@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Profile>Reach</Profile>
+  <Platform>DesktopGL</Platform>
+  <Config />
+  <SourceFiles>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/fnt/pf.spritefont</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/fnt/pf_big.spritefont</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/cone.FBX</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/cube.FBX</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/sphere.FBX</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/clear.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/compositor.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/diffuse.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/FXAA.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/Invert.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/light_depth.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/point_light_geom.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/skybox.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/spot_light_geom.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/terrain.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/cash_santa.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/cash_santa_t.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/dongt.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/ge_orb.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/lolmap.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/rhyth_body.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/rhyth_head.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/trump_map.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/trump_tex.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/trumpmapclean.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/walkable_test.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/zerocool_sharper.jpg</File>
+  </SourceFiles>
+  <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+  </DestFiles>
+</SourceFileCollection>
