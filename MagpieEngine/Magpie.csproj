@@ -43,6 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EngineState.cs" />
+    <Compile Include="Engine\Collision\Collision.cs" />
+    <Compile Include="Engine\Collision\Raycasting.cs" />
     <Compile Include="Engine\Extensions.cs" />
     <Compile Include="Engine\WorldElements\Actor.cs" />
     <Compile Include="Engine\Clock.cs" />

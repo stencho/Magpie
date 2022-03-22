@@ -10,9 +10,9 @@ namespace Magpie.Engine.Floors {
         Vector3 position { get; set; }
         Matrix orientation { get; set; }
 
-        float get_footing_height(float X, float Z);
+        float get_footing_height(Vector3 pos);
         Vector3 get_footing(float X, float Z);
-        bool within_vertical_bounds(Vector2 XZ);
+        bool within_vertical_bounds(Vector3 pos);
 
         void Draw();
         void Update();

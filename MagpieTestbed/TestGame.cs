@@ -48,10 +48,19 @@ namespace MagpieTestbed
             add_bind(new KeyBind(Keys.S, "backward"));
             add_bind(new KeyBind(Keys.Space, "up"));
             add_bind(new KeyBind(Keys.C, "down"));
+
+            add_bind(new KeyBind(Keys.T, "test"));
+
             add_bind(new MouseButtonBind(MouseButtons.Right, "click_right"));
 
             world.current_map.add_object("test_sphere", new TestSphere());
             world.current_map.add_floor("test_floor", new FloorPlane());
+            world.current_map.add_floor("test_floor2", new FloorPlane());
+
+            ((FloorPlane)world.current_map.floors["test_floor2"]).size = new Vector2(50, 20);
+            world.current_map.floors["test_floor2"].position = new Vector3(0,4f,0);
+            world.current_map.floors["test_floor2"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(36f)) * Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(26f)); ;
+            //world.current_map.floors["test_floor2"].orientation 
 
             world.current_map.player_actor = new FreeCamActor();
             
@@ -77,9 +86,12 @@ namespace MagpieTestbed
 
             world.Update();
 
+            if (bind_pressed("test"))
+                world.current_map.floors["test_floor2"].orientation *= Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(6F * Clock.frame_time_delta));
+
             base.Update(gameTime);
         }
-
+        
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -93,11 +105,10 @@ namespace MagpieTestbed
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
 
-            Vector3 highest_point = new Vector3(world.player_actor.position.X, world.highest_floor(world.player_actor.position.XZ()).Item1, world.player_actor.position.Z);
-
             world.Draw(GraphicsDevice, EngineState.camera);
-
-            Draw3D.xyz_cross(GraphicsDevice, highest_point, 1f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            Vector3 highest = new Vector3(world.player_actor.position.X, world.highest_floor_below(world.player_actor.position).Item1, world.player_actor.position.Z);
+            Draw3D.xyz_cross(GraphicsDevice, highest, 1f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.xyz_cross(GraphicsDevice, ((FloorPlane)world.current_map.floors["test_floor"]).testpos, 1f, Color.ForestGreen, EngineState.camera.view, EngineState.camera.projection);
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
@@ -113,11 +124,10 @@ namespace MagpieTestbed
                 Clock.frame_rate_immediate.ToString() + " FPS\n" +
 
                 "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" +
-
-                "Height below [" + highest_point.Y.ToString() + "]\n"
-                    
+                highest.simple_vector3_string_brackets()
+                
                 , Vector2.One * 2, Color.White);
-
+            
             Draw2D.sb.End();
             
             GraphicsDevice.SetRenderTarget(null);

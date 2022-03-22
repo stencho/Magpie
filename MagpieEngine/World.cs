@@ -30,15 +30,16 @@ namespace Magpie {
 
         }
 
-        public (float, Floor) highest_floor(Vector2 xz) {
+        
+        public (float, Floor) highest_floor(Vector3 pos) {
             float highest = float.MinValue;
             float c = 0f;
             Floor f = null;
 
             foreach (Floor floor in current_map.floors.Values) {
-                if (!floor.within_vertical_bounds(xz)) continue;
+                if (!floor.within_vertical_bounds(pos)) continue;
 
-                c = floor.get_footing_height(xz.X, xz.Y);
+                c = floor.get_footing_height(pos);
 
                 if (c > highest) {
                     highest = c;
@@ -49,8 +50,9 @@ namespace Magpie {
             if (f != null)
                 return (highest, f);
             else
-                return (0, null);
+                return (float.MinValue, null);
         }
+        
 
         public (float, Floor) highest_floor_below(Vector3 pos) {
             float highest = float.MinValue;
@@ -58,9 +60,9 @@ namespace Magpie {
             Floor f = null;
 
             foreach (Floor floor in current_map.floors.Values) {
-                if (!floor.within_vertical_bounds(pos.XZ())) continue;
+                if (!floor.within_vertical_bounds(pos)) continue;
 
-                c = floor.get_footing_height(pos.X, pos.Y);
+                c = floor.get_footing_height(pos);
 
                 if (c > highest && c < pos.Y) {
                     highest = c;
@@ -71,10 +73,13 @@ namespace Magpie {
             if (f != null)
                 return (highest, f);
             else
-                return (0, null);
+                return (float.MinValue, null);
         }
 
         public void Update() {
+            foreach (Floor floor in current_map.floors.Values) {
+                floor.Update();
+            }
             foreach (Actor actor in current_map.actors.Values) {
                 actor.Update();
             }

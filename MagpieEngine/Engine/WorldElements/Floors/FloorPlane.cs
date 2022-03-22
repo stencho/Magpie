@@ -6,42 +6,57 @@ using System.Threading.Tasks;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 
+using static Magpie.Engine.Controls;
+using static Magpie.Engine.DigitalControlBindings;
+
+
 namespace Magpie.Engine.Floors {
     public class FloorPlane : Floor {
-        public Vector3 position { get; set; } = (Vector3.Backward * 20) + (Vector3.Up * 2f);
+        public Vector3 position { get; set; } = Vector3.Zero;
         public Vector2 size { get; set; } = Vector2.One * 50f;
         public Matrix orientation { get; set; } = Matrix.Identity;
 
-        public void Draw() {
-            Draw3D.fill_quad(EngineState.graphics_device, Matrix.CreateTranslation(position) * orientation,
-                (Vector3.Forward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f),
-                (Vector3.Forward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f),
-                (Vector3.Backward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f),
-                (Vector3.Backward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f),
-                Color.White, EngineState.camera.view, EngineState.camera.projection);
+        public Vector3 A => position + Vector3.Transform((Vector3.Forward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f)  , orientation);
+        public Vector3 B => position + Vector3.Transform((Vector3.Forward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f) , orientation);
+        public Vector3 C => position + Vector3.Transform((Vector3.Backward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f), orientation);
+        public Vector3 D => position + Vector3.Transform((Vector3.Backward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f) , orientation);
 
+        public void Draw() {
+            Draw3D.fill_quad(EngineState.graphics_device, Matrix.Identity,
+                A,B,C,D,
+                Color.White, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.xyz_cross(EngineState.graphics_device, Vector3.Transform(Vector3.Zero, orientation * Matrix.CreateTranslation(position)), 1f, Color.Pink, EngineState.camera.view, EngineState.camera.projection);
         }
 
         public void Update() {
-
         }
 
         public Vector3 get_footing(float X, float Z) {
             throw new NotImplementedException();
         }
 
-        public float get_footing_height(float X, float Z) {
-            return position.Y;
+        public float get_footing_height(Vector3 pos) {
+            Vector3 hit = Vector3.Zero;
+            //this feels hacky but fuck it works
+            Collision.Raycasting.ray_intersects_quad(pos + (Vector3.Up * float.MaxValue), Vector3.Down, D,C,B,A, out hit, out _);            
+            return hit.Y;
         }
+        public Vector3 testpos = Vector3.Zero;
+        public Vector3 test_A, test_B, test_C, test_D;
+        public Vector3 test_t_A, test_t_B, test_t_C, test_t_D;
 
-        public bool within_vertical_bounds(Vector2 XZ) {
-            if (XZ.X > position.X - (size.X * 0.5f) && XZ.X < position.X + (size.X * 0.5f) &&
-                XZ.Y > position.Z - (size.Y * 0.5f) && XZ.Y < position.Z + (size.Y * 0.5f)) { 
-                return true;
-            } else { 
-                return false;
-            }
+        public bool within_vertical_bounds(Vector3 pos) {
+            test_t_A = A;
+            test_t_B = B;
+            test_t_C = C;
+            test_t_D = D;
             
+            return Math2D.point_within_polygon(
+                pos.XZ(),
+                test_t_A.XZ(),
+                test_t_B.XZ(),
+                test_t_C.XZ(),
+                test_t_D.XZ());
         }
     }
 }

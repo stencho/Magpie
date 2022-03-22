@@ -86,6 +86,47 @@ namespace Magpie.Engine {
             return false;
         }
 
+        public static bool point_within_regular_obb(Vector2 A, Vector2 B, Vector2 C, Vector2 D, Vector2 point) {
+            Vector2 AB = Vector2.Normalize(B - A);
+            Vector2 BC = Vector2.Normalize(C - B);
+            Vector2 CD = Vector2.Normalize(D - C);
+            Vector2 DA = Vector2.Normalize(A - D);
+            
+            if (Vector2.Dot(AB, point - B) > 0)
+                return false;
+
+            if (Vector2.Dot(BC, point - C) > 0)
+                return false;
+
+            if (Vector2.Dot(CD, point - D) > 0)
+                return false;
+
+            if (Vector2.Dot(DA, point - A) > 0)
+                return false;
+
+            return true;            
+        }
+
+        public static bool point_within_polygon(Vector2 point, params Vector2[] poly_points) {
+            bool result = true;
+
+            for (int i = 0; i < poly_points.Length; i++) {
+                Vector2 v1, v2;
+                if (i < poly_points.Length-1) {
+                    v1 = (Vector2)poly_points[i];
+                    v2 = (Vector2)poly_points[i + 1];
+                } else {
+                    v1 = (Vector2)poly_points[i];
+                    v2 = (Vector2)poly_points[0];
+                }
+                if (((point.X-v1.X) * (v1.Y-v2.Y)) + ((point.Y-v1.Y)*(v2.X-v1.X)) <= 0) {
+                    return false;
+                }
+            }
+
+            return result;
+        }
+
         public static bool same_direction_as_origin(Vector2 direction, Vector2 origin_dir) {
             return (Vector2.Dot(direction, origin_dir) > 0);
         }

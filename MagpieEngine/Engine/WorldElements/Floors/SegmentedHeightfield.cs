@@ -18,7 +18,7 @@ namespace Magpie.Engine.Floors {
             throw new NotImplementedException();
         }
 
-        public float get_footing_height(float X, float Z) {
+        public float get_footing_height(Vector3 pos) {
             throw new NotImplementedException();
         }
 
@@ -26,7 +26,7 @@ namespace Magpie.Engine.Floors {
             throw new NotImplementedException();
         }
 
-        public bool within_vertical_bounds(Vector2 XZ) {
+        public bool within_vertical_bounds(Vector3 pos) {
             throw new NotImplementedException();
         }
     }
