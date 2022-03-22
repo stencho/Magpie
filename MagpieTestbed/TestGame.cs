@@ -46,6 +46,12 @@ namespace MagpieTestbed
             add_bind(new KeyBind(Keys.A, "left"));
             add_bind(new KeyBind(Keys.D, "right"));
             add_bind(new KeyBind(Keys.S, "backward"));
+
+            add_bind(new KeyBind(Keys.Up, "t_forward"));
+            add_bind(new KeyBind(Keys.Left, "t_left"));
+            add_bind(new KeyBind(Keys.Right, "t_right"));
+            add_bind(new KeyBind(Keys.Down, "t_backward"));
+
             add_bind(new KeyBind(Keys.Space, "up"));
             add_bind(new KeyBind(Keys.C, "down"));
 
@@ -56,11 +62,13 @@ namespace MagpieTestbed
             world.current_map.add_object("test_sphere", new TestSphere());
             world.current_map.add_floor("test_floor", new FloorPlane());
             world.current_map.add_floor("test_floor2", new FloorPlane());
+            world.current_map.add_actor("test_actor", new MoveTestActor());
 
             ((FloorPlane)world.current_map.floors["test_floor2"]).size = new Vector2(50, 20);
             world.current_map.floors["test_floor2"].position = new Vector3(0,4f,0);
-            world.current_map.floors["test_floor2"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(36f)) * Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(26f)); ;
-            //world.current_map.floors["test_floor2"].orientation 
+            world.current_map.floors["test_floor2"].orientation = 
+                Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(36f)) * Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(26f));
+            
 
             world.current_map.player_actor = new FreeCamActor();
             
@@ -91,7 +99,9 @@ namespace MagpieTestbed
 
             base.Update(gameTime);
         }
-        
+
+        Vector2 fake_origin = new Vector2(EngineState.resolution.X - 200, 200);
+
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -106,7 +116,12 @@ namespace MagpieTestbed
             GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
 
             world.Draw(GraphicsDevice, EngineState.camera);
+
+
             Vector3 highest = new Vector3(world.player_actor.position.X, world.highest_floor_below(world.player_actor.position).Item1, world.player_actor.position.Z);
+            fake_origin = new Vector2(EngineState.resolution.X - 200, 200);
+
+
             Draw3D.xyz_cross(GraphicsDevice, highest, 1f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
             Draw3D.xyz_cross(GraphicsDevice, ((FloorPlane)world.current_map.floors["test_floor"]).testpos, 1f, Color.ForestGreen, EngineState.camera.view, EngineState.camera.projection);
 
@@ -119,6 +134,9 @@ namespace MagpieTestbed
 
 
             Draw2D.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+
+            Draw2D.cross(fake_origin, 5, 5, Color.Purple);
+
 
             Draw2D.text_shadow("pf",
                 Clock.frame_rate_immediate.ToString() + " FPS\n" +

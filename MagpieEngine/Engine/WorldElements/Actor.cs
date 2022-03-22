@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Magpie.Engine.Floors;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 namespace Magpie.Engine {
     public interface Actor {
         Vector3 position { get; set; }
+        Vector3 wants_movement { get; set; }
         void Update();
         void Draw();
     }

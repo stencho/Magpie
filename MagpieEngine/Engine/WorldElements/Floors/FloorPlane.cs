@@ -38,25 +38,22 @@ namespace Magpie.Engine.Floors {
         public float get_footing_height(Vector3 pos) {
             Vector3 hit = Vector3.Zero;
             //this feels hacky but fuck it works
-            Collision.Raycasting.ray_intersects_quad(pos + (Vector3.Up * float.MaxValue), Vector3.Down, D,C,B,A, out hit, out _);            
+            Collision.Raycasting.ray_intersects_quad(pos + (Vector3.Up * float.MaxValue), Vector3.Down, A,B,C,D, out hit, out _);            
             return hit.Y;
         }
+
+        public Vector3 ensure_position_on_floor(Vector3 position) {
+            return Vector3.Zero;
+        }
+
         public Vector3 testpos = Vector3.Zero;
         public Vector3 test_A, test_B, test_C, test_D;
         public Vector3 test_t_A, test_t_B, test_t_C, test_t_D;
 
-        public bool within_vertical_bounds(Vector3 pos) {
-            test_t_A = A;
-            test_t_B = B;
-            test_t_C = C;
-            test_t_D = D;
-            
+        public bool within_vertical_bounds(Vector3 pos) {            
             return Math2D.point_within_polygon(
                 pos.XZ(),
-                test_t_A.XZ(),
-                test_t_B.XZ(),
-                test_t_C.XZ(),
-                test_t_D.XZ());
+                A.XZ(),B.XZ(),C.XZ(),D.XZ());
         }
     }
 }

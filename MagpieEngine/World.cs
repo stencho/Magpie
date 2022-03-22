@@ -82,9 +82,21 @@ namespace Magpie {
             }
             foreach (Actor actor in current_map.actors.Values) {
                 actor.Update();
+
+                if (actor.wants_movement != Vector3.Zero) {
+                    actor.position += actor.wants_movement;
+
+                    actor.wants_movement = Vector3.Zero;
+                }
             }
 
             current_map.player_actor.Update();
+
+            if (player_actor.wants_movement != Vector3.Zero) {
+                player_actor.position += player_actor.wants_movement;
+
+                player_actor.wants_movement = Vector3.Zero;
+            }
         }
 
         public void Draw(GraphicsDevice gd, Camera camera) {
@@ -92,7 +104,7 @@ namespace Magpie {
                 floor.Draw();
             }
             foreach (GameObject go in current_map.objects.Values) {
-                go.Draw(gd, camera);
+                go.Draw();
             }
             foreach (Actor actor in current_map.actors.Values) {
                 actor.Draw();

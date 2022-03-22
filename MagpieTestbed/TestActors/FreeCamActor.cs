@@ -1,5 +1,6 @@
 ﻿using Magpie;
 using Magpie.Engine;
+using Magpie.Engine.Floors;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -16,7 +17,8 @@ namespace MagpieTestbed.TestActors {
     [Serializable]
     class FreeCamActor : Actor {
         public Camera cam;
-        public Vector3 position { get; set; } = (Vector3.Backward + Vector3.Up) * 6;
+        public Vector3 position { get; set; } = Vector3.Zero;
+        public Vector3 wants_movement { get; set; } = (Vector3.Backward + Vector3.Up) * 6;
 
         float movement_speed = 12f;
         float mouse_multi = 3f;
@@ -84,7 +86,7 @@ namespace MagpieTestbed.TestActors {
             }
 
             if (mv != Vector3.Zero)
-                position += Vector3.Normalize(mv) * movement_speed * Clock.frame_time_delta;
+                wants_movement = Vector3.Normalize(mv) * movement_speed * Clock.frame_time_delta;
 
             cam.position = position;
             cam.update();    

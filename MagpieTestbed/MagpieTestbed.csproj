@@ -44,6 +44,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="TestActors\FreeCamActor.cs" />
+    <Compile Include="TestActors\MoveTestActor.cs" />
     <Compile Include="TestGame.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

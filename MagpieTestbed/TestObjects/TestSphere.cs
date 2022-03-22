@@ -1,4 +1,5 @@
-﻿using Magpie.Engine;
+﻿using Magpie;
+using Magpie.Engine;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,6 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static Magpie.Engine.Controls;
+using static Magpie.Engine.DigitalControlBindings;
+
 namespace MagpieTestbed.TestObjects {
     [Serializable]
     class TestSphere : GameObject {
@@ -16,8 +20,8 @@ namespace MagpieTestbed.TestObjects {
         public float radius = 1f;
 
 
-        public void Draw(GraphicsDevice gd, Camera camera) {
-            Draw3D.sphere(gd, position, radius, Color.LightGreen, camera.view, camera.projection);
+        public void Draw() {
+            Draw3D.sphere(EngineState.graphics_device, position, radius, Color.LightGreen, EngineState.camera.view, EngineState.camera.projection);
         }
 
         public void Update() {

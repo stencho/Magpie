@@ -178,12 +178,12 @@ namespace Magpie.Engine.Collision {
             float v = Vector3.Dot(start_A, tri);
             normal = Vector3.Zero;
 
-            if (v < 0f) {
+            if (v > 0f) {
                 float u = -Vector3.Dot(start_B, tri);
-                if (u < 0f) return false;
+                if (u > 0f) return false;
 
                 float w = scalar_triple(rsrd, start_B, start_A);
-                if (w < 0f) return false;
+                if (w > 0f) return false;
 
                 float denom = 1f / (u + v + w);
                 u *= denom; v *= denom; w *= denom;
@@ -195,10 +195,10 @@ namespace Magpie.Engine.Collision {
                 Vector3 start_D = D - ray_start;
 
                 float u = Vector3.Dot(start_D, tri);
-                if (u < 0f) return false;
+                if (u > 0f) return false;
 
                 float w = scalar_triple(rsrd, start_A, start_D);
-                if (w < 0f) return false;
+                if (w > 0f) return false;
 
                 v = -v;
 
@@ -209,7 +209,7 @@ namespace Magpie.Engine.Collision {
                 normal = Vector3.Normalize(Vector3.Cross(D - C, C - A));
             }
 
-            if (!CollisionHelper.same_direction(ray_dir, intersection_point - ray_start)) { intersection_point = Vector3.Zero; return false; }
+            //if (CollisionHelper.same_direction(ray_dir, intersection_point - ray_start)) { intersection_point = Vector3.Zero; return false; }
 
             return true;
         }

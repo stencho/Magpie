@@ -12,6 +12,6 @@ namespace Magpie.Engine {
         Vector3 position { get; set; }
         Matrix orientation { get; set; }
         void Update();
-        void Draw(GraphicsDevice gd, Camera camera);        
+        void Draw();        
     }
 }
