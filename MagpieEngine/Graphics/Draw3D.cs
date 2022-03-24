@@ -133,6 +133,53 @@ namespace Magpie.Graphics {
             line(gd, P - (Vector3.UnitZ * (line_distance / 2)), P + (Vector3.UnitZ * (line_distance / 2)), color, view, projection);
         }
 
+        /*
+         
+            if (same_direction(Vector3.Cross(s.ABC, s.AC), s.AO)) {
+                if (same_direction(s.AC, s.AO)) {
+                    var tmp2 = s.C;
+                    s.B = tmp2;
+                    s.C = tmp;
+
+                    dir = Vector3.Cross(Vector3.Cross(s.AC, s.AO), s.AC);
+
+                    exit_path = "AC";
+                } else {
+                    if (same_direction(s.AB, s.AO)) {
+                        dir = Vector3.Cross(Vector3.Cross(s.AB, s.AO), s.AB);
+                        exit_path = "ABxAOxAB";
+                    } else {
+                        dir = s.AO;
+                        exit_path = "AO";
+                    }
+                }
+            } else {
+                if (same_direction(Vector3.Cross(s.AB, s.ABC), s.AO)) {
+                    if (same_direction(s.AB, s.AO)) {
+                        dir = Vector3.Cross(Vector3.Cross(s.AB, s.AO), s.AB);
+                        exit_path = "ABxAOxAB";
+                    } else {
+                        dir = s.AO;
+                        exit_path = "AO";
+                    }
+                } else {
+                    if (same_direction(s.ABC, s.AO)) {
+                        dir = s.ABC;
+                        exit_path = "ABC";
+                    } else {
+                        tmp = s.B;
+                        var tmp2 = s.C;
+                        s.B = tmp2;
+                        s.C = tmp;
+                        s.ABC = Vector3.Cross(s.AB, s.AC);
+
+                        dir = -s.ABC;
+                        exit_path = "-ABC";
+                    }
+                }
+            }
+         */
+
         public static void circle(GraphicsDevice gd, Vector3 p, float radius, Vector3 normal, int subdivs, Color color, Matrix view, Matrix projection) {
             if (subdivs < 6) return;
             VertexPositionColor[] verts = new VertexPositionColor[subdivs];
@@ -168,9 +215,9 @@ namespace Magpie.Graphics {
         }
 
         public static void sphere(GraphicsDevice gd, Vector3 P, float radius, Color color, Matrix view, Matrix projection) {
-            Draw3D.circle(gd, P, radius, Vector3.Up, 19, color, view, projection);
-            Draw3D.circle(gd, P, radius, Vector3.Right, 19, color, view, projection);
-            Draw3D.circle(gd, P, radius, Vector3.Forward, 19, color, view, projection);
+            Draw3D.circle(gd, P, radius, Vector3.Up, 32, color, view, projection);
+            Draw3D.circle(gd, P, radius, Vector3.Right, 32, color, view, projection);
+            Draw3D.circle(gd, P, radius, Vector3.Forward, 32, color, view, projection);
         }
 
         public static void capsule(GraphicsDevice gd, Vector3 A, Vector3 B, float radius, Color color, Matrix view, Matrix projection) {
@@ -251,7 +298,23 @@ namespace Magpie.Graphics {
                     }
                 }
                 testing_gradient.SetData(glowData);
+
+
+                text_effect = new BasicEffect(gd);
             }
+        }
+
+        public static BasicEffect text_effect;
+        public static void text_3D(GraphicsDevice gd, SpriteBatch sb, string text, string fontname, Vector3 offset, Vector3? normal, float scale, Matrix view, Matrix projection, Color color, bool always_visible = false) {
+            Vector2 origin = ContentHandler.resources[fontname].value_ft.MeasureString(text) / 2f;
+            text_effect.World = Matrix.CreateScale(scale, -scale, 0) * Matrix.CreateLookAt(Vector3.Zero, view.Forward, Vector3.Up) * Matrix.CreateTranslation(offset);
+            text_effect.View = view;
+            text_effect.Projection = projection;
+            text_effect.DiffuseColor = color.ToVector3();
+            text_effect.TextureEnabled = true;
+            sb.Begin(0, null, SamplerState.PointWrap, (always_visible ? DepthStencilState.None : DepthStencilState.DepthRead), RasterizerState.CullNone, text_effect);
+            sb.DrawString(ContentHandler.resources[fontname].value_ft, text, Vector2.Zero, Color.White, 0, origin, 0.015f, SpriteEffects.None, 1);
+            sb.End();
         }
 
         public static void draw_buffers_diffuse_color(GraphicsDevice gd, VertexBuffer vb, IndexBuffer ib, Color color, Matrix world, Matrix view, Matrix projection) {
@@ -411,5 +474,48 @@ namespace Magpie.Graphics {
             draw_buffers_diffuse_texture(gd, q_vertex_buffer, q_index_buffer, tum, Color.White, world, view, projection);
             //draw_buffers(gd, q_vertex_buffer, q_index_buffer, world, color, view, projection);
         }
+
+
+        public static void arrow(GraphicsDevice gd, Vector3 A, Vector3 B, float chevron_distance_percent, Vector3 color, Matrix view, Matrix projection) { arrow(gd, A, B, chevron_distance_percent, Color.FromNonPremultiplied(new Vector4(color, 1.0f)), view, projection); }
+
+        public static void arrow(GraphicsDevice gd, Vector3 A, Vector3 B, float chevron_distance_percent, Vector4 color, Matrix view, Matrix projection) { arrow(gd, A, B, chevron_distance_percent, Color.FromNonPremultiplied(color), view, projection); }
+
+        public static void arrow(GraphicsDevice gd, Vector3 A, Vector3 B, float chevron_distance_percent, Color color, Matrix view, Matrix projection) {
+            line(gd, A, B, color, view, projection);
+            Vector3 BA = (A - B) * chevron_distance_percent;
+
+            if (line_effect == null) {
+                line_effect = new BasicEffect(gd);
+                line_effect.World = Matrix.Identity;
+            }
+
+            line_effect.View = view;
+            line_effect.Projection = projection;
+            line_effect.LightingEnabled = false;
+            
+
+            VertexPositionColor[] verts = new VertexPositionColor[9];
+
+            verts[0] = new VertexPositionColor(A, color);
+            verts[1] = new VertexPositionColor(B, color);
+            verts[2] = new VertexPositionColor(B + (Vector3.Cross(Vector3.Cross(BA, Vector3.Up), BA) * chevron_distance_percent) + (BA * chevron_distance_percent), color);
+
+            verts[3] = new VertexPositionColor(B, color);
+            verts[4] = new VertexPositionColor(B + (Vector3.Cross(Vector3.Cross(BA, Vector3.Down), BA) * chevron_distance_percent) + (BA * chevron_distance_percent), color);
+
+            verts[5] = new VertexPositionColor(B, color);
+            verts[6] = new VertexPositionColor(B + (Vector3.Cross(Vector3.Cross(BA, Vector3.Left), BA) * chevron_distance_percent) + (BA * chevron_distance_percent), color);
+
+            verts[7] = new VertexPositionColor(B, color);
+            verts[8] = new VertexPositionColor(B + (Vector3.Cross(Vector3.Cross(BA, Vector3.Right), BA) * chevron_distance_percent) + (BA * chevron_distance_percent), color);
+
+            line_effect.DiffuseColor = color.ToVector3();
+
+            for (int i = 0; i < line_effect.CurrentTechnique.Passes.Count; i++) {
+                line_effect.CurrentTechnique.Passes[i].Apply();
+                gd.DrawUserPrimitives(PrimitiveType.LineStrip, verts, 0, 8);
+            }
+        }
+
     }
 }

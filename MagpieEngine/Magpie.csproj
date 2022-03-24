@@ -44,7 +44,12 @@
   <ItemGroup>
     <Compile Include="EngineState.cs" />
     <Compile Include="Engine\Collision\Collision.cs" />
+    <Compile Include="Engine\Collision\GJK3D.cs" />
     <Compile Include="Engine\Collision\Raycasting.cs" />
+    <Compile Include="Engine\Collision\Support3D\Point3D.cs" />
+    <Compile Include="Engine\Collision\Support3D\Sphere.cs" />
+    <Compile Include="Engine\Collision\Support3D\Tetrahedron.cs" />
+    <Compile Include="Engine\Collision\Support3D\Triangle.cs" />
     <Compile Include="Engine\Extensions.cs" />
     <Compile Include="Engine\WorldElements\Actor.cs" />
     <Compile Include="Engine\Clock.cs" />
@@ -79,7 +84,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Engine\Collision\3DColliders\" />
+    <Folder Include="Engine\Collision\Support2D\" />
     <Folder Include="Graphics\Animation\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

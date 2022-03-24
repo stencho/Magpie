@@ -18,7 +18,7 @@ namespace MagpieTestbed.TestActors {
     class FreeCamActor : Actor {
         public Camera cam;
         public Vector3 position { get; set; } = Vector3.Zero;
-        public Vector3 wants_movement { get; set; } = (Vector3.Backward + Vector3.Up) * 6;
+        public Vector3 wants_movement { get; set; } = (Vector3.Backward + Vector3.Up) * 2;
 
         float movement_speed = 12f;
         float mouse_multi = 3f;
@@ -42,7 +42,7 @@ namespace MagpieTestbed.TestActors {
                     camera_enabled = true;
                     EngineState.game.IsMouseVisible = false;
 
-                    mouse_lock = true;                    
+                    mouse_lock = true;
                 }
 
             } else if (bind_just_released("click_right") || (camera_enabled && !EngineState.is_active && EngineState.was_active)) {

@@ -64,7 +64,7 @@ namespace Magpie {
 
                 c = floor.get_footing_height(pos);
 
-                if (c > highest && c < pos.Y) {
+                if (c > highest && c <= pos.Y) {
                     highest = c;
                     f = floor;
                 }
