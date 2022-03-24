@@ -43,13 +43,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EngineState.cs" />
+    <Compile Include="Engine\Collision\AABB.cs" />
     <Compile Include="Engine\Collision\Collision.cs" />
     <Compile Include="Engine\Collision\GJK3D.cs" />
+    <Compile Include="Engine\Collision\OBB.cs" />
     <Compile Include="Engine\Collision\Raycasting.cs" />
-    <Compile Include="Engine\Collision\Support3D\Point3D.cs" />
+    <Compile Include="Engine\Collision\Shapes.cs" />
+    <Compile Include="Engine\Collision\Support3D\Capsule.cs" />
+    <Compile Include="Engine\Collision\Support3D\Cube.cs" />
+    <Compile Include="Engine\Collision\Support3D\Line.cs" />
+    <Compile Include="Engine\Collision\Support3D\Polyhedron.cs" />
+    <Compile Include="Engine\Collision\Support3D\Quad.cs" />
     <Compile Include="Engine\Collision\Support3D\Sphere.cs" />
-    <Compile Include="Engine\Collision\Support3D\Tetrahedron.cs" />
     <Compile Include="Engine\Collision\Support3D\Triangle.cs" />
+    <Compile Include="Engine\Collision\Supports.cs" />
     <Compile Include="Engine\Extensions.cs" />
     <Compile Include="Engine\WorldElements\Actor.cs" />
     <Compile Include="Engine\Clock.cs" />

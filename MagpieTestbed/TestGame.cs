@@ -10,12 +10,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 
-using Magpie.Engine.Collision.Support3D;
-
 using static Magpie.Engine.Controls;
 using static Magpie.Engine.DigitalControlBindings;
-using static Magpie.Engine.Collision.GJK3D;
 using Magpie.Engine.Collision;
+using Magpie.Engine.Collision.Support3D;
 
 namespace MagpieTestbed
 {
@@ -74,8 +72,12 @@ namespace MagpieTestbed
             //((FloorPlane)world.current_map.floors["test_floor2"]).size = new Vector2(50, 20);
             //world.current_map.floors["test_floor2"].position = new Vector3(0,4f,0);
             //world.current_map.floors["test_floor2"].orientation = 
-               // Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(36f)) * Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(26f));
-            
+            // Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(36f)) * Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(26f));
+
+            ((Quad)test_b).B += Vector3.Forward * 40f;
+            ((Quad)test_b).C += Vector3.Forward * 40f;
+
+            ((Quad)test_b).position += Vector3.Forward * 40f;
 
             world.current_map.player_actor = new FreeCamActor();
             
@@ -129,23 +131,31 @@ namespace MagpieTestbed
 
             test_a.position += mv;
 
-
             //if (bind_pressed("test"))
             //world.current_map.floors["test_floor2"].orientation *= Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(6F * Clock.frame_time_delta));
 
-            result = GJK3D.intersects(test_a, test_b);
+
+            result = GJK.gjk_intersects(test_a, test_b,
+                test_a.orientation * Matrix.CreateTranslation(test_a.position),
+                test_b.orientation * Matrix.CreateTranslation(test_b.position));
 
             base.Update(gameTime);
         }
-        gjk_result result;
+        GJK.gjk_result result;
         Vector2 fake_origin = new Vector2(EngineState.resolution.X - 200, 200);
         Vector3 fake_origin_3d = Vector3.Zero;
 
+        //Sphere test_a = new Sphere();
+        Capsule test_a = new Capsule(1.85f, 1f);
+        //sphere_data test_b = new sphere_data();
+
+        Quad test_b = new Quad(20, 20);
+
         //Point3D test_a = new Point3D();
-        Sphere test_a = new Sphere();
+        //Sphere test_a = new Sphere();
         //Tetrahedron test_a = new Tetrahedron();
         //Sphere test_b = new Sphere();
-        Tetrahedron test_b = new Tetrahedron();
+        //Tetrahedron test_b = new Tetrahedron();
 
         protected override void Draw(GameTime gameTime)
         {
@@ -164,6 +174,7 @@ namespace MagpieTestbed
 
             test_a.draw();
             test_b.draw();
+
 
             Draw3D.xyz_cross(GraphicsDevice, result.closest_point_A, 1f, Color.Purple, EngineState.camera.view, EngineState.camera.projection);
             Draw3D.xyz_cross(GraphicsDevice, result.closest_point_B, 1f, Color.Purple, EngineState.camera.view, EngineState.camera.projection);

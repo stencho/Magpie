@@ -5,20 +5,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Magpie.Engine.Collision.GJK3D;
 
 namespace Magpie.Engine.Collision.Support3D {
     public class Sphere : shape3D {
-        public Vector3 position { get; set; } = Vector3.Up * 2f + (Vector3.Right * 0);
-        public float radius { get; set; } = 1f;
+        public Matrix orientation { get; set; } = Matrix.Identity;
+        public Vector3 position { get; set; } = Vector3.Zero;
+        public Vector3 start_point => P;
 
-        public void draw() {
-            Draw3D.sphere(EngineState.graphics_device, position, radius, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+        public shape_type shape { get; } = shape_type.sphere;
+
+        public Vector3 P;
+        public float radius;
+
+        public AABB find_bounding_box() {
+            return new AABB(position - (Vector3.One * radius), position + (Vector3.One * radius));
         }
 
-        public Vector3 find_point_in_direction(Vector3 direction, out int vert_ID) {
-            vert_ID = 0;
-            return position + (Vector3.Normalize(direction) * (radius));
+        public Sphere() {
+            P = Vector3.Zero;
+
+            radius = 1.1f;
+        }
+
+        public void draw() {
+            Draw3D.sphere(EngineState.graphics_device, position, radius, Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
+            find_bounding_box().draw(EngineState.graphics_device, Vector3.Zero, Color.Red, EngineState.camera.view, EngineState.camera.projection);
         }
     }
 }

@@ -347,6 +347,44 @@ namespace Magpie.Engine.Collision {
             return a + t * ab;
         }
 
+        public static AABB AABB_around_OBB(OBB obb) {
+            float Xmin = float.MaxValue, Ymin = float.MaxValue, Zmin = float.MaxValue;
+            float Xmax = float.MinValue, Ymax = float.MinValue, Zmax = float.MinValue;
+
+            if (obb.A.X > Xmax) Xmax = obb.A.X; if (obb.A.X < Xmin) Xmin = obb.A.X;
+            if (obb.A.Y > Ymax) Ymax = obb.A.Y; if (obb.A.Y < Ymin) Ymin = obb.A.Y;
+            if (obb.A.Z > Zmax) Zmax = obb.A.Z; if (obb.A.Z < Zmin) Zmin = obb.A.Z;
+
+            if (obb.B.X > Xmax) Xmax = obb.B.X; if (obb.B.X < Xmin) Xmin = obb.B.X;
+            if (obb.B.Y > Ymax) Ymax = obb.B.Y; if (obb.B.Y < Ymin) Ymin = obb.B.Y;
+            if (obb.B.Z > Zmax) Zmax = obb.B.Z; if (obb.B.Z < Zmin) Zmin = obb.B.Z;
+
+            if (obb.C.X > Xmax) Xmax = obb.C.X; if (obb.C.X < Xmin) Xmin = obb.C.X;
+            if (obb.C.Y > Ymax) Ymax = obb.C.Y; if (obb.C.Y < Ymin) Ymin = obb.C.Y;
+            if (obb.C.Z > Zmax) Zmax = obb.C.Z; if (obb.C.Z < Zmin) Zmin = obb.C.Z;
+
+            if (obb.D.X > Xmax) Xmax = obb.D.X; if (obb.D.X < Xmin) Xmin = obb.D.X;
+            if (obb.D.Y > Ymax) Ymax = obb.D.Y; if (obb.D.Y < Ymin) Ymin = obb.D.Y;
+            if (obb.D.Z > Zmax) Zmax = obb.D.Z; if (obb.D.Z < Zmin) Zmin = obb.D.Z;
+
+            if (obb.E.X > Xmax) Xmax = obb.E.X; if (obb.E.X < Xmin) Xmin = obb.E.X;
+            if (obb.E.Y > Ymax) Ymax = obb.E.Y; if (obb.E.Y < Ymin) Ymin = obb.E.Y;
+            if (obb.E.Z > Zmax) Zmax = obb.E.Z; if (obb.E.Z < Zmin) Zmin = obb.E.Z;
+
+            if (obb.F.X > Xmax) Xmax = obb.F.X; if (obb.F.X < Xmin) Xmin = obb.F.X;
+            if (obb.F.Y > Ymax) Ymax = obb.F.Y; if (obb.F.Y < Ymin) Ymin = obb.F.Y;
+            if (obb.F.Z > Zmax) Zmax = obb.F.Z; if (obb.F.Z < Zmin) Zmin = obb.F.Z;
+
+            if (obb.G.X > Xmax) Xmax = obb.G.X; if (obb.G.X < Xmin) Xmin = obb.G.X;
+            if (obb.G.Y > Ymax) Ymax = obb.G.Y; if (obb.G.Y < Ymin) Ymin = obb.G.Y;
+            if (obb.G.Z > Zmax) Zmax = obb.G.Z; if (obb.G.Z < Zmin) Zmin = obb.G.Z;
+
+            if (obb.H.X > Xmax) Xmax = obb.H.X; if (obb.H.X < Xmin) Xmin = obb.H.X;
+            if (obb.H.Y > Ymax) Ymax = obb.H.Y; if (obb.H.Y < Ymin) Ymin = obb.H.Y;
+            if (obb.H.Z > Zmax) Zmax = obb.H.Z; if (obb.H.Z < Zmin) Zmin = obb.H.Z;
+
+            return new AABB(new Vector3(Xmin, Ymin, Zmin), new Vector3(Xmax, Ymax, Zmax));
+        }
         ///
         ///  DYNAMIC      :  STAGE
         ///    SWEPT QUAD |  ! PLANE 
