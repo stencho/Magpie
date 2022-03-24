@@ -16,7 +16,8 @@ namespace Magpie.Engine.Collision.Support3D {
             Draw3D.sphere(EngineState.graphics_device, position, radius, Color.Red, EngineState.camera.view, EngineState.camera.projection);
         }
 
-        public Vector3 find_point_in_direction(Vector3 direction) {
+        public Vector3 find_point_in_direction(Vector3 direction, out int vert_ID) {
+            vert_ID = 0;
             return position + (Vector3.Normalize(direction) * (radius));
         }
     }

@@ -320,6 +320,33 @@ namespace Magpie.Engine.Collision {
             return (t && t2 && t3 && t4);
         }
 
+        public static Vector3 highest_dot(Vector3 direction, out int index, params Vector3[] verts) {
+            float dot = float.MinValue; index = 0;
+            Vector3 v = Vector3.Zero;
+
+            for (int i = 0; i < verts.Length; i++) {
+                float d = Vector3.Dot(verts[i], direction);
+
+                if (d > dot) {
+                    index = i;
+                    dot = d;
+                    v = verts[i];
+                }
+            }
+
+            return v;
+        }
+        
+        public static Vector3 point_of_minimum_norm(Vector3 a, Vector3 b, Vector3 p) {
+            var ab = b - a;
+            var t = Vector3.Dot(p - a, ab) / Vector3.Dot(ab, ab);
+
+            if (t < 0) t = 0;
+            if (t > 1) t = 1;
+
+            return a + t * ab;
+        }
+
         ///
         ///  DYNAMIC      :  STAGE
         ///    SWEPT QUAD |  ! PLANE 

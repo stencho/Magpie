@@ -23,9 +23,8 @@ namespace Magpie.Engine.Collision.Support3D {
             Draw3D.line(EngineState.graphics_device, C, A, Color.Blue, EngineState.camera.view, EngineState.camera.projection);
         }
 
-        public Vector3 find_point_in_direction(Vector3 direction) {
-            int ind = 0;
-            return highest_dot(direction, out ind, A, B, C);
+        public Vector3 find_point_in_direction(Vector3 direction, out int vert_ID) {
+            return CollisionHelper.highest_dot(direction, out vert_ID, A, B, C);
         }
     }
 }

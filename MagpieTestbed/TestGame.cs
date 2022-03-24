@@ -92,7 +92,6 @@ namespace MagpieTestbed
             ContentHandler.UnloadAll();
         }
 
-        gjk_result res;
 
         protected override void Update(GameTime gameTime)
         {
@@ -102,8 +101,6 @@ namespace MagpieTestbed
                 Exit();
 
             world.Update();
-
-            res = GJK3D.intersects(test_a, test_b);
 
             Vector3 mv = Vector3.Zero;
 
@@ -130,20 +127,17 @@ namespace MagpieTestbed
             if (mv != Vector3.Zero)
                 mv = (Vector3.Normalize(mv) * 4f * Clock.frame_time_delta);
 
-            //test_b.position += mv;
-
-            test_b.A += mv;
-            test_b.B += mv;
-            test_b.C += mv;
-            test_b.D += mv;
+            test_a.position += mv;
 
 
             //if (bind_pressed("test"))
             //world.current_map.floors["test_floor2"].orientation *= Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(6F * Clock.frame_time_delta));
 
+            result = GJK3D.intersects(test_a, test_b);
+
             base.Update(gameTime);
         }
-
+        gjk_result result;
         Vector2 fake_origin = new Vector2(EngineState.resolution.X - 200, 200);
         Vector3 fake_origin_3d = Vector3.Zero;
 
@@ -168,39 +162,13 @@ namespace MagpieTestbed
 
             world.Draw(GraphicsDevice, EngineState.camera);
 
-
-            Vector3 highest = new Vector3(world.player_actor.position.X, world.highest_floor_below(world.player_actor.position).Item1, world.player_actor.position.Z);
-            fake_origin = new Vector2(EngineState.resolution.X - 200, 200);
-
             test_a.draw();
             test_b.draw();
 
-            Draw3D.xyz_cross(GraphicsDevice, fake_origin_3d, 1f, Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.xyz_cross(GraphicsDevice, result.closest_point_A, 1f, Color.Purple, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.xyz_cross(GraphicsDevice, result.closest_point_B, 1f, Color.Purple, EngineState.camera.view, EngineState.camera.projection);
 
-
-            for (int i = 0; i < res.num_points; i++) {
-                Draw3D.xyz_cross(GraphicsDevice, fake_origin_3d + res.simplex[i], 1f, Color.Purple, EngineState.camera.view, EngineState.camera.projection);
-                for (int l = 0; l < res.num_points-1; l++) {
-                    if (l != i)
-                        Draw3D.line(GraphicsDevice, fake_origin_3d + res.simplex[i], fake_origin_3d + res.simplex[l], Color.Pink, EngineState.camera.view, EngineState.camera.projection);
-                }
-            }
-
-            Vector3 abc = (res.A + res.B + res.C) / 3f;
-            Vector3 bdc = (res.B + res.C + res.D) / 3f;
-            Vector3 acd = (res.A + res.C + res.D) / 3f;
-            Vector3 adb = (res.A + res.D + res.B) / 3f;
-
-            Draw3D.xyz_cross(GraphicsDevice, res.closest_point_A, 1f, Color.Pink, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.xyz_cross(GraphicsDevice, res.closest_point_B, 1f, Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.xyz_cross(GraphicsDevice, res.closest_simplex_point_to_origin, 1f, Color.LightBlue, EngineState.camera.view, EngineState.camera.projection);
-
-            Draw3D.line(GraphicsDevice, fake_origin_3d + abc, fake_origin_3d + abc + GJK3D.ABC, Color.Red, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.line(GraphicsDevice, fake_origin_3d + acd, fake_origin_3d + acd + GJK3D.ACD, Color.Green, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.line(GraphicsDevice, fake_origin_3d + bdc, fake_origin_3d + bdc + GJK3D.BDC, Color.Blue, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.line(GraphicsDevice, fake_origin_3d + adb, fake_origin_3d + adb + GJK3D.ADB, Color.Orange, EngineState.camera.view, EngineState.camera.projection);
-
-            Draw3D.line(GraphicsDevice, fake_origin_3d, fake_origin_3d - res.A * 0.3f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.line(GraphicsDevice, result.closest_point_A, result.closest_point_B, Color.Red, EngineState.camera.view, EngineState.camera.projection);
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
@@ -208,20 +176,6 @@ namespace MagpieTestbed
             GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
-            string s = "";
-            for (int i = 0; i < res.num_points; i++) {
-                
-                switch (i) {
-                    case 0: s = "A"; break;
-                    case 1: s = "B"; break;
-                    case 2: s = "C"; break;
-                    case 3: s = "D"; break;
-                }
-
-                Draw3D.text_3D(GraphicsDevice, Draw2D.sb, 
-                    s,
-                    "pf", fake_origin_3d + res.simplex[i], null, 1f, EngineState.camera.view, EngineState.camera.projection, Color.Red);
-            }
 
             Draw2D.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
@@ -231,10 +185,8 @@ namespace MagpieTestbed
             Draw2D.text_shadow("pf",
                 Clock.frame_rate_immediate.ToString() + " FPS\n" +
 
-                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" +
-                highest.simple_vector3_string_brackets() +"\n"+
-                res.distance + "\n" + res.penetration + "\n HIT: " + res.hit + "\n" + res.closest_simplex_point_to_origin.simple_vector3_string_brackets() + "\n" + 
-                res.iterations + " iterations"
+                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + 
+                result.hit + " " 
                 
                 , Vector2.One * 2, Color.White);
             
