@@ -85,6 +85,10 @@
     <Compile Include="Graphics\Draw2D.cs" />
     <Compile Include="Graphics\GBuffer.cs" />
     <Compile Include="Graphics\Render.cs" />
+    <Compile Include="Graphics\UI\UIForm.cs" />
+    <Compile Include="Graphics\UI\UIForms.cs" />
+    <Compile Include="Graphics\UI\UILayer.cs" />
+    <Compile Include="Graphics\UI\UIWindow.cs" />
     <Compile Include="Graphics\VerticalQuad.cs" />
     <Compile Include="Graphics\wm_skyboxtessellator.cs" />
     <Compile Include="World.cs" />

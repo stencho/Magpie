@@ -1,5 +1,6 @@
 ﻿using Magpie.Engine;
 using Magpie.Graphics;
+using Magpie.Graphics.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -21,7 +22,9 @@ namespace Magpie {
         public static GraphicsDevice graphics_device;
         public static GameTime gametime;
         public static Game game;
+        public static UILayer ui;
 
+        public static bool ui_layer_clicked;
         public static bool is_active;
         public static bool was_active;
 
@@ -40,6 +43,7 @@ namespace Magpie {
             buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y);
 
             Renderer.configure_renderer(resolution, graphics_device, graphics, window, Draw2D.sb);
+            ui = new UILayer(EngineState.resolution);
 
             Draw3D.init(graphics_device);
         }
@@ -53,6 +57,9 @@ namespace Magpie {
             Clock.update_fps();
 
             Controls.update(window,game.IsActive, resolution);
+
+            ui.update(out ui_layer_clicked);
+            ui.hit_scan(mouse_position.X, mouse_position.Y);
 
             is_active = game.IsActive;
             

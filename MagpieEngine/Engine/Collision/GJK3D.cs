@@ -25,15 +25,7 @@ namespace Magpie {
             public Vector3 DA;
             public Vector3 DB;
         }
-
-        public enum simplex_stage {
-            none,
-            point,
-            line,
-            tri,
-            tetrahedron
-        }
-
+        
         public struct simplex {
             public int max_iterations;
             public int iterations;
@@ -107,19 +99,7 @@ namespace Magpie {
             Vector3 N = Vector3.Cross(B, A);
             return Vector3.Dot(N, C);
         }
-
-        struct debug_point {
-            public Color color;
-            public Vector3 position;
-        }
-        static List<debug_point> debug_draw_points = new List<debug_point>();
-
-        public static void draw(GraphicsDevice gd, Camera cam) {
-            foreach(debug_point dp in debug_draw_points) {
-                Draw3D.xyz_cross(gd, dp.position, 0.2f, dp.color, cam.view, cam.projection);
-            }
-        }
-
+        
         public static int gjk(ref support sup, ref simplex s) {
             //drop out if we've passed the max iterations
             if (s.max_iterations > 0 && s.iterations >= max_iterations)
@@ -537,7 +517,6 @@ namespace Magpie {
             DD = Vector3.Zero;
 
             switch (s.count) {
-                default: throw new Exception("ded");
                 case 1:
                     //point
                     DD = s.verts[0].P * -1;

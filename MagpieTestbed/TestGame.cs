@@ -14,6 +14,7 @@ using static Magpie.Engine.Controls;
 using static Magpie.Engine.DigitalControlBindings;
 using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
+using Magpie.Graphics.UI;
 
 namespace MagpieTestbed
 {
@@ -24,7 +25,6 @@ namespace MagpieTestbed
     {
         GraphicsDeviceManager graphics;
         World world = new World();
-        
         public TestGame()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -43,7 +43,7 @@ namespace MagpieTestbed
             base.Initialize();
 
             EngineState.initialize(new XYPair(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Window, GraphicsDevice, graphics, this);
-
+            
             add_bind(new KeyBind(Keys.W, "forward"));
             add_bind(new KeyBind(Keys.A, "left"));
             add_bind(new KeyBind(Keys.D, "right"));
@@ -61,7 +61,9 @@ namespace MagpieTestbed
             add_bind(new KeyBind(Keys.C, "down"));
 
             add_bind(new KeyBind(Keys.T, "test"));
+            //add_bind(new KeyBind(Keys.LeftAlt, "ui_alt"));
 
+            add_bind(new MouseButtonBind(MouseButtons.Left, "ui_select"));
             add_bind(new MouseButtonBind(MouseButtons.Right, "click_right"));
 
             //world.current_map.add_object("test_sphere", new TestSphere());
@@ -82,6 +84,12 @@ namespace MagpieTestbed
             world.current_map.player_actor = new FreeCamActor();
             
             EngineState.camera = ((FreeCamActor)world.current_map.player_actor).cam;
+
+            EngineState.ui.add_form("top_panel", new UIPanel(XYPair.One * -3, new XYPair(EngineState.resolution.X + 5, 16)));
+
+            EngineState.ui.add_form("test_form", new UIButton(new XYPair(EngineState.resolution.X - 17, 0), new XYPair(17, 18), "close_button", "X", false));
+            
+            
         }
 
         protected override void LoadContent()
@@ -94,12 +102,11 @@ namespace MagpieTestbed
             ContentHandler.UnloadAll();
         }
 
-
         protected override void Update(GameTime gameTime)
         {
             EngineState.Update(gameTime, this);
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape) || ((UIButton)EngineState.ui.forms["test_form"]).clicking)
                 Exit();
 
             world.Update();
@@ -187,7 +194,7 @@ namespace MagpieTestbed
             GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
-
+            
             Draw2D.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
             Draw2D.cross(fake_origin, 5, 5, Color.Purple);
@@ -197,12 +204,15 @@ namespace MagpieTestbed
                 Clock.frame_rate_immediate.ToString() + " FPS\n" +
 
                 "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + 
-                result.hit + " " 
+                result.hit + " "
                 
-                , Vector2.One * 2, Color.White);
-            
+                , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
+
+            EngineState.ui.draw();
+
             Draw2D.sb.End();
-            
+
+
             GraphicsDevice.SetRenderTarget(null);
             Renderer.compose(EngineState.buffer);
             //base.Draw(gameTime);
