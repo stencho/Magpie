@@ -13,6 +13,42 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin ../../MagpieEngine/Shaders/clear.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/clear.fx;sha/clear.fx
+
+#begin ../../MagpieEngine/Shaders/compositor.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/compositor.fx;sha/compositor.fx
+
+#begin ../../MagpieEngine/Shaders/diffuse.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/diffuse.fx;sha/diffuse.fx
+
+#begin ../../MagpieEngine/Shaders/light_depth.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/light_depth.fx;sha/light_depth.fx
+
+#begin ../../MagpieEngine/Shaders/skybox.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/skybox.fx;sha/skybox.fx
+
+#begin ../../MagpieEngine/Shaders/terrain.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/terrain.fx;sha/terrain.fx
+
 #begin fnt/pf.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
@@ -83,66 +119,6 @@
 /processorParam:SwapWindingOrder=False
 /processorParam:TextureFormat=Compressed
 /build:gfx/sphere.FBX
-
-#begin sha/clear.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/clear.fx
-
-#begin sha/compositor.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/compositor.fx
-
-#begin sha/diffuse.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/diffuse.fx
-
-#begin sha/FXAA.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/FXAA.fx
-
-#begin sha/Invert.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/Invert.fx
-
-#begin sha/light_depth.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/light_depth.fx
-
-#begin sha/point_light_geom.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/point_light_geom.fx
-
-#begin sha/skybox.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/skybox.fx
-
-#begin sha/spot_light_geom.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/spot_light_geom.fx
-
-#begin sha/terrain.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/terrain.fx
 
 #begin tex/cash_santa.png
 /importer:TextureImporter

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/clear.fx</SourceFile>
-  <SourceTime>2021-01-17T16:42:00.5369766+11:00</SourceTime>
+  <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/clear.fx</SourceFile>
+  <SourceTime>2022-03-26T06:03:54.1043055+11:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/Content/sha/clear.xnb</DestFile>
-  <DestTime>2022-03-22T10:34:52.5843746+11:00</DestTime>
+  <DestTime>2022-03-26T06:16:42.3408677+11:00</DestTime>
   <Importer>EffectImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>EffectProcessor</Processor>

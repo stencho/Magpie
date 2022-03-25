@@ -97,6 +97,15 @@
   <ItemGroup>
     <Folder Include="Engine\Collision\Support2D\" />
     <Folder Include="Graphics\Animation\" />
+    <Folder Include="Graphics\Lights\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Shaders\clear.fx" />
+    <Content Include="Shaders\compositor.fx" />
+    <Content Include="Shaders\diffuse.fx" />
+    <Content Include="Shaders\light_depth.fx" />
+    <Content Include="Shaders\skybox.fx" />
+    <Content Include="Shaders\terrain.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

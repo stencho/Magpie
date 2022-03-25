@@ -115,9 +115,9 @@ namespace Magpie.Graphics {
             e_clear = ContentHandler.resources["clear"].value_fx;
             e_terrain = ContentHandler.resources["terrain"].value_fx;
             e_compositor = ContentHandler.resources["compositor"].value_fx;
+
             e_light_depth = ContentHandler.resources["light_depth"].value_fx;
-            e_light_spot_geom = ContentHandler.resources["spot_light_geom"].value_fx;
-            e_light_point_geom = ContentHandler.resources["point_light_geom"].value_fx;
+
             e_skybox = ContentHandler.resources["skybox"].value_fx;
 
             light_blendstate = new BlendState();

@@ -12,7 +12,6 @@ C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\bin\Debug\SharpDX.Direct3D1
 C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\bin\Debug\SharpDX.MediaFoundation.xml
 C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\bin\Debug\SharpDX.XAudio2.xml
 C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\bin\Debug\SharpDX.XInput.xml
-C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\obj\Debug\Magpie.csprojAssemblyReference.cache
 C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\obj\Debug\Magpie.csproj.CoreCompileInputs.cache
 C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\obj\Debug\Magpie.csproj.CopyComplete
 C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\bin\Debug\Magpie.dll
