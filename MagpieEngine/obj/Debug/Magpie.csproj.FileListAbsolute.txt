@@ -18,3 +18,4 @@ C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\bin\Debug\Magpie.dll
 C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\bin\Debug\Magpie.pdb
 C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\obj\Debug\Magpie.dll
 C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\obj\Debug\Magpie.pdb
+C:\Users\nat\source\repos\ProjectMagpie\MagpieEngine\obj\Debug\Magpie.csprojAssemblyReference.cache

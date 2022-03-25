@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 
 namespace Magpie.Engine.Floors {
@@ -12,6 +13,10 @@ namespace Magpie.Engine.Floors {
         public Matrix orientation { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public void Draw() {
+            throw new NotImplementedException();
+        }
+
+        public void draw_depth(DynamicLight light) {
             throw new NotImplementedException();
         }
 

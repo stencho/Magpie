@@ -3,7 +3,7 @@
   <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/compositor.fx</SourceFile>
   <SourceTime>2022-03-26T06:03:54.1103059+11:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/sha/compositor.xnb</DestFile>
-  <DestTime>2022-03-26T06:16:38.9348191+11:00</DestTime>
+  <DestTime>2022-03-26T08:58:43.8430471+11:00</DestTime>
   <Importer>EffectImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>EffectProcessor</Processor>

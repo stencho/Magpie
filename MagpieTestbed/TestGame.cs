@@ -15,6 +15,7 @@ using static Magpie.Engine.DigitalControlBindings;
 using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics.UI;
+using Magpie.Graphics.Lights;
 
 namespace MagpieTestbed
 {
@@ -24,7 +25,7 @@ namespace MagpieTestbed
     public class TestGame : Game
     {
         GraphicsDeviceManager graphics;
-        World world = new World();
+        World world;
         public TestGame()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -38,12 +39,15 @@ namespace MagpieTestbed
             this.IsFixedTimeStep = false;
         }
 
+
         protected override void Initialize()
         {
             base.Initialize();
 
             EngineState.initialize(new XYPair(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Window, GraphicsDevice, graphics, this);
-            
+
+            world = new World();
+
             add_bind(new KeyBind(Keys.W, "forward"));
             add_bind(new KeyBind(Keys.A, "left"));
             add_bind(new KeyBind(Keys.D, "right"));
@@ -66,8 +70,8 @@ namespace MagpieTestbed
             add_bind(new MouseButtonBind(MouseButtons.Left, "ui_select"));
             add_bind(new MouseButtonBind(MouseButtons.Right, "click_right"));
 
-            //world.current_map.add_object("test_sphere", new TestSphere());
-            //world.current_map.add_floor("test_floor", new FloorPlane());
+            world.current_map.add_object("test_sphere", new TestSphere());
+            world.current_map.add_floor("test_floor", new FloorPlane());
             //world.current_map.add_floor("test_floor2", new FloorPlane());
             //world.current_map.add_actor("test_actor", new MoveTestActor());
 
@@ -88,14 +92,14 @@ namespace MagpieTestbed
             EngineState.ui.add_form("top_panel", new UIPanel(XYPair.One * -3, new XYPair(EngineState.resolution.X + 5, 16)));
 
             EngineState.ui.add_form("test_form", new UIButton(new XYPair(EngineState.resolution.X - 17, 0), new XYPair(17, 18), "close_button", "X", false));
-            
-            
+
         }
 
         protected override void LoadContent()
         {
             ContentHandler.LoadContent(Content, GraphicsDevice);
             ContentHandler.LoadAll();
+
         }
 
         protected override void UnloadContent() {
@@ -182,11 +186,17 @@ namespace MagpieTestbed
             test_a.draw();
             test_b.draw();
 
+            Draw3D.xyz_cross(GraphicsDevice, world.test_light.position, .1f, Color.Pink, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + world.test_light.orientation.Forward, Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
 
             Draw3D.xyz_cross(GraphicsDevice, result.closest_point_A, 1f, Color.Purple, EngineState.camera.view, EngineState.camera.projection);
             Draw3D.xyz_cross(GraphicsDevice, result.closest_point_B, 1f, Color.Purple, EngineState.camera.view, EngineState.camera.projection);
 
             Draw3D.line(GraphicsDevice, result.closest_point_A, result.closest_point_B, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+
+
+            world.build_lighting();
+
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
@@ -209,6 +219,8 @@ namespace MagpieTestbed
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
 
             EngineState.ui.draw();
+
+            Draw2D.image(world.test_light.depth_map, XYPair.One * 50, XYPair.One * 300, Color.White);
 
             Draw2D.sb.End();
 

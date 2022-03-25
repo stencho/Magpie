@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Magpie.Graphics;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace Magpie.Engine.Floors {
         bool within_vertical_bounds(Vector3 pos);
 
         void Draw();
+        void draw_depth(DynamicLight light);
         void Update();
     }
 }

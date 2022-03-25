@@ -83,7 +83,9 @@
     <Compile Include="Graphics\Camera.cs" />
     <Compile Include="Graphics\Draw3D.cs" />
     <Compile Include="Graphics\Draw2D.cs" />
+    <Compile Include="Graphics\DynamicLight.cs" />
     <Compile Include="Graphics\GBuffer.cs" />
+    <Compile Include="Graphics\Lights\Spotlight.cs" />
     <Compile Include="Graphics\Render.cs" />
     <Compile Include="Graphics\UI\UIForm.cs" />
     <Compile Include="Graphics\UI\UIForms.cs" />
@@ -97,7 +99,6 @@
   <ItemGroup>
     <Folder Include="Engine\Collision\Support2D\" />
     <Folder Include="Graphics\Animation\" />
-    <Folder Include="Graphics\Lights\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Shaders\clear.fx" />

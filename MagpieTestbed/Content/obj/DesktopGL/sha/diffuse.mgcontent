@@ -3,7 +3,7 @@
   <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/diffuse.fx</SourceFile>
   <SourceTime>2022-03-26T06:03:54.1123071+11:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/sha/diffuse.xnb</DestFile>
-  <DestTime>2022-03-26T06:16:39.1573627+11:00</DestTime>
+  <DestTime>2022-03-26T08:58:44.0665882+11:00</DestTime>
   <Importer>EffectImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>EffectProcessor</Processor>

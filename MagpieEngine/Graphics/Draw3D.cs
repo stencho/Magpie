@@ -40,6 +40,7 @@ namespace Magpie.Graphics {
             ContentHandler.resources["diffuse"].value_fx.Parameters["DiffuseMap"].SetValue(onePXWhite);
             ContentHandler.resources["diffuse"].value_fx.Parameters["tint"].SetValue(color.ToVector3());
             ContentHandler.resources["diffuse"].value_fx.Parameters["FarClip"].SetValue(2000f);
+            ContentHandler.resources["diffuse"].value_fx.Parameters["opacity"].SetValue(-1f);
 
 
 
@@ -63,7 +64,7 @@ namespace Magpie.Graphics {
             ContentHandler.resources["diffuse"].value_fx.Parameters["DiffuseMap"].SetValue(onePXWhite);
             ContentHandler.resources["diffuse"].value_fx.Parameters["tint"].SetValue(color.ToVector3());
             ContentHandler.resources["diffuse"].value_fx.Parameters["FarClip"].SetValue(2000f);
-
+            ContentHandler.resources["diffuse"].value_fx.Parameters["opacity"].SetValue(-1f);
 
 
             VertexPositionColor[] verts = new VertexPositionColor[points.Length];
@@ -206,6 +207,7 @@ namespace Magpie.Graphics {
             ContentHandler.resources["diffuse"].value_fx.Parameters["DiffuseMap"].SetValue(onePXWhite);
             ContentHandler.resources["diffuse"].value_fx.Parameters["tint"].SetValue(color.ToVector3());
             ContentHandler.resources["diffuse"].value_fx.Parameters["FarClip"].SetValue(2000f);
+            ContentHandler.resources["diffuse"].value_fx.Parameters["opacity"].SetValue(-1f);
 
 
             for (int i = 0; i < ContentHandler.resources["diffuse"].value_fx.CurrentTechnique.Passes.Count; i++) {
@@ -282,6 +284,8 @@ namespace Magpie.Graphics {
         }
 
         public static Texture2D tum;
+        public static Effect light_depth;
+
         public static void init(GraphicsDevice gd) {
 
             if (onePXWhite == null) {
@@ -299,6 +303,7 @@ namespace Magpie.Graphics {
                 }
                 testing_gradient.SetData(glowData);
 
+                light_depth = ContentHandler.resources["light_depth"].value_fx;
 
                 text_effect = new BasicEffect(gd);
             }
@@ -321,12 +326,13 @@ namespace Magpie.Graphics {
             Effect e_diffuse = ContentHandler.resources["diffuse"].value_fx;
 
             //ContentHandler.resources["diffuse"].value_fx. = color.ToVector3();
-            ContentHandler.resources["diffuse"].value_fx.Parameters["World"].SetValue(world);
-            ContentHandler.resources["diffuse"].value_fx.Parameters["View"].SetValue(view);
-            ContentHandler.resources["diffuse"].value_fx.Parameters["Projection"].SetValue(projection);
-            ContentHandler.resources["diffuse"].value_fx.Parameters["DiffuseMap"].SetValue(onePXWhite);
-            ContentHandler.resources["diffuse"].value_fx.Parameters["tint"].SetValue(color.ToVector3());
-            ContentHandler.resources["diffuse"].value_fx.Parameters["FarClip"].SetValue(2000f);
+            e_diffuse.Parameters["World"].SetValue(world);
+            e_diffuse.Parameters["View"].SetValue(view);
+            e_diffuse.Parameters["Projection"].SetValue(projection);
+            e_diffuse.Parameters["DiffuseMap"].SetValue(onePXWhite);
+            e_diffuse.Parameters["tint"].SetValue(color.ToVector3());
+            e_diffuse.Parameters["FarClip"].SetValue(2000f);
+            e_diffuse.Parameters["opacity"].SetValue(-1f);
 
             gd.RasterizerState = RasterizerState.CullCounterClockwise;
             gd.BlendState = BlendState.AlphaBlend;
@@ -349,12 +355,13 @@ namespace Magpie.Graphics {
             Effect e_diffuse = ContentHandler.resources["diffuse"].value_fx;
 
             //ContentHandler.resources["diffuse"].value_fx. = color.ToVector3();
-            ContentHandler.resources["diffuse"].value_fx.Parameters["World"].SetValue(world);
-            ContentHandler.resources["diffuse"].value_fx.Parameters["View"].SetValue(view);
-            ContentHandler.resources["diffuse"].value_fx.Parameters["Projection"].SetValue(projection);
-            ContentHandler.resources["diffuse"].value_fx.Parameters["DiffuseMap"].SetValue(texture);
-            ContentHandler.resources["diffuse"].value_fx.Parameters["tint"].SetValue(color.ToVector3());
-            ContentHandler.resources["diffuse"].value_fx.Parameters["FarClip"].SetValue(2000f);
+            e_diffuse.Parameters["World"].SetValue(world);
+            e_diffuse.Parameters["View"].SetValue(view);
+            e_diffuse.Parameters["Projection"].SetValue(projection);
+            e_diffuse.Parameters["DiffuseMap"].SetValue(texture);
+            e_diffuse.Parameters["tint"].SetValue(color.ToVector3());
+            e_diffuse.Parameters["FarClip"].SetValue(2000f);
+            e_diffuse.Parameters["opacity"].SetValue(-1f);
 
             gd.RasterizerState = RasterizerState.CullCounterClockwise;
             gd.BlendState = BlendState.AlphaBlend;
@@ -365,9 +372,33 @@ namespace Magpie.Graphics {
             e_diffuse.Techniques["BasicColorDrawing"].Passes[0].Apply();
 
             gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount));
-
-
         }
+
+        public static void draw_buffers_depth(DynamicLight light, Matrix world, VertexBuffer vb, IndexBuffer ib) {
+            Effect e_diffuse = ContentHandler.resources["light_depth"].value_fx;
+
+            e_diffuse.Parameters["World"].SetValue(world);
+            e_diffuse.Parameters["View"].SetValue(light.view);
+            e_diffuse.Parameters["Projection"].SetValue(light.projection);
+            e_diffuse.Parameters["LightPosition"].SetValue(light.position + (Vector3.Up * 20f));
+            e_diffuse.Parameters["DepthPrecision"].SetValue(light.far_clip);
+            //e_diffuse.Parameters["DiffuseMap"].SetValue(tum);
+            // e_diffuse.Parameters["tint"].SetValue(Color.White.ToVector3());
+            // e_diffuse.Parameters["FarClip"].SetValue(0.1f);
+            // e_diffuse.Parameters["FarClip"].SetValue(2000f);
+            // e_diffuse.Parameters["opacity"].SetValue(-1f);
+
+            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+            EngineState.graphics_device.BlendState = BlendState.Opaque;
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
+            EngineState.graphics_device.SetVertexBuffer(vb);
+            EngineState.graphics_device.Indices = ib;
+
+            e_diffuse.Techniques["Default"].Passes[0].Apply();
+
+            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount));
+        }
+
         public static void draw_buffers(GraphicsDevice gd, VertexBuffer vb, IndexBuffer ib, Matrix world, Color color, Matrix view, Matrix projection) {
             init(gd);
 

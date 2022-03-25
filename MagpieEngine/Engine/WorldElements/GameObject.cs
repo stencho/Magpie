@@ -12,6 +12,7 @@ namespace Magpie.Engine {
         Vector3 position { get; set; }
         Matrix orientation { get; set; }
         void Update();
-        void Draw();        
+        void Draw();
+        void draw_depth(DynamicLight light);
     }
 }

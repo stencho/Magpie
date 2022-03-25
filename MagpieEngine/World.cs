@@ -2,6 +2,7 @@
 using Magpie.Engine.Floors;
 using Magpie.Engine.Stages;
 using Magpie.Graphics;
+using Magpie.Graphics.Lights;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -14,8 +15,12 @@ namespace Magpie {
     public class World {
         public Map current_map;
         public Actor player_actor => current_map.player_actor;
+
+        public Spotlight test_light;
+
         public World() {
             load_map();
+            test_light = new Spotlight();
         }
 
         public void load_map() {
@@ -27,7 +32,6 @@ namespace Magpie {
         }
 
         public void LoadContent() {
-
         }
 
         
@@ -109,6 +113,25 @@ namespace Magpie {
             foreach (Actor actor in current_map.actors.Values) {
                 actor.Draw();
             }
+        }
+
+        public void build_lighting() {
+            EngineState.graphics_device.SetRenderTarget(test_light.depth_map);
+            test_light.position = EngineState.camera.position + Vector3.Up * 10f;
+            test_light.orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Left, MathHelper.ToRadians(30f));
+
+            test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + test_light.orientation.Forward, Vector3.Up);
+
+            EngineState.graphics_device.Clear(Color.White);
+
+            foreach (Floor floor in current_map.floors.Values) {
+                floor.draw_depth(test_light);
+            }
+
+            foreach (GameObject go in current_map.objects.Values) {
+                go.draw_depth(test_light);
+            }
+
         }
 
     }

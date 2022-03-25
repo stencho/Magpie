@@ -57,7 +57,7 @@ namespace Magpie.Graphics {
 
         private void update_frustum_projection() {
             frustum_projection = Matrix.CreatePerspectiveFieldOfView(
-                        MathHelper.ToRadians(FOV / (aspect_ratio * 0.8f)), aspect_ratio, near_clip, far_clip);
+                        MathHelper.ToRadians(FOV / (aspect_ratio)), aspect_ratio, near_clip, far_clip);
         }
 
         public void update_projection(XYPair res) {
