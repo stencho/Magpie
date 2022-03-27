@@ -1,53 +1,43 @@
 ﻿float4x4 World;
-float4x4 View;
-float4x4 Projection;
-float3 LightPosition;
-//This is for modulating the Light's Depth Precision
-float DepthPrecision;//Input Structure
-float4 instanceTransform;
+float4x4 LVP;
+float DepthPrecision;
+float FarClip;
+float3 light_pos;
 
-struct VSI
+struct VertexShaderOutput
 {
-	float4 Position : POSITION0;
-};
-//Output Structure
-struct VSO
-{
-	float4 Position : POSITION;
-	float4 WorldPosition : TEXCOORD0;
-	float depth : TEXCOORD1;
+    float4 Position : POSITION;
+	float4 depth : TEXCOORD0;
+	float4 world_pos : TEXCOORD1;
 };
 
-//Vertex Shader
-VSO VS(VSI input)
-{
-	//Initialize Output
-	VSO output;
-	//Transform Position
-	float4 worldPosition = mul(input.Position, World);
-	float4 viewPosition = mul(worldPosition, View);
-	output.Position = mul(viewPosition, Projection);
-	//Pass World Position
-	output.WorldPosition = worldPosition;
-	output.depth = output.WorldPosition.z /= output.WorldPosition.w;
-	//Return Output
-	return output;
-}
-//Pixel Shader
-float4 PS(VSO input) : COLOR0
+VertexShaderOutput VertexShaderFunction(float4 position : POSITION)
 {
 
-	float depth = (length(LightPosition - input.depth)/DepthPrecision);
+    VertexShaderOutput output;
+	output.world_pos = mul(position, World);
+    output.Position = mul(position, mul(World, LVP));
 
-	//Return Exponential of Depth
-	return float4(depth, depth, depth, 1);
+	output.depth = (output.Position);
+    return output;
 }
-//Technique
-technique Default
+
+float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-	pass p0
-	{
-		VertexShader = compile vs_3_0 VS();
-		PixelShader = compile ps_3_0 PS();
-	}
+	float d = (input.depth.z / input.depth.w);
+    return float4(d,d,d,1);
+}
+
+technique Technique1
+{
+    pass Pass1
+    {
+#if SM4
+		VertexShader = compile vs_4_0_level_9_3 VertexShaderFunction();
+		PixelShader = compile ps_4_0_level_9_3 PixelShaderFunction();
+#else
+        VertexShader = compile vs_3_0 VertexShaderFunction();
+		PixelShader = compile ps_3_0 PixelShaderFunction();
+#endif
+    }
 }

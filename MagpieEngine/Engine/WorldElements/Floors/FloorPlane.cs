@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Magpie.Engine.Collision;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,12 +15,15 @@ namespace Magpie.Engine.Floors {
     public class FloorPlane : Floor {
         public Vector3 position { get; set; } = Vector3.Zero;
         public Vector2 size { get; set; } = Vector2.One * 50f;
-        public Matrix orientation { get; set; } = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(45f));
+        public Matrix orientation { get; set; } = Matrix.Identity;
+        public Matrix world => orientation * Matrix.CreateTranslation(position);
 
-        public Vector3 A => position + Vector3.Transform((Vector3.Forward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f)  , orientation);
-        public Vector3 B => position + Vector3.Transform((Vector3.Forward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f) , orientation);
-        public Vector3 C => position + Vector3.Transform((Vector3.Backward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f), orientation);
-        public Vector3 D => position + Vector3.Transform((Vector3.Backward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f) , orientation);
+        public Vector3 A => (Vector3.Forward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f)  ;
+        public Vector3 B => (Vector3.Forward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f) ;
+        public Vector3 C => (Vector3.Backward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f);
+        public Vector3 D => (Vector3.Backward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f) ;
+
+        public BoundingBox bounds { get; set; }
 
         static ushort[] q_indices = { 0, 1, 2, 2, 3, 0 };
         public static VertexPositionNormalTexture[] quad = new VertexPositionNormalTexture[4] {
@@ -29,8 +33,10 @@ namespace Magpie.Engine.Floors {
                 new VertexPositionNormalTexture(new Vector3(-1, -1, 0), -Vector3.UnitZ, new Vector2(0, 1))
             };
 
-        IndexBuffer index_buffer;
-        VertexBuffer vertex_buffer;
+        public IndexBuffer index_buffer { get; set; }
+        public VertexBuffer vertex_buffer { get; set; }
+
+        public string texture { get; set; } =  "zerocool_sharper";
 
         public FloorPlane() {
 
@@ -48,15 +54,12 @@ namespace Magpie.Engine.Floors {
                 vertex_buffer.SetData<VertexPositionNormalTexture>(quad);
             }
 
-
-        }
-
-        public void Draw() {
-            Draw3D.draw_buffers_diffuse_texture(EngineState.graphics_device, vertex_buffer, index_buffer, Draw3D.tum, Color.White, orientation * Matrix.CreateTranslation(position), EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.xyz_cross(EngineState.graphics_device, Vector3.Transform(Vector3.Zero, orientation * Matrix.CreateTranslation(position)), 1f, Color.Pink, EngineState.camera.view, EngineState.camera.projection);
         }
 
         public void Update() {
+           // bounds = CollisionHelper.find_bounding_box_around_points(A, B, C, D);
+           bounds = BoundingBox.CreateFromPoints(new Vector3[] {A,B,C,D});
+
         }
 
         public Vector3 get_footing(float X, float Z) {
@@ -74,18 +77,11 @@ namespace Magpie.Engine.Floors {
             return Vector3.Zero;
         }
 
-        public Vector3 testpos = Vector3.Zero;
-        public Vector3 test_A, test_B, test_C, test_D;
-        public Vector3 test_t_A, test_t_B, test_t_C, test_t_D;
-
         public bool within_vertical_bounds(Vector3 pos) {            
             return Math2D.point_within_polygon(
                 pos.XZ(),
                 A.XZ(),B.XZ(),C.XZ(),D.XZ());
         }
 
-        public void draw_depth(DynamicLight light) {
-            Draw3D.draw_buffers_depth(light, orientation * Matrix.CreateTranslation(position), vertex_buffer, index_buffer);
-        }
     }
 }

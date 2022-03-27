@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Magpie.Engine;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace Magpie.Graphics {
         public Matrix frustum_projection { get; set; }
 
         public float near_clip { get; set; } = 0.1f;
-        public float far_clip { get; set; } = 2000f;
+        public float far_clip { get; set; } = 500f;
 
         public float FOV { get; set; } = 110f;
         public float FOV_default { get; set; } = 110f;
@@ -85,7 +86,7 @@ namespace Magpie.Graphics {
 
             view = Matrix.CreateLookAt(position, position + direction + lookat_offset, Vector3.Up);
 
-            frustum_view = Matrix.CreateLookAt(position - (direction * 10f), position + lookat_offset + (direction * (far_clip * 1.5f)), Vector3.Up);
+            frustum_view = Matrix.CreateLookAt(position, position + lookat_offset + (direction * (far_clip)), Vector3.Up);
 
             inverse_view = Matrix.Invert(view);
             InverseViewProjection = Matrix.Invert(view * projection);

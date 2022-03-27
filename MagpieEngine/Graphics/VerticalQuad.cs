@@ -35,10 +35,6 @@ namespace Magpie.Graphics {
         Vector3 pos;
         Vector3 s;
 
-        public void draw() {
-            Renderer.draw_buffers(vertex_buffer, index_buffer, world, textures[0]);
-        }
-
         public void update() { }
 
         public Matrix orientation {

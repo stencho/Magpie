@@ -37,6 +37,12 @@
 /processorParam:DebugMode=Auto
 /build:../../MagpieEngine/Shaders/light_depth.fx;sha/light_depth.fx
 
+#begin ../../MagpieEngine/Shaders/lit_diffuse.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/lit_diffuse.fx;sha/lit_diffuse.fx
+
 #begin ../../MagpieEngine/Shaders/skybox.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -62,6 +68,25 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:fnt/pf_big.spritefont
+
+#begin gfx/bigcube.FBX
+/importer:FbxImporter
+/processor:ModelProcessor
+/processorParam:ColorKeyColor=0,0,0,0
+/processorParam:ColorKeyEnabled=True
+/processorParam:DefaultEffect=BasicEffect
+/processorParam:GenerateMipmaps=True
+/processorParam:GenerateTangentFrames=False
+/processorParam:PremultiplyTextureAlpha=True
+/processorParam:PremultiplyVertexColors=True
+/processorParam:ResizeTexturesToPowerOfTwo=False
+/processorParam:RotationX=0
+/processorParam:RotationY=0
+/processorParam:RotationZ=0
+/processorParam:Scale=1
+/processorParam:SwapWindingOrder=False
+/processorParam:TextureFormat=Compressed
+/build:gfx/bigcube.FBX
 
 #begin gfx/cone.FBX
 /importer:FbxImporter

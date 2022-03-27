@@ -21,7 +21,7 @@ namespace MagpieTestbed.TestActors {
         public Vector3 wants_movement { get; set; } = (Vector3.Backward + Vector3.Up) * 2;
 
         float movement_speed = 12f;
-        float mouse_multi = 3f;
+        float mouse_multi = 0.6f;
 
 
         bool camera_enabled = false;
@@ -53,14 +53,14 @@ namespace MagpieTestbed.TestActors {
             }
 
             if (camera_enabled && !bind_just_pressed("click_right") && !bind_released("click_right")) {
-                cam.orientation *= Matrix.CreateRotationY(mouse_delta.X / (EngineState.resolution.X / mouse_multi));
+                cam.orientation *= Matrix.CreateRotationY(mouse_delta.X / (EngineState.resolution.X * mouse_multi));
                                                
                 //first person camera pitch
                 //clamped from -0.9 to 0.9 by way of only allowing the mouse to move up/down if it's below/above those values
                 if (cam.orientation.Forward.Y < .98f && mouse_delta.Y > 0) {
-                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta.Y / (EngineState.resolution.Y / mouse_multi));
+                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta.Y / (EngineState.resolution.Y * mouse_multi));
                 } else if (cam.orientation.Forward.Y > -.98f && mouse_delta.Y < 0) {                    
-                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta.Y / (EngineState.resolution.Y / mouse_multi));
+                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta.Y / (EngineState.resolution.Y * mouse_multi));
                 } 
             }
 
@@ -89,7 +89,8 @@ namespace MagpieTestbed.TestActors {
                 wants_movement = Vector3.Normalize(mv) * movement_speed * Clock.frame_time_delta;
 
             cam.position = position;
-            cam.update();    
+            cam.update();
+            cam.update_projection(EngineState.resolution);
         }
         public void Draw() { }
     }

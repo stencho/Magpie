@@ -65,13 +65,42 @@ namespace MagpieTestbed
             add_bind(new KeyBind(Keys.C, "down"));
 
             add_bind(new KeyBind(Keys.T, "test"));
+            add_bind(new KeyBind(Keys.F2, "switch_buffer"));
+            add_bind(new KeyBind(Keys.F3, "bias_minus"));
+            add_bind(new KeyBind(Keys.F4, "bias_plus"));
+            add_bind(new KeyBind(Keys.F5, "screenshot"));
             //add_bind(new KeyBind(Keys.LeftAlt, "ui_alt"));
 
             add_bind(new MouseButtonBind(MouseButtons.Left, "ui_select"));
             add_bind(new MouseButtonBind(MouseButtons.Right, "click_right"));
-
+            /*
             world.current_map.add_object("test_sphere", new TestSphere());
+            world.current_map.add_object("test_sphere2", new TestSphere());
+            world.current_map.add_object("test_sphere3", new TestSphere());
+            world.current_map.add_object("test_sphere4", new TestSphere());
+            world.current_map.add_object("test_sphere5", new TestSphere());
+            world.current_map.add_object("test_sphere6", new TestSphere());
+
+            
+
+
+            world.current_map.objects["test_sphere2"].position += Vector3.Forward * 5f;
+            world.current_map.objects["test_sphere3"].position += Vector3.Forward * 5f + Vector3.Right * 2f;
+            world.current_map.objects["test_sphere4"].position += Vector3.Forward * 5f + Vector3.Left * 2f;
+            world.current_map.objects["test_sphere5"].position += Vector3.Forward * 8f + Vector3.Up * 2f;
+            world.current_map.objects["test_sphere6"].position += Vector3.Forward * 12f + Vector3.Up * 2f;
+
+
+            world.current_map.objects["test_sphere6"].model = "bigcube";
+            */
+
+            for (int i = 0; i < 100; i++) {
+                world.current_map.add_object("test_sphere" + i, new TestSphere());
+                world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
+            }
+
             world.current_map.add_floor("test_floor", new FloorPlane());
+            //world.current_map.floors["test_floor"].position = Vector3.Forward * 10f + Vector3.Up * 5f;
             //world.current_map.add_floor("test_floor2", new FloorPlane());
             //world.current_map.add_actor("test_actor", new MoveTestActor());
 
@@ -80,10 +109,10 @@ namespace MagpieTestbed
             //world.current_map.floors["test_floor2"].orientation = 
             // Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(36f)) * Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(26f));
 
-            ((Quad)test_b).B += Vector3.Forward * 40f;
-            ((Quad)test_b).C += Vector3.Forward * 40f;
+            //((Quad)test_b).B += Vector3.Forward * 40f;
+            //((Quad)test_b).C += Vector3.Forward * 40f;
 
-            ((Quad)test_b).position += Vector3.Forward * 40f;
+            //((Quad)test_b).position += Vector3.Forward * 40f;
 
             world.current_map.player_actor = new FreeCamActor();
             
@@ -112,6 +141,7 @@ namespace MagpieTestbed
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape) || ((UIButton)EngineState.ui.forms["test_form"]).clicking)
                 Exit();
+
 
             world.Update();
 
@@ -146,22 +176,35 @@ namespace MagpieTestbed
             //world.current_map.floors["test_floor2"].orientation *= Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(6F * Clock.frame_time_delta));
 
 
-            result = GJK.gjk_intersects(test_a, test_b,
+            results = new GJK.gjk_result[world.current_map.objects.Count];
+            int i = 0;
+            foreach (GameObject o in world.current_map.objects.Values) {
+                if (i % 3 == 0)
+                    world.current_map.objects["test_sphere" + i].orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, ((float)i / 3f / 5f) * Clock.frame_time_delta);
+
+                results[i] = GJK.gjk_intersects(test_a, o.collision,
                 test_a.orientation * Matrix.CreateTranslation(test_a.position),
-                test_b.orientation * Matrix.CreateTranslation(test_b.position));
+                o.world);
+                i++;
+            }
+
+            if (bind_just_pressed("bias_minus")) Scene.LIGHT_BIAS -= 0.00001f;
+            if (bind_just_pressed("bias_plus")) Scene.LIGHT_BIAS += 0.00001f;
+
+            if (bind_just_pressed("screenshot")) Renderer.screenshot_at_end_of_frame();
+
+
 
             base.Update(gameTime);
         }
-        GJK.gjk_result result;
+        GJK.gjk_result[] results;
         Vector2 fake_origin = new Vector2(EngineState.resolution.X - 200, 200);
         Vector3 fake_origin_3d = Vector3.Zero;
 
         //Sphere test_a = new Sphere();
         Capsule test_a = new Capsule(1.85f, 1f);
         //sphere_data test_b = new sphere_data();
-
-        Quad test_b = new Quad(20, 20);
-
+        
         //Point3D test_a = new Point3D();
         //Sphere test_a = new Sphere();
         //Tetrahedron test_a = new Tetrahedron();
@@ -173,10 +216,8 @@ namespace MagpieTestbed
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             GraphicsDevice.SetRenderTarget(null);
-            Renderer.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
 
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
-            
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
@@ -184,18 +225,17 @@ namespace MagpieTestbed
             world.Draw(GraphicsDevice, EngineState.camera);
 
             test_a.draw();
-            test_b.draw();
-
-            Draw3D.xyz_cross(GraphicsDevice, world.test_light.position, .1f, Color.Pink, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + world.test_light.orientation.Forward, Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
-
-            Draw3D.xyz_cross(GraphicsDevice, result.closest_point_A, 1f, Color.Purple, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.xyz_cross(GraphicsDevice, result.closest_point_B, 1f, Color.Purple, EngineState.camera.view, EngineState.camera.projection);
-
-            Draw3D.line(GraphicsDevice, result.closest_point_A, result.closest_point_B, Color.Red, EngineState.camera.view, EngineState.camera.projection);
 
 
-            world.build_lighting();
+            //Draw3D.xyz_cross(GraphicsDevice, world.test_light.position, .1f, Color.Pink, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.line(GraphicsDevice, world.test_light.position, (Vector3.Up * 2f + Vector3.Forward * 8f) - world.test_light.position, Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
+
+            foreach (GJK.gjk_result result in results) {
+                Draw3D.xyz_cross(GraphicsDevice, result.closest_point_A, 1f, result.hit ? Color.LightGreen : Color.Red, EngineState.camera.view, EngineState.camera.projection);
+                Draw3D.xyz_cross(GraphicsDevice, result.closest_point_B, 1f, result.hit ? Color.LightGreen : Color.Red, EngineState.camera.view, EngineState.camera.projection);
+
+                //Draw3D.line(GraphicsDevice, result.closest_point_A, result.closest_point_B, result.hit ? Color.LightGreen: Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            }           
 
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
@@ -213,15 +253,13 @@ namespace MagpieTestbed
             Draw2D.text_shadow("pf",
                 Clock.frame_rate_immediate.ToString() + " FPS\n" +
 
-                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + 
-                result.hit + " "
+                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Renderer.buffer == -1) ? "combined" : ((Renderer.buffers)Renderer.buffer).ToString()) +"\n" +
+                Scene.LIGHT_BIAS.ToString()
                 
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
 
             EngineState.ui.draw();
-
-            Draw2D.image(world.test_light.depth_map, XYPair.One * 50, XYPair.One * 300, Color.White);
-
+            
             Draw2D.sb.End();
 
 

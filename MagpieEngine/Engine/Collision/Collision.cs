@@ -385,6 +385,24 @@ namespace Magpie.Engine.Collision {
 
             return new AABB(new Vector3(Xmin, Ymin, Zmin), new Vector3(Xmax, Ymax, Zmax));
         }
+
+        public static BoundingBox find_bounding_box_around_points(params Vector3[] points) {
+            Vector3 min = Vector3.One * float.MaxValue, max = Vector3.One * float.MinValue;
+
+            foreach (Vector3 point in points) {
+                if (point.X < min.X)
+                    min.X = point.X;
+                if (point.Y < min.Y)
+                    min.Y = point.Y;
+
+                if (point.X > max.X)
+                    max.X = point.X;
+                if (point.Y > max.Y)
+                    max.Y = point.Y;
+            }
+
+            return new BoundingBox(min, max);
+        }
         ///
         ///  DYNAMIC      :  STAGE
         ///    SWEPT QUAD |  ! PLANE 

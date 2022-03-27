@@ -25,6 +25,8 @@ float4 sky_color;
 float sky_brightness;
 float atmosphere = 0.02;
 
+bool flip_texture_h;
+bool flip_texture_v;
 
 bool fn = false;
 float3 atmosphere_color;
@@ -57,6 +59,12 @@ struct PSO
 };
 
 
+
+
+
+
+
+
 sampler DIFFUSE : register(s0);
 sampler NORMAL : register(s1);
 sampler DEPTH : register(s2);
@@ -74,16 +82,7 @@ sampler DiffuseSampler = sampler_state
 	ADDRESSV = WRAP;
 };
 
-texture DiffuseMapOverlay;
-sampler DiffuseSamplerOverlay = sampler_state
-{
-    texture = <Overlay>;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-    MIPFILTER = LINEAR;
-    ADDRESSU = WRAP;
-    ADDRESSV = WRAP;
-};
+
 
 float Phong(float3 N)
 {
@@ -110,6 +109,7 @@ float logzbuf(float4 xyzw)
 {
     return max(1e-6, log(NearClip * xyzw.z + 1) / log(NearClip * FarClip + 1) * xyzw.w);
 }
+
 float3 force_normal = 0;
 
 float4 manualSample(sampler Sampler, float2 UV, float2 textureSize)
@@ -129,8 +129,6 @@ float4 manualSample(sampler Sampler, float2 UV, float2 textureSize)
     return interpolated;
 }
 
-bool flip_h;
-bool flip_v;
 
 // REGULAR RENDER PASSES
 VSO MainVS(in VSI input)
@@ -138,12 +136,16 @@ VSO MainVS(in VSI input)
 	VSO output = (VSO)0;
 	float4x4 wvp = mul(World, mul(View, Projection));
 
+	//clip space position
 	output.Position = mul(input.Position, wvp);
+
+
     //output.pos3d =  mul(input.Position, world);
     output.TexCoord = input.TexCoord;
-    if (flip_h > 0)
+
+    if (flip_texture_h > 0)
         output.TexCoord.x = 1 - output.TexCoord.x;
-    if (flip_v > 0)
+    if (flip_texture_v > 0)
         output.TexCoord.y = output.TexCoord.y - 1;
     
     output.Depth = 1-((output.Position.z / FarClip) / 1);

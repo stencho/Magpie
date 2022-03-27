@@ -374,30 +374,6 @@ namespace Magpie.Graphics {
             gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount));
         }
 
-        public static void draw_buffers_depth(DynamicLight light, Matrix world, VertexBuffer vb, IndexBuffer ib) {
-            Effect e_diffuse = ContentHandler.resources["light_depth"].value_fx;
-
-            e_diffuse.Parameters["World"].SetValue(world);
-            e_diffuse.Parameters["View"].SetValue(light.view);
-            e_diffuse.Parameters["Projection"].SetValue(light.projection);
-            e_diffuse.Parameters["LightPosition"].SetValue(light.position + (Vector3.Up * 20f));
-            e_diffuse.Parameters["DepthPrecision"].SetValue(light.far_clip);
-            //e_diffuse.Parameters["DiffuseMap"].SetValue(tum);
-            // e_diffuse.Parameters["tint"].SetValue(Color.White.ToVector3());
-            // e_diffuse.Parameters["FarClip"].SetValue(0.1f);
-            // e_diffuse.Parameters["FarClip"].SetValue(2000f);
-            // e_diffuse.Parameters["opacity"].SetValue(-1f);
-
-            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
-            EngineState.graphics_device.BlendState = BlendState.Opaque;
-            EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
-            EngineState.graphics_device.SetVertexBuffer(vb);
-            EngineState.graphics_device.Indices = ib;
-
-            e_diffuse.Techniques["Default"].Passes[0].Apply();
-
-            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount));
-        }
 
         public static void draw_buffers(GraphicsDevice gd, VertexBuffer vb, IndexBuffer ib, Matrix world, Color color, Matrix view, Matrix projection) {
             init(gd);

@@ -80,10 +80,17 @@ namespace Magpie {
                 return (float.MinValue, null);
         }
 
+        
+
         public void Update() {
+            foreach (GameObject go in current_map.objects.Values) {
+                go.Update();
+            }
+
             foreach (Floor floor in current_map.floors.Values) {
                 floor.Update();
             }
+
             foreach (Actor actor in current_map.actors.Values) {
                 actor.Update();
 
@@ -101,9 +108,15 @@ namespace Magpie {
 
                 player_actor.wants_movement = Vector3.Zero;
             }
+
+            
         }
 
+        SceneObject[] current_scene;
         public void Draw(GraphicsDevice gd, Camera camera) {
+             current_scene = Scene.create_scene_from_lists(current_map.floors, current_map.objects, current_map.actors, EngineState.camera.frustum);
+
+            /*
             foreach (Floor floor in current_map.floors.Values) {
                 floor.Draw();
             }
@@ -113,26 +126,20 @@ namespace Magpie {
             foreach (Actor actor in current_map.actors.Values) {
                 actor.Draw();
             }
+            */
+
+            //test_light.position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.3f) + (EngineState.camera.orientation.Down * 0.5f);
+            //test_light.orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(10f));
+
+            //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);
+
+            Scene.build_lighting(new DynamicLight[] { test_light }, current_scene);
+
+            Renderer.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
+
+            Scene.draw(current_scene, new DynamicLight[] { test_light });
         }
 
-        public void build_lighting() {
-            EngineState.graphics_device.SetRenderTarget(test_light.depth_map);
-            test_light.position = EngineState.camera.position + Vector3.Up * 10f;
-            test_light.orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Left, MathHelper.ToRadians(30f));
-
-            test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + test_light.orientation.Forward, Vector3.Up);
-
-            EngineState.graphics_device.Clear(Color.White);
-
-            foreach (Floor floor in current_map.floors.Values) {
-                floor.draw_depth(test_light);
-            }
-
-            foreach (GameObject go in current_map.objects.Values) {
-                go.draw_depth(test_light);
-            }
-
-        }
 
     }
 }

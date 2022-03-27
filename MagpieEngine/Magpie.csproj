@@ -58,6 +58,7 @@
     <Compile Include="Engine\Collision\Support3D\Triangle.cs" />
     <Compile Include="Engine\Collision\Supports.cs" />
     <Compile Include="Engine\Extensions.cs" />
+    <Compile Include="Engine\RNG.cs" />
     <Compile Include="Engine\WorldElements\Actor.cs" />
     <Compile Include="Engine\Clock.cs" />
     <Compile Include="Engine\Collision\GJK2D.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Graphics\GBuffer.cs" />
     <Compile Include="Graphics\Lights\Spotlight.cs" />
     <Compile Include="Graphics\Render.cs" />
+    <Compile Include="Graphics\Scene.cs" />
     <Compile Include="Graphics\UI\UIForm.cs" />
     <Compile Include="Graphics\UI\UIForms.cs" />
     <Compile Include="Graphics\UI\UILayer.cs" />
@@ -105,6 +107,7 @@
     <Content Include="Shaders\compositor.fx" />
     <Content Include="Shaders\diffuse.fx" />
     <Content Include="Shaders\light_depth.fx" />
+    <Content Include="Shaders\lit_diffuse.fx" />
     <Content Include="Shaders\skybox.fx" />
     <Content Include="Shaders\terrain.fx" />
   </ItemGroup>

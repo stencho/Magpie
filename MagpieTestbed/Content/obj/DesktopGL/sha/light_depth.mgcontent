@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/light_depth.fx</SourceFile>
-  <SourceTime>2022-03-26T08:57:53.8676262+11:00</SourceTime>
+  <SourceTime>2022-03-27T10:24:39.9122121+11:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/sha/light_depth.xnb</DestFile>
-  <DestTime>2022-03-26T08:58:44.2846285+11:00</DestTime>
+  <DestTime>2022-03-27T10:25:57.5769674+11:00</DestTime>
   <Importer>EffectImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>EffectProcessor</Processor>

@@ -1,0 +1,164 @@
+﻿#if OPENGL
+	#define SV_POSITION POSITION
+	#define VS_SHADERMODEL vs_3_0
+	#define PS_SHADERMODEL ps_3_0
+#else
+	#define VS_SHADERMODEL vs_4_0_level_9_1
+	#define PS_SHADERMODEL ps_4_0_level_9_1
+#endif
+
+matrix World;
+matrix View;
+matrix Projection;
+
+matrix WVIT;
+
+float FarClip = 2000;
+float NearClip;
+float LightBias;
+
+bool flip_texture_h;
+bool flip_texture_v;
+
+sampler DIFFUSE : register(s0);
+sampler NORMAL : register(s1);
+sampler DEPTH : register(s2);
+sampler LIGHTING : register(s3);
+
+texture DiffuseMap;
+sampler DiffuseSampler = sampler_state
+{
+	texture = <DiffuseMap>;
+	MINFILTER = POINT;
+	MAGFILTER = POINT;
+	MIPFILTER = POINT;
+	ADDRESSU = WRAP;
+	ADDRESSV = WRAP;
+};
+
+struct VertexShaderInput
+{
+	float4 Position : POSITION0;
+    float4 UV : TEXCOORD0;
+    float3 Normal : NORMAL0;
+    float3 Tangent : TANGENT0;
+    float3 BiTangent : BINORMAL0;
+};
+
+struct VertexShaderOutput
+{
+    float4 Position : POSITION;
+    float2 TexCoord : TEXCOORD0;
+    float4 Depth : TEXCOORD1;
+    float3x3 TBN : TEXCOORD2;
+	float4 lightpos : TEXCOORD6;
+	float4 WorldPos : TEXCOORD7;
+    float4 color : COLOR1;
+    
+};
+struct PSO
+{
+    float4 Diffuse : COLOR0;
+    float4 Normals : COLOR1;
+    float4 Depth : COLOR2;
+    float4 Lighting : COLOR3;
+};
+
+half3 encode(half3 n)
+{
+    n = normalize(n);
+    n.xyz = 0.5f * (n.xyz + 1.0f);
+    return n;
+}
+half3 decode(half3 enc)
+{
+    return (2.0f * enc.xyz - 1.0f);
+}
+
+float4x4 lightWVP;
+float LightClip;
+float3 LightPosition;
+texture shadow_map;
+
+SamplerState ShadowMapSampler
+{
+	texture = <shadow_map>;
+	MinFilter = anisotropic;
+	MagFilter = anisotropic;
+	MipFilter = anisotropic;
+	AddressU = clamp;
+	AddressV = clamp;
+};
+
+VertexShaderOutput MainVS(in VertexShaderInput input)
+{
+	VertexShaderOutput output = (VertexShaderOutput)0;
+
+	float4x4 wvp = mul(World, mul(View, Projection));
+		
+	output.lightpos = mul(input.Position, lightWVP);
+	output.WorldPos = mul(input.Position, World);
+	output.Position = mul(input.Position, wvp);
+    output.TexCoord = input.UV;
+
+    if (flip_texture_h > 0)
+        output.TexCoord.x = 1 - output.TexCoord.x;
+    if (flip_texture_v > 0)
+        output.TexCoord.y = output.TexCoord.y - 1;
+		
+    output.Depth = 1-((output.Position.z / FarClip));
+    output.Depth.a = 1;
+    
+    output.TBN[0] = normalize(mul(input.Tangent, (float3x3) WVIT));
+    output.TBN[1] = normalize(mul(input.BiTangent, (float3x3) WVIT));    
+    output.TBN[2] = normalize(mul(input.Normal, (float3x3) WVIT));
+	return output;
+}
+
+PSO MainPS(VertexShaderOutput input) : COLOR
+{
+    PSO output = (PSO)0;
+	bool osm = true;
+    float4 rgba = tex2D(DiffuseSampler, input.TexCoord);
+	
+    output.Depth.rgb = input.Depth.r;
+	output.Depth.a = 1;
+    output.Normals = float4(encode(input.TBN[2]), 1);
+    output.Diffuse = rgba;
+	output.Lighting = 1;
+		
+	float lpos = input.lightpos.z / input.lightpos.w;
+
+	float2 stexcoord = mad(0.5, input.lightpos.xy / input.lightpos.w, float2(0.5, 0.5));
+	stexcoord.y = 1.0f - stexcoord.y;
+		
+	if ((saturate(stexcoord.x) == stexcoord.x) && (saturate(stexcoord.y) == stexcoord.y))
+    {
+        osm=false;  
+    }
+	
+
+	float4 stx = tex2D(ShadowMapSampler, stexcoord.xy) ;
+	if (stx.x < lpos - 0.00003) {
+		output.Lighting.rgb = 0.01f;
+	} else  {	
+		float d_center = 1-(length(float2(0.5, 0.5)-stexcoord.xy) * 2);
+		float distance = 1-(length(LightPosition - input.WorldPos) / LightClip);
+		
+		output.Lighting.rgb = distance * clamp(pow(d_center * 2,3) * 2, 0.01, 1.0);
+	}
+	if (osm) {
+		output.Lighting.rgb = float3(0.01,0.01,0.01);
+	}
+
+	return output;
+}
+
+technique BasicColorDrawing
+{
+	pass P0
+	{
+		VertexShader = compile VS_SHADERMODEL MainVS();
+		PixelShader = compile PS_SHADERMODEL MainPS();
+	}
+};

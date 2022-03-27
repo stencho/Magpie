@@ -5,12 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Magpie.Engine.Floors {
     [Serializable]
     class Heightfield : Floor {
         public Vector3 position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Matrix orientation { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Matrix world { get; }
+
+        public BoundingBox bounds { get; set; }
+        public IndexBuffer index_buffer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public VertexBuffer vertex_buffer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public string texture { get; set; } = "zerocool_sharper";
 
         public void Draw() {
             throw new NotImplementedException();

@@ -1,4 +1,5 @@
 ﻿using Magpie.Engine.Floors;
+using Magpie.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace Magpie.Engine.Stages {
         public Dictionary<string, Floor> floors = new Dictionary<string, Floor>();
         public Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
         public Dictionary<string, Actor> actors = new Dictionary<string, Actor>();
+
+        public List<DynamicLight> lights = new List<DynamicLight>();
 
         public Actor player_actor;
 

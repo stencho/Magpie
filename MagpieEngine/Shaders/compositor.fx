@@ -129,11 +129,10 @@ float4 MainPS(VSO input) : COLOR
        // if (input.UV.g > eyelid)
             //rgba.xyz = 0;
     }
-    
-    if (buffer == 0 || (fullbright && buffer == -1))
+    if (buffer == -1)        
+        return rgba_final * l;
+    else if (buffer == 0 || (fullbright && buffer == -1))
         return rgba.rgba;
-    else if (buffer == -1)        
-        return rgba_final;
     else if (buffer == 1)
         return n; //normals
     else if (buffer == 2)
@@ -141,9 +140,9 @@ float4 MainPS(VSO input) : COLOR
     else if (buffer == 3)
         return l; //lighting
     else if (buffer == 4)
-        return rgba_final *= l * 1.3; //final
+        return rgba_final * l * 1.3; //final
     else
-        return rgba_final *= l;
+        return rgba_final * l;
     
 }
 

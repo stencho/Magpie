@@ -3,7 +3,7 @@
   <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/cube.FBX</SourceFile>
   <SourceTime>2020-03-08T09:16:22.1217663+11:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/gfx/cube.xnb</DestFile>
-  <DestTime>2022-03-26T08:58:44.9102441+11:00</DestTime>
+  <DestTime>2022-03-26T18:37:00.0121392+11:00</DestTime>
   <Importer>FbxImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>ModelProcessor</Processor>

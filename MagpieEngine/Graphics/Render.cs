@@ -132,6 +132,10 @@ namespace Magpie.Graphics {
             graphics_buffer = GBuffer.Create(gd, res.X, res.Y, 1, true);
         }
 
+
+
+
+
         public static void clear_buffer() {
             gd.Clear(Color.FromNonPremultiplied(0, 0, 0, 0));
             gd.DepthStencilState = DepthStencilState.DepthRead;
@@ -236,178 +240,18 @@ namespace Magpie.Graphics {
             frame_draw_count = 0;
         }
 
-
-        public static void set_shader(string shader) {
-            e_diffuse = ContentHandler.resources[shader].value_fx;
-        }
-        public static void set_texture(string map) {
-            e_diffuse.Parameters["DiffuseMap"].SetValue(ContentHandler.resources[map].value_tx);
-        }
-        public static void set_texture(ContentHandlerSingleFN handler) {
-            e_diffuse.Parameters["DiffuseMap"].SetValue(handler.resource.value_tx);
-        }
-        public static void set_world(Matrix w) {
-            e_diffuse.Parameters["World"].SetValue(w);
-        }
         public static void set_buffers(VertexBuffer vb, IndexBuffer ib, int offset = 0) {
             gd.SetVertexBuffer(vb, offset);
             gd.Indices = ib;
         }
+
         static VertexBuffer vertex_buffer_tmp;
         static IndexBuffer index_buffer_tmp;
 
-        public static void set_and_draw_buffer_data(VertexPositionNormalTexture[] vd, ushort[] id) {
-
-            vertex_buffer_tmp = new VertexBuffer(gd, VertexPositionNormalTexture.VertexDeclaration, vd.Length, BufferUsage.None);
-            vertex_buffer_tmp.SetData<VertexPositionNormalTexture>(vd);
-            index_buffer_tmp = new IndexBuffer(gd, IndexElementSize.SixteenBits, id.Length, BufferUsage.None);
-            index_buffer_tmp.SetData<ushort>(id);
-
-
-            gd.SetVertexBuffer(vertex_buffer_tmp, 0);
-            gd.Indices = index_buffer_tmp;
-
-            frame_draw_count++;
-
-            e_diffuse.Techniques["BasicColorDrawing"].Passes[0].Apply();
-            gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vertex_buffer_tmp.VertexCount));
-        }
         public static void set_rasterizer_state(RasterizerState mode) {
             gd.RasterizerState = mode;
         }
-
-        private static void draw_buffers_to_screen(VertexBuffer vb) {
-            frame_draw_count++;
-            e_diffuse.Techniques["BasicColorDrawing"].Passes[0].Apply();
-            gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount));
-        }
-        private static void draw_buffers_to_screen(VertexBuffer vb, int start_index, int prim_count) {
-            frame_draw_count++;
-            e_diffuse.Techniques["BasicColorDrawing"].Passes[0].Apply();
-            gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, start_index, prim_count);
-        }
-
-
-        public static void draw_buffer_data(VertexPositionNormalTexture[] vd, ushort[] id, Matrix world, string texture) {
-            if (!String.IsNullOrWhiteSpace(texture))
-                set_texture(texture);
-
-            set_world(world);
-            set_and_draw_buffer_data(vd, id);
-        }
-        public static void draw_buffers(VertexBuffer vb, IndexBuffer ib, Matrix world, string texture) {
-            if (!String.IsNullOrWhiteSpace(texture))
-                set_texture(texture);
-
-            set_world(world);
-            set_buffers(vb, ib);
-            draw_buffers_to_screen(vb);
-        }
-
-
-        public static void draw_part(ModelMeshPart part, Matrix world, string texture) {
-            if (!String.IsNullOrWhiteSpace(texture))
-                set_texture(texture);
-
-            set_world(world);
-            set_buffers(part.VertexBuffer, part.IndexBuffer, part.VertexOffset);
-            draw_buffers_to_screen(part.VertexBuffer);
-        }
-
-
-        public static void draw_model(Model model, Camera camera, Matrix world, ContentHandlerSingleFN[] textures) {
-            e_diffuse.Parameters["View"].SetValue(camera.view);
-            e_diffuse.Parameters["Projection"].SetValue(camera.projection);
-
-            r_count = 0;
-            foreach (ModelMesh mmmmm in model.Meshes) {
-                foreach (ModelMeshPart mlurp in mmmmm.MeshParts) {
-
-                    if ((r_count < textures.Length) && textures[r_count] != null)
-                        set_texture(textures[r_count]);
-
-                    set_world(world);
-                    set_buffers(mlurp.VertexBuffer, mlurp.IndexBuffer, mlurp.VertexOffset);
-                    draw_buffers_to_screen(mlurp.VertexBuffer, mlurp.StartIndex, mlurp.PrimitiveCount);
-                    r_count++;
-                }
-            }
-
-            gd.DepthStencilState = DepthStencilState.Default;
-        }
-
-
-
-        public static void draw_model(Model model, Camera camera, Matrix world, string[] textures) {
-            e_diffuse.Parameters["View"].SetValue(camera.view);
-            e_diffuse.Parameters["Projection"].SetValue(camera.projection);
-
-            r_count = 0;
-            foreach (ModelMesh mmmmm in model.Meshes) {
-                foreach (ModelMeshPart mlurp in mmmmm.MeshParts) {
-
-                    if ((r_count < textures.Length) && !String.IsNullOrWhiteSpace(textures[r_count]))
-                        set_texture(textures[r_count]);
-
-                    set_world(world);
-                    set_buffers(mlurp.VertexBuffer, mlurp.IndexBuffer, mlurp.VertexOffset);
-                    draw_buffers_to_screen(mlurp.VertexBuffer, mlurp.StartIndex, mlurp.PrimitiveCount);
-                    r_count++;
-                }
-            }
-
-            /*
-            foreach (ModelBone bone in model.Bones) {
-
-                foreach (ModelBone child in bone.Children) {
-
-                    if (child.Children.Count > 0) {
-                        gd.DepthStencilState = DepthStencilState.None;
-                        //Draw.xyz_cross(gd, (child.Transform * world).Translation, .1f, Color.LightGreen, last_camera.view, last_camera.projection);
-                    }
-                }
-            }
-            */
-            gd.DepthStencilState = DepthStencilState.Default;
-        }
-
-
-
-
-        static int r_count = 0;
-
-        public static void draw_buffers_start_to_finish_instanced(VertexBuffer vb, IndexBuffer ib, DynamicVertexBuffer instance_buffer, Matrix world, string texture, List<instance> instance_data) {
-            if (instance_data.Count <= 0)
-                return;
-
-            set_texture(texture);
-            set_world(Matrix.Identity);
-
-            //tmp_instance_binding[0] = new VertexBufferBinding(_fsq_vb);
-            tmp_instance_binding[0] = new VertexBufferBinding(vb);
-
-            tmp_instance_binding[1] = new VertexBufferBinding(instance_buffer, 0, 1);
-
-
-
-            gd.SetVertexBuffers(tmp_instance_binding);
-            //gd.Indices = _fsq_ib;
-            gd.Indices = ib;
-
-            gd.DepthStencilState = DepthStencilState.Default;
-            gd.BlendState = BlendState.AlphaBlend;
-            gd.RasterizerState = RasterizerState.CullCounterClockwise;
-
-            if (instance_data.Count < 1) return;
-            frame_draw_count++;
-            e_diffuse.Techniques["instanced"].Passes[0].Apply();
-            //e_diffuse.Techniques["instanced"].Passes[0].Apply();
-            //gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount) / 2);
-            //e_diffuse.Techniques["BasicColorDrawing"].Passes[0].Apply();
-            // gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount) / 2);
-            gd.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vb.VertexCount / 2, instance_data.Count);
-        }
-
+        
         public struct InstancedVertex : IVertexType {
             public VertexDeclaration VertexDeclaration => throw new NotImplementedException();
 
@@ -420,20 +264,6 @@ namespace Magpie.Graphics {
                 new VertexElement(sizeof(float) * 16, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 5),
                 new VertexElement(sizeof(float) * 20, VertexElementFormat.Color, VertexElementUsage.Color, 0)
             };
-            /*
-            //position
-            new VertexElement(sizeof(float) * 16, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 5),
-            //velocity
-            new VertexElement((sizeof(float) * 4 * 4) + ((sizeof(float) * 3) * 1), VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 6),
-            //tint
-            new VertexElement((sizeof(float) * 4 * 4) + ((sizeof(float) * 3) * 2), VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 7),
-
-            //tex offset
-            new VertexElement((sizeof(float) * 4 * 4) + ((sizeof(float) * 3) * 3), VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 8),
-
-            //tex rotation/opacity/flip_h
-            new VertexElement((sizeof(float) * 4 * 4) + ((sizeof(float) * 3) * 3) + ((sizeof(float) * 2) * 1), VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 9)
-            */
 
             //boilerplate
             public static VertexDeclaration Declaration {
@@ -455,22 +285,6 @@ namespace Magpie.Graphics {
             [FieldOffset(sizeof(float) * 16)] public Vector4 r4;
             [FieldOffset(sizeof(float) * 20)] public Color tint;
         }
-        //[FieldOffset(sizeof(float) * 4 * 4)] public Vector3 position;
-        //[FieldOffset((sizeof(float) * 4 * 4) +     ((sizeof(float) * 3) * 1))]     public Vector3 velocity;
-        //[FieldOffset((sizeof(float) * 4 * 4) +     ((sizeof(float) * 3) * 2))]     public Vector3 tint;
-
-        // [FieldOffset((sizeof(float) * 4 * 4) +     ((sizeof(float) * 3) * 3))]     public Vector2 tex_offset;
-
-        //[FieldOffset((sizeof(float) * 4 * 4) +     ((sizeof(float) * 3) * 3) +     ((sizeof(float) * 2) * 1))]     public Vector3 rot_opa_flip;
-
-
-
-
-        //[FieldOffset((sizeof(float) * 4 * 4) +     ((sizeof(float) * 3) * 3) +     ((sizeof(float) * 2) * 1))]     public float tex_rotation;
-        //[FieldOffset((sizeof(float) * 4 * 4) +     ((sizeof(float) * 3) * 3) +     ((sizeof(float) * 2) * 1) +     (sizeof(float) * 1))] public float opacity;     
-        //[FieldOffset((sizeof(float) * 4 * 4) +     ((sizeof(float) * 3) * 3) +     ((sizeof(float) * 2) * 1) +     (sizeof(float) * 2))] public bool flip_texture_h;
-        // OFFSETS          1 MATRIX         |              VECTOR 3S     N  |           VECTOR 2S        N  |             FLOAT    N
-
 
         private static InstancedVertexData[] instance_buffer_temp;
         private static DynamicVertexBuffer temp_return_buffer;
@@ -514,59 +328,10 @@ namespace Magpie.Graphics {
             temp_return_buffer.SetData(instance_buffer_temp);
 
             return temp_return_buffer;
-            /*
-            data.position = info.position;
-            data.velocity = info.velocity_normal * info.velocity_delta;
-            data.tint = info.tint.ToVector3();
-
-            data.tex_offset = info.texture_offset;
-
-            data.rot_opa_flip.X = info.texture_rotation;
-            data.rot_opa_flip.Y = info.opacity;
-            data.rot_opa_flip.Z = (info.flip_texture_h ? 1f : 0f) + (info.flip_texture_v ? 0f : 0.5f);// and then in shader if (rot_opa_flip.z > 0 && < 1) || (rot_opa_flip.z > 1), flip vertical, also if (rot_opa_flip >= 1), flip horizontal
-
-            */
-            //data.tex_rotation = info.texture_rotation;
-            //data.opacity = info.opacity;
-            //data.flip_texture_h = info.flip_texture_h;
         }
 
 
-
-        private static VertexBufferBinding[] tmp_instance_binding = new VertexBufferBinding[2];
-        /* public static void draw_buffers_start_to_finish_instanced(VertexBuffer vb, IndexBuffer ib, Matrix world, string texture, params instance[] instance_data) {
-             if (instance_data.Length <= 0)
-                 return;
-
-             set_texture(texture);
-             set_world(Matrix.Identity);
-
-             //tmp_instance_binding[0] = new VertexBufferBinding(_fsq_vb);
-             tmp_instance_binding[0] = new VertexBufferBinding(vb);
-
-
-             tmp_instance_binding[1] = new VertexBufferBinding(pack_instance_data(instance_data), 0, 1);
-
-
-
-             gd.SetVertexBuffers(tmp_instance_binding);
-             //gd.Indices = _fsq_ib;
-             gd.Indices = ib;
-
-             gd.DepthStencilState = DepthStencilState.Default;
-             gd.BlendState = BlendState.AlphaBlend;
-             gd.RasterizerState = RasterizerState.CullCounterClockwise;
-
-             if (instance_data.Length < 1) return;
-             frame_draw_count++;
-             e_diffuse.Techniques["instanced"].Passes[0].Apply();
-             //e_diffuse.Techniques["instanced"].Passes[0].Apply();
-             //gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount) / 2);
-             //e_diffuse.Techniques["BasicColorDrawing"].Passes[0].Apply();
-             // gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount) / 2);
-             gd.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vb.VertexCount / 3, instance_data.Length);
-         }*/
-
+        
         public enum transform_type {
             scale_orientation_translation,
             billboard,
@@ -629,16 +394,7 @@ namespace Magpie.Graphics {
                 camera_distance = Vector3.Distance(cam.position, this.position);
 
                 if (cam.frustum.Contains(position) != ContainmentType.Disjoint) {
-                    //update this upon adding scaled bounding boxes to this class
-                    //if that ever happens
-                    //might also require creation of hitbox -> bone attachment to
-                    // create an accurate bounding box
-                    //cylinders + OBBs + their bounding boxen should make creating a composite large bounding box ez
-                    //not super necessary tho, literally this is instanced and by design shouldn't be heaving around a shitty butt ass load of data w/ every instance
-
                     camera_frustum_hit = true;
-
-
                 }
             }
 
@@ -654,54 +410,7 @@ namespace Magpie.Graphics {
             public bool flip_texture_h;
             public bool flip_texture_v;
 
-            //public AABB bounding_box; 
-            //public OBB bounding_box; // ???????
-            //maybe, this will be a big perf hit but could be handy for some cute effects, it might also be possible to do some gpu collision in combination w/ the velocity info
-            //should be possible to write a shader that just outputs literally just the IDs of the two colliding objects, then on cpu check that list and just reflect their velocity norms or whatever
-            //should also be possible to test collisions vs static world geometry here too, or at least simplified versions of it
-            //will be far more useful once I've implemented a static world geometry collision editor for stuff like this/projectiles/raycasts
-
         }
-
-        /*
-        public static void render_drawable(IGeometry render_object, Camera camera) {
-            if (camera == null) return;
-            if (last_camera != null && camera != last_camera) {
-            }
-            last_camera = camera;
-
-            if (wireframe)
-                gd.RasterizerState = wf_rasterizer_state;
-            else {
-               // if (!render_object.transparent)
-                    gd.RasterizerState = RasterizerState.CullCounterClockwise;
-               // else
-                   // gd.RasterizerState = RasterizerState.CullNone;
-
-            }
-            gd.DepthStencilState = DepthStencilState.Default;
-            gd.BlendState = BlendState.AlphaBlend;
-            //set_shader(render_object.shader);
-
-            e_diffuse.Parameters["WVIT"].SetValue((Matrix.Invert(render_object.orientation * camera.view)));
-            e_diffuse.Parameters["View"].SetValue(camera.view);
-            e_diffuse.Parameters["Projection"].SetValue(camera.projection);
-            //e_diffuse.Parameters["fullbright"].SetValue(fullbright);
-            e_diffuse.Parameters["light_dir"].SetValue(light_dir);
-            e_diffuse.Parameters["sky_brightness"].SetValue(sky_brightness);
-            e_diffuse.Parameters["opacity"].SetValue(1f);
-            e_diffuse.Parameters["tint"].SetValue(1f);
-            e_diffuse.Parameters["flip_h"].SetValue(false);
-            e_diffuse.Parameters["flip_v"].SetValue(false);
-            e_diffuse.Parameters["NearClip"].SetValue(camera.near_clip);
-            //e_diffuse.Parameters["FarClip"].SetValue(camera.far_clip);
-            //e_diffuse.Parameters["transparency"].SetValue(-1f);
-            //e_diffuse.Parameters["transparent"].SetValue(-1f);
-
-            render_object.draw();
-
-            set_shader("diffuse");
-        }*/
 
         public static int clip_render_count = 0;
 
@@ -814,9 +523,7 @@ namespace Magpie.Graphics {
             e_compositor.Parameters["NormalLayer"].SetValue(graphics_buffer.rt_normal);
             e_compositor.Parameters["sky_brightness"].SetValue(sky_brightness);
             e_compositor.Parameters["atmosphere_color"].SetValue(atmosphere_color.ToVector3());
-            //e_compositor.Parameters["eyelid"].SetValue(0f);
             e_compositor.Parameters["buffer"].SetValue(buffer);
-            //e_compositor.Parameters["fullbright"].SetValue(fullbright);
 
             e_compositor.Techniques["draw"].Passes[0].Apply();
 
@@ -831,35 +538,11 @@ namespace Magpie.Graphics {
             draw_texture_to_screen(graphics_buffer.rt_2D);
 
             e_compositor.Parameters["fog"].SetValue(false);
-            //e_compositor.Parameters["LightLayer"].SetValue(ContentHandler.resources["OnePXWhite"].value_tx);
-            //e_compositor.Parameters["DepthLayer"].SetValue(ContentHandler.resources["OnePXWhite"].value_tx);
-
 
             gd.BlendState = BlendState.AlphaBlend;
 
-
             spritebatch_draw_to_screen(graphics_buffer.position, graphics_buffer.rt_final);
 
-
-            // spritebatch_draw_to_screen(lights[0].depth_buffer, Vector2.Zero, Vector2.One * 0.3f);
-
-            /*
-            //e_compositor.Parameters["DiffuseLayer"].SetValue(graphics_buffer.rt_depth);
-            //e_compositor.Techniques["draw"].Passes[0].Apply();
-            //gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
-
-            //e_compositor.Parameters["LightLayer"].SetValue(ContentHandler.resources["OnePXWhite"].value_tx);
-
-            
-
-
-            gd.SetRenderTarget(null);
-            gd.SetVertexBuffer(quad.vertex_buffer);
-            gd.Indices = quad.index_buffer;
-            e_compositor.Parameters["DiffuseLayer"].SetValue(graphics_buffer.rt_final);
-            e_compositor.Techniques["draw"].Passes[0].Apply();
-            gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
-            */
             if (screenshot) {
                 if (!Directory.Exists("scr")) Directory.CreateDirectory("scr");
 
