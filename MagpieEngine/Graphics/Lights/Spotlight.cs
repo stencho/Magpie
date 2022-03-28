@@ -24,7 +24,7 @@ namespace Magpie.Graphics.Lights {
         public Matrix projection { get; set; }
                
         public Spotlight() {
-            _depth = new RenderTarget2D(EngineState.graphics_device, depth_map_resolution, depth_map_resolution, false, SurfaceFormat.Vector4, DepthFormat.Depth24Stencil8);
+            _depth = new RenderTarget2D(EngineState.graphics_device, depth_map_resolution, depth_map_resolution, false, SurfaceFormat.Single, DepthFormat.Depth24);
 
             orientation = Matrix.CreateFromAxisAngle(Vector3.Left, MathHelper.ToRadians(45f));
             orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(280));

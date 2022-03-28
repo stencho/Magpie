@@ -1,5 +1,6 @@
 ﻿using Magpie;
 using Magpie.Engine;
+using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
@@ -35,7 +36,8 @@ namespace MagpieTestbed.TestObjects {
         }
 
         public void Update() {
-            bounds = BoundingBox.CreateFromSphere(ContentHandler.resources["cube"].value_gfx.Meshes[0].BoundingSphere);
+
+            bounds = CollisionHelper.BoundingBox_around_OBB((Cube)collision, world);
         }
     }
 }

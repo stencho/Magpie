@@ -27,7 +27,7 @@ namespace Magpie {
         Vector3 start_point { get; }
 
         AABB find_bounding_box();
-        
+
         shape_type shape { get; }
              
         void draw();

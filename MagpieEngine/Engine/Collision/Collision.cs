@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Magpie.Engine.Collision.Support3D;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -384,6 +385,148 @@ namespace Magpie.Engine.Collision {
             if (obb.H.Z > Zmax) Zmax = obb.H.Z; if (obb.H.Z < Zmin) Zmin = obb.H.Z;
 
             return new AABB(new Vector3(Xmin, Ymin, Zmin), new Vector3(Xmax, Ymax, Zmax));
+        }
+
+        public static AABB AABB_around_OBB(OBB obb, Matrix world) {
+            float Xmin = float.MaxValue, Ymin = float.MaxValue, Zmin = float.MaxValue;
+            float Xmax = float.MinValue, Ymax = float.MinValue, Zmax = float.MinValue;
+
+            Vector3 tmp_A = Vector3.Transform(obb.A, world);
+            Vector3 tmp_B = Vector3.Transform(obb.B, world);
+            Vector3 tmp_C = Vector3.Transform(obb.C, world);
+            Vector3 tmp_D = Vector3.Transform(obb.D, world);
+            Vector3 tmp_E = Vector3.Transform(obb.E, world);
+            Vector3 tmp_F = Vector3.Transform(obb.F, world);
+            Vector3 tmp_G = Vector3.Transform(obb.G, world);
+            Vector3 tmp_H = Vector3.Transform(obb.H, world);
+
+            if (tmp_A.X > Xmax) Xmax = tmp_A.X; if (tmp_A.X < Xmin) Xmin = tmp_A.X;
+            if (tmp_A.Y > Ymax) Ymax = tmp_A.Y; if (tmp_A.Y < Ymin) Ymin = tmp_A.Y;
+            if (tmp_A.Z > Zmax) Zmax = tmp_A.Z; if (tmp_A.Z < Zmin) Zmin = tmp_A.Z;
+
+            if (tmp_B.X > Xmax) Xmax = tmp_B.X; if (tmp_B.X < Xmin) Xmin = tmp_B.X;
+            if (tmp_B.Y > Ymax) Ymax = tmp_B.Y; if (tmp_B.Y < Ymin) Ymin = tmp_B.Y;
+            if (tmp_B.Z > Zmax) Zmax = tmp_B.Z; if (tmp_B.Z < Zmin) Zmin = tmp_B.Z;
+
+            if (tmp_C.X > Xmax) Xmax = tmp_C.X; if (tmp_C.X < Xmin) Xmin = tmp_C.X;
+            if (tmp_C.Y > Ymax) Ymax = tmp_C.Y; if (tmp_C.Y < Ymin) Ymin = tmp_C.Y;
+            if (tmp_C.Z > Zmax) Zmax = tmp_C.Z; if (tmp_C.Z < Zmin) Zmin = tmp_C.Z;
+
+            if (tmp_D.X > Xmax) Xmax = tmp_D.X; if (tmp_D.X < Xmin) Xmin = tmp_D.X;
+            if (tmp_D.Y > Ymax) Ymax = tmp_D.Y; if (tmp_D.Y < Ymin) Ymin = tmp_D.Y;
+            if (tmp_D.Z > Zmax) Zmax = tmp_D.Z; if (tmp_D.Z < Zmin) Zmin = tmp_D.Z;
+
+            if (tmp_E.X > Xmax) Xmax = tmp_E.X; if (tmp_E.X < Xmin) Xmin = tmp_E.X;
+            if (tmp_E.Y > Ymax) Ymax = tmp_E.Y; if (tmp_E.Y < Ymin) Ymin = tmp_E.Y;
+            if (tmp_E.Z > Zmax) Zmax = tmp_E.Z; if (tmp_E.Z < Zmin) Zmin = tmp_E.Z;
+
+            if (tmp_F.X > Xmax) Xmax = tmp_F.X; if (tmp_F.X < Xmin) Xmin = tmp_F.X;
+            if (tmp_F.Y > Ymax) Ymax = tmp_F.Y; if (tmp_F.Y < Ymin) Ymin = tmp_F.Y;
+            if (tmp_F.Z > Zmax) Zmax = tmp_F.Z; if (tmp_F.Z < Zmin) Zmin = tmp_F.Z;
+
+            if (tmp_G.X > Xmax) Xmax = tmp_G.X; if (tmp_G.X < Xmin) Xmin = tmp_G.X;
+            if (tmp_G.Y > Ymax) Ymax = tmp_G.Y; if (tmp_G.Y < Ymin) Ymin = tmp_G.Y;
+            if (tmp_G.Z > Zmax) Zmax = tmp_G.Z; if (tmp_G.Z < Zmin) Zmin = tmp_G.Z;
+
+            if (tmp_H.X > Xmax) Xmax = tmp_H.X; if (tmp_H.X < Xmin) Xmin = tmp_H.X;
+            if (tmp_H.Y > Ymax) Ymax = tmp_H.Y; if (tmp_H.Y < Ymin) Ymin = tmp_H.Y;
+            if (tmp_H.Z > Zmax) Zmax = tmp_H.Z; if (tmp_H.Z < Zmin) Zmin = tmp_H.Z;
+
+            return new AABB(new Vector3(Xmin, Ymin, Zmin), new Vector3(Xmax, Ymax, Zmax));
+        }
+        public static BoundingBox BoundingBox_around_OBB(OBB obb, Matrix world) {
+            float Xmin = float.MaxValue, Ymin = float.MaxValue, Zmin = float.MaxValue;
+            float Xmax = float.MinValue, Ymax = float.MinValue, Zmax = float.MinValue;
+
+            Vector3 tmp_A = Vector3.Transform(obb.A, world);
+            Vector3 tmp_B = Vector3.Transform(obb.B, world);
+            Vector3 tmp_C = Vector3.Transform(obb.C, world);
+            Vector3 tmp_D = Vector3.Transform(obb.D, world);
+            Vector3 tmp_E = Vector3.Transform(obb.E, world);
+            Vector3 tmp_F = Vector3.Transform(obb.F, world);
+            Vector3 tmp_G = Vector3.Transform(obb.G, world);
+            Vector3 tmp_H = Vector3.Transform(obb.H, world);
+
+            if (tmp_A.X > Xmax) Xmax = tmp_A.X; if (tmp_A.X < Xmin) Xmin = tmp_A.X;
+            if (tmp_A.Y > Ymax) Ymax = tmp_A.Y; if (tmp_A.Y < Ymin) Ymin = tmp_A.Y;
+            if (tmp_A.Z > Zmax) Zmax = tmp_A.Z; if (tmp_A.Z < Zmin) Zmin = tmp_A.Z;
+
+            if (tmp_B.X > Xmax) Xmax = tmp_B.X; if (tmp_B.X < Xmin) Xmin = tmp_B.X;
+            if (tmp_B.Y > Ymax) Ymax = tmp_B.Y; if (tmp_B.Y < Ymin) Ymin = tmp_B.Y;
+            if (tmp_B.Z > Zmax) Zmax = tmp_B.Z; if (tmp_B.Z < Zmin) Zmin = tmp_B.Z;
+
+            if (tmp_C.X > Xmax) Xmax = tmp_C.X; if (tmp_C.X < Xmin) Xmin = tmp_C.X;
+            if (tmp_C.Y > Ymax) Ymax = tmp_C.Y; if (tmp_C.Y < Ymin) Ymin = tmp_C.Y;
+            if (tmp_C.Z > Zmax) Zmax = tmp_C.Z; if (tmp_C.Z < Zmin) Zmin = tmp_C.Z;
+
+            if (tmp_D.X > Xmax) Xmax = tmp_D.X; if (tmp_D.X < Xmin) Xmin = tmp_D.X;
+            if (tmp_D.Y > Ymax) Ymax = tmp_D.Y; if (tmp_D.Y < Ymin) Ymin = tmp_D.Y;
+            if (tmp_D.Z > Zmax) Zmax = tmp_D.Z; if (tmp_D.Z < Zmin) Zmin = tmp_D.Z;
+
+            if (tmp_E.X > Xmax) Xmax = tmp_E.X; if (tmp_E.X < Xmin) Xmin = tmp_E.X;
+            if (tmp_E.Y > Ymax) Ymax = tmp_E.Y; if (tmp_E.Y < Ymin) Ymin = tmp_E.Y;
+            if (tmp_E.Z > Zmax) Zmax = tmp_E.Z; if (tmp_E.Z < Zmin) Zmin = tmp_E.Z;
+
+            if (tmp_F.X > Xmax) Xmax = tmp_F.X; if (tmp_F.X < Xmin) Xmin = tmp_F.X;
+            if (tmp_F.Y > Ymax) Ymax = tmp_F.Y; if (tmp_F.Y < Ymin) Ymin = tmp_F.Y;
+            if (tmp_F.Z > Zmax) Zmax = tmp_F.Z; if (tmp_F.Z < Zmin) Zmin = tmp_F.Z;
+
+            if (tmp_G.X > Xmax) Xmax = tmp_G.X; if (tmp_G.X < Xmin) Xmin = tmp_G.X;
+            if (tmp_G.Y > Ymax) Ymax = tmp_G.Y; if (tmp_G.Y < Ymin) Ymin = tmp_G.Y;
+            if (tmp_G.Z > Zmax) Zmax = tmp_G.Z; if (tmp_G.Z < Zmin) Zmin = tmp_G.Z;
+
+            if (tmp_H.X > Xmax) Xmax = tmp_H.X; if (tmp_H.X < Xmin) Xmin = tmp_H.X;
+            if (tmp_H.Y > Ymax) Ymax = tmp_H.Y; if (tmp_H.Y < Ymin) Ymin = tmp_H.Y;
+            if (tmp_H.Z > Zmax) Zmax = tmp_H.Z; if (tmp_H.Z < Zmin) Zmin = tmp_H.Z;
+
+            return new BoundingBox(new Vector3(Xmin, Ymin, Zmin), new Vector3(Xmax, Ymax, Zmax));
+        }
+        public static BoundingBox BoundingBox_around_OBB(Cube obb, Matrix world) {
+            float Xmin = float.MaxValue, Ymin = float.MaxValue, Zmin = float.MaxValue;
+            float Xmax = float.MinValue, Ymax = float.MinValue, Zmax = float.MinValue;
+
+            Vector3 tmp_A = Vector3.Transform(obb.A, world);
+            Vector3 tmp_B = Vector3.Transform(obb.B, world);
+            Vector3 tmp_C = Vector3.Transform(obb.C, world);
+            Vector3 tmp_D = Vector3.Transform(obb.D, world);
+            Vector3 tmp_E = Vector3.Transform(obb.E, world);
+            Vector3 tmp_F = Vector3.Transform(obb.F, world);
+            Vector3 tmp_G = Vector3.Transform(obb.G, world);
+            Vector3 tmp_H = Vector3.Transform(obb.H, world);
+
+            if (tmp_A.X > Xmax) Xmax = tmp_A.X; if (tmp_A.X < Xmin) Xmin = tmp_A.X;
+            if (tmp_A.Y > Ymax) Ymax = tmp_A.Y; if (tmp_A.Y < Ymin) Ymin = tmp_A.Y;
+            if (tmp_A.Z > Zmax) Zmax = tmp_A.Z; if (tmp_A.Z < Zmin) Zmin = tmp_A.Z;
+
+            if (tmp_B.X > Xmax) Xmax = tmp_B.X; if (tmp_B.X < Xmin) Xmin = tmp_B.X;
+            if (tmp_B.Y > Ymax) Ymax = tmp_B.Y; if (tmp_B.Y < Ymin) Ymin = tmp_B.Y;
+            if (tmp_B.Z > Zmax) Zmax = tmp_B.Z; if (tmp_B.Z < Zmin) Zmin = tmp_B.Z;
+
+            if (tmp_C.X > Xmax) Xmax = tmp_C.X; if (tmp_C.X < Xmin) Xmin = tmp_C.X;
+            if (tmp_C.Y > Ymax) Ymax = tmp_C.Y; if (tmp_C.Y < Ymin) Ymin = tmp_C.Y;
+            if (tmp_C.Z > Zmax) Zmax = tmp_C.Z; if (tmp_C.Z < Zmin) Zmin = tmp_C.Z;
+
+            if (tmp_D.X > Xmax) Xmax = tmp_D.X; if (tmp_D.X < Xmin) Xmin = tmp_D.X;
+            if (tmp_D.Y > Ymax) Ymax = tmp_D.Y; if (tmp_D.Y < Ymin) Ymin = tmp_D.Y;
+            if (tmp_D.Z > Zmax) Zmax = tmp_D.Z; if (tmp_D.Z < Zmin) Zmin = tmp_D.Z;
+
+            if (tmp_E.X > Xmax) Xmax = tmp_E.X; if (tmp_E.X < Xmin) Xmin = tmp_E.X;
+            if (tmp_E.Y > Ymax) Ymax = tmp_E.Y; if (tmp_E.Y < Ymin) Ymin = tmp_E.Y;
+            if (tmp_E.Z > Zmax) Zmax = tmp_E.Z; if (tmp_E.Z < Zmin) Zmin = tmp_E.Z;
+
+            if (tmp_F.X > Xmax) Xmax = tmp_F.X; if (tmp_F.X < Xmin) Xmin = tmp_F.X;
+            if (tmp_F.Y > Ymax) Ymax = tmp_F.Y; if (tmp_F.Y < Ymin) Ymin = tmp_F.Y;
+            if (tmp_F.Z > Zmax) Zmax = tmp_F.Z; if (tmp_F.Z < Zmin) Zmin = tmp_F.Z;
+
+            if (tmp_G.X > Xmax) Xmax = tmp_G.X; if (tmp_G.X < Xmin) Xmin = tmp_G.X;
+            if (tmp_G.Y > Ymax) Ymax = tmp_G.Y; if (tmp_G.Y < Ymin) Ymin = tmp_G.Y;
+            if (tmp_G.Z > Zmax) Zmax = tmp_G.Z; if (tmp_G.Z < Zmin) Zmin = tmp_G.Z;
+
+            if (tmp_H.X > Xmax) Xmax = tmp_H.X; if (tmp_H.X < Xmin) Xmin = tmp_H.X;
+            if (tmp_H.Y > Ymax) Ymax = tmp_H.Y; if (tmp_H.Y < Ymin) Ymin = tmp_H.Y;
+            if (tmp_H.Z > Zmax) Zmax = tmp_H.Z; if (tmp_H.Z < Zmin) Zmin = tmp_H.Z;
+
+            return new BoundingBox(new Vector3(Xmin, Ymin, Zmin), new Vector3(Xmax, Ymax, Zmax));
         }
 
         public static BoundingBox find_bounding_box_around_points(params Vector3[] points) {

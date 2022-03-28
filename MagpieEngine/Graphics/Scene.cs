@@ -22,6 +22,8 @@ namespace Magpie.Graphics {
 
         public List<Texture2D> shadow_maps { get; set; }
         public Matrix light_wvp { get; set; }
+        public Vector3 light_pos { get; set; }
+        public float light_clip { get; set; }
     }
 
     public class Scene {
@@ -31,24 +33,41 @@ namespace Magpie.Graphics {
 
         public const int max_lights_per_object = 10;
         public static float LIGHT_BIAS = 0.00001f;
-        public static SceneObject[] create_scene_from_lists(Dictionary<string,Floor> floors, Dictionary<string, GameObject> objects, Dictionary<string, Actor> actors, BoundingFrustum view_frustum) {
+        public static SceneObject[] create_scene_from_lists(Dictionary<string,Floor> floors, Dictionary<string, GameObject> objects, Dictionary<string, Actor> actors, IEnumerable<DynamicLight> lights, BoundingFrustum view_frustum) {
             List<SceneObject> scene = new List<SceneObject>();
+            bool any_visible_light_frustum = false;
 
             foreach (Floor floor in floors.Values) {
-                if (floor.bounds.Intersects(view_frustum)) {
+                foreach (DynamicLight l in lights) {
+                    if (l.frustum.Intersects(floor.bounds) && l.frustum.Intersects(EngineState.camera.frustum)) {
+                        any_visible_light_frustum = true;
+                        break;
+                    }
+                }
+
+                if (floor.bounds.Intersects(view_frustum) || any_visible_light_frustum) {
                     scene.Add(new SceneObject {
                         vertex_buffer = floor.vertex_buffer,
                         index_buffer = floor.index_buffer,
                         mesh_bounds = floor.bounds,
                         world = floor.world,
                         texture = floor.texture,
+
                         shadow_maps = new List<Texture2D>()
                    });
 
                 }
             }
             foreach (GameObject go in objects.Values) {
-                //if (go.bounds.Intersects(view_frustum)) {
+
+                foreach (DynamicLight l in lights) {
+                    if (l.frustum.Intersects(go.bounds) && l.frustum.Intersects(EngineState.camera.frustum)) {
+                        any_visible_light_frustum = true;
+                        break;
+                    }
+                }
+
+                if (go.bounds.Intersects(view_frustum) || any_visible_light_frustum) {
 
                     int texture_index = 0;
                     foreach (ModelMesh mm in ContentHandler.resources[go.model].value_gfx.Meshes) {
@@ -59,12 +78,14 @@ namespace Magpie.Graphics {
                                 world = go.world,
                                 mesh_bounds = go.bounds,
                                 texture = go.textures[texture_index],
-                                shadow_maps = new List<Texture2D>()
+
+                                shadow_maps = new List<Texture2D>()                               
+                                
                             });
                         }
                         texture_index++;
                     }
-                //}
+                }
             }
 
             foreach (Actor actor in actors.Values) {
@@ -86,7 +107,7 @@ namespace Magpie.Graphics {
                 
                 for (int i = 0; i < scene.Length; i++) {
                     SceneObject so = scene[i];
-                    //if (light.frustum.Intersects(so.mesh_bounds)) {
+                    if (light.frustum.Intersects(so.mesh_bounds) && light.frustum.Intersects(EngineState.camera.frustum)) {
 
                         e_light_depth.Parameters["World"].SetValue(so.world);
 
@@ -104,8 +125,10 @@ namespace Magpie.Graphics {
                         }
 
                         scene[i].light_wvp = so.world * light.view * light.projection;
+                        scene[i].light_clip = light.far_clip;
+                        scene[i].light_pos = light.position;
                         so.shadow_maps.Add(light.depth_map);
-                    //}
+                    }
                 }
 
             }
@@ -113,12 +136,7 @@ namespace Magpie.Graphics {
 
         public static void draw(IEnumerable<SceneObject> scene, IEnumerable<DynamicLight> lights) {
             EngineState.graphics_device.SetRenderTargets(EngineState.buffer.buffer_targets);
-
-            DynamicLight light = lights.First();
-
-            e_lit_diffuse.Parameters["LightPosition"].SetValue(light.position);
-            e_lit_diffuse.Parameters["LightClip"].SetValue(light.far_clip);
-
+            
             e_lit_diffuse.Parameters["FarClip"].SetValue(EngineState.camera.far_clip);
             e_lit_diffuse.Parameters["View"].SetValue(EngineState.camera.view);
             e_lit_diffuse.Parameters["Projection"].SetValue(EngineState.camera.projection);
@@ -134,6 +152,8 @@ namespace Magpie.Graphics {
                 if (so.shadow_maps.Count > 0) {
                     e_lit_diffuse.Parameters["shadow_map"].SetValue(so.shadow_maps[0]);
                     e_lit_diffuse.Parameters["lightWVP"].SetValue(so.light_wvp);
+                    e_lit_diffuse.Parameters["LightPosition"].SetValue(so.light_pos);
+                    e_lit_diffuse.Parameters["LightClip"].SetValue(so.light_clip);
                 }
                 EngineState.graphics_device.SetVertexBuffer(so.vertex_buffer);
                 EngineState.graphics_device.Indices = so.index_buffer;

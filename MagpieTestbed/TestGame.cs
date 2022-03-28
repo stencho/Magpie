@@ -66,9 +66,9 @@ namespace MagpieTestbed
 
             add_bind(new KeyBind(Keys.T, "test"));
             add_bind(new KeyBind(Keys.F2, "switch_buffer"));
-            add_bind(new KeyBind(Keys.F3, "bias_minus"));
-            add_bind(new KeyBind(Keys.F4, "bias_plus"));
+
             add_bind(new KeyBind(Keys.F5, "screenshot"));
+
             //add_bind(new KeyBind(Keys.LeftAlt, "ui_alt"));
 
             add_bind(new MouseButtonBind(MouseButtons.Left, "ui_select"));
@@ -188,9 +188,6 @@ namespace MagpieTestbed
                 i++;
             }
 
-            if (bind_just_pressed("bias_minus")) Scene.LIGHT_BIAS -= 0.00001f;
-            if (bind_just_pressed("bias_plus")) Scene.LIGHT_BIAS += 0.00001f;
-
             if (bind_just_pressed("screenshot")) Renderer.screenshot_at_end_of_frame();
 
 
@@ -235,10 +232,9 @@ namespace MagpieTestbed
                 Draw3D.xyz_cross(GraphicsDevice, result.closest_point_B, 1f, result.hit ? Color.LightGreen : Color.Red, EngineState.camera.view, EngineState.camera.projection);
 
                 //Draw3D.line(GraphicsDevice, result.closest_point_A, result.closest_point_B, result.hit ? Color.LightGreen: Color.Red, EngineState.camera.view, EngineState.camera.projection);
-            }           
+            }
 
-
-            GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
+                GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
 
             GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;

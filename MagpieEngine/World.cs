@@ -114,7 +114,7 @@ namespace Magpie {
 
         SceneObject[] current_scene;
         public void Draw(GraphicsDevice gd, Camera camera) {
-             current_scene = Scene.create_scene_from_lists(current_map.floors, current_map.objects, current_map.actors, EngineState.camera.frustum);
+             current_scene = Scene.create_scene_from_lists(current_map.floors, current_map.objects, current_map.actors, new DynamicLight[] { test_light }, EngineState.camera.frustum);
 
             /*
             foreach (Floor floor in current_map.floors.Values) {
