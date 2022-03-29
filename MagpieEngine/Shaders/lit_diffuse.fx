@@ -16,6 +16,7 @@ matrix WVIT;
 float FarClip = 2000;
 float NearClip;
 float LightBias;
+bool in_light;
 
 bool flip_texture_h;
 bool flip_texture_v;
@@ -119,6 +120,9 @@ PSO MainPS(VertexShaderOutput input) : COLOR
 {
     PSO output = (PSO)0;
 	bool osm = true;
+	float d_center = 0.5;
+	float distance = 0.0;
+
     float4 rgba = tex2D(DiffuseSampler, input.TexCoord);
 	
     output.Depth.rgb = input.Depth.r;
@@ -131,25 +135,34 @@ PSO MainPS(VertexShaderOutput input) : COLOR
 
 	float2 stexcoord = mad(0.5, input.lightpos.xy / input.lightpos.w, float2(0.5, 0.5));
 	stexcoord.y = 1.0f - stexcoord.y;
-		
-	if ((saturate(stexcoord.x) == stexcoord.x) && (saturate(stexcoord.y) == stexcoord.y))
-    {
-        osm=false;  
-    }
-	
 
-	float4 stx = tex2D(ShadowMapSampler, stexcoord.xy) ;
-	if (stx.x < lpos - 0.00003) {
-		output.Lighting.rgb = 0.01f;
-	} else  {	
-		float d_center = 1-(length(float2(0.5, 0.5)-stexcoord.xy) * 2);
-		float distance = 1-(length(LightPosition - input.WorldPos) / LightClip);
+	float stx = tex2D(ShadowMapSampler, stexcoord.xy).x;
+
+	if ((saturate(stexcoord.x) == stexcoord.x) && (saturate(stexcoord.y) == stexcoord.y)) {
+		osm = false;  
+	}
+
+	float l = 1;
+	
+	if (in_light){
+		if (stx.x < lpos - 0.000003) {
+			l = 0.01f;
+		} else  {	
+			d_center = 1-(length(float2(0.5, 0.5)-stexcoord.xy) * 2);
+			distance = 1-(length(LightPosition - input.WorldPos) / LightClip);
 		
-		output.Lighting.rgb = distance * clamp(pow(d_center * 2,3) * 2, 0.01, 1.0);
+			l = distance * clamp(pow(d_center * 2,3) * 2, 0.01, 1.0);
+		}
+
+		if (osm) {
+			l = float3(0.01,0.01,0.01);
+		}
+	} else {
+		l = 0.01;
 	}
-	if (osm) {
-		output.Lighting.rgb = float3(0.01,0.01,0.01);
-	}
+
+	
+	output.Lighting.rgb = float3(l,l,l);
 
 	return output;
 }
