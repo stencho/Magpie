@@ -24,6 +24,12 @@ namespace Magpie.Graphics {
         public Matrix light_wvp { get; set; }
         public Vector3 light_pos { get; set; }
         public float light_clip { get; set; }
+
+        public bool in_light { get; set; }
+        public List<LightInfo> lights { get; set; }
+    }
+    public struct LightInfo {
+
     }
 
     public class Scene {
@@ -39,9 +45,11 @@ namespace Magpie.Graphics {
 
             foreach (Floor floor in floors.Values) {
                 foreach (DynamicLight l in lights) {
-                    if (l.frustum.Intersects(floor.bounds) && l.frustum.Intersects(EngineState.camera.frustum)) {
-                        any_visible_light_frustum = true;
-                        break;
+                    if (l.frustum.Intersects(EngineState.camera.frustum)) {
+                        if (l.frustum.Intersects(floor.bounds)) {
+                            any_visible_light_frustum = true;
+                            break;
+                        }
                     }
                 }
 
@@ -52,7 +60,7 @@ namespace Magpie.Graphics {
                         mesh_bounds = floor.bounds,
                         world = floor.world,
                         texture = floor.texture,
-
+                        in_light = false,
                         shadow_maps = new List<Texture2D>()
                    });
 
@@ -61,9 +69,11 @@ namespace Magpie.Graphics {
             foreach (GameObject go in objects.Values) {
 
                 foreach (DynamicLight l in lights) {
-                    if (l.frustum.Intersects(go.bounds) && l.frustum.Intersects(EngineState.camera.frustum)) {
-                        any_visible_light_frustum = true;
-                        break;
+                    if (l.frustum.Intersects(EngineState.camera.frustum)) {
+                        if (l.frustum.Intersects(go.bounds)) {
+                            any_visible_light_frustum = true;
+                            break;
+                        }
                     }
                 }
 
@@ -78,7 +88,7 @@ namespace Magpie.Graphics {
                                 world = go.world,
                                 mesh_bounds = go.bounds,
                                 texture = go.textures[texture_index],
-
+                                in_light = false,
                                 shadow_maps = new List<Texture2D>()                               
                                 
                             });
@@ -107,10 +117,12 @@ namespace Magpie.Graphics {
                 
                 for (int i = 0; i < scene.Length; i++) {
                     SceneObject so = scene[i];
+
                     if (light.frustum.Intersects(so.mesh_bounds) && light.frustum.Intersects(EngineState.camera.frustum)) {
+                        scene[i].in_light = true;
 
                         e_light_depth.Parameters["World"].SetValue(so.world);
-
+                        
                         EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
                         EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
 
@@ -148,6 +160,7 @@ namespace Magpie.Graphics {
             foreach (SceneObject so in scene) {
                 e_lit_diffuse.Parameters["World"].SetValue(so.world);
                 e_lit_diffuse.Parameters["DiffuseMap"].SetValue(ContentHandler.resources[so.texture].value_tx);
+                e_lit_diffuse.Parameters["in_light"].SetValue(so.in_light);
 
                 if (so.shadow_maps.Count > 0) {
                     e_lit_diffuse.Parameters["shadow_map"].SetValue(so.shadow_maps[0]);
