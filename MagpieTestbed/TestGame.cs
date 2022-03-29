@@ -201,7 +201,7 @@ namespace MagpieTestbed
         //Sphere test_a = new Sphere();
         Capsule test_a = new Capsule(1.85f, 1f);
         //sphere_data test_b = new sphere_data();
-        
+
         //Point3D test_a = new Point3D();
         //Sphere test_a = new Sphere();
         //Tetrahedron test_a = new Tetrahedron();
@@ -247,7 +247,7 @@ namespace MagpieTestbed
 
 
             Draw2D.text_shadow("pf",
-                Clock.frame_rate_immediate.ToString() + " FPS\n" +
+                Clock.frame_rate.ToString() + " FPS [" +  Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
 
                 "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Renderer.buffer == -1) ? "combined" : ((Renderer.buffers)Renderer.buffer).ToString()) +"\n" +
                 Scene.LIGHT_BIAS.ToString()
