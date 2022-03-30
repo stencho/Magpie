@@ -13,6 +13,8 @@ namespace Magpie.Graphics {
         Matrix view { get; set; }
         Matrix projection { get; set; }
 
+        Color light_color { get; set; }
+
         int depth_map_resolution { get; }
         RenderTarget2D depth_map { get; }
         string shader { get; }

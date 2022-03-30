@@ -94,7 +94,7 @@ namespace Magpie.Graphics {
                     } else if (DigitalControlBindings.bind_pressed("ui_context_menu") && !locked_size) {
 
                         if (mouse_state.Position != mouse_state_prev.Position) {
-                            gbuffer.change_resolution(Render.gd, size.X, size.Y);
+                            gbuffer.change_resolution(EngineState.graphics_device, size.X, size.Y);
                             GC.Collect();
                             form_rt = gbuffer.rt_diffuse;
                         }
@@ -151,7 +151,7 @@ namespace Magpie.Graphics {
 
             if (DigitalControlBindings.bind_just_released("ui_context_menu")) {
                 //form_rt = new RenderTarget2D(Renderer.gd, size.X, size.Y);
-                gbuffer.CreateInPlace(Render.gd, size.X, size.Y);
+                gbuffer.CreateInPlace(EngineState.graphics_device, size.X, size.Y);
                 GC.Collect();
 
                 form_rt = gbuffer.rt_diffuse;
@@ -182,13 +182,13 @@ namespace Magpie.Graphics {
         public override void internal_stateless_draw(GraphicsDevice gd, SpriteBatch sb) {
             foreach (UIForm f in sub_forms.Values) {
                 if (((!f.hidden && !hide_all_subforms) || (f.name == "close_button" && !hide_close_button)) && (f.type == form_type.PANEL)) continue;
-                f.internal_stateless_draw(Render.gd, Render.sb);
+                f.internal_stateless_draw(EngineState.graphics_device, EngineState.spritebatch);
             }
 
             if (hide_all_subforms) return;
 
             gd.SetRenderTargets(gbuffer.buffer_targets);
-            Render.clear_buffer();
+            Scene.clear_buffer();
 
             gd.DepthStencilState = DepthStencilState.Default;
             gd.RasterizerState = RasterizerState.CullCounterClockwise;
@@ -223,11 +223,11 @@ namespace Magpie.Graphics {
                 mouse_over_by_update = true;
             } else mouse_over_by_update = false;
             
-            if (form_rt == null && Render.gd != null && !hide_all_subforms) {
+            if (form_rt == null && EngineState.graphics_device != null && !hide_all_subforms) {
                 //form_rt = new RenderTarget2D(Renderer.gd, size.X, size.Y);
                 gbuffer = new GBuffer();
                 GC.Collect();
-                gbuffer.CreateInPlace(Render.gd, size.X, size.Y);
+                gbuffer.CreateInPlace(EngineState.graphics_device, size.X, size.Y);
                 form_rt = gbuffer.rt_diffuse;
                 //form_rt_normal = new RenderTarget2D(Renderer.gd, size.X, size.Y);
                 //form_rt_depth = new RenderTarget2D(Renderer.gd, size.X, size.Y);
@@ -243,7 +243,7 @@ namespace Magpie.Graphics {
                 locked_size = true;
             }
 
-            if (Render.gd != null) {
+            if (EngineState.graphics_device != null) {
                 if (DigitalControlBindings.bind_pressed("ui_alt")) {
                     //hide_all_subforms = true;
                     //sub_forms[0].hidden = false;

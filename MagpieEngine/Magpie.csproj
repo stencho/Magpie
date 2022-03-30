@@ -87,7 +87,7 @@
     <Compile Include="Graphics\DynamicLight.cs" />
     <Compile Include="Graphics\GBuffer.cs" />
     <Compile Include="Graphics\Lights\Spotlight.cs" />
-    <Compile Include="Graphics\Render.cs" />
+    <Compile Include="Graphics\Instancing.cs" />
     <Compile Include="Graphics\Scene.cs" />
     <Compile Include="Graphics\UI\UIForm.cs" />
     <Compile Include="Graphics\UI\UIForms.cs" />

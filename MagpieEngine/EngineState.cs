@@ -23,6 +23,7 @@ namespace Magpie {
         public static GameTime gametime;
         public static Game game;
         public static UILayer ui;
+        public static SpriteBatch spritebatch;
 
         public static bool ui_layer_clicked;
         public static bool is_active;
@@ -37,12 +38,12 @@ namespace Magpie {
             graphics = gdm;
             graphics_device = gd;
 
-            Draw2D.sb = new SpriteBatch(graphics_device);
+            spritebatch = new SpriteBatch(graphics_device);
 
             buffer = new GBuffer();
             buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y);
 
-            Render.configure_renderer(resolution, graphics_device, graphics, window, Draw2D.sb);
+            Scene.configure_renderer();
             ui = new UILayer(EngineState.resolution);
 
             Draw3D.init(graphics_device);

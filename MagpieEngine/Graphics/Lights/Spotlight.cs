@@ -22,7 +22,9 @@ namespace Magpie.Graphics.Lights {
 
         public Matrix view { get; set; }
         public Matrix projection { get; set; }
-               
+
+        public Color light_color { get; set; } = Color.Purple;
+
         public Spotlight() {
             _depth = new RenderTarget2D(EngineState.graphics_device, depth_map_resolution, depth_map_resolution, false, SurfaceFormat.Single, DepthFormat.Depth24);
 

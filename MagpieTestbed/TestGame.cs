@@ -94,7 +94,7 @@ namespace MagpieTestbed
             world.current_map.objects["test_sphere6"].model = "bigcube";
             */
 
-            for (int i = 0; i < 250; i++) {
+            for (int i = 0; i < 150; i++) {
                 world.current_map.add_object("test_sphere" + i, new TestSphere());
                 world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
             }
@@ -188,7 +188,7 @@ namespace MagpieTestbed
                 i++;
             }
             
-            if (bind_just_pressed("screenshot")) Render.screenshot_at_end_of_frame();
+            if (bind_just_pressed("screenshot")) Scene.screenshot_at_end_of_frame();
 
 
 
@@ -241,7 +241,7 @@ namespace MagpieTestbed
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
             
-            Draw2D.sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+            EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
             Draw2D.cross(fake_origin, 5, 5, Color.Purple);
 
@@ -249,19 +249,19 @@ namespace MagpieTestbed
             Draw2D.text_shadow("pf",
                 Clock.frame_rate.ToString() + " FPS [" +  Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
 
-                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Render.buffer == -1) ? "combined" : ((Render.buffers)Render.buffer).ToString()) +"\n" +
+                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Scene.buffer == -1) ? "combined" : ((Scene.buffers)Scene.buffer).ToString()) +"\n" +
                 Scene.LIGHT_BIAS.ToString()
                 
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
 
             EngineState.ui.draw();
-            
-            Draw2D.sb.End();
+
+            EngineState.spritebatch.End();
 
 
             GraphicsDevice.SetRenderTarget(null);
 
-            Render.compose(EngineState.buffer);
+            Scene.compose();
             //base.Draw(gameTime);
         }
     }

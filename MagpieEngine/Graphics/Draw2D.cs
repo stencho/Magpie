@@ -13,12 +13,11 @@ namespace Magpie.Graphics {
     public static class Draw2D {
 
         #region Drawing functions
-        public static SpriteBatch sb;
 
         public static XYPair get_txt_size_pf(string txt) => Math2D.measure_string("pf", txt);
 
         public static void text(string font, string s, Vector2 position, Color color) {
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position, color);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color);
         }
 
         public enum text_rotation {
@@ -28,52 +27,52 @@ namespace Magpie.Graphics {
             UPSIDE_DOWN = 180
         }
         public static void text(string font, string s, Vector2 position, Color color, text_rotation rotation) {
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position, color, MathHelper.ToRadians((int)rotation), Vector2.Zero, 1f, SpriteEffects.None, 1f);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color, MathHelper.ToRadians((int)rotation), Vector2.Zero, 1f, SpriteEffects.None, 1f);
         }
 
         public static void text(string font, string s, Vector2 position, Color color, text_rotation rotation, Vector2 origin, float scale = 1f, SpriteEffects effect = SpriteEffects.None, float z = 1f) {
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position, color, MathHelper.ToRadians((int)rotation), origin, scale, effect, z);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color, MathHelper.ToRadians((int)rotation), origin, scale, effect, z);
         }
 
         public static void text_shadow(string font, string s, XYPair position, Color color) {
             //Console.WriteLine(s);
 
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, Color.Black);
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, Color.Black);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color);
         }
         public static void text_shadow(string font, string s, Vector2 position, Color color) {
             //Console.WriteLine(s);
 
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position + Vector2.One, Color.Black);
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position, color);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position + Vector2.One, Color.Black);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color);
         }
         public static void text_shadow(string font, string s, XYPair position, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float depth) {
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, Color.Black, rotation, origin, scale, effects, depth - 1);
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color, rotation, origin, scale, effects, depth);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, Color.Black, rotation, origin, scale, effects, depth - 1);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color, rotation, origin, scale, effects, depth);
         }
         public static void text_shadow(string font, string s, Vector2 position, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float depth) {
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position + Vector2.One, Color.Black, rotation, origin, scale, effects, depth - 1);
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position, color, rotation, origin, scale, effects, depth);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position + Vector2.One, Color.Black, rotation, origin, scale, effects, depth - 1);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color, rotation, origin, scale, effects, depth);
         }
         public static void text_shadow(string font, string s, XYPair position, Vector2 norm, Color color, Color shadow_color) {
             //Console.WriteLine(s);
 
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, norm + position, shadow_color);
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, norm + position, shadow_color);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color);
         }
         public static void text_shadow(string font, string s, Vector2 position, Vector2 norm, Color color, Color shadow_color) {
             //Console.WriteLine(s);
 
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position + norm, shadow_color);
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position, color);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position + norm, shadow_color);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color);
         }
         public static void text_shadow(string font, string s, XYPair position, Vector2 norm, Color color, Color shadow_color, float rotation, Vector2 origin, float scale, SpriteEffects effects) {
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, norm + position, shadow_color, rotation, origin, scale, effects, 0);
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color, rotation, origin, scale, effects, 0);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, norm + position, shadow_color, rotation, origin, scale, effects, 0);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color, rotation, origin, scale, effects, 0);
         }
         public static void text_shadow(string font, string s, Vector2 position, Vector2 norm, Color color, Color shadow_color, float rotation, Vector2 origin, float scale, SpriteEffects effects) {
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position + norm, shadow_color, rotation, origin, scale, effects, 0);
-            sb.DrawString(ContentHandler.resources[font].value_ft, s, position, color, rotation, origin, scale, effects, 0);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position + norm, shadow_color, rotation, origin, scale, effects, 0);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color, rotation, origin, scale, effects, 0);
         }
 
 
@@ -92,7 +91,7 @@ namespace Magpie.Graphics {
             var middlePoint = new Vector2(0, 0.5f);
             var scale = new Vector2(tan.Length(), line_width);
 
-            sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, a, null, color, rotation, middlePoint, scale, SpriteEffects.None, 0f);
+            EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, a, null, color, rotation, middlePoint, scale, SpriteEffects.None, 0f);
         }
 
         public static void line(XYPair a, XYPair b, float line_width, Color color) {
@@ -102,7 +101,7 @@ namespace Magpie.Graphics {
             var middlePoint = new Vector2(0, 0.5f);
             var scale = new Vector2(tan.Length(), line_width);
 
-            sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, a.ToVector2(), null, color, rotation, middlePoint, scale, SpriteEffects.None, 0f);
+            EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, a.ToVector2(), null, color, rotation, middlePoint, scale, SpriteEffects.None, 0f);
         }
 
         public static void line(LineSegment segment, float line_width) {
@@ -124,7 +123,7 @@ namespace Magpie.Graphics {
             var middlePoint = new Vector2(0, ContentHandler.resources["center_glow"].value_tx.Height / 2f);
             var scale = new Vector2(tan.Length(), thickness);
 
-            sb.Draw(ContentHandler.resources["center_glow"].value_tx, a, null, color, rotation, middlePoint, scale, SpriteEffects.None, 0f);
+            EngineState.spritebatch.Draw(ContentHandler.resources["center_glow"].value_tx, a, null, color, rotation, middlePoint, scale, SpriteEffects.None, 0f);
         }
         /// <summary>
         /// Draws a horizontally skewed rectangle
@@ -137,7 +136,7 @@ namespace Magpie.Graphics {
             for (var i = 0; i < rect.Height; i++) {
                 var skewAmount = Math.Round((Convert.ToDouble(i) / Convert.ToDouble(rect.Height)) * skewRightByPix, MidpointRounding.AwayFromZero);
 
-                sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx,
+                EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx,
                     new Rectangle(rect.X + (int)(skewRightByPix - skewAmount),
                         rect.Y + i, rect.Width, 1), col);
             }
@@ -154,7 +153,7 @@ namespace Magpie.Graphics {
             for (var i = 0; i < rect.Width; i++) {
                 var skewAmount = (Convert.ToDouble(i) / Convert.ToDouble(rect.Width)) * skewUpByPix;
 
-                sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, new Rectangle(rect.X + i, rect.Y - (int)skewAmount, 1, rect.Height), col);
+                EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, new Rectangle(rect.X + i, rect.Y - (int)skewAmount, 1, rect.Height), col);
             }
         }
 
@@ -178,13 +177,13 @@ namespace Magpie.Graphics {
                 skewed_rect_horizontal(new Rectangle(frontRect.X, (frontRect.Y - depthVertSkew), frontRect.Width, depthVertSkew),
                                         depth * horiSkew, top);
                 if (horiSkew > 0f)
-                    sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, new Rectangle(frontRect.Right, frontRect.Top - depthVertSkew, depthHoriSkew, depthVertSkew), top);
+                    EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, new Rectangle(frontRect.Right, frontRect.Top - depthVertSkew, depthHoriSkew, depthVertSkew), top);
             } else { //Draw bottom
                 skewed_rect_horizontal(new Rectangle((int)(frontRect.X + depth * horiSkew), frontRect.Bottom, frontRect.Width, depthVertSkew),
                                         -(depth * horiSkew), top);
 
                 if (horiSkew > 0f)
-                    sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, new Rectangle(frontRect.Right, frontRect.Bottom, depthHoriSkew, depthVertSkew), top);
+                    EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, new Rectangle(frontRect.Right, frontRect.Bottom, depthHoriSkew, depthVertSkew), top);
             }
 
             if (horiSkew > 0f) { //Right
@@ -197,16 +196,16 @@ namespace Magpie.Graphics {
                                     (vertSkew < 0f ? -depthVertSkew : depthVertSkew), side);
             }
 
-            sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, frontRect, front);
+            EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, frontRect, front);
         }
         static Rectangle sq_f;
         public static void fill_square(int tlx, int tly, int sizex, int sizey, Color color) {
             sq_f = new Rectangle(tlx, tly, sizex, sizey);
-            sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, sq_f, color);
+            EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, sq_f, color);
         }
         public static void fill_square(XYPair top_left, XYPair size, Color color) {
             sq_f = new Rectangle(top_left.X, top_left.Y, size.X, size.Y);
-            sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, sq_f, color);
+            EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, sq_f, color);
         }
 
         //ContentHandlerSingleFN
@@ -215,7 +214,7 @@ namespace Magpie.Graphics {
             image(content_handler, position.X, position.Y, size.X, size.Y, tint);
         }
         public static void image(ContentHandlerSingleFN content_handler, int X, int Y, int W, int H, Color tint) {
-            sb.Draw(content_handler.resource.value_tx, new Rectangle(X, Y, W, H), tint);
+            EngineState.spritebatch.Draw(content_handler.resource.value_tx, new Rectangle(X, Y, W, H), tint);
         }
         public static void image(RenderTarget2D rt, XYPair position, XYPair size, Color tint) {
             image(rt, position.X, position.Y, size.X, size.Y, tint);
@@ -241,46 +240,46 @@ namespace Magpie.Graphics {
             image(texture, position.X, position.Y, size.X, size.Y, tint, origin);
         }
         public static void image(RenderTarget2D rt, int X, int Y, int W, int H, Color tint) {
-            sb.Draw(rt, new Rectangle(X, Y, W, H), tint);
+            EngineState.spritebatch.Draw(rt, new Rectangle(X, Y, W, H), tint);
         }
         public static void image(Texture2D texture, int X, int Y, int W, int H, Color tint, Vector2 origin) {
-            sb.Draw(texture, new Rectangle(X, Y, W, H), null, tint, 0f, origin, SpriteEffects.None, 0f);
+            EngineState.spritebatch.Draw(texture, new Rectangle(X, Y, W, H), null, tint, 0f, origin, SpriteEffects.None, 0f);
         }
         public static void image(string name, XYPair position, XYPair size, Color tint, Vector2 origin) {
             image(name, position.X, position.Y, size.X, size.Y, tint);
         }
         public static void image(string name, XYPair offset_index, XYPair offset_cell_size, XYPair position, XYPair size, Color tint) {
             
-            sb.Draw(ContentHandler.resources[name].value_tx,
+            EngineState.spritebatch.Draw(ContentHandler.resources[name].value_tx,
                 new Rectangle(position.X, position.Y, size.X, size.Y),
                 new Rectangle(offset_cell_size.X * offset_index.X, offset_cell_size.Y * offset_index.Y, offset_cell_size.X, offset_cell_size.Y),
                 tint);
         }
         public static void image(string name, XYPair offset_index, XYPair offset_cell_size, XYPair position, XYPair size, Color tint, Vector2 origin) {
-            sb.Draw(ContentHandler.resources[name].value_tx,
+            EngineState.spritebatch.Draw(ContentHandler.resources[name].value_tx,
                 new Rectangle(position.X, position.Y, size.X, size.Y),
                 new Rectangle(offset_cell_size.X * offset_index.X, offset_cell_size.Y * offset_index.Y, offset_cell_size.X, offset_cell_size.Y),
                 tint, 0f, origin, SpriteEffects.None, 10f);
         }
         public static void image(Texture2D texture, XYPair offset_index, XYPair offset_cell_size, XYPair position, XYPair size, Color tint) {
-            sb.Draw(texture,
+            EngineState.spritebatch.Draw(texture,
                 new Rectangle(position.X, position.Y, size.X, size.Y),
                 new Rectangle(offset_cell_size.X * offset_index.X, offset_cell_size.Y * offset_index.Y, offset_cell_size.X, offset_cell_size.Y),
                 tint);
         }
         public static void image(Texture2D texture, XYPair offset_index, XYPair offset_cell_size, XYPair position, XYPair size, Color tint, Vector2 origin) {
-            sb.Draw(texture,
+            EngineState.spritebatch.Draw(texture,
                 new Rectangle(position.X, position.Y, size.X, size.Y),
                 new Rectangle(offset_cell_size.X * offset_index.X, offset_cell_size.Y * offset_index.Y, offset_cell_size.X, offset_cell_size.Y),
                 tint, 0f, origin, SpriteEffects.None, 10f);
         }
         
         public static void image(string name, int X, int Y, int W, int H, Color tint) {
-            sb.Draw(ContentHandler.resources[name].value_tx, new Rectangle(X, Y, W, H), tint);
+            EngineState.spritebatch.Draw(ContentHandler.resources[name].value_tx, new Rectangle(X, Y, W, H), tint);
         }
 
         public static void image(string name, XYPair position, XYPair size, Color tint, SpriteEffects flipmode) {
-            sb.Draw(ContentHandler.resources[name].value_tx, new Rectangle(position.X, position.Y, size.X, size.Y), null, tint, 0f, Vector2.Zero, flipmode, 1f);
+            EngineState.spritebatch.Draw(ContentHandler.resources[name].value_tx, new Rectangle(position.X, position.Y, size.X, size.Y), null, tint, 0f, Vector2.Zero, flipmode, 1f);
         }
 
         public static void cross(XYPair position, int sizeX, int sizeY, Color color) {
@@ -388,7 +387,7 @@ namespace Magpie.Graphics {
 
 
         private static void put_pixel(Vector2 pos, Color col) {
-            sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, pos, col);
+            EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, pos, col);
         }
 
         public static void circle(Vector2 pos, int r, Color color) {
@@ -482,7 +481,7 @@ namespace Magpie.Graphics {
         }
 
         public static void DrawPoint(Vector2 pos, Color col, float size = 1f) {
-            sb.Draw(ContentHandler.resources["OnePXWhite"].value_tx, pos, null, col, 0f, Vector2.One * 0.5f, size, SpriteEffects.None, 0f);
+            EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, pos, null, col, 0f, Vector2.One * 0.5f, size, SpriteEffects.None, 0f);
         }
 
         #endregion

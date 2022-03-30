@@ -112,6 +112,8 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	return output;
 }
 
+float3 light_color;
+float3 ambient_light;
 PSO MainPS(VertexShaderOutput input) : COLOR
 {
     PSO output = (PSO)0;
@@ -126,7 +128,7 @@ PSO MainPS(VertexShaderOutput input) : COLOR
     output.Normals.rgb = encode(input.Normal);
 	output.Normals.a = 1;
     output.Diffuse = rgba;
-	output.Lighting = 1;
+	output.Lighting = float4(ambient_light,1);
 		
 	float lpos = input.lightpos.z / input.lightpos.w;
 
@@ -139,27 +141,27 @@ PSO MainPS(VertexShaderOutput input) : COLOR
 		osm = false;  
 	}
 
-	float l = 1;
+	float3 l = 1;
 	
 	if (in_light){
 		if (stx.x < lpos - 0.000003) {
-			l = 0.01f;
+			l = ambient_light;
 		} else  {	
 			d_center = 1-(length(float2(0.5, 0.5)-stexcoord.xy) * 2);
 			distance = 1-(length(LightPosition - input.WorldPos) / LightClip);
 		
-			l = distance * clamp(pow(d_center * 2,3) * 2, 0.01, 1.0);
+			l = ( clamp(light_color * distance * pow(d_center * 2,3) * 2, ambient_light, 1.0));
 		}
 
 		if (osm) {
-			l = float3(0.01,0.01,0.01);
+			l = ambient_light;
 		}
 	} else {
-		l = 0.01;
+		l = ambient_light;
 	}
 
 	
-	output.Lighting.rgb = float3(l,l,l);
+	output.Lighting.rgb = l;
 
 	return output;
 }
