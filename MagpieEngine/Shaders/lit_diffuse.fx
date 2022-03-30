@@ -11,7 +11,7 @@ matrix World;
 matrix View;
 matrix Projection;
 
-matrix WVIT;
+float4x4 WVIT;
 
 float FarClip = 2000;
 float NearClip;
@@ -42,18 +42,16 @@ struct VertexShaderInput
 	float4 Position : POSITION0;
     float4 UV : TEXCOORD0;
     float3 Normal : NORMAL0;
-    float3 Tangent : TANGENT0;
-    float3 BiTangent : BINORMAL0;
 };
 
 struct VertexShaderOutput
 {
     float4 Position : POSITION;
     float2 TexCoord : TEXCOORD0;
-    float4 Depth : TEXCOORD1;
-    float3x3 TBN : TEXCOORD2;
-	float4 lightpos : TEXCOORD6;
-	float4 WorldPos : TEXCOORD7;
+    float3 Normal : TEXCOORD1;
+    float4 Depth : TEXCOORD2;
+	float4 lightpos : TEXCOORD3;
+	float4 WorldPos : TEXCOORD4;
     float4 color : COLOR1;
     
 };
@@ -110,9 +108,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
     output.Depth = 1-((output.Position.z / FarClip));
     output.Depth.a = 1;
     
-    output.TBN[0] = normalize(mul(input.Tangent, (float3x3) WVIT));
-    output.TBN[1] = normalize(mul(input.BiTangent, (float3x3) WVIT));    
-    output.TBN[2] = normalize(mul(input.Normal, (float3x3) WVIT));
+    output.Normal = normalize(mul(input.Normal, WVIT));
 	return output;
 }
 
@@ -124,10 +120,11 @@ PSO MainPS(VertexShaderOutput input) : COLOR
 	float distance = 0.0;
 
     float4 rgba = tex2D(DiffuseSampler, input.TexCoord);
-	
+		
     output.Depth.rgb = input.Depth.r;
 	output.Depth.a = 1;
-    output.Normals = float4(encode(input.TBN[2]), 1);
+    output.Normals.rgb = encode(input.Normal);
+	output.Normals.a = 1;
     output.Diffuse = rgba;
 	output.Lighting = 1;
 		

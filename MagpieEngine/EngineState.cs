@@ -42,7 +42,7 @@ namespace Magpie {
             buffer = new GBuffer();
             buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y);
 
-            Renderer.configure_renderer(resolution, graphics_device, graphics, window, Draw2D.sb);
+            Render.configure_renderer(resolution, graphics_device, graphics, window, Draw2D.sb);
             ui = new UILayer(EngineState.resolution);
 
             Draw3D.init(graphics_device);

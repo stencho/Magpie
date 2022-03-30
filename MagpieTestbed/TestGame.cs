@@ -94,7 +94,7 @@ namespace MagpieTestbed
             world.current_map.objects["test_sphere6"].model = "bigcube";
             */
 
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 250; i++) {
                 world.current_map.add_object("test_sphere" + i, new TestSphere());
                 world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
             }
@@ -175,7 +175,7 @@ namespace MagpieTestbed
             //if (bind_pressed("test"))
             //world.current_map.floors["test_floor2"].orientation *= Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(6F * Clock.frame_time_delta));
 
-
+            
             results = new GJK.gjk_result[world.current_map.objects.Count];
             int i = 0;
             foreach (GameObject o in world.current_map.objects.Values) {
@@ -187,8 +187,8 @@ namespace MagpieTestbed
                 o.world);
                 i++;
             }
-
-            if (bind_just_pressed("screenshot")) Renderer.screenshot_at_end_of_frame();
+            
+            if (bind_just_pressed("screenshot")) Render.screenshot_at_end_of_frame();
 
 
 
@@ -225,14 +225,14 @@ namespace MagpieTestbed
 
 
             //Draw3D.xyz_cross(GraphicsDevice, world.test_light.position, .1f, Color.Pink, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.line(GraphicsDevice, world.test_light.position, (Vector3.Up * 2f + Vector3.Forward * 8f) - world.test_light.position, Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
-
+            Draw3D.line(GraphicsDevice, world.test_light.position, (Vector3.Up * 2f + Vector3.Forward * 8f), Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
+            /*
             foreach (GJK.gjk_result result in results) {
                 Draw3D.xyz_cross(GraphicsDevice, result.closest_point_A, 1f, result.hit ? Color.LightGreen : Color.Red, EngineState.camera.view, EngineState.camera.projection);
                 Draw3D.xyz_cross(GraphicsDevice, result.closest_point_B, 1f, result.hit ? Color.LightGreen : Color.Red, EngineState.camera.view, EngineState.camera.projection);
 
                 //Draw3D.line(GraphicsDevice, result.closest_point_A, result.closest_point_B, result.hit ? Color.LightGreen: Color.Red, EngineState.camera.view, EngineState.camera.projection);
-            }
+            }*/
 
                 GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
@@ -249,7 +249,7 @@ namespace MagpieTestbed
             Draw2D.text_shadow("pf",
                 Clock.frame_rate.ToString() + " FPS [" +  Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
 
-                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Renderer.buffer == -1) ? "combined" : ((Renderer.buffers)Renderer.buffer).ToString()) +"\n" +
+                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Render.buffer == -1) ? "combined" : ((Render.buffers)Render.buffer).ToString()) +"\n" +
                 Scene.LIGHT_BIAS.ToString()
                 
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
@@ -260,7 +260,8 @@ namespace MagpieTestbed
 
 
             GraphicsDevice.SetRenderTarget(null);
-            Renderer.compose(EngineState.buffer);
+
+            Render.compose(EngineState.buffer);
             //base.Draw(gameTime);
         }
     }

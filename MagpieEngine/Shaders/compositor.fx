@@ -11,9 +11,9 @@
 sampler2D DiffuseSampler = sampler_state
 {
 	texture = <DiffuseLayer>;
-	MINFILTER = POINT;
-	MAGFILTER = POINT;
-	MIPFILTER = POINT;
+	MINFILTER = ANISOTROPIC;
+	MAGFILTER = ANISOTROPIC;
+	MIPFILTER = ANISOTROPIC;
 	ADDRESSU = CLAMP;
 	ADDRESSV = CLAMP;
 };
@@ -38,9 +38,9 @@ sampler2D DepthSampler = sampler_state
 sampler2D NormalSampler = sampler_state
 {
     texture = <NormalLayer>;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-    MIPFILTER = LINEAR;
+    MINFILTER = POINT;
+    MAGFILTER = POINT;
+    MIPFILTER = POINT;
     ADDRESSU = CLAMP;
     ADDRESSV = CLAMP;
 };
@@ -68,12 +68,11 @@ VSO MainVS(VSI input)
 	return output;
 }
 
-bool fog = false;
+bool fog = true;
 
 int buffer = 1;
 float sky_brightness;
 float3 atmosphere_color;
-float eyelid = 0;
 
 bool fullbright = false;
 
@@ -98,51 +97,20 @@ float4 MainPS(VSO input) : COLOR
     float4 rgba = tex2D(DiffuseSampler, input.UV);
     float4 l = tex2D(LightSampler, input.UV);
     float4 n = tex2D(NormalSampler, input.UV);
-    float4 d = tex2D(DepthSampler, input.UV);
-	d.rgb = (1-d.rgb);
-
-    float x = 2-(cubicPulse(0.5,2,input.UV.x));
-	if (x <0.5) x = 0;
-    float4 rgba_final = rgba;
-    //if (d.z >=0.95) 
-        //clip(-1);
-
-    if (fog)
-    {
-		//
-		rgba_final *= l;
-		
-        rgba_final = float4(
-			clamp(
-				color_lerp(
-						rgba.rgb,
-						(atmosphere_color * sky_brightness), 
-						d.z),
-			0, 1), 
-		
-		(clamp((1.8+ (d.z))*2.4, 0, 1)) * x );
-
-    }
-    
-    if (eyelid > 0)
-    {
-       // if (input.UV.g > eyelid)
-            //rgba.xyz = 0;
-    }
+    float d = tex2D(DepthSampler, input.UV).r;
+	
     if (buffer == -1)        
-        return rgba_final * l;
-    else if (buffer == 0 || (fullbright && buffer == -1))
+        return rgba.rgba * l;
+    else if (buffer == 0 || fullbright)
         return rgba.rgba;
     else if (buffer == 1)
         return n; //normals
     else if (buffer == 2)
-        return d; //depth
+        return float4(d.r, d.r, d.r, 1); //depth
     else if (buffer == 3)
         return l; //lighting
-    else if (buffer == 4)
-        return rgba_final * l * 1.3; //final
-    else
-        return rgba_final * l;
+	else 
+		return rgba.rgba * l;
     
 }
 

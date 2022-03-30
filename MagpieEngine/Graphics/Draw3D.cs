@@ -134,53 +134,6 @@ namespace Magpie.Graphics {
             line(gd, P - (Vector3.UnitZ * (line_distance / 2)), P + (Vector3.UnitZ * (line_distance / 2)), color, view, projection);
         }
 
-        /*
-         
-            if (same_direction(Vector3.Cross(s.ABC, s.AC), s.AO)) {
-                if (same_direction(s.AC, s.AO)) {
-                    var tmp2 = s.C;
-                    s.B = tmp2;
-                    s.C = tmp;
-
-                    dir = Vector3.Cross(Vector3.Cross(s.AC, s.AO), s.AC);
-
-                    exit_path = "AC";
-                } else {
-                    if (same_direction(s.AB, s.AO)) {
-                        dir = Vector3.Cross(Vector3.Cross(s.AB, s.AO), s.AB);
-                        exit_path = "ABxAOxAB";
-                    } else {
-                        dir = s.AO;
-                        exit_path = "AO";
-                    }
-                }
-            } else {
-                if (same_direction(Vector3.Cross(s.AB, s.ABC), s.AO)) {
-                    if (same_direction(s.AB, s.AO)) {
-                        dir = Vector3.Cross(Vector3.Cross(s.AB, s.AO), s.AB);
-                        exit_path = "ABxAOxAB";
-                    } else {
-                        dir = s.AO;
-                        exit_path = "AO";
-                    }
-                } else {
-                    if (same_direction(s.ABC, s.AO)) {
-                        dir = s.ABC;
-                        exit_path = "ABC";
-                    } else {
-                        tmp = s.B;
-                        var tmp2 = s.C;
-                        s.B = tmp2;
-                        s.C = tmp;
-                        s.ABC = Vector3.Cross(s.AB, s.AC);
-
-                        dir = -s.ABC;
-                        exit_path = "-ABC";
-                    }
-                }
-            }
-         */
-
         public static void circle(GraphicsDevice gd, Vector3 p, float radius, Vector3 normal, int subdivs, Color color, Matrix view, Matrix projection) {
             if (subdivs < 6) return;
             VertexPositionColor[] verts = new VertexPositionColor[subdivs];

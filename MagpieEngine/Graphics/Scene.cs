@@ -39,6 +39,8 @@ namespace Magpie.Graphics {
 
         public const int max_lights_per_object = 10;
         public static float LIGHT_BIAS = 0.00001f;
+
+
         public static SceneObject[] create_scene_from_lists(Dictionary<string,Floor> floors, Dictionary<string, GameObject> objects, Dictionary<string, Actor> actors, IEnumerable<DynamicLight> lights, BoundingFrustum view_frustum) {
             List<SceneObject> scene = new List<SceneObject>();
             bool any_visible_light_frustum = false;
@@ -159,6 +161,8 @@ namespace Magpie.Graphics {
 
             foreach (SceneObject so in scene) {
                 e_lit_diffuse.Parameters["World"].SetValue(so.world);
+                e_lit_diffuse.Parameters["WVIT"].SetValue(Matrix.Invert(so.world * EngineState.camera.view));
+
                 e_lit_diffuse.Parameters["DiffuseMap"].SetValue(ContentHandler.resources[so.texture].value_tx);
                 e_lit_diffuse.Parameters["in_light"].SetValue(so.in_light);
 
@@ -209,5 +213,6 @@ namespace Magpie.Graphics {
                 }
             }
         }
+
     }
 }

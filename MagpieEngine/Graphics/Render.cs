@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Magpie.Graphics {
-    public static class Renderer {
+    public static class Render {
         public static Effect e_diffuse;
         public static Effect e_terrain;
         public static Effect e_compositor;
@@ -30,8 +30,6 @@ namespace Magpie.Graphics {
 
         public static Color atmosphere_color = Color.MediumPurple;
         public static Color sky_color = Color.Lerp(Color.Purple, Color.LightSkyBlue, 0.2f);
-        // public static Color atmosphere_color = Color.Lerp(Color.DeepPink, Color.White, 0.8f);
-        // public static Color sky_color = Color.DeepPink;
 
         public static float sky_brightness = 1f;
 
@@ -44,9 +42,7 @@ namespace Magpie.Graphics {
         public static GraphicsDeviceManager graphics;
         public static GameWindow window;
         public static SpriteBatch sb;
-
-        public static GBuffer graphics_buffer;
-
+        
         public static VerticalQuad quad;
 
         static RasterizerState wf_rasterizer_state = new RasterizerState() { FillMode = FillMode.WireFrame, CullMode = CullMode.None };
@@ -68,23 +64,10 @@ namespace Magpie.Graphics {
             diffuse,
             normal,
             depth,
-            lighting,
-            final
+            lighting
         }
-        static byte buffer_count = 4;
-
-        static VertexBuffer _fsq_vb;
-        static IndexBuffer _fsq_ib;
-        private static VertexPositionTexture[] _quad = new VertexPositionTexture[4] {
-                new VertexPositionTexture(new Vector3(-1, 1, 0), new Vector2(0, 0)),
-                new VertexPositionTexture(new Vector3(1, 1, 0), new Vector2(1, 0)),
-                new VertexPositionTexture(new Vector3(1, -1, 0), new Vector2(1, 1)),
-                new VertexPositionTexture(new Vector3(-1, -1, 0), new Vector2(0, 1))
-            };
-        public static VertexBuffer fsq_vertex_buffer { get => _fsq_vb; set => _fsq_vb = value; }
-        public static IndexBuffer fsq_index_buffer { get => _fsq_ib; set => _fsq_ib = value; }
-        public static VertexPositionTexture[] fsq_vb_data { get => _quad; set => _quad = value; }
-
+        static byte buffer_count = 3;
+        
         public static void configure_renderer(XYPair res, GraphicsDevice graphicsDevice, GraphicsDeviceManager graphicsdm, GameWindow Window, SpriteBatch spriteBatch) {
             gd = graphicsDevice;
             graphics = graphicsdm;
@@ -92,15 +75,7 @@ namespace Magpie.Graphics {
             sb = spriteBatch;
             current_res = res;
 
-            _fsq_vb = new VertexBuffer(gd, VertexPositionTexture.VertexDeclaration,
-            fsq_vb_data.Length, BufferUsage.None);
-            _fsq_vb.SetData<VertexPositionTexture>(fsq_vb_data);
-            ushort[] indices = { 0, 1, 2, 2, 3, 0 };
-            _fsq_ib = new IndexBuffer(gd, IndexElementSize.SixteenBits,
-            indices.Length, BufferUsage.None);
-            _fsq_ib.SetData<ushort>(indices);
-
-            skybox_t.PrivateCreateSkyboxFromCrossImage(out skybox_data, out skybox_indices, 64, 0, 1, 2, 3, 5, 4);
+            skybox_t.PrivateCreateSkyboxFromCrossImage(out skybox_data, out skybox_indices, 1, 0, 1, 2, 3, 5, 4);
             skybox_t.Subdivide(skybox_data, skybox_indices, out skybox_data, out skybox_indices, 16, MathHelper.Pi);
             skybox_cm = new RenderTarget2D(gd, skybox_face_res * 4, skybox_face_res * 3, false, SurfaceFormat.Rgba64, DepthFormat.Depth16);
             skybox_cm_e = new RenderTarget2D(gd, skybox_face_res * 4, skybox_face_res * 3, false, SurfaceFormat.Rgba64, DepthFormat.Depth16);
@@ -129,13 +104,8 @@ namespace Magpie.Graphics {
             light_blendstate.AlphaBlendFunction = BlendFunction.Add;
 
             quad = new VerticalQuad(gd);
-            graphics_buffer = GBuffer.Create(gd, res.X, res.Y, 1, true);
         }
-
-
-
-
-
+                          
         public static void clear_buffer() {
             gd.Clear(Color.FromNonPremultiplied(0, 0, 0, 0));
             gd.DepthStencilState = DepthStencilState.DepthRead;
@@ -150,43 +120,10 @@ namespace Magpie.Graphics {
             gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
         }
 
-        public static void clear_buffer(Camera cam) {
-            gd.Clear(Color.FromNonPremultiplied(0, 0, 0, 0));
-            gd.DepthStencilState = DepthStencilState.DepthRead;
-
-            last_camera = cam;
-
-            e_clear.Parameters["color"].SetValue(Color.Transparent.ToVector4());
-            e_clear.Techniques["Default"].Passes[0].Apply();
-
-            gd.SetVertexBuffer(quad.vertex_buffer);
-            gd.Indices = quad.index_buffer;
-
-            frame_draw_count++;
-            gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
-        }
         public static void clear_buffer(Color color) {
-            //gd.Clear(color);
             gd.DepthStencilState = DepthStencilState.DepthRead;
 
             e_clear.Parameters["color"].SetValue(color.ToVector4());
-            //e_clear.Parameters["color"].SetValue(Vector4.Zero);
-            e_clear.Techniques["Default"].Passes[0].Apply();
-
-            gd.SetVertexBuffer(quad.vertex_buffer);
-            gd.Indices = quad.index_buffer;
-
-            frame_draw_count++;
-            gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
-        }
-        public static void clear_buffer(Camera cam, Color color) {
-            //gd.Clear(color);
-            gd.DepthStencilState = DepthStencilState.DepthRead;
-
-            last_camera = cam;
-
-            e_clear.Parameters["color"].SetValue(color.ToVector4());
-            //e_clear.Parameters["color"].SetValue(Vector4.Zero);
             e_clear.Techniques["Default"].Passes[0].Apply();
 
             gd.SetVertexBuffer(quad.vertex_buffer);
@@ -197,13 +134,11 @@ namespace Magpie.Graphics {
         }
 
         public static void clear_all_and_draw_skybox(Camera camera, GBuffer graphics_buffer) {
-            //gd.Clear(color);
             gd.DepthStencilState = DepthStencilState.DepthRead;
 
             gd.SetRenderTargets(graphics_buffer.buffer_targets);
 
             e_clear.Parameters["color"].SetValue(atmosphere_color.ToVector4());
-            //e_clear.Parameters["color"].SetValue(Vector4.Zero);
             e_clear.Techniques["Default"].Passes[0].Apply();
 
             gd.SetVertexBuffer(quad.vertex_buffer);
@@ -213,41 +148,24 @@ namespace Magpie.Graphics {
             gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
 
             gd.RasterizerState = RasterizerState.CullNone;
-            gd.BlendState = BlendState.AlphaBlend;
+            gd.BlendState = BlendState.Opaque;
 
 
             e_skybox.Parameters["atmosphere_color"].SetValue(atmosphere_color.ToVector4());
             e_skybox.Parameters["sky_color"].SetValue(sky_color.ToVector4());
             e_skybox.Parameters["sky_brightness"].SetValue(sky_brightness);
 
-            e_skybox.Parameters["World"].SetValue(Matrix.CreateScale(150f) * Matrix.CreateTranslation(camera.position));
+            e_skybox.Parameters["World"].SetValue(Matrix.CreateScale(1f) * Matrix.CreateTranslation(camera.position));
             e_skybox.Parameters["View"].SetValue(camera.view);
             e_skybox.Parameters["Projection"].SetValue(camera.projection);
-
-            //e_skybox.Parameters["cubemap"].SetValue(ContentHandler.resources["OnePXWhite"].value_tx);
-            //e_skybox.Parameters["cubemap"].SetValue(skybox_cm);
-            //e_skybox.Parameters["cubemap_emissive"].SetValue(skybox_cm_e);
-
+            
             e_skybox.Techniques["draw"].Passes[0].Apply();
 
             frame_draw_count++;
-            gd.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, skybox_data, 0, 2, skybox_indices, 0, skybox_indices.Length / 3, VertexPositionNormalColorUv.VertexDeclaration);
-            
+            gd.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, skybox_data, 0, 2, skybox_indices, 0, skybox_indices.Length / 3, VertexPositionNormalColorUv.VertexDeclaration);           
 
         }
-
-        public static void reset_draw_count() {
-            frame_draw_count = 0;
-        }
-
-        public static void set_buffers(VertexBuffer vb, IndexBuffer ib, int offset = 0) {
-            gd.SetVertexBuffer(vb, offset);
-            gd.Indices = ib;
-        }
-
-        static VertexBuffer vertex_buffer_tmp;
-        static IndexBuffer index_buffer_tmp;
-
+                
         public static void set_rasterizer_state(RasterizerState mode) {
             gd.RasterizerState = mode;
         }
@@ -284,6 +202,20 @@ namespace Magpie.Graphics {
             [FieldOffset(sizeof(float) * 12)] public Vector4 r3;
             [FieldOffset(sizeof(float) * 16)] public Vector4 r4;
             [FieldOffset(sizeof(float) * 20)] public Color tint;
+        }
+        
+        public enum transform_type {
+            scale_orientation_translation,
+            billboard,
+            constrained_billboard
+        }
+
+        public struct instance {
+            public Matrix world;
+            public Vector2 texture_offset;
+            public bool flip_h;
+            public bool flip_v;
+            public Color tint;
         }
 
         private static InstancedVertexData[] instance_buffer_temp;
@@ -328,22 +260,6 @@ namespace Magpie.Graphics {
             temp_return_buffer.SetData(instance_buffer_temp);
 
             return temp_return_buffer;
-        }
-
-
-        
-        public enum transform_type {
-            scale_orientation_translation,
-            billboard,
-            constrained_billboard
-        }
-
-        public struct instance {
-            public Matrix world;
-            public Vector2 texture_offset;
-            public bool flip_h;
-            public bool flip_v;
-            public Color tint;
         }
 
         public class model_instance_info {
@@ -467,9 +383,9 @@ namespace Magpie.Graphics {
             e_diffuse.Techniques["BasicColorDrawing"].Passes[0].Apply();
             frame_draw_count++;
             gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
-            //e_compositor.Parameters["offset"].SetValue(Vector2.Zero);
-
         }
+
+        /*
         static bool FXAA = false;
         public static void draw_FXAA_to_final_buffer() {
             gd.SetRenderTarget(graphics_buffer.rt_final);
@@ -489,7 +405,7 @@ namespace Magpie.Graphics {
 
             frame_draw_count++;
             gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
-        }
+        }*/
 
         public static int buffer = -1;
         internal static RasterizerState wireframe_state = new RasterizerState() { CullMode = CullMode.None, FillMode = FillMode.WireFrame };
@@ -505,24 +421,27 @@ namespace Magpie.Graphics {
 
             gd.BlendState = BlendState.Additive;
 
+            /*
             if (FXAA) {
                 gd.SetRenderTarget(graphics_buffer.rt_fxaa);
             } else {
                 gd.SetRenderTarget(graphics_buffer.rt_final);
             }
+            */ gd.SetRenderTarget(graphics_buffer.rt_final);
+
 
             clear_buffer(atmosphere_color);
 
             gd.BlendState = BlendState.AlphaBlend;
 
-            e_compositor.Parameters["fog"].SetValue(true);
+            //e_compositor.Parameters["fog"].SetValue(true);
 
             e_compositor.Parameters["DiffuseLayer"].SetValue(graphics_buffer.rt_diffuse);
             e_compositor.Parameters["DepthLayer"].SetValue(graphics_buffer.rt_depth);
             e_compositor.Parameters["LightLayer"].SetValue(graphics_buffer.rt_lighting);
             e_compositor.Parameters["NormalLayer"].SetValue(graphics_buffer.rt_normal);
-            e_compositor.Parameters["sky_brightness"].SetValue(sky_brightness);
-            e_compositor.Parameters["atmosphere_color"].SetValue(atmosphere_color.ToVector3());
+            //e_compositor.Parameters["sky_brightness"].SetValue(sky_brightness);
+           // e_compositor.Parameters["atmosphere_color"].SetValue(atmosphere_color.ToVector3());
             e_compositor.Parameters["buffer"].SetValue(buffer);
 
             e_compositor.Techniques["draw"].Passes[0].Apply();
@@ -530,14 +449,16 @@ namespace Magpie.Graphics {
             frame_draw_count++;
             gd.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
 
+            /*
             if (FXAA) {
                 draw_FXAA_to_final_buffer();
 
             }
+            */
 
             draw_texture_to_screen(graphics_buffer.rt_2D);
 
-            e_compositor.Parameters["fog"].SetValue(false);
+            //e_compositor.Parameters["fog"].SetValue(false);
 
             gd.BlendState = BlendState.AlphaBlend;
 

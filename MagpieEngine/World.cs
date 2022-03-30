@@ -135,7 +135,7 @@ namespace Magpie {
 
             Scene.build_lighting(new DynamicLight[] { test_light }, current_scene);
 
-            Renderer.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
+            Render.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
 
             Scene.draw(current_scene, new DynamicLight[] { test_light });
         }

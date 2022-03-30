@@ -351,7 +351,7 @@ namespace Magpie.Graphics.UI {
 
         public override void draw() {
             if (form_rt == null)
-                form_rt = new RenderTarget2D(Renderer.gd, size.X, size.Y);
+                form_rt = new RenderTarget2D(Render.gd, size.X, size.Y);
             // if (mouse_hover)
             //     Draw2D.fill_square(position, size, Color.Red);
             // else
@@ -421,7 +421,7 @@ namespace Magpie.Graphics.UI {
 
         public override void draw() {
             if (form_rt == null)
-                form_rt = new RenderTarget2D(Renderer.gd, size.X, size.Y);
+                form_rt = new RenderTarget2D(Render.gd, size.X, size.Y);
             Draw2D.fill_square(position, size, Color.Plum);
             Draw2D.image(form_rt, position, size, Color.White);
             if (draw_border)
@@ -506,7 +506,7 @@ namespace Magpie.Graphics.UI {
 
             if (DigitalControlBindings.bind_pressed("ui_context_menu") || DigitalControlBindings.bind_just_released("ui_context_menu")) {
                 if (Controls.mouse_state.Position != Controls.mouse_state_prev.Position) {
-                    r_tmp = new RenderTarget2D(Renderer.gd, size.X, size.Y);
+                    r_tmp = new RenderTarget2D(Render.gd, size.X, size.Y);
                     form_rt = r_tmp;
                     GC.Collect();
                 }

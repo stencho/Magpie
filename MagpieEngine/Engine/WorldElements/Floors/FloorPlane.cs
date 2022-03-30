@@ -27,9 +27,9 @@ namespace Magpie.Engine.Floors {
 
         static ushort[] q_indices = { 0, 1, 2, 2, 3, 0 };
         public static VertexPositionNormalTexture[] quad = new VertexPositionNormalTexture[4] {
-                new VertexPositionNormalTexture(new Vector3(-1, 1, 0), -Vector3.UnitZ, new Vector2(0, 0)),
-                new VertexPositionNormalTexture(new Vector3(1, 1, 0), -Vector3.UnitZ, new Vector2(1, 0)),
-                new VertexPositionNormalTexture(new Vector3(1, -1, 0), -Vector3.UnitZ, new Vector2(1, 1)),
+                new VertexPositionNormalTexture(new Vector3(-1, 1, 0) , -Vector3.UnitZ, new Vector2(0, 0)),
+                new VertexPositionNormalTexture(new Vector3(1, 1, 0)  , -Vector3.UnitZ, new Vector2(1, 0)),
+                new VertexPositionNormalTexture(new Vector3(1, -1, 0) , -Vector3.UnitZ, new Vector2(1, 1)),
                 new VertexPositionNormalTexture(new Vector3(-1, -1, 0), -Vector3.UnitZ, new Vector2(0, 1))
             };
 
@@ -41,10 +41,10 @@ namespace Magpie.Engine.Floors {
         public FloorPlane() {
 
             quad = new VertexPositionNormalTexture[4] {
-                new VertexPositionNormalTexture(A, -Vector3.UnitZ, new Vector2(0, 0)),
-                new VertexPositionNormalTexture(B, -Vector3.UnitZ, new Vector2(1, 0)),
-                new VertexPositionNormalTexture(C, -Vector3.UnitZ, new Vector2(1, 1)),
-                new VertexPositionNormalTexture(D, -Vector3.UnitZ, new Vector2(0, 1))
+                new VertexPositionNormalTexture(A, Vector3.Up, new Vector2(0, 0)),
+                new VertexPositionNormalTexture(B, Vector3.Up, new Vector2(1, 0)),
+                new VertexPositionNormalTexture(C, Vector3.Up, new Vector2(1, 1)),
+                new VertexPositionNormalTexture(D, Vector3.Up, new Vector2(0, 1))
             };
 
             if (index_buffer == null) {
