@@ -49,6 +49,12 @@
 /processorParam:DebugMode=Auto
 /build:../../MagpieEngine/Shaders/skybox.fx;sha/skybox.fx
 
+#begin ../../MagpieEngine/Shaders/spotlight.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/spotlight.fx;sha/spotlight.fx
+
 #begin ../../MagpieEngine/Shaders/terrain.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -144,6 +150,12 @@
 /processorParam:SwapWindingOrder=False
 /processorParam:TextureFormat=Compressed
 /build:gfx/sphere.FBX
+
+#begin sha/base.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:sha/base.fx
 
 #begin tex/cash_santa.png
 /importer:TextureImporter

@@ -10,6 +10,7 @@
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/light_depth.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/lit_diffuse.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/skybox.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/spotlight.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/terrain.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/fnt/pf.spritefont</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/fnt/pf_big.spritefont</File>
@@ -17,6 +18,7 @@
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/cone.FBX</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/cube.FBX</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/sphere.FBX</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/base.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/cash_santa.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/cash_santa_t.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/dongt.png</File>
@@ -37,7 +39,9 @@
     <File>sha/light_depth.fx</File>
     <File>sha/lit_diffuse.fx</File>
     <File>sha/skybox.fx</File>
+    <File>sha/spotlight.fx</File>
     <File>sha/terrain.fx</File>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

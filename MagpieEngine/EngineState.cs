@@ -44,6 +44,7 @@ namespace Magpie {
             buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y);
 
             Scene.configure_renderer();
+
             ui = new UILayer(EngineState.resolution);
 
             Draw3D.init(graphics_device);

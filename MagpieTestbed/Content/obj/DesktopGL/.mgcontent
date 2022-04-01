@@ -5,6 +5,7 @@
   <Config />
   <SourceFiles>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/clear.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/compositor.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/diffuse.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/light_depth.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/lit_diffuse.fx</File>
@@ -16,6 +17,7 @@
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/cone.FBX</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/cube.FBX</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/sphere.FBX</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/sha/base.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/cash_santa.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/cash_santa_t.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/dongt.png</File>
@@ -31,11 +33,13 @@
   </SourceFiles>
   <DestFiles>
     <File>sha/clear.fx</File>
+    <File>sha/compositor.fx</File>
     <File>sha/diffuse.fx</File>
     <File>sha/light_depth.fx</File>
     <File>sha/lit_diffuse.fx</File>
     <File>sha/skybox.fx</File>
     <File>sha/terrain.fx</File>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

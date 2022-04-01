@@ -194,10 +194,9 @@ namespace MagpieTestbed
 
             base.Update(gameTime);
         }
-        GJK.gjk_result[] results;
-        Vector2 fake_origin = new Vector2(EngineState.resolution.X - 200, 200);
-        Vector3 fake_origin_3d = Vector3.Zero;
 
+        GJK.gjk_result[] results;
+        
         //Sphere test_a = new Sphere();
         Capsule test_a = new Capsule(1.85f, 1f);
         //sphere_data test_b = new sphere_data();
@@ -209,23 +208,14 @@ namespace MagpieTestbed
         //Tetrahedron test_b = new Tetrahedron();
 
         protected override void Draw(GameTime gameTime)
-        {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            GraphicsDevice.SetRenderTarget(null);
-
+        {            
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
-            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
 
             world.Draw(GraphicsDevice, EngineState.camera);
 
             test_a.draw();
 
-
-            //Draw3D.xyz_cross(GraphicsDevice, world.test_light.position, .1f, Color.Pink, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.line(GraphicsDevice, world.test_light.position, (Vector3.Up * 2f + Vector3.Forward * 8f), Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
+            
             /*
             foreach (GJK.gjk_result result in results) {
                 Draw3D.xyz_cross(GraphicsDevice, result.closest_point_A, 1f, result.hit ? Color.LightGreen : Color.Red, EngineState.camera.view, EngineState.camera.projection);
@@ -234,18 +224,12 @@ namespace MagpieTestbed
                 //Draw3D.line(GraphicsDevice, result.closest_point_A, result.closest_point_B, result.hit ? Color.LightGreen: Color.Red, EngineState.camera.view, EngineState.camera.projection);
             }*/
 
-                GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
+            GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
+            Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + world.test_light.orientation.Forward * world.test_light.far_clip, Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
 
-            GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            GraphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
-            
             EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
-
-            Draw2D.cross(fake_origin, 5, 5, Color.Purple);
-
-
+                       
             Draw2D.text_shadow("pf",
                 Clock.frame_rate.ToString() + " FPS [" +  Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
 
@@ -256,8 +240,9 @@ namespace MagpieTestbed
 
             EngineState.ui.draw();
 
-            EngineState.spritebatch.End();
+            Draw2D.image(world.lights[0].depth_map, XYPair.One * 50, XYPair.One * 200, Color.White);
 
+            EngineState.spritebatch.End();
 
             GraphicsDevice.SetRenderTarget(null);
 

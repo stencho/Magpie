@@ -17,10 +17,18 @@ namespace Magpie {
         public Actor player_actor => current_map.player_actor;
 
         public Spotlight test_light;
+        public Spotlight test_light2;
+        public List<DynamicLight> lights = new List<DynamicLight>();
 
         public World() {
             load_map();
             test_light = new Spotlight();
+            test_light2 = new Spotlight();
+            test_light2.position += Vector3.Left * 14f;
+            test_light2.light_color = Color.LightPink;
+
+            lights.Add(test_light);
+            //lights.Add(test_light2);
         }
 
         public void load_map() {
@@ -83,6 +91,10 @@ namespace Magpie {
         
 
         public void Update() {
+            foreach (DynamicLight light in lights) {
+                light.update();
+            }
+
             foreach (GameObject go in current_map.objects.Values) {
                 go.Update();
             }
@@ -114,7 +126,7 @@ namespace Magpie {
 
         SceneObject[] current_scene;
         public void Draw(GraphicsDevice gd, Camera camera) {
-             current_scene = Scene.create_scene_from_lists(current_map.floors, current_map.objects, current_map.actors, new DynamicLight[] { test_light }, EngineState.camera.frustum);
+             current_scene = Scene.create_scene_from_lists(current_map.floors, current_map.objects, current_map.actors, lights, EngineState.camera.frustum);
 
             /*
             foreach (Floor floor in current_map.floors.Values) {
@@ -133,11 +145,12 @@ namespace Magpie {
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);
 
-            Scene.build_lighting(new DynamicLight[] { test_light }, current_scene);
+            Scene.build_lighting(lights, current_scene);
 
             Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
 
-            Scene.draw(current_scene, new DynamicLight[] { test_light });
+            Scene.draw(current_scene);
+            Scene.draw_lighting(lights);
         }
 
 

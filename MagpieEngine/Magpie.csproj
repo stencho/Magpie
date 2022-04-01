@@ -109,6 +109,7 @@
     <Content Include="Shaders\light_depth.fx" />
     <Content Include="Shaders\lit_diffuse.fx" />
     <Content Include="Shaders\skybox.fx" />
+    <Content Include="Shaders\spotlight.fx" />
     <Content Include="Shaders\terrain.fx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -77,8 +77,11 @@ half3 decode(half3 enc)
 float4x4 lightWVP;
 float LightClip;
 float3 LightPosition;
-texture shadow_map;
+float3 LightDirection;
+float3 light_color;
+float3 ambient_light;
 
+texture shadow_map;
 SamplerState ShadowMapSampler
 {
 	texture = <shadow_map>;
@@ -112,8 +115,11 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	return output;
 }
 
-float3 light_color;
-float3 ambient_light;
+float PCF(float depth, float NdotL, float2 shadowmap_UV) {
+	
+	return 0.5f;
+}
+
 PSO MainPS(VertexShaderOutput input) : COLOR
 {
     PSO output = (PSO)0;
@@ -130,6 +136,10 @@ PSO MainPS(VertexShaderOutput input) : COLOR
     output.Diffuse = rgba;
 	output.Lighting = float4(ambient_light,1);
 		
+	return output;
+}
+
+		/*
 	float lpos = input.lightpos.z / input.lightpos.w;
 
 	float2 stexcoord = mad(0.5, input.lightpos.xy / input.lightpos.w, float2(0.5, 0.5));
@@ -144,13 +154,13 @@ PSO MainPS(VertexShaderOutput input) : COLOR
 	float3 l = 1;
 	
 	if (in_light){
-		if (stx.x < lpos - 0.000003) {
+		if (stx.x < lpos - 0.00001) {
 			l = ambient_light;
 		} else  {	
 			d_center = 1-(length(float2(0.5, 0.5)-stexcoord.xy) * 2);
 			distance = 1-(length(LightPosition - input.WorldPos) / LightClip);
 		
-			l = ( clamp(light_color * distance * pow(d_center * 2,3) * 2, ambient_light, 1.0));
+			l = ( clamp(light_color * distance , ambient_light, 1.0));
 		}
 
 		if (osm) {
@@ -159,12 +169,10 @@ PSO MainPS(VertexShaderOutput input) : COLOR
 	} else {
 		l = ambient_light;
 	}
-
 	
 	output.Lighting.rgb = l;
+	*/
 
-	return output;
-}
 
 technique BasicColorDrawing
 {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/cone.FBX</SourceFile>
-  <SourceTime>2018-07-01T07:53:08.284197+10:00</SourceTime>
+  <SourceTime>2022-04-01T10:03:04.1334817+11:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/gfx/cone.xnb</DestFile>
-  <DestTime>2022-03-26T18:37:00.0071394+11:00</DestTime>
+  <DestTime>2022-04-01T11:05:39.9684242+11:00</DestTime>
   <Importer>FbxImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>ModelProcessor</Processor>
