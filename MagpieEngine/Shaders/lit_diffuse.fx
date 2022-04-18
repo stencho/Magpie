@@ -11,15 +11,11 @@ matrix World;
 matrix View;
 matrix Projection;
 
-float4x4 WVIT;
+float3x3 WVIT;
 
 float FarClip = 2000;
 float NearClip;
 float LightBias;
-bool in_light;
-
-bool flip_texture_h;
-bool flip_texture_v;
 
 sampler DIFFUSE : register(s0);
 sampler NORMAL : register(s1);
@@ -40,20 +36,18 @@ sampler DiffuseSampler = sampler_state
 struct VertexShaderInput
 {
 	float4 Position : POSITION0;
-    float4 UV : TEXCOORD0;
     float3 Normal : NORMAL0;
+    float2 TexCoord : TEXCOORD0;
+	float3 Tangent : TANGENT0;
+	float3 BiTangent : BINORMAL0;
 };
 
 struct VertexShaderOutput
 {
     float4 Position : POSITION;
     float2 TexCoord : TEXCOORD0;
-    float3 Normal : TEXCOORD1;
-    float4 Depth : TEXCOORD2;
-	float4 lightpos : TEXCOORD3;
-	float4 WorldPos : TEXCOORD4;
-    float4 color : COLOR1;
-    
+    float4 Depth : TEXCOORD1;
+    float3x3 TBN : TEXCOORD2;
 };
 struct PSO
 {
@@ -74,23 +68,8 @@ half3 decode(half3 enc)
     return (2.0f * enc.xyz - 1.0f);
 }
 
-float4x4 lightWVP;
-float LightClip;
-float3 LightPosition;
-float3 LightDirection;
-float3 light_color;
 float3 ambient_light;
 
-texture shadow_map;
-SamplerState ShadowMapSampler
-{
-	texture = <shadow_map>;
-	MinFilter = anisotropic;
-	MagFilter = anisotropic;
-	MipFilter = anisotropic;
-	AddressU = clamp;
-	AddressV = clamp;
-};
 
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {
@@ -98,20 +77,18 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 	float4x4 wvp = mul(World, mul(View, Projection));
 		
-	output.lightpos = mul(input.Position, lightWVP);
-	output.WorldPos = mul(input.Position, World);
 	output.Position = mul(input.Position, wvp);
-    output.TexCoord = input.UV;
+    output.TexCoord = input.TexCoord;
 
-    if (flip_texture_h > 0)
-        output.TexCoord.x = 1 - output.TexCoord.x;
-    if (flip_texture_v > 0)
-        output.TexCoord.y = output.TexCoord.y - 1;
 		
-    output.Depth = 1-((output.Position.z / FarClip));
-    output.Depth.a = 1;
+    //output.Depth = 1-((output.Position.z / FarClip));
+
+	output.Depth = output.Position;
     
-    output.Normal = normalize(mul(input.Normal, WVIT));
+	output.TBN[0] = normalize(mul(input.Tangent, (float3x3)WVIT));
+	output.TBN[1] = normalize(mul(input.BiTangent, (float3x3)WVIT));
+	output.TBN[2] = normalize(mul(input.Normal, (float3x3)WVIT));
+
 	return output;
 }
 
@@ -120,59 +97,25 @@ float PCF(float depth, float NdotL, float2 shadowmap_UV) {
 	return 0.5f;
 }
 
-PSO MainPS(VertexShaderOutput input) : COLOR
+PSO MainPS(VertexShaderOutput input)
 {
     PSO output = (PSO)0;
-	bool osm = true;
-	float d_center = 0.5;
-	float distance = 0.0;
 
     float4 rgba = tex2D(DiffuseSampler, input.TexCoord);
-		
-    output.Depth.rgb = input.Depth.r;
+	
+    output.Depth.rgb = input.Depth.z/input.Depth.w;
 	output.Depth.a = 1;
-    output.Normals.rgb = encode(input.Normal);
+
+    output.Normals.rgb = encode(normalize(input.TBN[2]));
 	output.Normals.a = 1;
+
     output.Diffuse = rgba;
+
 	output.Lighting = float4(ambient_light,1);
 		
 	return output;
 }
-
-		/*
-	float lpos = input.lightpos.z / input.lightpos.w;
-
-	float2 stexcoord = mad(0.5, input.lightpos.xy / input.lightpos.w, float2(0.5, 0.5));
-	stexcoord.y = 1.0f - stexcoord.y;
-
-	float stx = tex2D(ShadowMapSampler, stexcoord.xy).x;
-
-	if ((saturate(stexcoord.x) == stexcoord.x) && (saturate(stexcoord.y) == stexcoord.y)) {
-		osm = false;  
-	}
-
-	float3 l = 1;
 	
-	if (in_light){
-		if (stx.x < lpos - 0.00001) {
-			l = ambient_light;
-		} else  {	
-			d_center = 1-(length(float2(0.5, 0.5)-stexcoord.xy) * 2);
-			distance = 1-(length(LightPosition - input.WorldPos) / LightClip);
-		
-			l = ( clamp(light_color * distance , ambient_light, 1.0));
-		}
-
-		if (osm) {
-			l = ambient_light;
-		}
-	} else {
-		l = ambient_light;
-	}
-	
-	output.Lighting.rgb = l;
-	*/
-
 
 technique BasicColorDrawing
 {

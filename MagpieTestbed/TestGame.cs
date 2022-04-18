@@ -226,6 +226,14 @@ namespace MagpieTestbed
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
+
+
+            foreach (DynamicLight l in world.lights) {
+                if (l.type == LightType.POINT)
+                    Draw3D.xyz_cross(GraphicsDevice, l.position, 0.1f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            }
+            //Draw3D.xyz_cross(GraphicsDevice, world.pointl.position, world.pointl.radius, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+
             Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + world.test_light.orientation.Forward * world.test_light.far_clip, Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
 
             EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
@@ -240,7 +248,7 @@ namespace MagpieTestbed
 
             EngineState.ui.draw();
 
-            Draw2D.image(world.lights[0].depth_map, XYPair.One * 50, XYPair.One * 200, Color.White);
+            //Draw2D.image(world.lights[0].depth_map, XYPair.One * 50, XYPair.One * 200, Color.White);
 
             EngineState.spritebatch.End();
 

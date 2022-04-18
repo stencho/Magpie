@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/sphere.FBX</SourceFile>
-  <SourceTime>2019-12-01T21:12:52.1744045+11:00</SourceTime>
+  <SourceTime>2022-04-19T01:13:24.9150826+10:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/Content/gfx/sphere.xnb</DestFile>
-  <DestTime>2022-03-26T13:33:22.4930317+11:00</DestTime>
+  <DestTime>2022-04-19T01:13:28.1953357+10:00</DestTime>
   <Importer>FbxImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>ModelProcessor</Processor>

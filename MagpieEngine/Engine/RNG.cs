@@ -29,5 +29,9 @@ namespace Magpie.Engine {
         public static int rng_int(int min, int max) => _rng.Next(min, max);
 
         public static bool rng_bool => (_rng.NextDouble() >= 0.5);
+
+        public static Color random_opaque_color() {
+            return Color.FromNonPremultiplied((int)(255 * rng_float), (int)(255 * rng_float), (int)(255 * rng_float), 255);
+        }
     }
 }

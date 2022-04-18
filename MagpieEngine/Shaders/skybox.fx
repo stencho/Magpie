@@ -104,7 +104,8 @@ PSO clear_sky(VSO input)
     output.Lighting.a = 1;
     output.Normals = 0;
     output.Diffuse = rgba_final;
-    output.Depth = 1;
+    output.Depth.rgb = 0;
+    output.Depth.a = 1;
     return output;
 };
 

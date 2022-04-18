@@ -16,16 +16,24 @@ namespace Magpie {
         public Map current_map;
         public Actor player_actor => current_map.player_actor;
 
-        public Spotlight test_light;
-        public Spotlight test_light2;
+        public SpotLight test_light;
+        public SpotLight test_light2;
         public List<DynamicLight> lights = new List<DynamicLight>();
 
         public World() {
             load_map();
-            test_light = new Spotlight();
-            test_light2 = new Spotlight();
+            test_light = new SpotLight();
+            test_light2 = new SpotLight();
             test_light2.position += Vector3.Left * 14f;
             test_light2.light_color = Color.LightPink;
+
+            for (int i = 0; i < 20; i++) {
+                lights.Add(new PointLight(
+                    (Vector3.UnitX * (10f * RNG.rng_float_neg_one_to_one)) + (Vector3.UnitY * (20f * RNG.rng_float)) + (Vector3.Forward * (30f * RNG.rng_float)), 
+                    5 + (RNG.rng_float * 10f), 
+                    RNG.random_opaque_color()
+                    ));
+            }
 
             lights.Add(test_light);
             //lights.Add(test_light2);

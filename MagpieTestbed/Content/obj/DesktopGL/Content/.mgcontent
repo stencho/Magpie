@@ -9,6 +9,7 @@
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/diffuse.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/light_depth.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/lit_diffuse.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/pointlight.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/skybox.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/spotlight.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/terrain.fx</File>
@@ -38,6 +39,7 @@
     <File>sha/diffuse.fx</File>
     <File>sha/light_depth.fx</File>
     <File>sha/lit_diffuse.fx</File>
+    <File>sha/pointlight.fx</File>
     <File>sha/skybox.fx</File>
     <File>sha/spotlight.fx</File>
     <File>sha/terrain.fx</File>
