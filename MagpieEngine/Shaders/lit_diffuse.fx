@@ -63,7 +63,7 @@ half3 encode(half3 n)
     n.xyz = 0.5f * (n.xyz + 1.0f);
     return n;
 }
-half3 decode(half3 enc)
+float3 decode(half3 enc)
 {
     return (2.0f * enc.xyz - 1.0f);
 }

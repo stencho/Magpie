@@ -57,9 +57,9 @@ namespace Magpie.Graphics {
         static RenderTarget2D skybox_cm;
         static RenderTarget2D skybox_cm_e;
 
-        public static Color atmosphere_color = Color.MediumPurple;
+        public static Color atmosphere_color = Color.DarkMagenta;
         public static Color sky_color = Color.Lerp(Color.Purple, Color.LightSkyBlue, 0.2f);
-        public static float sky_brightness = 1f;
+        public static float sky_brightness = 0.04f;
 
         public static VerticalQuad quad;
 
@@ -174,7 +174,7 @@ namespace Magpie.Graphics {
                 e_lit_diffuse.Parameters["WVIT"].SetValue(Matrix.Transpose(Matrix.Invert(so.world * EngineState.camera.view)));
 
                 e_lit_diffuse.Parameters["DiffuseMap"].SetValue(ContentHandler.resources[so.texture].value_tx);
-                e_lit_diffuse.Parameters["ambient_light"].SetValue(sky_color.ToVector3() * 0.1f);
+                e_lit_diffuse.Parameters["ambient_light"].SetValue(sky_color.ToVector3() * sky_brightness);
                 
                 EngineState.graphics_device.SetVertexBuffer(so.vertex_buffer);
                 EngineState.graphics_device.Indices = so.index_buffer;
@@ -190,7 +190,12 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.SetRenderTargets(EngineState.buffer.rt_lighting);
             
             EngineState.graphics_device.BlendState = DynamicLightRequirements.blend_state;
-            EngineState.graphics_device.DepthStencilState = DepthStencilState.DepthRead;
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.None;
+
+            e_pointlight.Parameters["View"].SetValue(EngineState.camera.view);
+            e_pointlight.Parameters["Projection"].SetValue(EngineState.camera.projection);
+            e_pointlight.Parameters["inverseView"].SetValue(Matrix.Invert(EngineState.camera.view));
+            e_pointlight.Parameters["InverseViewProjection"].SetValue(Matrix.Invert(EngineState.camera.view * EngineState.camera.projection));
 
             foreach (DynamicLight light in lights) {
                 switch (light.type) {
@@ -199,23 +204,25 @@ namespace Magpie.Graphics {
                         break;
 
                     case LightType.POINT:
-                        e_pointlight.Parameters["View"].SetValue(EngineState.camera.view);
-                        e_pointlight.Parameters["Projection"].SetValue(EngineState.camera.projection);
                         e_pointlight.Parameters["World"].SetValue(light.world);
 
                         e_pointlight.Parameters["GBuffer_Normal"].SetValue(EngineState.buffer.rt_normal);
-                        e_pointlight.Parameters["GBuffer_Depth"].SetValue(EngineState.buffer.rt_depth);
+                        EngineState.graphics_device.SamplerStates[0] = SamplerState.LinearClamp;
 
-                        e_pointlight.Parameters["Shadows"].SetValue(false);
+                        e_pointlight.Parameters["GBuffer_Depth"].SetValue(EngineState.buffer.rt_depth);
+                        EngineState.graphics_device.SamplerStates[1] = SamplerState.LinearClamp;
 
                         //e_pointlight.Parameters["CameraPosition"].SetValue(EngineState.camera.position);
                         e_pointlight.Parameters["LightColor"].SetValue(light.light_color.ToVector4());
                         e_pointlight.Parameters["LightPosition"].SetValue(light.position);
                         e_pointlight.Parameters["LightIntensity"].SetValue(1f);
                         e_pointlight.Parameters["LightRadius"].SetValue(((PointLight)light).radius);
-                        e_pointlight.Parameters["InverseViewProjection"].SetValue(Matrix.Invert(EngineState.camera.view * EngineState.camera.projection));
+
+                        e_pointlight.Parameters["Shadows"].SetValue(false);
+                        e_pointlight.Parameters["stepped"].SetValue(false);
+
+
                         e_pointlight.Parameters["GBufferTextureSize"].SetValue(EngineState.resolution.ToVector2());
-                        e_pointlight.Parameters["inverseView"].SetValue(Matrix.Invert(EngineState.camera.view));
 
 
                         EngineState.graphics_device.SetVertexBuffer(ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer);

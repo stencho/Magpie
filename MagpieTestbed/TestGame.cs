@@ -230,7 +230,7 @@ namespace MagpieTestbed
 
             foreach (DynamicLight l in world.lights) {
                 if (l.type == LightType.POINT)
-                    Draw3D.xyz_cross(GraphicsDevice, l.position, 0.1f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+                    Draw3D.xyz_cross(GraphicsDevice, l.position, 0.1f, l.light_color, EngineState.camera.view, EngineState.camera.projection);
             }
             //Draw3D.xyz_cross(GraphicsDevice, world.pointl.position, world.pointl.radius, Color.Red, EngineState.camera.view, EngineState.camera.projection);
 

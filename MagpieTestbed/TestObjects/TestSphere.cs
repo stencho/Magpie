@@ -26,8 +26,8 @@ namespace MagpieTestbed.TestObjects {
 
         public BoundingBox bounds { get; set; }
 
-        public string model { get; set; } = "cube";
-        public string[] textures { get; set; } = new string[] { "zerocool_sharper" };
+        public string model { get; set; } = "sphere";
+        public string[] textures { get; set; } = new string[] { "OnePXWhite" };
 
         public shape3D collision { get; set; }
 

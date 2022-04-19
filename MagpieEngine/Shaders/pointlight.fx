@@ -29,16 +29,16 @@ sampler GBuffer2 = sampler_state {
 	MINFILTER = POINT;
 	MAGFILTER = POINT;
 	MIPFILTER = POINT;
-	ADDRESSU = WRAP;
-	ADDRESSV = WRAP;
+	ADDRESSU = CLAMP;
+	ADDRESSV = CLAMP ;
 };
 sampler ShadowMap = sampler_state {
-	texture = <ShadowMapTx>;
-	MINFILTER = POINT;
-	MAGFILTER = POINT;
-	MIPFILTER = POINT;
-	ADDRESSU = WRAP;
-	ADDRESSV = WRAP;
+	texture = <ShadowMap>;
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+	MIPFILTER = LINEAR;
+	ADDRESSU = CLAMP;
+	ADDRESSV = CLAMP;
 };
 
 struct VSI
@@ -121,63 +121,48 @@ float4 manualSampleCUBE(sampler Sampler, float3 UVW, float3 textureSize)
 	return float4(C, 1);
 }
 float Epsilon = 1e-10;
-
+bool stepped = false;
 float4 createLightmap(float3 Position, float3 N)
 {
-	//Calculate Light Vector
 	float3 L = LightPosition.xyz - Position.xyz;
-	//Calculate Linear Attenuation
-	//float Attenuation = saturate(min(1, length(L)) / (LightRadius / 2));
-	float Attenuation = saturate(1.0f - max(1, length(L)) / (LightRadius / 2));
+
+	float Attenuation = saturate(1.0f - max(0.01f, length(L)) / (LightRadius / 2));
 	
-	//Normalize Light Vector
 	L = normalize(L);
-	//Calculate Reflection vector
+
 	float3 R = normalize(reflect(-L, N));
-	//Calculate Eye vector
+
 	float3 E = normalize(CameraPosition - Position.xyz);
-	//Calculate N.L
+
 	float NL = dot(N, L);
-	//Calculate Diffuse
+
 	float3 Diffuse = NL * LightColor.xyz;
-	//Calculate Specular
-	//Get Light-Z from Manually Sampled ShadowMap
+
 	float lZ = manualSampleCUBE(ShadowMap, float3(-L.xy, L.z), shadowMapSize).r;
-	//Assymetric Workaround...
+
 	float ShadowFactor = 1;
 	float sf = 1;
-	//If Shadowing is on then get the Shadow Factor
+
 	if (Shadows)
 	{
-		// Calculate distance to the light
 		float len = min(0.01, length(LightPosition - Position)) / DepthPrecision;
-		//len *= NL;
-		//Calculate the Shadow Factor
-		
-			ShadowFactor = (lZ * exp(-(DepthPrecision * 0.46f) * ((len) - DepthBias)));
+		ShadowFactor = (lZ * exp(-(DepthPrecision * 0.46f) * ((len) - DepthBias)));
 		
 	}	
 
 	float output = ShadowFactor * Attenuation * LightIntensity;
 
-	if (output < 0.2)
+	if (stepped && output < 0.2)
 		output = 0;
-	else if (output > 0.2 && output < 0.4)
+	else if (stepped && output > 0.2 && output < 0.4)
 		output = .25;
-	else if (output > 0.4 && output < 0.6)
+	else if (stepped && output > 0.4 && output < 0.6)
 		output = .5;
-	else if (output > 0.6 && output < 0.8)
+	else if (stepped && output > 0.6 && output < 0.8)
 		output = .75;
-	else if (output > 0.8)
-		output = 1;
+	else if (stepped && output > 0.8)
+		output = 1;	
 
-	if (FullBright) {
-		ShadowFactor = 1;
-		Attenuation = 1;
-	}
-
-
-	//Calculate Final Product
 	return output * float4(Diffuse.rgb, 1);
 }
 
@@ -199,14 +184,13 @@ float4 PS(VSO input) : COLOR0
 {
 	input.ScreenPosition.xy /= input.ScreenPosition.w;
 
-	float2 UV = 0.5f * (float2(input.ScreenPosition.x, -input.ScreenPosition.y) + 1) -
-	float2(1.0f / GBufferTextureSize.xy);
+	float2 UV = 0.5f * (float2(input.ScreenPosition.x, -input.ScreenPosition.y) + 1.0f) - float2(1.0f / GBufferTextureSize.xy);
 
-	half4 encodedNormal = tex2D(GBuffer1, UV);
-	half3 Normal = mul(decode(encodedNormal.xyz), inverseView);
+	float4 encodedNormal = manualSample(GBuffer1, UV, GBufferTextureSize);
+	float3 Normal = mul(decode(encodedNormal.xyz), inverseView);
 
 
-	float Depth = manualSample(GBuffer2, UV, GBufferTextureSize).x;
+	float Depth = tex2D(GBuffer2, UV).x;
 
 	float4 Position = 1.0f;
 	Position.xy = input.ScreenPosition.xy;

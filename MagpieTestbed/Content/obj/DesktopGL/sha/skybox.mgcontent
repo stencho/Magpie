@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/skybox.fx</SourceFile>
-  <SourceTime>2022-03-30T14:06:13.2935071+11:00</SourceTime>
+  <SourceTime>2022-04-19T03:52:38.310197+10:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/sha/skybox.xnb</DestFile>
-  <DestTime>2022-04-01T10:00:17.0516588+11:00</DestTime>
+  <DestTime>2022-04-19T11:33:34.2183411+10:00</DestTime>
   <Importer>EffectImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>EffectProcessor</Processor>
