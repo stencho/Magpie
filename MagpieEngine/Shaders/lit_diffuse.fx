@@ -79,12 +79,15 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 		
 	output.Position = mul(input.Position, wvp);
     output.TexCoord = input.TexCoord;
-
 		
     //output.Depth = 1-((output.Position.z / FarClip));
 
-	output.Depth = output.Position;
+	//output.Depth = output.Position;
     
+	output.Depth.x = output.Position.z;
+	output.Depth.y = output.Position.w;
+	output.Depth.z = mul(mul(input.Position, World),View).z;
+
 	output.TBN[0] = normalize(mul(input.Tangent, (float3x3)WVIT));
 	output.TBN[1] = normalize(mul(input.BiTangent, (float3x3)WVIT));
 	output.TBN[2] = normalize(mul(input.Normal, (float3x3)WVIT));
@@ -103,8 +106,13 @@ PSO MainPS(VertexShaderOutput input)
 
     float4 rgba = tex2D(DiffuseSampler, input.TexCoord);
 	
+	/*
     output.Depth.rgb = input.Depth.z/input.Depth.w;
 	output.Depth.a = 1;
+	*/
+	
+	output.Depth.r = input.Depth.x / input.Depth.y;
+	output.Depth.gba = 1;
 
     output.Normals.rgb = encode(normalize(input.TBN[2]));
 	output.Normals.a = 1;

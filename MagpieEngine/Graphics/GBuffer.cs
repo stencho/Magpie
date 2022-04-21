@@ -75,14 +75,16 @@ namespace Magpie.Graphics {
 
             this._width = width; this._height = height;
 
+            _resolution_scale = res_scale;
+
             viewport = new Viewport(position.X, position.Y, width, height);
 
             shader_position_offset = Vector2.Zero;
             shader_size_scale = Vector2.One;
 
             rt_diffuse = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
-            rt_normal = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None);
-            rt_depth = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Single, DepthFormat.None);
+            rt_normal = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Vector4, DepthFormat.None);
+            rt_depth = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
             rt_lighting = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
 
             rt_final = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None);
@@ -137,7 +139,7 @@ namespace Magpie.Graphics {
             
             gbuffer.rt_diffuse = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
             gbuffer.rt_normal = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None);
-            gbuffer.rt_depth = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Single, DepthFormat.None);
+            gbuffer.rt_depth = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
             gbuffer.rt_lighting = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
 
             gbuffer.rt_final = new RenderTarget2D(gd, (int)(width), (int)(height), false, SurfaceFormat.Color, DepthFormat.None);

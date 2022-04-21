@@ -1,142 +1,162 @@
-﻿#if OPENGL
-	#define SV_POSITION POSITION
-	#define VS_SHADERMODEL vs_3_0
-	#define PS_SHADERMODEL ps_3_0
-#else
-	#define VS_SHADERMODEL vs_4_0_level_9_1
-	#define PS_SHADERMODEL ps_4_0_level_9_1
-#endif
+﻿float4x4 World;
+float4x4 View;
+float4x4 InverseView;
+float4x4 Projection;
+float4x4 InverseViewProjection;
 
-matrix World;
-matrix View;
-matrix Projection;
-matrix IVP;
-matrix LVP;
-
+float3 CameraPosition;
+float4x4 LightViewProjection;
 float3 LightPosition;
+float4 LightColor;
+float LightIntensity;
 float3 LightDirection;
-float LightAngle;
+float LightAngleCos;
 float LightClip;
+float2 GBufferTextureSize;
+bool Shadows;
+float shadowMapSize;
+float DepthBias;
 
-sampler DIFFUSE : register(s0);
-sampler NORMAL : register(s1);
-sampler DEPTH : register(s2);
-sampler LIGHTING : register(s3);
+sampler DEPTH : register(s0) = sampler_state {
+	MINFILTER = POINT;
+	MAGFILTER = POINT;
+	MIPFILTER = POINT;
 
-struct VertexShaderInput
-{
+	ADDRESSU = CLAMP;
+	ADDRESSV = CLAMP;
+};
+
+sampler NORMAL : register(s1) = sampler_state {
+	MINFILTER = POINT;
+	MAGFILTER = POINT;
+	MIPFILTER = POINT;
+	
+	ADDRESSU = CLAMP;
+	ADDRESSV = CLAMP;
+};
+
+sampler COOKIE: register(s2)= sampler_state {
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+	MIPFILTER = LINEAR;
+	
+	ADDRESSU = CLAMP;
+	ADDRESSV = CLAMP;
+};
+sampler SHADOW : register(s3);
+
+struct VSI {
 	float4 Position : POSITION0;
 };
 
-struct VertexShaderOutput
-{
-	float4 Position : SV_POSITION;
+struct VSO {
+	float4 Position : POSITION0;
 	float4 ScreenPosition : TEXCOORD0;
-	float4 Color : COLOR0;
 };
 
-struct PSO
-{
-    float4 Diffuse : COLOR0;
-    float4 Normals : COLOR1;
-    float4 Depth : COLOR2;
-    float4 Lighting : COLOR3;
-};
-
-VertexShaderOutput MainVS(in VertexShaderInput input)
-{
-	VertexShaderOutput output = (VertexShaderOutput)0;
-	
-	float4x4 wvp = mul(World, mul(View, Projection));
-	output.Position = mul(input.Position, wvp);
+VSO VS(VSI input) {
+	VSO output;
+	float4 worldPosition = mul(input.Position, World);
+	float4 viewPosition = mul(worldPosition, View);
+	output.Position = mul(viewPosition, Projection);
 	output.ScreenPosition = output.Position;
-	output.Color = float4(1,1,1,1);
-
 	return output;
 }
 
-//float4 Phong(float3 Position, float3 N, float radialAttenuation,float SpecularIntensity, float SpecularPower) {
-	//Calculate Light vector
-	//float3 L = LightPosition.xyz - Position.xyz;
+float4 manualSample(sampler Sampler, float2 UV, float2 textureSize) {
+	float2 texelpos = textureSize * UV;
+	float2 lerps = frac(texelpos);
+	float texelSize = 1.0 / textureSize;
+	float4 sourcevals[4];
 
-	//Calculate height Attenuation
-	//float heightAttenuation = 1.0f - saturate(length(L) - (LightHeight / 2));
+	sourcevals[0] = tex2D(Sampler, UV);
+	sourcevals[1] = tex2D(Sampler, UV + float2(texelSize, 0));
+	sourcevals[2] = tex2D(Sampler, UV + float2(0, texelSize));
+	sourcevals[3] = tex2D(Sampler, UV + float2(texelSize, texelSize));
 
-	//Calculate total Attenuation
-	//float Attenuation = min(radialAttenuation, heightAttenuation);
+	float4 interpolated = lerp(lerp(sourcevals[0], sourcevals[1], lerps.x),
+	lerp(sourcevals[2], sourcevals[3], lerps.x ), lerps.y);
+	return interpolated;
+}
 
-	//Now Normalize the Light
-	//L = normalize(L);
+float4 Phong(float3 Position, float3 N, float radialAttenuation,float SpecularIntensity, float SpecularPower) {
+	float3 L = Position.xyz - LightPosition.xyz;
 
-	//Calculate L.S
-	//float SL = dot(L, S);
-
-	//No asymmetrical returns in HLSL, so work around with this
-	//float4 Shading = 0;
-
-	//If this pixel is in the SpotLights Cone
-	//if(SL <= LightAngleCos) {
-		//Calculate Reflection Vector
-	//	float3 R = normalize(reflect(-L, N));
-
-		//Calculate Eye Vector
-	//	float3 E = normalize(CameraPosition - Position.xyz);
-
-		//Calculate N.L
-	//	float NL = dot(N, L);
-
-		//Calculate Diffuse
-	//	float3 Diffuse = NL * LightColor.xyz;
-
-		//Calculate Specular
-		//float Specular = SpecularIntensity * pow(saturate(dot(R, E)), SpecularPower);
-
-		//Calculate Final Product
-	//	Shading = Attenuation * LightIntensity * float4(Diffuse.rgb, 1);
-	//}
-	//Return Shading Value
-	//return Shading;
-//}
-
-PSO MainPS(VertexShaderOutput input) : COLOR
-{
-	input.ScreenPosition.xy /= input.ScreenPosition.w;
-
-	float d = tex2D(DEPTH,input.ScreenPosition.xy);
-	PSO output = (PSO)1;
-
-	float4 p = 1.0f;
-	p.xy = input.ScreenPosition.xy;
-	p.z = d;
-
-	p = mul(p, IVP);
-	p/=p.w;
-
-	float3 L = LightPosition.xyz - p.xyz;
+	float heightAttenuation = 1  - (length(L) / (LightClip));
+	float Attenuation = min(radialAttenuation, heightAttenuation);
 
 	L = normalize(L);
-	float SL = dot(L,LightDirection);
 
-	float shading = 0;
+	float SL = dot(L, LightDirection);
 
-	if (SL <= LightAngle) {
-		shading = 1;
-	} else {
-		shading = 0;
+	float4 Shading = 0;
+	if (SL > LightAngleCos && distance(Position.xyz, LightPosition.xyz) <= LightClip) {
+		float NL = dot(-N, L);
+		float3 Diffuse = NL * LightColor.xyz;
+		Shading = float4(Diffuse.rgb, 1) * heightAttenuation ;
 	}
 
-	output.Diffuse = float4(0,0,0,0);
-	output.Normals = float4(0,0,0,0);
-	output.Depth = float4(d,d,d,1);
-	output.Lighting = float4(shading,shading,shading,1);
-	return output;
+	return Shading;
 }
 
-technique BasicColorDrawing
-{
-	pass P0
-	{
-		VertexShader = compile VS_SHADERMODEL MainVS();
-		PixelShader = compile PS_SHADERMODEL MainPS();
+
+float3 decode(float3 enc) {
+	return (2.0f * enc.xyz- 1.0f);
+}
+
+float RGBADecode(float4 value) {
+	const float4 bits = float4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1);
+	return dot(value.xyzw , bits);
+}
+
+float4 PS(VSO input) : COLOR0 {
+	input.ScreenPosition.xy /= input.ScreenPosition.w;
+
+	float2 UV = 0.5f * (float2(input.ScreenPosition.x, -input.ScreenPosition.y) + 1.0f) - float2(1.0f / GBufferTextureSize.xy);
+	
+	float4 encodedNormal = tex2D(NORMAL,UV);
+	float3 Normal = mul(decode(encodedNormal.xyz), InverseView);
+
+	
+	//float3 Depth = tex2D(DEPTH,UV).rgb;
+	
+	float3 Depth = manualSample(DEPTH,UV, GBufferTextureSize).rgb;
+
+	float4 Position = 1.0f;
+	Position.xy = input.ScreenPosition.xy;
+	Position.z = Depth.r;
+
+	Position = mul(Position, InverseViewProjection);
+	Position /= Position.w;
+
+	float3 L = Position.xyz - LightPosition.xyz;
+	float Ll = length(L);
+
+	float4 LightScreenPos = mul(Position, LightViewProjection);
+
+	float4 LSPcookie = LightScreenPos / (Ll * 0.5);
+	LightScreenPos /= Ll ;
+	
+	float2 LUV = 0.5 * (float2(LightScreenPos.x, -LightScreenPos.y) + 1);
+	float2 LUVcookie = 0.5 * (float2(LSPcookie.x, -LSPcookie.y) + 1);
+
+	float lZ = manualSample(SHADOW, LUV, shadowMapSize);
+
+	float Attenuation = tex2D(COOKIE, LUVcookie.xy).r;
+
+	float ShadowFactor = 1;
+	if(Shadows) {
+		float len = max(0.01f, length(LightPosition - Position)) / LightClip;
+		ShadowFactor = (lZ * exp(-(LightClip * 0.5f) * (len - DepthBias)));
 	}
-};
+
+	return Phong(Position.xyz, Normal, 1, 1, 1) * saturate(ShadowFactor) * Attenuation;
+	//return float4(Position.xyz, 1) * s;
+}
+
+technique Default {
+	pass p0 {
+		VertexShader = compile vs_3_0 VS();
+		PixelShader = compile ps_3_0 PS();
+	}
+}

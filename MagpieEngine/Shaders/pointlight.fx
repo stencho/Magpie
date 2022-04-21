@@ -1,7 +1,7 @@
 ﻿
 float4x4 World;
 float4x4 View;
-float4x4 inverseView;
+float4x4 InverseView;
 float4x4 Projection;
 float4x4 InverseViewProjection;
 float3 CameraPosition;
@@ -17,7 +17,7 @@ float shadowMapSize;
 bool FullBright;
 
 sampler GBuffer1 = sampler_state {
-	texture = <GBuffer_Normal>;
+	texture = <NORMAL>;
 	MINFILTER = POINT;
 	MAGFILTER = POINT;
 	MIPFILTER = POINT;
@@ -25,7 +25,7 @@ sampler GBuffer1 = sampler_state {
 	ADDRESSV = WRAP;
 };
 sampler GBuffer2 = sampler_state {
-	texture = <GBuffer_Depth>;
+	texture = <DEPTH>;
 	MINFILTER = POINT;
 	MAGFILTER = POINT;
 	MIPFILTER = POINT;
@@ -121,7 +121,7 @@ float4 manualSampleCUBE(sampler Sampler, float3 UVW, float3 textureSize)
 	return float4(C, 1);
 }
 float Epsilon = 1e-10;
-bool stepped = false;
+bool quantized = false;
 float4 createLightmap(float3 Position, float3 N)
 {
 	float3 L = LightPosition.xyz - Position.xyz;
@@ -152,15 +152,15 @@ float4 createLightmap(float3 Position, float3 N)
 
 	float output = ShadowFactor * Attenuation * LightIntensity;
 
-	if (stepped && output < 0.2)
+	if (quantized && output < 0.2)
 		output = 0;
-	else if (stepped && output > 0.2 && output < 0.4)
+	else if (quantized && output > 0.2 && output < 0.4)
 		output = .25;
-	else if (stepped && output > 0.4 && output < 0.6)
+	else if (quantized && output > 0.4 && output < 0.6)
 		output = .5;
-	else if (stepped && output > 0.6 && output < 0.8)
+	else if (quantized && output > 0.6 && output < 0.8)
 		output = .75;
-	else if (stepped && output > 0.8)
+	else if (quantized && output > 0.8)
 		output = 1;	
 
 	return output * float4(Diffuse.rgb, 1);
@@ -187,7 +187,7 @@ float4 PS(VSO input) : COLOR0
 	float2 UV = 0.5f * (float2(input.ScreenPosition.x, -input.ScreenPosition.y) + 1.0f) - float2(1.0f / GBufferTextureSize.xy);
 
 	float4 encodedNormal = manualSample(GBuffer1, UV, GBufferTextureSize);
-	float3 Normal = mul(decode(encodedNormal.xyz), inverseView);
+	float3 Normal = mul(decode(encodedNormal.xyz), InverseView);
 
 
 	float Depth = tex2D(GBuffer2, UV).x;

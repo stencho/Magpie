@@ -107,6 +107,7 @@
     <Content Include="Shaders\clear.fx" />
     <Content Include="Shaders\compositor.fx" />
     <Content Include="Shaders\diffuse.fx" />
+    <Content Include="Shaders\exp_light_depth.fx" />
     <Content Include="Shaders\light_depth.fx" />
     <Content Include="Shaders\lit_diffuse.fx" />
     <Content Include="Shaders\pointlight.fx" />

@@ -7,6 +7,7 @@
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/clear.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/compositor.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/diffuse.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/exp_light_depth.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/light_depth.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/lit_diffuse.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/pointlight.fx</File>
@@ -37,6 +38,7 @@
     <File>sha/clear.fx</File>
     <File>sha/compositor.fx</File>
     <File>sha/diffuse.fx</File>
+    <File>sha/exp_light_depth.fx</File>
     <File>sha/light_depth.fx</File>
     <File>sha/lit_diffuse.fx</File>
     <File>sha/pointlight.fx</File>

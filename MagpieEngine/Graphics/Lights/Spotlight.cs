@@ -16,50 +16,51 @@ namespace Magpie.Graphics.Lights {
 
         public string shader => "spotlight";
 
-        public float far_clip { get; set; } = 50f;
-        public float near_clip { get; set; } = 0.2f;
+        public float far_clip { get; set; } = 33f;
+        public float near_clip { get; set; } = 0.1f;
 
-        public float fov { get; set; } = MathHelper.PiOver2;
+        public float fov { get; set; } = 1.3f;// MathHelper.PiOver2;
 
         public BoundingFrustum frustum { get; set; }
-        public Vector3 position { get; set; } = (Vector3.Up * 15.91909f) + (Vector3.Backward *9.921314f);
+        public Vector3 position { get; set; } = (Vector3.Up * 15.91909f) + (Vector3.Forward *3.921314f);
         public Matrix orientation { get; set; } 
 
         public Matrix view { get; set; }
         public Matrix projection { get; set; }
         public Matrix world { get; set; }
 
-        public Color light_color { get; set; } = Color.Purple;
+        public Color light_color { get; set; } = Color.White;
 
-        float radial_scale;
-        Matrix actual_scale;
+        public float radial_scale;
+        public Matrix actual_scale;
 
         public float angle_cos => (float)Math.Cos((double)fov);
 
         public SpotLight() {
-            _depth = new RenderTarget2D(EngineState.graphics_device, depth_map_resolution, depth_map_resolution, false, SurfaceFormat.Single, DepthFormat.Depth24);
+            _depth = new RenderTarget2D(EngineState.graphics_device, depth_map_resolution, depth_map_resolution, false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
 
-            orientation = Matrix.CreateFromAxisAngle(Vector3.Left, MathHelper.ToRadians(45f));
+            orientation = Matrix.CreateFromAxisAngle(Vector3.Left, MathHelper.ToRadians(90f));
 
-            view = Matrix.CreateLookAt(position, position + orientation.Forward, Vector3.Up);
+            view = Matrix.CreateLookAt(position, position + orientation.Forward, orientation.Up);
             projection = Matrix.CreatePerspectiveFieldOfView(fov, 1f, near_clip, far_clip);
 
-            radial_scale = (float)Math.Tan((double)fov / 2.0) * 2f * far_clip;
+            radial_scale = (float)Math.Tan((double)fov) * far_clip;
             actual_scale = Matrix.CreateScale(radial_scale, radial_scale, far_clip);
 
-            world = Matrix.CreateTranslation(Vector3.Forward) * actual_scale * orientation * Matrix.CreateTranslation(position);
-
+            world = actual_scale * orientation * Matrix.CreateTranslation(position);
+            
             frustum = new BoundingFrustum(view * projection);
         }
 
         public void update() {
-            view = Matrix.CreateLookAt(position, position + orientation.Forward, Vector3.Up);
+
+            view = Matrix.CreateLookAt(position, position + orientation.Forward, orientation.Up);
             projection = Matrix.CreatePerspectiveFieldOfView(fov, 1f, near_clip, far_clip);
 
-            radial_scale = (float)Math.Tan((double)fov / 2.0) * 2f * far_clip;
+            radial_scale = (float)Math.Tan((double)fov) * far_clip;
             actual_scale = Matrix.CreateScale(radial_scale, radial_scale, far_clip);
 
-            world = Matrix.CreateTranslation(Vector3.Forward) * actual_scale * orientation * Matrix.CreateTranslation(position);
+            world = actual_scale * orientation * Matrix.CreateTranslation(position);
 
             frustum = new BoundingFrustum(view * projection);
         }

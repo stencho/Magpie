@@ -255,6 +255,7 @@ namespace Magpie.Engine {
                 AddResource(new Resource("HalfGrey", _halfGrey));
 
                 AddResource(new Resource("center_glow", new Texture2D(gd, 1, 256)));
+                AddResource(new Resource("radial_glow", new Texture2D(gd, 256, 256)));
                 AddResource(new Resource("gradient_vertical", new Texture2D(gd, 256, 256)));
                 AddResource(new Resource("skybox_gradient", new Texture2D(gd, 512, 512)));
 
@@ -271,7 +272,7 @@ namespace Magpie.Engine {
                 glowData = new Color[256 * 256];
                 for (var i = 0; i < 255; i++) {
                     for (var x = 0; x < 255; x++) {
-                        glowData[(i * 255) + x] = Color.FromNonPremultiplied(255, 255, 255, i);
+                        glowData[(i * 256) + x] = Color.FromNonPremultiplied(255, 255, 255, i);
                     }
                 }
 
@@ -299,6 +300,25 @@ namespace Magpie.Engine {
 
                 ((Texture2D)resources["skybox_gradient"].value).SetData(glowData);
 
+                glowData = new Color[256 * 256];
+
+                for (var i = 0; i < 255; i++) {
+
+                    float px, py;
+
+                    for (var x = 0; x < 255; x++) {
+
+                        px = x / 255f;
+                        py = i / 255f;
+
+                        float t = 0.4f - Vector2.Distance(Vector2.One * 0.5f, new Vector2(px, py));
+
+                        int o = (int)((t*6) * 255);
+                        glowData[(i * 256) + x] = Color.FromNonPremultiplied(o,o,o, 255);
+                    }
+                }
+
+                ((Texture2D)resources["radial_glow"].value).SetData(glowData);
                 glowData = null;
                 pixel_loaded = true;
             }

@@ -48,3 +48,4 @@ C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug
 C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\sha\spotlight.xnb
 C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\sha\base.xnb
 C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\sha\pointlight.xnb
+C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\sha\exp_light_depth.xnb

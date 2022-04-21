@@ -26,7 +26,7 @@ namespace Magpie {
             test_light2 = new SpotLight();
             test_light2.position += Vector3.Left * 14f;
             test_light2.light_color = Color.LightPink;
-
+            
             for (int i = 0; i < 20; i++) {
                 lights.Add(new PointLight(
                     (Vector3.UnitX * (10f * RNG.rng_float_neg_one_to_one)) + (Vector3.UnitY * (20f * RNG.rng_float)) + (Vector3.Forward * (30f * RNG.rng_float)), 
@@ -34,10 +34,11 @@ namespace Magpie {
                     RNG.random_opaque_color()
                     ));
             }
-
+            
             lights.Add(test_light);
             //lights.Add(test_light2);
         }
+        //float3 Depth = tex2D(DEPTH, UV).rgb;
 
         public void load_map() {
             current_map = new Map();
@@ -99,6 +100,9 @@ namespace Magpie {
         
 
         public void Update() {
+            test_light.position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.6f) + (EngineState.camera.orientation.Down * 0.5f);
+            test_light.orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
+
             foreach (DynamicLight light in lights) {
                 light.update();
             }
@@ -128,7 +132,7 @@ namespace Magpie {
 
                 player_actor.wants_movement = Vector3.Zero;
             }
-
+            //test_light.update();
             
         }
 
@@ -148,8 +152,6 @@ namespace Magpie {
             }
             */
 
-            //test_light.position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.3f) + (EngineState.camera.orientation.Down * 0.5f);
-            //test_light.orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(10f));
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);
 

@@ -31,6 +31,12 @@
 /processorParam:DebugMode=Auto
 /build:../../MagpieEngine/Shaders/diffuse.fx;sha/diffuse.fx
 
+#begin ../../MagpieEngine/Shaders/exp_light_depth.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/exp_light_depth.fx;sha/exp_light_depth.fx
+
 #begin ../../MagpieEngine/Shaders/light_depth.fx
 /importer:EffectImporter
 /processor:EffectProcessor

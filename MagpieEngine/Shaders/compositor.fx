@@ -11,18 +11,18 @@
 sampler2D DiffuseSampler = sampler_state
 {
 	texture = <DiffuseLayer>;
-	MINFILTER = ANISOTROPIC;
-	MAGFILTER = ANISOTROPIC;
-	MIPFILTER = ANISOTROPIC;
+	MINFILTER = POINT;
+	MAGFILTER = POINT;
+	MIPFILTER = POINT;
 	ADDRESSU = CLAMP;
 	ADDRESSV = CLAMP;
 };
 sampler2D LightSampler = sampler_state
 {
 	texture = <LightLayer>;
-	MINFILTER = ANISOTROPIC;
-	MAGFILTER = ANISOTROPIC;
-	MIPFILTER = ANISOTROPIC;
+	MINFILTER = POINT;
+	MAGFILTER = POINT;
+	MIPFILTER = POINT;
 	ADDRESSU = CLAMP;
 	ADDRESSV = CLAMP;
 };
@@ -97,7 +97,7 @@ float4 MainPS(VSO input) : COLOR
     float4 rgba = tex2D(DiffuseSampler, input.UV);
     float4 l = tex2D(LightSampler, input.UV);
     float4 n = tex2D(NormalSampler, input.UV);
-    float d = tex2D(DepthSampler, input.UV).r;
+    float3 d = tex2D(DepthSampler, input.UV).rgb;
 	
     if (buffer == -1)        
         return rgba.rgba * l;
@@ -106,7 +106,7 @@ float4 MainPS(VSO input) : COLOR
     else if (buffer == 1)
         return n; //normals
     else if (buffer == 2)
-        return float4(d.r, d.r, d.r, 1); //depth
+        return float4(d.r, d.g, d.b, 1); //depth
     else if (buffer == 3)
         return l; //lighting
 	else 

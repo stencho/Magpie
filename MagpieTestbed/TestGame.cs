@@ -190,6 +190,14 @@ namespace MagpieTestbed
             
             if (bind_just_pressed("screenshot")) Scene.screenshot_at_end_of_frame();
 
+            if (bind_just_pressed("test")) {
+                world.current_map.objects.Clear();
+
+                for (int o = 0; o < 150; o++) {
+                    world.current_map.add_object("test_sphere" + o, new TestSphere());
+                    world.current_map.objects["test_sphere" + o].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one * 10)) + (Vector3.Up * (RNG.rng_float * 20));
+                }
+            }
 
 
             base.Update(gameTime);
@@ -213,7 +221,7 @@ namespace MagpieTestbed
 
             world.Draw(GraphicsDevice, EngineState.camera);
 
-            test_a.draw();
+           // test_a.draw();
 
             
             /*
@@ -228,13 +236,14 @@ namespace MagpieTestbed
             GraphicsDevice.Clear(Color.Transparent);
 
 
-            foreach (DynamicLight l in world.lights) {
-                if (l.type == LightType.POINT)
-                    Draw3D.xyz_cross(GraphicsDevice, l.position, 0.1f, l.light_color, EngineState.camera.view, EngineState.camera.projection);
-            }
-            //Draw3D.xyz_cross(GraphicsDevice, world.pointl.position, world.pointl.radius, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            //foreach (DynamicLight l in world.lights) {
+                //if (l.type == LightType.POINT)
+                    //Draw3D.xyz_cross(GraphicsDevice, l.position, 0.1f, l.light_color, EngineState.camera.view, EngineState.camera.projection);
+            //}
 
-            Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + world.test_light.orientation.Forward * world.test_light.far_clip, Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
+            //Draw3D.xyz_cross(GraphicsDevice, world.test_light.position, 1f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            ///Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (world.test_light.orientation.Forward * world.test_light.far_clip), Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
+            //Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (Vector3.Transform(Vector3.Normalize(world.test_light.orientation.Forward + world.test_light.orientation.Down), ((SpotLight)world.test_light).actual_scale)), Color.Orange, EngineState.camera.view, EngineState.camera.projection);
 
             EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
                        
@@ -248,7 +257,8 @@ namespace MagpieTestbed
 
             EngineState.ui.draw();
 
-            //Draw2D.image(world.lights[0].depth_map, XYPair.One * 50, XYPair.One * 200, Color.White);
+            //Draw2D.image(world.test_light.depth_map, XYPair.One * 50, XYPair.One * 200, Color.White);
+            //Draw2D.image(ContentHandler.resources["radial_glow"].value_tx, XYPair.One * 150, XYPair.One * 200, Color.White);
 
             EngineState.spritebatch.End();
 
