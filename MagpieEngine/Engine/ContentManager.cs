@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static Magpie.Graphics.Draw2D;
 
 namespace Magpie.Engine {
     public enum RESOURCE_TYPE {
@@ -233,6 +234,7 @@ namespace Magpie.Engine {
                 Console.WriteLine("resource already added: " + resource.name);
         }
 
+
         public static void LoadContent(ContentManager Content, GraphicsDevice gd) {
             if (!pixel_loaded) {
                 _onePXWhite = new Texture2D(gd, 1, 1);
@@ -268,6 +270,16 @@ namespace Magpie.Engine {
                 }
 
                 ((Texture2D)resources["center_glow"].value).SetData(glowData);
+
+                glowData = new Color[256];
+                for (var i = 0; i < glowData.Length; i++) {
+                    var p = i / (glowData.Length / 2f);
+                    if (p > 1) p = 1f - (p - 1);
+
+                    glowData[i] = Color.FromNonPremultiplied(255, 255, 255, (int)(p * 155));
+                }
+
+
 
                 glowData = new Color[256 * 256];
                 for (var i = 0; i < 255; i++) {

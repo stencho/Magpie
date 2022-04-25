@@ -18,7 +18,6 @@ namespace Magpie {
 
         public SpotLight test_light;
         public SpotLight test_light2;
-        public List<DynamicLight> lights = new List<DynamicLight>();
 
         public World() {
             load_map();
@@ -28,14 +27,14 @@ namespace Magpie {
             test_light2.light_color = Color.LightPink;
             
             for (int i = 0; i < 20; i++) {
-                lights.Add(new PointLight(
-                    (Vector3.UnitX * (10f * RNG.rng_float_neg_one_to_one)) + (Vector3.UnitY * (20f * RNG.rng_float)) + (Vector3.Forward * (30f * RNG.rng_float)), 
-                    5 + (RNG.rng_float * 10f), 
-                    RNG.random_opaque_color()
-                    ));
+                 current_map.lights.Add(new PointLight(
+                     (Vector3.UnitX * (10f * RNG.rng_float_neg_one_to_one)) + (Vector3.UnitY * (20f * RNG.rng_float)) + (Vector3.Forward * (30f * RNG.rng_float)), 
+                     5 + (RNG.rng_float * 10f), 
+                     RNG.random_opaque_color()
+                     ));
             }
-            
-            lights.Add(test_light);
+
+            current_map.lights.Add(test_light);
             //lights.Add(test_light2);
         }
         //float3 Depth = tex2D(DEPTH, UV).rgb;
@@ -100,10 +99,10 @@ namespace Magpie {
         
 
         public void Update() {
-            test_light.position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.6f) + (EngineState.camera.orientation.Down * 0.5f);
+            test_light.position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.6f) + (EngineState.camera.orientation.Down * 0.2f);
             test_light.orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
 
-            foreach (DynamicLight light in lights) {
+            foreach (DynamicLight light in current_map.lights) {
                 light.update();
             }
 
@@ -132,13 +131,14 @@ namespace Magpie {
 
                 player_actor.wants_movement = Vector3.Zero;
             }
+            Scene.sun_moon.update();
             //test_light.update();
             
         }
 
         SceneObject[] current_scene;
         public void Draw(GraphicsDevice gd, Camera camera) {
-             current_scene = Scene.create_scene_from_lists(current_map.floors, current_map.objects, current_map.actors, lights, EngineState.camera.frustum);
+             current_scene = Scene.create_scene_from_lists(current_map.floors, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
 
             /*
             foreach (Floor floor in current_map.floors.Values) {
@@ -155,12 +155,12 @@ namespace Magpie {
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);
 
-            Scene.build_lighting(lights, current_scene);
+            Scene.build_lighting(current_map.lights, current_scene);
 
             Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
 
             Scene.draw(current_scene);
-            Scene.draw_lighting(lights);
+            Scene.draw_lighting(current_map.lights);
         }
 
 

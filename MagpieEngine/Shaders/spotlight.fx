@@ -43,6 +43,7 @@ sampler COOKIE: register(s2)= sampler_state {
 	ADDRESSU = CLAMP;
 	ADDRESSV = CLAMP;
 };
+
 sampler SHADOW : register(s3);
 
 struct VSI {
@@ -93,7 +94,7 @@ float4 Phong(float3 Position, float3 N, float radialAttenuation,float SpecularIn
 	if (SL > LightAngleCos && distance(Position.xyz, LightPosition.xyz) <= LightClip) {
 		float NL = dot(-N, L);
 		float3 Diffuse = NL * LightColor.xyz;
-		Shading = float4(Diffuse.rgb, 1) * heightAttenuation ;
+		Shading = float4(Diffuse.rgb, 1) * Attenuation;
 	}
 
 	return Shading;
@@ -116,26 +117,22 @@ float4 PS(VSO input) : COLOR0 {
 	
 	float4 encodedNormal = tex2D(NORMAL,UV);
 	float3 Normal = mul(decode(encodedNormal.xyz), InverseView);
-
-	
-	//float3 Depth = tex2D(DEPTH,UV).rgb;
-	
-	float3 Depth = manualSample(DEPTH,UV, GBufferTextureSize).rgb;
+		
+	float Depth = manualSample(DEPTH,UV, GBufferTextureSize).r;
 
 	float4 Position = 1.0f;
 	Position.xy = input.ScreenPosition.xy;
-	Position.z = Depth.r;
-
+	Position.z = Depth;
 	Position = mul(Position, InverseViewProjection);
 	Position /= Position.w;
-
+	
 	float3 L = Position.xyz - LightPosition.xyz;
 	float Ll = length(L);
 
 	float4 LightScreenPos = mul(Position, LightViewProjection);
 
-	float4 LSPcookie = LightScreenPos / (Ll * 0.5);
-	LightScreenPos /= Ll ;
+	float4 LSPcookie = LightScreenPos / (Ll);
+	LightScreenPos /= Ll;
 	
 	float2 LUV = 0.5 * (float2(LightScreenPos.x, -LightScreenPos.y) + 1);
 	float2 LUVcookie = 0.5 * (float2(LSPcookie.x, -LSPcookie.y) + 1);
@@ -150,7 +147,7 @@ float4 PS(VSO input) : COLOR0 {
 		ShadowFactor = (lZ * exp(-(LightClip * 0.5f) * (len - DepthBias)));
 	}
 
-	return Phong(Position.xyz, Normal, 1, 1, 1) * saturate(ShadowFactor) * Attenuation;
+	return Phong(Position.xyz, Normal, Attenuation, 1, 1) * saturate(ShadowFactor);
 	//return float4(Position.xyz, 1) * s;
 }
 

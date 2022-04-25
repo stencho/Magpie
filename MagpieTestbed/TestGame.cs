@@ -73,6 +73,8 @@ namespace MagpieTestbed
 
             add_bind(new MouseButtonBind(MouseButtons.Left, "ui_select"));
             add_bind(new MouseButtonBind(MouseButtons.Right, "click_right"));
+            add_bind(new MouseButtonBind(MouseButtons.ScrollUp, "scroll_up"));
+            add_bind(new MouseButtonBind(MouseButtons.ScrollDown, "scroll_down"));
             /*
             world.current_map.add_object("test_sphere", new TestSphere());
             world.current_map.add_object("test_sphere2", new TestSphere());
@@ -189,14 +191,37 @@ namespace MagpieTestbed
             }
             
             if (bind_just_pressed("screenshot")) Scene.screenshot_at_end_of_frame();
+            bool held_test = true;
+            if (bind_pressed("test")) {
+                if (bind_pressed("scroll_up") || bind_pressed("scroll_down")) {
+                    DigitalControlBindings.set_bind_special("test", special_action_status.held);
+                    held_test = false;
+                }
+            }
 
-            if (bind_just_pressed("test")) {
+            if (bind_just_released("test")) {
+                if (!bind_held("test")) {
+
+                    Scene.sun_moon.time_stopped = !Scene.sun_moon.time_stopped;
+                }
+            }
+            if (bind_held("test")) {
+
+                /*
                 world.current_map.objects.Clear();
 
                 for (int o = 0; o < 150; o++) {
                     world.current_map.add_object("test_sphere" + o, new TestSphere());
                     world.current_map.objects["test_sphere" + o].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one * 10)) + (Vector3.Up * (RNG.rng_float * 20));
-                }
+                }*/
+                if (!held_test) {
+                    if (bind_pressed("scroll_up")) {
+                        Scene.sun_moon.set_time_of_day(Scene.sun_moon.current_day_value + ((Controls.wheel_delta / 240.0) * 0.05));
+                    }
+                    if (bind_pressed("scroll_down")) {
+                        Scene.sun_moon.set_time_of_day(Scene.sun_moon.current_day_value + ((Controls.wheel_delta / -240.0) * -0.05));
+                    }
+                } 
             }
 
 
@@ -214,7 +239,10 @@ namespace MagpieTestbed
         //Tetrahedron test_a = new Tetrahedron();
         //Sphere test_b = new Sphere();
         //Tetrahedron test_b = new Tetrahedron();
-
+        private string print_ts(TimeSpan ts) {
+            string s = string.Format("{0:F0}m{1:F0}s", ts.TotalMinutes, ts.Seconds);
+            return s;
+        }
         protected override void Draw(GameTime gameTime)
         {            
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
@@ -245,7 +273,7 @@ namespace MagpieTestbed
             ///Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (world.test_light.orientation.Forward * world.test_light.far_clip), Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
             //Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (Vector3.Transform(Vector3.Normalize(world.test_light.orientation.Forward + world.test_light.orientation.Down), ((SpotLight)world.test_light).actual_scale)), Color.Orange, EngineState.camera.view, EngineState.camera.projection);
 
-            EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+            EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap);
                        
             Draw2D.text_shadow("pf",
                 Clock.frame_rate.ToString() + " FPS [" +  Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
@@ -254,6 +282,35 @@ namespace MagpieTestbed
                 Scene.LIGHT_BIAS.ToString()
                 
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
+
+
+            //Draw2D.line(Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + Vector2.One, Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + (Vector2.UnitX * 200f) + Vector2.One, 1, Color.Black);
+            //Draw2D.line(Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f), Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + (Vector2.UnitX * 200f), 1, Color.Red);
+
+            Draw2D.image(Scene.sun_moon.lerps.debug_band, XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f), XYPair.One + (XYPair.UnitY * 30) + (XYPair.UnitX * 256), Color.White);
+
+            Draw2D.line(
+                (XYPair.UnitX * ((float)Scene.sun_moon.current_day_value * 256)) + XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f),
+                (XYPair.UnitX * ((float)Scene.sun_moon.current_day_value * 256)) + XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 70f) + (XYPair.UnitY * 30), 
+                2f, Color.Red);
+
+
+            Draw2D.text_shadow("pf",
+string.Format(@"
+{0:F0}ms/{1}ms ({2:F3}%)
+{3:F0}/{4:F0} {5} 
+1 day = {7}/{6:F2}x speed multiplier ({8})
+
+",
+Scene.sun_moon.current_time_ms, Scene.sun_moon.entire_day_cycle_length_ms, Scene.sun_moon.current_day_value * 100f,
+Scene.sun_moon.current_time_ms / 1000f, Scene.sun_moon.entire_day_cycle_length_ms / 1000f, "Time is " + (Scene.sun_moon.time_stopped ? "stopped" : "ticking"),
+Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scene.sun_moon.cycle_ts_scaled)
+
+
+
+
+)           , Vector2.One * 2 + (Vector2.UnitX * 300), Color.White);
+
 
             EngineState.ui.draw();
 

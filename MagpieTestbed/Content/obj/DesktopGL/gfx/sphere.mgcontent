@@ -3,7 +3,7 @@
   <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/gfx/sphere.FBX</SourceFile>
   <SourceTime>2022-04-19T01:13:24.9150826+10:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/gfx/sphere.xnb</DestFile>
-  <DestTime>2022-04-19T01:23:57.4197369+10:00</DestTime>
+  <DestTime>2022-04-25T21:56:21.9588775+10:00</DestTime>
   <Importer>FbxImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>ModelProcessor</Processor>

@@ -12,6 +12,157 @@ using System.Threading.Tasks;
 namespace Magpie.Graphics {
     public static class Draw2D {
 
+        public class GradientMapGenerator1D {
+            public float min, max, value;
+            public Color start_color;
+
+            public Texture2D debug_band;
+
+            public void build_debug_band_texture(int width = 256) {
+                debug_band = new Texture2D(EngineState.graphics_device, width, 1);
+                var data = new Color[width];
+                
+                for (var i = 0; i < data.Length; i++) {
+                    float a = i; float b = data.Length;
+                    float ab = a / b;
+
+                    data[i] = get_color_at(ab);
+                }
+
+                debug_band.SetData(data);
+            }
+
+            public struct CLerpPck {
+                public Color color; public float position;
+                public CLerpPck(Color color, float position) {
+                    this.color = color;
+                    this.position = position;
+                }
+            }
+
+            List<CLerpPck> Lerps = new List<CLerpPck>();
+
+            public Color get_color_at(float position) {
+                float position_within_lerp = 0.0f;
+                float position_end = 1f;
+                float lerp_length = 1f;
+                float norm_pos_in_lerp = 0.0f;
+
+                var first_lerp = Lerps[0];
+                if (position <= first_lerp.position) {
+                    lerp_length = first_lerp.position;
+
+                    norm_pos_in_lerp = position / lerp_length;
+                    return ColorInterpolate(start_color, first_lerp.color, norm_pos_in_lerp);
+                }
+                
+
+                for (int i = 0; i < Lerps.Count-1; i++) {
+                    CLerpPck lerp = Lerps[i];
+                    CLerpPck next_lerp = Lerps[i+1];
+
+                    if (position >= lerp.position && position < next_lerp.position) {
+                        position_within_lerp = (position - lerp.position);
+                        
+                        position_end = next_lerp.position;
+                        lerp_length = next_lerp.position - lerp.position;
+
+                        norm_pos_in_lerp = position_within_lerp / lerp_length;
+
+                        return ColorInterpolate(lerp.color, next_lerp.color, norm_pos_in_lerp);
+                    }
+                }
+
+                return start_color;
+            }
+
+            public Color current_color {
+                get {
+                    foreach (CLerpPck lerp in Lerps) {
+
+                    }
+
+                    return Color.White;
+                }
+            }
+            
+            public GradientMapGenerator1D(Color start_color) {
+                min = 0.0f;
+                max = 0.0f;
+                value = 0.0f;
+
+                this.start_color = start_color;
+            }
+
+            public void add_lerp(Color color, float position) {
+                if (position > max) max = position;
+                
+                var tmp = new CLerpPck(color, position);
+
+                Lerps.Add(tmp);
+            }
+        }
+
+        /// <summary>
+        /// Interpolates between two colors
+        /// </summary>
+        /// <param name="colorA">The first color</param>
+        /// <param name="colorB">The second color</param>
+        /// <param name="bAmount">The amount to interpolate; 0.0 for 100% color A, 1.0 for color B</param>
+        /// <returns>The resulting Color</returns>
+        public static Color ColorInterpolate(Color colorA, Color colorB, float bAmount) {
+            var aAmount = 1.0f - bAmount;
+            var r = (int)(colorA.R * aAmount + colorB.R * bAmount);
+            var g = (int)(colorA.G * aAmount + colorB.G * bAmount);
+            var b = (int)(colorA.B * aAmount + colorB.B * bAmount);
+
+            return Color.FromNonPremultiplied(r, g, b, 255);
+        }
+
+        public static T Limit<T>(T input, T min, T max) {
+            if (Comparer<T>.Default.Compare(input, max) > 0) return max;
+            return Comparer<T>.Default.Compare(min, input) > 0 ? min : input;
+        }
+        /// <summary>
+        /// Generates a randomized color which is similar to the input color
+        /// </summary>
+        /// <param name="inputColor">the input color</param>
+        /// <param name="maxDifference">a float from 0.0-1.0 determining the maximum difference</param>
+        /// <returns></returns>
+        public static Color SimilarColor(Color inputColor, float maxDifference) {
+            var diff = (int)(maxDifference * 255);
+
+            var r = Limit((int)(inputColor.R + diff * ((RNG.rng_float * 2f) - 1.0f)), 0, 255);
+            var g = Limit((int)(inputColor.G + diff * ((RNG.rng_float * 2f) - 1.0f)), 0, 255);
+            var b = Limit((int)(inputColor.B + diff * ((RNG.rng_float * 2f) - 1.0f)), 0, 255);
+
+            return Color.FromNonPremultiplied(r, g, b, 255);
+        }
+
+        /// <summary>
+        /// Generates a muted version of the input color
+        /// </summary>
+        /// <param name="input">the color to mute</param>
+        /// <param name="amount">the amount to mute by</param>
+        /// <returns></returns>
+        public static Color MuteColor(Color input, float amount) {
+            return Color.FromNonPremultiplied(
+                Limit((int)(input.R * (1.0f - amount)), 0, 255),
+                Limit((int)(input.G * (1.0f - amount)), 0, 255),
+                Limit((int)(input.B * (1.0f - amount)), 0, 255),
+                input.A);
+        }
+
+        /// <summary>
+        /// Generates a monochrome color between white and black
+        /// </summary>
+        /// <param name="fromWhite">The maximum amount of difference from 255/255/255, flat white</param>
+        /// <returns></returns>
+        public static Color RandomShadeOfGrey(float fromWhite) {
+            var val = 255 - ((int)(RNG.rng_float * (255 * fromWhite)));
+            return Color.FromNonPremultiplied(val, val, val, 255);
+        }
+
         #region Drawing functions
 
         public static XYPair get_txt_size_pf(string txt) => Math2D.measure_string("pf", txt);

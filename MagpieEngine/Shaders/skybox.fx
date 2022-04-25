@@ -88,8 +88,8 @@ float4 color_lerp(float4 a, float4 b, float position)
 bool fog = false;
 
 float4 sky_color;
-float sky_brightness;
 float4 atmosphere_color;
+
 PSO clear_sky(VSO input)
 {
     PSO output = (PSO) 0;
@@ -99,11 +99,11 @@ PSO clear_sky(VSO input)
     float4 rgba_final = sky_color;
     
     //draw fade from atmospheric albedo (is this the right term lmaomo) up to full on sky colour
-    rgba_final.rgb = color_lerp(atmosphere_color.rgb * sky_brightness, sky_color.rgb * sky_brightness, clamp(input.Pos3d.y*0.3, 0.0, 1));
+    rgba_final.rgb = color_lerp(atmosphere_color.rgb, sky_color.rgb, clamp(input.Pos3d.y*0.3, 0.0, 1));
     output.Lighting.rgb = 1;
     output.Lighting.a = 1;
-    output.Normals = 0;
-    output.Diffuse = rgba_final;
+    output.Normals = 1;
+    output.Diffuse = rgba_final * 0.5;
     output.Depth.rgb = 1;
     output.Depth.a = 1;
     return output;

@@ -119,7 +119,13 @@ PSO MainPS(VertexShaderOutput input)
 
     output.Diffuse = rgba;
 
-	output.Lighting = float4(ambient_light,1);
+	//TODO vvvUSE ALPHA CHANNEL OF LIGHTINGvvv FOR KEEPING TRACK OF SCENE ALPHA
+	// this will allow for at the very least 1 bit of alpha through obviously Lighting.w.a = 0;
+	// but also with a bit of work, well, a float is a lot of bytes, it would be possible to do stuff like storing a set of bytes in a float in the alpha, representing an ID from a list of 255 possible values
+	// I think this would allow up to 4 transparencies in a row before it'd break, and would allow individual IDs 0-255
+	// 4 8-bit ints packed into a 32-bit float, [AAAA/AAAA][BBBB/BBBB][CCCC/CCCC][DDDD/DDDD]
+	//										    0xAA,      0xBB,      0xCC,      0xDD
+	output.Lighting = float4(0,0,0,1);
 		
 	return output;
 }

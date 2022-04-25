@@ -25,11 +25,11 @@
 /processorParam:DebugMode=Auto
 /build:../../MagpieEngine/Shaders/compositor.fx;sha/compositor.fx
 
-#begin ../../MagpieEngine/Shaders/diffuse.fx
+#begin ../../MagpieEngine/Shaders/directionallight.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:../../MagpieEngine/Shaders/diffuse.fx;sha/diffuse.fx
+/build:../../MagpieEngine/Shaders/directionallight.fx;sha/directionallight.fx
 
 #begin ../../MagpieEngine/Shaders/exp_light_depth.fx
 /importer:EffectImporter
@@ -37,17 +37,17 @@
 /processorParam:DebugMode=Auto
 /build:../../MagpieEngine/Shaders/exp_light_depth.fx;sha/exp_light_depth.fx
 
+#begin ../../MagpieEngine/Shaders/fill_gbuffer.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/fill_gbuffer.fx;sha/fill_gbuffer.fx
+
 #begin ../../MagpieEngine/Shaders/light_depth.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:../../MagpieEngine/Shaders/light_depth.fx;sha/light_depth.fx
-
-#begin ../../MagpieEngine/Shaders/lit_diffuse.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:../../MagpieEngine/Shaders/lit_diffuse.fx;sha/lit_diffuse.fx
 
 #begin ../../MagpieEngine/Shaders/pointlight.fx
 /importer:EffectImporter
@@ -162,12 +162,6 @@
 /processorParam:SwapWindingOrder=False
 /processorParam:TextureFormat=Compressed
 /build:gfx/sphere.FBX
-
-#begin sha/base.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/base.fx
 
 #begin tex/cash_santa.png
 /importer:TextureImporter

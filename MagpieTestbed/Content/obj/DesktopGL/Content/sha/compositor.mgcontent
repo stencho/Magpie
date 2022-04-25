@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SourceFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/compositor.fx</SourceFile>
-  <SourceTime>2022-04-21T12:51:15.7703307+10:00</SourceTime>
+  <SourceTime>2022-04-26T07:01:07.7044145+10:00</SourceTime>
   <DestFile>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/bin/DesktopGL/Content/sha/compositor.xnb</DestFile>
-  <DestTime>2022-04-21T12:51:16.6009761+10:00</DestTime>
+  <DestTime>2022-04-26T07:01:08.5405595+10:00</DestTime>
   <Importer>EffectImporter</Importer>
   <ImporterTime>2019-11-28T00:13:38+11:00</ImporterTime>
   <Processor>EffectProcessor</Processor>

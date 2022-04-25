@@ -347,8 +347,14 @@ namespace Magpie.Engine {
             } //else throw new Exception("invalid bind name: " + bind);
             else return special_action_status.none;
         }
+        public static void set_bind_special(string bind, special_action_status special) {
+            if (status.ContainsKey(bind)) {
+                status[bind].special = special;
+            } //else throw new Exception("invalid bind name: " + bind);
+        }
 
-        
+
+        //public static void force_enable_hold(string bind) => get_bind_special
 
         public static bool bind_pressed(string bind) =>       (!bind_disabled(bind)) && (get_bind_result(bind) == digital_bind_result.pressed || get_bind_result(bind) == digital_bind_result.just_pressed);
         public static bool bind_just_held(string bind) =>     (!bind_disabled(bind)) && (get_bind_special(bind) == special_action_status.hold_start);
@@ -689,9 +695,10 @@ namespace Magpie.Engine {
         
         #endregion
 
-        public struct bind_state {
+        public class bind_state {
             public digital_bind_result result;
             public special_action_status special;
+
         }
 
         public interface IDigitalBind {
@@ -848,7 +855,7 @@ namespace Magpie.Engine {
 
             public string[] binds { get; set; }
 
-            bind_state s;
+            bind_state s = new bind_state();
             public bind_state state => s;
 
             hold_status h = new hold_status();

@@ -100,7 +100,7 @@ float4 MainPS(VSO input) : COLOR
     float3 d = tex2D(DepthSampler, input.UV).rgb;
 	
     if (buffer == -1)        
-        return rgba.rgba * l;
+        return saturate((rgba.rgba * l) * 1.25);
     else if (buffer == 0 || fullbright)
         return rgba.rgba;
     else if (buffer == 1)

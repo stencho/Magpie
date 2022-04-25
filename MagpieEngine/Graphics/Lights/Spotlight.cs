@@ -19,7 +19,7 @@ namespace Magpie.Graphics.Lights {
         public float far_clip { get; set; } = 33f;
         public float near_clip { get; set; } = 0.1f;
 
-        public float fov { get; set; } = 1.3f;// MathHelper.PiOver2;
+        public float fov { get; set; } = MathHelper.PiOver4;
 
         public BoundingFrustum frustum { get; set; }
         public Vector3 position { get; set; } = (Vector3.Up * 15.91909f) + (Vector3.Forward *3.921314f);
