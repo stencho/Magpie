@@ -1,0 +1,60 @@
+TODO IMMEDIATE
+NEW SEGMENTED TERRAIN/HEIGHTFIELD
+	- Segments should keep track of all textures, shaders and models required for all of the content contained within them gets loaded
+		- on top of this, a system for loading and unloading models/textures dynamically as the player moves from area to area
+
+	- Segments need to keep high and low level of detail vertex/index buffers, if not more levels of detail than that
+		- probably automate controlling how many levels of detail there are and how detailed each is with regards to the base height data
+		- these only need to really be created once when the map is being exported and at any point where changes are being made to the heightmap		
+		- quick dynamic shader based displacement could actually be a really good idea, if ogl supports it
+			- if not oml it might be time to switch to dx
+		- shader to do GPU-based texture blending using a class to keep track of each of the texture layers, each of the textures, their overlay maps, and their UV scaling, and use a custom buffer/shader setup to draw the terrain and handle the texture list, texture opacity data, etc. 		
+			- this could actually be pretty fun tbh
+		- shader to do a pass for temporary decals
+			- less necessary, might be useful
+
+	- it might be possible to optimize rendering the world by having segments keep track of the vertex buffers of each of their objects, then pass them into a monolithic shader with multiple models loaded to draw the map chunk and all static geometry in it at the same time
+
+	- rendering system to handle all of this
+		- should all trickle down to terrain.draw() of course, but probably need more than just draw(), draw_these_segments(params (int,int)[] segment_ids)
+			- keep a set of debug flags for drawing with debug visualizations, integrate this harder than usual, it's important here
+		- just do general diffuse drawing to begin with, can add bump maps or whatever later on, but you don't need specular to test
+		
+	- none of the bullshit with the old segmented heightmaps where they were extremely hard to use and modify
+		- during creation, whatever goes, but each heightfield must store for public use:
+			- a copy of the overall actual heightmap data
+				- heightmap_data should probably be its own thing, with the ability to access it as contiguous data, x/y indices, or as a set of segment height data
+					- contiguous data as in data[69] => the height at X:69, Y:0
+					- x/y as in data[69,420] => the height at index X:69, Y:420
+					- segment height data as in segmentdata[6,9] => a single-segment heightmap-data representing that specific segment
+			- positions for each corner, center position, all get and set, so all modifying a base internal position on set
+			- a multidimensional array of segments, accessible via segments[3,6]
+			
+		- each segment should keep track of
+			-basically the same as above minus the array of segments
+
+	- need to write a tool into the heightmap code to use immediate mode rendering to preview the general shape, segment layout, LODs and height mapping of a heightfield
+
+	? would be cool to have vector displacement
+		- I might be too dumb 2 make that work well, BUT if the collision tests work on a (collider -> a bunch of heightmap triangles) basis and not by mathematically gluing stuff to the grond then it might be doable with not too much trouble
+
+NEW COLLISION SYSTEM
+	- swept collision tests
+		[ ] point/sphere -> line/line with radius
+		[ ] line/capsule -> square/square with radius
+		[ ] tri -> absolute fuckfest toblerone
+		[ ] quad -> munted cube
+		[?] cube -> why??
+
+	- additional collision test radius on everything
+		- similar to old implementation
+		-	|	|		   |   |
+		-	|	|--+----+--|   |
+		- should allow for rock solid compressionless collisions when moving slowly
+		- depending on how implementation of sweeping goes, this might be completely worthless
+
+TRANSPARENCY HANDLING
+	- use alpha channel of lighting rendertarget to handle transparency storage, check fill_gbuffer.fx for more info
+
+POINT & SPOTLIGHTS 
+	- allow usage of baked, static-but-dynamic shadow maps- this should be a literal joke for spot lights and slightly less of a joke for point lights
