@@ -39,16 +39,17 @@ namespace Magpie.Graphics {
     }
 
     public class SunMoonSystem {
-        public Color night_ambient = Color.FromNonPremultiplied(4, 4, 9, 255);
+        public Color night_ambient = Color.FromNonPremultiplied(3,1,3, 255);
 
         public Color atmosphere_color = Color.FromNonPremultiplied(4, 4, 9, 255);
 
         public Color sky_color = Color.Lerp(Color.Purple, Color.LightSkyBlue, 0.2f);
 
         public Vector3 sun_direction => sun_orientation.Forward;
-        private Matrix sun_orientation = Matrix.Identity * Matrix.CreateRotationX(MathHelper.ToRadians(-45f)) * Matrix.CreateRotationZ(MathHelper.ToRadians(-45f));
+        private Matrix sun_orientation = Matrix.Identity * Matrix.CreateRotationX(MathHelper.ToRadians(-75f)) * Matrix.CreateRotationZ(MathHelper.ToRadians(-15f));
+        public Color current_color = Color.White;
 
-        public GradientMapGenerator1D lerps;
+        public GradientLineGenerator lerps;
 
         public double time_multiplier = 12f;
 
@@ -78,20 +79,20 @@ namespace Magpie.Graphics {
         public TimeSpan cycle_ts_scaled => new TimeSpan(0, 0, 0, 0, (int)(entire_day_cycle_length_ms / time_multiplier));
 
         public SunMoonSystem() {
-            lerps = new GradientMapGenerator1D(night_ambient);
+            lerps = new GradientLineGenerator(night_ambient);
 
             lerps.add_lerp(night_ambient, .10f);
 
             //back down to orange just before dawn
-            lerps.add_lerp(Color.FromNonPremultiplied(253, 130, 194, 255), .25f);
+            lerps.add_lerp(Color.FromNonPremultiplied(180, 130, 194, 255), .25f);
 
             //midday sky
-            lerps.add_lerp(Color.FromNonPremultiplied(253, 130, 194, 255), .30f);
-            lerps.add_lerp(Color.FromNonPremultiplied(241, 175, 245, 255), .35f);
+            lerps.add_lerp(Color.FromNonPremultiplied(180, 175, 245, 255), .35f);
 
-            lerps.add_lerp(Color.FromNonPremultiplied(241, 235, 255, 255), .50f);
+            lerps.add_lerp(Color.FromNonPremultiplied(200, 200, 255, 255), .55f);
+
             //back down to orange just before dusk
-            lerps.add_lerp(Color.FromNonPremultiplied(233, 130, 194, 255), .6f);
+            lerps.add_lerp(Color.FromNonPremultiplied(220, 150, 165, 255), .75f);
 
             lerps.add_lerp(night_ambient, .9f);
             lerps.add_lerp(night_ambient, 1f);
@@ -112,10 +113,10 @@ namespace Magpie.Graphics {
 
 
 
-            Color current = lerps.get_color_at((float)Scene.sun_moon.current_day_value);
+            current_color = lerps.get_color_at((float)Scene.sun_moon.current_day_value);
 
-            sky_color = Color.Lerp(Color.MidnightBlue, current, 0.2f) * 0.3f;
-            atmosphere_color = Color.Lerp(night_ambient, current, .5f) * 0.9f;
+            sky_color = Color.Lerp(Color.MidnightBlue, current_color, 0.7f) * 0.3f;
+            atmosphere_color = Color.Lerp(Color.LightSkyBlue, current_color, .5f) * 0.75f;
         }
 
         public void set_time_of_day(double normalized_time) {
@@ -137,6 +138,7 @@ namespace Magpie.Graphics {
             e_directionallight.CurrentTechnique.Passes[0].Apply();
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);
 
+            /*
             e_directionallight.Parameters["LightDirection"].SetValue((sun_orientation * Matrix.CreateRotationY(MathHelper.ToRadians(90))).Forward);
             e_directionallight.CurrentTechnique.Passes[0].Apply();
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);
@@ -148,7 +150,7 @@ namespace Magpie.Graphics {
             e_directionallight.Parameters["LightDirection"].SetValue((sun_orientation * Matrix.CreateRotationY(MathHelper.ToRadians(180))).Forward);
             e_directionallight.CurrentTechnique.Passes[0].Apply();
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);
-
+            */
 
             /*
             //sun
@@ -177,7 +179,6 @@ namespace Magpie.Graphics {
         static Effect e_pointlight = ContentHandler.resources["pointlight"].value_fx;
 
         public const int max_lights_per_object = 10;
-        public static float LIGHT_BIAS = 0.00001f;
 
         static SkyBoxTesselator skybox_t = new SkyBoxTesselator();
         static VertexPositionNormalColorUv[] skybox_data;
@@ -215,15 +216,31 @@ namespace Magpie.Graphics {
                 //RE-ADD LIGHT/FRUSTUM CHECKS
 
                 //if (floor.bounds.Intersects(view_frustum) || any_visible_light_frustum) {
+                if (floor.type == FloorType.PLANE) {
                     scene.Add(new SceneObject {
-                        vertex_buffer = floor.vertex_buffer,
-                        index_buffer = floor.index_buffer,
+                        vertex_buffer = ((FloorPlane)floor).vertex_buffer,
+                        index_buffer = ((FloorPlane)floor).index_buffer,
                         mesh_bounds = floor.bounds,
                         world = floor.world,
                         texture = floor.texture,
                         in_light = false,
                         shadow_maps = new List<Texture2D>()
-                   });
+                    });
+                } else if (floor.type == FloorType.SEGMENTED_HEIGHTFIELD) {
+                    //do frustum test here to see which segments are in view and get the correct LOD buffer
+                    //then add a new scene object for each of the segments added, easy
+
+                    //for (int y = 0; y < segment count Y; y++) {
+                    //  for (int x = 0; x < segment count X; x++) 
+                    //      scene.Add(new SceneObject {
+
+                    //      });
+                    //  }
+                    //}
+
+                    //may be more efficient to use brain and or maths to only do the frustum check with segments that
+                    //are both in front of the camera (easy) and in a cone within the front of the camera (less easy)
+                }
 
                 //}
             }

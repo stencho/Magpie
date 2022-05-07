@@ -8,7 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Magpie.Engine.Floors {
+    public enum FloorType {
+        PLANE, 
+        HEIGHTFIELD,
+        SEGMENTED_HEIGHTFIELD
+    }
+
     public interface Floor {
+        FloorType type { get; }
+
         Vector3 position { get; set; }
         Matrix orientation { get; set; }
         Matrix world { get; }
@@ -19,10 +27,7 @@ namespace Magpie.Engine.Floors {
         bool within_vertical_bounds(Vector3 pos);
 
         BoundingBox bounds { get; set; }
-
-        IndexBuffer index_buffer { get; set; }
-        VertexBuffer vertex_buffer { get; set; }
-
+        
         void Update();
     }
 }

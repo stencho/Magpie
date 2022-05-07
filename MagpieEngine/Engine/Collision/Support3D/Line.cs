@@ -34,7 +34,7 @@ namespace Magpie.Engine.Collision.Support3D {
         public void draw() {
             Matrix w = orientation * Matrix.CreateTranslation(position);
 
-            Draw3D.line(EngineState.graphics_device,
+            Draw3D.line(
                 Vector3.Transform(A, w),
                 Vector3.Transform(B, w),
                 Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);

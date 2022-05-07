@@ -10,6 +10,8 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Magpie.Engine.Floors {
     [Serializable]
     class Heightfield : Floor {
+        public FloorType type => FloorType.HEIGHTFIELD;
+
         public Vector3 position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Matrix orientation { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Matrix world { get; }

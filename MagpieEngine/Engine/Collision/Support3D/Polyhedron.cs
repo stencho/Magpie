@@ -28,7 +28,7 @@ namespace Magpie.Engine.Collision.Support3D {
 
         public void draw() {
             foreach (Vector3 point in verts) {
-                Draw3D.xyz_cross(EngineState.graphics_device, Vector3.Transform(position + point, orientation), 0.1f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+                Draw3D.xyz_cross(Vector3.Transform(position + point, orientation), 0.1f, Color.Red);
             }
         }
 

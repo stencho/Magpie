@@ -17,6 +17,8 @@ float FarClip = 2000;
 float NearClip;
 float LightBias;
 
+float3 tint = float3(1,1,1);
+
 sampler DIFFUSE : register(s0);
 sampler NORMAL : register(s1);
 sampler DEPTH : register(s2);
@@ -117,7 +119,7 @@ PSO MainPS(VertexShaderOutput input)
     output.Normals.rgb = encode(normalize(input.TBN[2]));
 	output.Normals.a = 1;
 
-    output.Diffuse = rgba;
+    output.Diffuse = rgba * float4(tint,1);
 
 	//TODO vvvUSE ALPHA CHANNEL OF LIGHTINGvvv FOR KEEPING TRACK OF SCENE ALPHA
 	// this will allow for at the very least 1 bit of alpha through obviously Lighting.w.a = 0;

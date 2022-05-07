@@ -57,15 +57,15 @@ namespace Magpie.Engine.Collision.Support3D {
         public void draw() {
             Matrix w = Matrix.CreateTranslation(position);
 
-            Draw3D.fill_quad(EngineState.graphics_device, w, A, B, C, D, Color.White * 0.9f, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.fill_quad(w, A, B, C, D, Color.White * 0.9f, EngineState.camera.view, EngineState.camera.projection);
 
-            Draw3D.xyz_cross(EngineState.graphics_device, Vector3.Transform(A, w), 5f, Color.Green, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.xyz_cross(EngineState.graphics_device, Vector3.Transform(B, w), 5f, Color.Blue, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.xyz_cross(EngineState.graphics_device, Vector3.Transform(C, w), 5f, Color.Yellow, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.xyz_cross(EngineState.graphics_device, Vector3.Transform(D, w), 5f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.xyz_cross(Vector3.Transform(A, w), 5f, Color.Green);
+            Draw3D.xyz_cross(Vector3.Transform(B, w), 5f, Color.Blue);
+            Draw3D.xyz_cross(Vector3.Transform(C, w), 5f, Color.Yellow);
+            Draw3D.xyz_cross(Vector3.Transform(D, w), 5f, Color.Red);
 
-            Draw3D.line(EngineState.graphics_device, Vector3.Transform(A, w), Vector3.Transform(C, w), Color.Red, EngineState.camera.view, EngineState.camera.projection);
-            Draw3D.lines(EngineState.graphics_device, Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection,
+            Draw3D.line(Vector3.Transform(A, w), Vector3.Transform(C, w), Color.Red);
+            Draw3D.lines(Color.MonoGameOrange,
                 Vector3.Transform(A, w),
                 Vector3.Transform(B, w),
                 Vector3.Transform(C, w),

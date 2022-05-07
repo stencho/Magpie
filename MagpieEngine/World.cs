@@ -19,8 +19,13 @@ namespace Magpie {
         public SpotLight test_light;
         public SpotLight test_light2;
 
+        public SegmentedHeightfield test_hf;
+
         public World() {
             load_map();
+
+            test_hf = new SegmentedHeightfield(Vector3.Zero, XYPair.One * 128, 16);
+
             test_light = new SpotLight();
             test_light2 = new SpotLight();
             test_light2.position += Vector3.Left * 14f;
@@ -33,6 +38,7 @@ namespace Magpie {
                      RNG.random_opaque_color()
                      ));
             }
+            current_map.floors.Add("test_heightfield", test_hf);
 
             current_map.lights.Add(test_light);
             //lights.Add(test_light2);
@@ -154,12 +160,13 @@ namespace Magpie {
 
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);
-
+            
             Scene.build_lighting(current_map.lights, current_scene);
 
             Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
 
             Scene.draw(current_scene);
+
             Scene.draw_lighting(current_map.lights);
         }
 

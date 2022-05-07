@@ -85,7 +85,7 @@ namespace Magpie.Engine.Collision.Support3D {
         }
         
         public void draw() {
-            Draw3D.cube(EngineState.graphics_device,
+            Draw3D.cube(
                 Vector3.Transform(A, orientation * Matrix.CreateTranslation(position)),
                 Vector3.Transform(B, orientation * Matrix.CreateTranslation(position)),
                 Vector3.Transform(C, orientation * Matrix.CreateTranslation(position)),

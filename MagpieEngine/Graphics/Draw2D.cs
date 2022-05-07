@@ -11,8 +11,7 @@ using System.Threading.Tasks;
 
 namespace Magpie.Graphics {
     public static class Draw2D {
-
-        public class GradientMapGenerator1D {
+        public class GradientLineGenerator {
             public float min, max, value;
             public Color start_color;
 
@@ -86,7 +85,7 @@ namespace Magpie.Graphics {
                 }
             }
             
-            public GradientMapGenerator1D(Color start_color) {
+            public GradientLineGenerator(Color start_color) {
                 min = 0.0f;
                 max = 0.0f;
                 value = 0.0f;

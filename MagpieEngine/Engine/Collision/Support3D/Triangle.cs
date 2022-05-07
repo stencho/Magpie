@@ -41,9 +41,9 @@ namespace Magpie.Engine.Collision.Support3D {
         public void draw() {
             Matrix w = orientation * Matrix.CreateTranslation(position);
 
-            Draw3D.fill_tri(EngineState.graphics_device, w, A, B, C, Color.White * 0.9f, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.fill_tri(w, A, B, C, Color.White * 0.9f, EngineState.camera.view, EngineState.camera.projection);
 
-            Draw3D.lines(EngineState.graphics_device, Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection,
+            Draw3D.lines(Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection,
                 Vector3.Transform(A, w),
                 Vector3.Transform(B, w),
                 Vector3.Transform(C, w),

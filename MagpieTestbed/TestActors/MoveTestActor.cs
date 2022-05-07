@@ -45,7 +45,7 @@ namespace MagpieTestbed.TestActors {
 
         }
         public void Draw() {
-            Draw3D.sphere(EngineState.graphics_device, position + (Vector3.Up * 1), 1f, Color.LightGreen, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.sphere(position + (Vector3.Up * 1), 1f, Color.LightGreen);
         }
     }
 }

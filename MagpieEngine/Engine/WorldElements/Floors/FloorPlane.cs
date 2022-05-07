@@ -13,6 +13,8 @@ using static Magpie.Engine.DigitalControlBindings;
 
 namespace Magpie.Engine.Floors {
     public class FloorPlane : Floor {
+        public FloorType type => FloorType.PLANE;
+
         public Vector3 position { get; set; } = Vector3.Zero;
         public Vector2 size { get; set; } = Vector2.One * 50f;
         public Matrix orientation { get; set; } = Matrix.Identity;

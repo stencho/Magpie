@@ -76,10 +76,6 @@
     <Compile Include="Engine\Stages\StageExporter.cs" />
     <Compile Include="Engine\Stages\StageImporter.cs" />
     <Compile Include="Engine\Stages\Map.cs" />
-    <Compile Include="Engine\Walls\Circle.cs" />
-    <Compile Include="Engine\Walls\ConvexHull.cs" />
-    <Compile Include="Engine\Walls\Square.cs" />
-    <Compile Include="Engine\Walls\Wall.cs" />
     <Compile Include="Engine\XYPair.cs" />
     <Compile Include="Graphics\Camera.cs" />
     <Compile Include="Graphics\Draw3D.cs" />

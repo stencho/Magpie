@@ -28,8 +28,8 @@ namespace Magpie.Engine.Collision.Support3D {
         }
 
         public void draw() {
-            Draw3D.sphere(EngineState.graphics_device, position, radius, Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
-            find_bounding_box().draw(EngineState.graphics_device, Vector3.Zero, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.sphere(position, radius, Color.MonoGameOrange);
+            find_bounding_box().draw(Vector3.Zero, Color.Red);
         }
     }
 }

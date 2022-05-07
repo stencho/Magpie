@@ -48,8 +48,8 @@ namespace Magpie {
             return new AABB { _min = A._min - B, _max = A._max - B };
         }
 
-        public void draw(GraphicsDevice gd, Vector3 offset, Color color, Matrix view, Matrix projection) {
-            Draw3D.cube(gd, A+ offset, B+ offset, C+ offset, D+ offset, E+ offset, F+ offset, G+ offset, H+ offset, color, view, projection);
+        public void draw(Vector3 offset, Color color) {
+            Draw3D.cube(A+ offset, B+ offset, C+ offset, D+ offset, E+ offset, F+ offset, G+ offset, H+ offset, color, EngineState.camera.view, EngineState.camera.projection);
         }        
     }
 }

@@ -249,9 +249,9 @@ namespace MagpieTestbed
 
             world.Draw(GraphicsDevice, EngineState.camera);
 
-           // test_a.draw();
+            // test_a.draw();
 
-            
+
             /*
             foreach (GJK.gjk_result result in results) {
                 Draw3D.xyz_cross(GraphicsDevice, result.closest_point_A, 1f, result.hit ? Color.LightGreen : Color.Red, EngineState.camera.view, EngineState.camera.projection);
@@ -262,11 +262,11 @@ namespace MagpieTestbed
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
-
+            world.test_hf.DrawDebug();
 
             //foreach (DynamicLight l in world.lights) {
-                //if (l.type == LightType.POINT)
-                    //Draw3D.xyz_cross(GraphicsDevice, l.position, 0.1f, l.light_color, EngineState.camera.view, EngineState.camera.projection);
+            //if (l.type == LightType.POINT)
+            //Draw3D.xyz_cross(GraphicsDevice, l.position, 0.1f, l.light_color, EngineState.camera.view, EngineState.camera.projection);
             //}
 
             //Draw3D.xyz_cross(GraphicsDevice, world.test_light.position, 1f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
@@ -278,8 +278,8 @@ namespace MagpieTestbed
             Draw2D.text_shadow("pf",
                 Clock.frame_rate.ToString() + " FPS [" +  Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
 
-                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Scene.buffer == -1) ? "combined" : ((Scene.buffers)Scene.buffer).ToString()) +"\n" +
-                Scene.LIGHT_BIAS.ToString()
+                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Scene.buffer == -1) ? "combined" : ((Scene.buffers)Scene.buffer).ToString()) +"\n"
+                
                 
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
 
@@ -288,6 +288,8 @@ namespace MagpieTestbed
             //Draw2D.line(Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f), Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + (Vector2.UnitX * 200f), 1, Color.Red);
 
             Draw2D.image(Scene.sun_moon.lerps.debug_band, XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f), XYPair.One + (XYPair.UnitY * 30) + (XYPair.UnitX * 256), Color.White);
+
+            Draw2D.image(ContentHandler.resources["OnePXWhite"].value_tx, XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f) - (XYPair.UnitX * 35), XYPair.One * 30, Scene.sun_moon.current_color);
 
             Draw2D.line(
                 (XYPair.UnitX * ((float)Scene.sun_moon.current_day_value * 256)) + XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f),
@@ -320,6 +322,7 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
             EngineState.spritebatch.End();
 
             GraphicsDevice.SetRenderTarget(null);
+
 
             Scene.compose();
             //base.Draw(gameTime);

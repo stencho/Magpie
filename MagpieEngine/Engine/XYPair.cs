@@ -15,6 +15,10 @@ namespace Magpie.Engine {
         public int X;
         public int Y;
 
+        public XYPair(int XY) {
+            this.X = XY;
+            this.Y = XY;
+        }
         public XYPair(int X, int Y) {
             this.X = X;
             this.Y = Y;
@@ -110,6 +114,9 @@ namespace Magpie.Engine {
         public static XYPair operator /(XYPair a, Vector2 b) => new XYPair(a.X / (int)b.X, a.Y / (int)b.Y);
         public static XYPair operator -(XYPair a, Vector2 b) => new XYPair(a.X - (int)b.X, a.Y - (int)b.Y);
         public static XYPair operator +(XYPair a, Vector2 b) => new XYPair(a.X + (int)b.X, a.Y + (int)b.Y);
+
+        public Vector3 ToVector3XZ() => new Vector3(X, 0, Y);
+        public Vector3 ToVector3XY() => new Vector3(X, Y, 0);
 
         public Vector2 ToVector2() => new Vector2(X, Y);
         #endregion

@@ -47,7 +47,7 @@ namespace Magpie {
 
             ui = new UILayer(EngineState.resolution);
 
-            Draw3D.init(graphics_device);
+            Draw3D.init();
         }
 
         public static void Update(GameTime gt, Game game) {

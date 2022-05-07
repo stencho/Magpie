@@ -63,8 +63,8 @@ namespace Magpie.Engine.Collision.Support3D {
 
         public void draw() {
             Matrix w = orientation * Matrix.CreateTranslation(position);
-            Draw3D.capsule(EngineState.graphics_device, Vector3.Transform(A, w), Vector3.Transform(B, w), radius, Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
-            find_bounding_box().draw(EngineState.graphics_device, origin, Color.Red, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.capsule(Vector3.Transform(A, w), Vector3.Transform(B, w), radius, Color.MonoGameOrange);
+            find_bounding_box().draw(origin, Color.Red);
         }
 
     }
