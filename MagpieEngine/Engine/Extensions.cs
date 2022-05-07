@@ -24,5 +24,9 @@ namespace Magpie.Engine {
         public static string simple_vector2_string_brackets(this Vector2 input) {
             return string.Format("[{0:F2}, {1:F2}]", input.X, input.Y);
         }
+
+        public static Vector3 ToVector3XZ(this Vector2 v) {
+            return new Vector3(v.X, 0, v.Y);
+        }
     }
 }

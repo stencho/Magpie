@@ -86,6 +86,7 @@
     <Compile Include="Graphics\Lights\Spotlight.cs" />
     <Compile Include="Graphics\Instancing.cs" />
     <Compile Include="Graphics\Scene.cs" />
+    <Compile Include="Graphics\SDF.cs" />
     <Compile Include="Graphics\UI\UIForm.cs" />
     <Compile Include="Graphics\UI\UIForms.cs" />
     <Compile Include="Graphics\UI\UILayer.cs" />
@@ -107,6 +108,7 @@
     <Content Include="Shaders\fill_gbuffer.fx" />
     <Content Include="Shaders\light_depth.fx" />
     <Content Include="Shaders\pointlight.fx" />
+    <Content Include="Shaders\sdf_pixel.fx" />
     <Content Include="Shaders\skybox.fx" />
     <Content Include="Shaders\spotlight.fx" />
     <Content Include="Shaders\terrain.fx" />

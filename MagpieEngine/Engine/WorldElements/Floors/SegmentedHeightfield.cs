@@ -18,12 +18,13 @@ namespace Magpie.Engine.Floors {
 
             public SegmentedHeightfield parent { get; }
 
-            public Vector3 offset { get; }
+            public Vector2 offset { get; }
 
-            public Vector3 top_left => (parent.top_left + offset);
-            public Vector3 top_right { get; }
-            public Vector3 bottom_left { get; }
-            public Vector3 bottom_right { get; }
+            public Vector3 top_left => (parent.top_left + offset.ToVector3XZ());
+            public Vector3 top_right => top_left + new Vector3(size.X, 0, 0);
+
+            public Vector3 bottom_left => top_left + new Vector3(0, 0, size.Y);
+            public Vector3 bottom_right => top_left + size.ToVector3XZ();
 
             public int LOD_count = 4;
             public int LOD_level = 0;
@@ -33,8 +34,9 @@ namespace Magpie.Engine.Floors {
             public VertexBuffer[] LOD_vertex_buffers;
             public IndexBuffer[] LOD_index_buffers;
 
-            public HFSegment(SegmentedHeightfield parent) {
+            public HFSegment(SegmentedHeightfield parent, Vector2 offset) {
                 this.parent = parent;
+                this.offset = offset;
             }
 
             public void build_from_data(float[,] data) {
@@ -120,16 +122,37 @@ namespace Magpie.Engine.Floors {
             segments = new HFSegment[segment_count.X, segment_count.Y];
             //iterate over each of the segments
             for (int sy = 0; sy < segment_count.Y; sy++) {
-                for (int sx = 0; sx < segment_count.Y; sx++) {
-                    var current_segment = segments[sx, sy];
-                    current_segment = new HFSegment(this);
+                for (int sx = 0; sx < segment_count.X; sx++) {
+                    Vector2 offset = new Vector2(sx * segment_size.X, sy * segment_size.Y);
+                    var current_segment = new HFSegment(this, offset);
 
-                    current_segment.data = new float[segment_size.X, segment_size.Y];
+                    current_segment.data = new float[segment_size.X+1, segment_size.Y+1];
                     fill_segment_with_random(current_segment);
 
-                    current_segment.size = segment_size;
+                    //the reason why all the segment_sizes have +1 on them is because there 
+                    //needs to be an extra row and column of data on each segment to hold the 
+                    //left and top sides of the segments to the right of them and below them
+                    //including the data for the final right and bottom rows which would otherwise not exist
+                    
 
-                    current_segment.overall_UV_position = new Vector2(sx * segment_size.X, sy * segment_size.Y) / size;
+                    if (sx>0) {
+                        //make the +1 data of the segment to the left into the left side of the current segment's data
+                        for (int i = 0; i < segment_size.Y + 1; i++) {
+                            segments[sx - 1, sy].data[segment_size.X, i] = current_segment.data[0, i];
+                        }
+                    }
+                    if (sy > 0) {
+                        //same as above but making the top row into the above segment's bottom row
+                        for (int i = 0; i < segment_size.X + 1; i++) {
+                            segments[sx, sy - 1].data[i, segment_size.Y] = current_segment.data[i, 0];
+                        }
+                    }
+
+                    current_segment.size = segment_size;
+                    
+                    current_segment.overall_UV_position = offset / size.ToVector2();
+
+                    segments[sx, sy] = current_segment;
                     /*
                     for (int y = 0; y < segment_size.Y; y++) {
                         for (int x = 0; x < segment_size.Y; x++) {
@@ -143,8 +166,8 @@ namespace Magpie.Engine.Floors {
 
 
         private void fill_segment_with_random(HFSegment seg, float max_height = 0.3f) {
-            for (int y = 0; y < segment_size.Y; y++) {
-                for (int x = 0; x < segment_size.Y; x++) {
+            for (int y = 0; y < segment_size.Y + 1; y++) {
+                for (int x = 0; x < segment_size.X + 1; x++) {
                     seg.data[x, y] = RNG.rng_float * max_height;
                 }
             }
@@ -152,8 +175,8 @@ namespace Magpie.Engine.Floors {
         private void fill_segment_with_random(int X, int Y, float max_height = 0.3f) {
             var seg = segments[X, Y];
 
-            for (int y = 0; y < segment_size.Y; y++) {
-                for (int x = 0; x < segment_size.Y; x++) {
+            for (int y = 0; y < segment_size.Y + 1; y++) {
+                for (int x = 0; x < segment_size.X + 1; x++) {
                     seg.data[x, y] = RNG.rng_float * max_height;
                 }
             }
@@ -162,8 +185,8 @@ namespace Magpie.Engine.Floors {
         private void fill_all_segments_with_random(float max_height = 0.3f) {
             segments = new HFSegment[segment_count.X, segment_count.Y];
             //iterate over each of the segments
-            for (int sy = 0; sy < segment_count.Y; sy++) {
-                for (int sx = 0; sx < segment_count.Y; sx++) {
+            for (int sy = 0; sy < segment_count.Y+1; sy++) {
+                for (int sx = 0; sx < segment_count.X+1; sx++) {
                     var current_segment = segments[sx, sy];
                                         
                     for (int y = 0; y < segment_size.Y; y++) {
@@ -186,7 +209,6 @@ namespace Magpie.Engine.Floors {
             RenderTargetBinding[] rtb = EngineState.graphics_device.GetRenderTargets();
             EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_2D);
 
-            Draw3D.lines(Color.Red, top_left, top_right, bottom_right, bottom_left, top_left);
 
             Draw3D.xyz_cross(position, 1f, Color.Red);
 
@@ -194,6 +216,39 @@ namespace Magpie.Engine.Floors {
             Draw3D.xyz_cross(top_right, 5f, Color.Green);
             Draw3D.xyz_cross(bottom_right, 5f, Color.Blue);
             Draw3D.xyz_cross(bottom_left, 5f, Color.Yellow);
+
+            for (int sy = 0; sy < 2/*segment_count.Y*/; sy++) {
+                for (int sx = 0; sx < 2/*segment_count.X*/; sx++) {
+                    var s = segments[sx, sy];
+                    Draw3D.sphere(s.top_left, 0.1f, Color.White);
+
+                    
+
+                    Vector4 col = new Vector4(1, 0, s.overall_UV_position.X, 1f);
+                    Draw3D.line(s.top_left, s.top_right, Color.FromNonPremultiplied(col));
+
+                    col = new Vector4(s.overall_UV_position.Y, 0, 1, 1f);
+
+                    Draw3D.line(s.top_left, s.bottom_left, Color.FromNonPremultiplied(col));
+
+                    col = Color.HotPink.ToVector4();
+
+                    for (int y = 0; y < segment_size.Y + 1; y++) {
+                        for (int x = 0; x < segment_size.X + 1; x++) {
+                            if (x == 0 || y == 0 || x == segment_size.X || y == segment_size.Y) {
+                                col = new Vector4(1, 0, 0, 1);
+                            } else {
+                                col = Color.HotPink.ToVector4();
+                            }
+
+                            Draw3D.xyz_cross(s.top_left + new Vector3(x, s.data[x, y], y), 0.5f, Color.FromNonPremultiplied(col));
+                        }
+                    }
+                }
+            }
+            
+
+            Draw3D.lines(Color.White, top_left, top_right, bottom_right, bottom_left, top_left);
 
             EngineState.graphics_device.SetRenderTargets(rtb);
             //Draw3D.line()

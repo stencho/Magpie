@@ -389,6 +389,16 @@ namespace Magpie.Graphics {
 
             image(texture, position.X, position.Y, size.X, size.Y, tint, origin);
         }
+        public static void image(RenderTarget2D rt, Vector2 position, Vector2 size, Color tint, Vector2 origin_n) {
+            EngineState.spritebatch.Draw(rt, (origin_n * size) + position, null, tint);
+        }
+        public static void SDFToScreenImmediate(Texture2D tex, Vector2 position, Vector2 size, Color tint, Vector2 origin_n, float alpha_scissor) {
+            //ContentHandler.resources["sdf_pixel"].value_fx.Parameters["billboard_size"].SetValue(EngineState.resolution.ToVector2());
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["tint"].SetValue(tint.ToVector3());
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["alpha_scissor"].SetValue(alpha_scissor);
+
+            EngineState.spritebatch.Draw(tex, new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y), null, tint, 0f, origin_n, SpriteEffects.None, 0f); 
+        }
         public static void image(RenderTarget2D rt, int X, int Y, int W, int H, Color tint) {
             EngineState.spritebatch.Draw(rt, new Rectangle(X, Y, W, H), tint);
         }

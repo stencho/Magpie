@@ -73,6 +73,7 @@ namespace MagpieTestbed
 
             add_bind(new MouseButtonBind(MouseButtons.Left, "ui_select"));
             add_bind(new MouseButtonBind(MouseButtons.Right, "click_right"));
+            add_bind(new MouseButtonBind(MouseButtons.Middle, "click_middle"));
             add_bind(new MouseButtonBind(MouseButtons.ScrollUp, "scroll_up"));
             add_bind(new MouseButtonBind(MouseButtons.ScrollDown, "scroll_down"));
             /*
@@ -124,6 +125,8 @@ namespace MagpieTestbed
 
             EngineState.ui.add_form("test_form", new UIButton(new XYPair(EngineState.resolution.X - 17, 0), new XYPair(17, 18), "close_button", "X", false));
 
+
+            crosshair_sdf = new SDFSprite2D(EngineState.resolution.ToVector2() * 0.5f, new Vector2(4,4), 0.75f);
         }
 
         protected override void LoadContent()
@@ -239,6 +242,9 @@ namespace MagpieTestbed
         //Tetrahedron test_a = new Tetrahedron();
         //Sphere test_b = new Sphere();
         //Tetrahedron test_b = new Tetrahedron();
+
+        SDFSprite2D crosshair_sdf;
+
         private string print_ts(TimeSpan ts) {
             string s = string.Format("{0:F0}m{1:F0}s", ts.TotalMinutes, ts.Seconds);
             return s;
@@ -317,7 +323,14 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
             EngineState.ui.draw();
 
             //Draw2D.image(world.test_light.depth_map, XYPair.One * 50, XYPair.One * 200, Color.White);
-            //Draw2D.image(ContentHandler.resources["radial_glow"].value_tx, XYPair.One * 150, XYPair.One * 200, Color.White);
+            //Draw2D.image(ContentHandler.resources["circle"].value_tx, XYPair.One * 150, XYPair.One * 200, Color.White);
+
+
+            EngineState.spritebatch.End();
+            
+            EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, ContentHandler.resources["sdf_pixel"].value_fx, null);
+
+            crosshair_sdf.draw();
 
             EngineState.spritebatch.End();
 

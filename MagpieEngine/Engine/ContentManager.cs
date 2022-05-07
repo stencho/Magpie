@@ -258,6 +258,8 @@ namespace Magpie.Engine {
 
                 AddResource(new Resource("center_glow", new Texture2D(gd, 1, 256)));
                 AddResource(new Resource("radial_glow", new Texture2D(gd, 256, 256)));
+                AddResource(new Resource("sdf_circle", new Texture2D(gd, 256, 256)));
+                AddResource(new Resource("sdf_square", new Texture2D(gd, 256, 256)));
                 AddResource(new Resource("gradient_vertical", new Texture2D(gd, 256, 256)));
                 AddResource(new Resource("skybox_gradient", new Texture2D(gd, 512, 512)));
 
@@ -331,6 +333,48 @@ namespace Magpie.Engine {
                 }
 
                 ((Texture2D)resources["radial_glow"].value).SetData(glowData);
+
+
+                glowData = new Color[256 * 256];
+
+                for (var i = 0; i < 256; i++) {
+
+                    float px, py;
+
+                    for (var x = 0; x < 256; x++) {
+
+                        px = x / 255f;
+                        py = i / 255f;
+
+                        float t = Vector2.Distance(Vector2.One * 0.5f, new Vector2(px, py));
+
+                        int o = (int)((t) * 255);
+                        glowData[(i * 256) + x] = Color.FromNonPremultiplied(o, o, o, 255);
+                    }
+                }
+
+                ((Texture2D)resources["sdf_circle"].value).SetData(glowData);
+                
+                glowData = new Color[256 * 256];
+
+                for (var i = 0; i < 256; i++) {
+
+                    float px, py;
+
+                    for (var x = 0; x < 256; x++) {
+
+                        px = x / 255f;
+                        py = i / 255f;
+
+                        float t = Vector2.DistanceSquared(Vector2.One * 0.5f, new Vector2(px, py)) ;
+
+                        int o = (int)((t) * 255);
+                        glowData[(i * 256) + x] = Color.FromNonPremultiplied(o, o, o, 255);
+                    }
+                }
+
+                ((Texture2D)resources["sdf_square"].value).SetData(glowData);
+
                 glowData = null;
                 pixel_loaded = true;
             }

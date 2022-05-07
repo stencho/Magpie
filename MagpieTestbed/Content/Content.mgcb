@@ -55,6 +55,12 @@
 /processorParam:DebugMode=Auto
 /build:../../MagpieEngine/Shaders/pointlight.fx;sha/pointlight.fx
 
+#begin ../../MagpieEngine/Shaders/sdf_pixel.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../MagpieEngine/Shaders/sdf_pixel.fx;sha/sdf_pixel.fx
+
 #begin ../../MagpieEngine/Shaders/skybox.fx
 /importer:EffectImporter
 /processor:EffectProcessor

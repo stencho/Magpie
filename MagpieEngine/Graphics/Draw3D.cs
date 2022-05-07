@@ -174,8 +174,8 @@ namespace Magpie.Graphics {
             ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["Projection"].SetValue(projection);
             ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["DiffuseMap"].SetValue(onePXWhite);
             ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["tint"].SetValue(color.ToVector3());
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["FarClip"].SetValue(2000f);
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["opacity"].SetValue(-1f);
+            //ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["FarClip"].SetValue(2000f);
+            //ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["opacity"].SetValue(-1f);
 
 
             for (int i = 0; i < ContentHandler.resources["fill_gbuffer"].value_fx.CurrentTechnique.Passes.Count; i++) {
@@ -241,6 +241,13 @@ namespace Magpie.Graphics {
             color, view, projection);
         }
 
+        public static void dot() {
+
+        }
+
+        public static void square(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color) {
+            square(A, B, C, D, color, EngineState.camera.view, EngineState.camera.projection);
+        }
         public static void square(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color, Matrix view, Matrix projection) {
             lines(color, view, projection, A, B, C, D, A);
         }
