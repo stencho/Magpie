@@ -30,8 +30,7 @@ namespace MagpieTestbed
         SDFSprite2D test_sdf;
 
         SDFSprite2D crosshair_sdf;
-        float crosshair_size_multi = 2f;
-
+        
         Color crosshair_color = Color.White;
 
         GJK.gjk_result[] results;
@@ -92,6 +91,8 @@ namespace MagpieTestbed
 
             add_bind(new KeyBind(Keys.F5, "screenshot"));
 
+            add_bind(new KeyBind(Keys.LeftShift, "shift"));
+
             //add_bind(new KeyBind(Keys.LeftAlt, "ui_alt"));
 
             add_bind(new MouseButtonBind(MouseButtons.Left, "ui_select"));
@@ -150,14 +151,24 @@ namespace MagpieTestbed
 
 
             test_sdf = new SDFSprite2D(
-                (Vector2.One * 250f) + (Vector2.UnitY * 100f),
-                Vector2.One * 300,
-                0.1f, "sdf_test", SDFDrawAnchor.TopLeft);
-            
+                (Vector2.UnitY * 100f),
+                Vector2.One * 800,
+                0.5f, "sdf_quiet", SDFDrawAnchor.TopLeft);
+
+            test_sdf.inside_color = Color.White;
+            test_sdf.outline_color = Color.FromNonPremultiplied((int)(0.15f*255), (int)(0.15f * 255), (int)(0.15f * 255), 255);
+
+            test_sdf.enable_outline = true;
+            test_sdf.outline_width = 0.2f;
+            test_sdf.overlay_outline_texture_name = "checker";
+            test_sdf.overlay_inside_texture_name = "trumpmapclean";
+            test_sdf.outline_tile_count = new Vector2(69, 69);
+
+
             crosshair_sdf = new SDFSprite2D(
-                (EngineState.resolution.ToVector2() * 0.5f) , 
-                new Vector2(crosshair_size_multi * 2, crosshair_size_multi * 2), 
-                0.5f);
+                (EngineState.resolution.ToVector2() * 0.5f), 
+                new Vector2(16, 16), 0.75f);
+
         }
 
         protected override void LoadContent()
@@ -223,6 +234,41 @@ namespace MagpieTestbed
                 i++;
             }
             */
+
+            if (bind_pressed("scroll_up") && bind_released("shift")) {
+                if (test_sdf.alpha_scissor < 1f)
+                    test_sdf.alpha_scissor += 0.02f * (wheel_delta / 120f);
+                if (test_sdf.alpha_scissor > 1f)
+                    test_sdf.alpha_scissor = 1f;
+            }
+            if (bind_pressed("scroll_down") && bind_released("shift")) {
+                if (test_sdf.alpha_scissor > 0f)
+                    test_sdf.alpha_scissor -= 0.02f * (wheel_delta / -120f);
+                if (test_sdf.alpha_scissor <= 0f)
+                    test_sdf.alpha_scissor = 0f;
+            }
+
+            if (bind_pressed("scroll_up") && bind_pressed("shift")) {
+                test_sdf.enable_outline = true;
+
+                if (test_sdf.outline_width < 0.5f)
+                    test_sdf.outline_width += 0.01f;
+                if (test_sdf.outline_width > 0.5f)
+                    test_sdf.outline_width = 0.5f;
+            }
+            if (bind_pressed("scroll_down") && bind_pressed("shift")) {
+                if (test_sdf.outline_width > -0.5f)
+                    test_sdf.outline_width -= 0.01f;
+                if (test_sdf.outline_width <= -0.5f) {
+                    test_sdf.outline_width = -0.5f;
+                    test_sdf.enable_outline = false;
+                }
+            }
+
+
+            if (bind_just_pressed("click_middle")) {
+                test_sdf.invert_map = !test_sdf.invert_map;
+            }
 
 
             if (bind_just_pressed("screenshot")) Scene.screenshot_at_end_of_frame();
@@ -300,13 +346,14 @@ namespace MagpieTestbed
             //Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (Vector3.Transform(Vector3.Normalize(world.test_light.orientation.Forward + world.test_light.orientation.Down), ((SpotLight)world.test_light).actual_scale)), Color.Orange, EngineState.camera.view, EngineState.camera.projection);
 
             EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap);
-                       
-            Draw2D.text_shadow("pf",
-                Clock.frame_rate.ToString() + " FPS [" +  Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
 
-                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Scene.buffer == -1) ? "combined" : ((Scene.buffers)Scene.buffer).ToString()) +"\n"
-                
-                
+            Draw2D.text_shadow("pf",
+                Clock.frame_rate.ToString() + " FPS [" + Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
+
+                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Scene.buffer == -1) ? "combined" : ((Scene.buffers)Scene.buffer).ToString()) + "\n" +
+                "alpha_scissor " + string.Format("{0:F2}", test_sdf.alpha_scissor)
+
+
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
 
 
@@ -350,12 +397,9 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
 
             EngineState.spritebatch.End();
             
-            EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, ContentHandler.resources["sdf_pixel"].value_fx, null);
-
             crosshair_sdf.draw();
             test_sdf.draw();
 
-            EngineState.spritebatch.End();
 
             GraphicsDevice.SetRenderTarget(null);
 

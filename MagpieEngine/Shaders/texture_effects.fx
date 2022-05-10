@@ -10,7 +10,7 @@ float4 PS(float4 position : SV_Position, float4 color : COLOR0, float2 TexCoords
 	
 	float4 rgba = tex2D(TEXTURE, TexCoords * UV_Scale);
 	
-	if ((rgba.a < alpha_scissor*0.5) && (alpha_scissor > 0)) {
+	if (rgba.a < clamp(alpha_scissor, 0.001, 1)) {
 		clip(-1);
 	}
 	
