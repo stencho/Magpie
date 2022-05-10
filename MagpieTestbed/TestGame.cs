@@ -26,6 +26,28 @@ namespace MagpieTestbed
     {
         GraphicsDeviceManager graphics;
         World world;
+
+        SDFSprite2D test_sdf;
+
+        SDFSprite2D crosshair_sdf;
+        float crosshair_size_multi = 2f;
+
+        Color crosshair_color = Color.White;
+
+        GJK.gjk_result[] results;
+
+        //Sphere test_a = new Sphere();
+        Capsule test_a = new Capsule(1.85f, 1f);
+        //sphere_data test_b = new sphere_data();
+
+        //Point3D test_a = new Point3D();
+        //Sphere test_a = new Sphere();
+        //Tetrahedron test_a = new Tetrahedron();
+        //Sphere test_b = new Sphere();
+        //Tetrahedron test_b = new Tetrahedron();
+
+
+
         public TestGame()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -66,6 +88,7 @@ namespace MagpieTestbed
 
             add_bind(new KeyBind(Keys.T, "test"));
             add_bind(new KeyBind(Keys.F2, "switch_buffer"));
+            add_bind(new KeyBind(Keys.F3, "test", "switch_buffer"));
 
             add_bind(new KeyBind(Keys.F5, "screenshot"));
 
@@ -98,8 +121,8 @@ namespace MagpieTestbed
             */
 
             for (int i = 0; i < 150; i++) {
-                world.current_map.add_object("test_sphere" + i, new TestSphere());
-                world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
+                //world.current_map.add_object("test_sphere" + i, new TestSphere());
+                //world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
             }
 
             world.current_map.add_floor("test_floor", new FloorPlane());
@@ -126,13 +149,21 @@ namespace MagpieTestbed
             EngineState.ui.add_form("test_form", new UIButton(new XYPair(EngineState.resolution.X - 17, 0), new XYPair(17, 18), "close_button", "X", false));
 
 
-            crosshair_sdf = new SDFSprite2D(EngineState.resolution.ToVector2() * 0.5f, new Vector2(4,4), 0.75f);
+            test_sdf = new SDFSprite2D(
+                (Vector2.One * 250f) + (Vector2.UnitY * 100f),
+                Vector2.One * 300,
+                0.1f, "sdf_test", SDFDrawAnchor.TopLeft);
+            
+            crosshair_sdf = new SDFSprite2D(
+                (EngineState.resolution.ToVector2() * 0.5f) , 
+                new Vector2(crosshair_size_multi * 2, crosshair_size_multi * 2), 
+                0.5f);
         }
 
         protected override void LoadContent()
         {
             ContentHandler.LoadContent(Content, GraphicsDevice);
-            ContentHandler.LoadAll();
+            ContentHandler.LoadAllResources();
 
         }
 
@@ -150,6 +181,7 @@ namespace MagpieTestbed
 
             world.Update();
 
+            //handle test actor shape movement
             Vector3 mv = Vector3.Zero;
 
             if (bind_pressed("t_forward")) {
@@ -170,18 +202,16 @@ namespace MagpieTestbed
             if (bind_pressed("t_down")) {
                 mv += Vector3.Down;
             }
-
-
+            
             if (mv != Vector3.Zero)
                 mv = (Vector3.Normalize(mv) * 4f * Clock.frame_time_delta);
 
             test_a.position += mv;
-
-            //if (bind_pressed("test"))
-            //world.current_map.floors["test_floor2"].orientation *= Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(6F * Clock.frame_time_delta));
-
-            
+       
+            //test collision detection between above test actor and all the objects in the scene
             results = new GJK.gjk_result[world.current_map.objects.Count];
+
+            /*
             int i = 0;
             foreach (GameObject o in world.current_map.objects.Values) {
                 if (i % 3 == 0)
@@ -192,7 +222,9 @@ namespace MagpieTestbed
                 o.world);
                 i++;
             }
-            
+            */
+
+
             if (bind_just_pressed("screenshot")) Scene.screenshot_at_end_of_frame();
             bool held_test = true;
             if (bind_pressed("test")) {
@@ -217,6 +249,7 @@ namespace MagpieTestbed
                     world.current_map.add_object("test_sphere" + o, new TestSphere());
                     world.current_map.objects["test_sphere" + o].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one * 10)) + (Vector3.Up * (RNG.rng_float * 20));
                 }*/
+
                 if (!held_test) {
                     if (bind_pressed("scroll_up")) {
                         Scene.sun_moon.set_time_of_day(Scene.sun_moon.current_day_value + ((Controls.wheel_delta / 240.0) * 0.05));
@@ -231,24 +264,11 @@ namespace MagpieTestbed
             base.Update(gameTime);
         }
 
-        GJK.gjk_result[] results;
-        
-        //Sphere test_a = new Sphere();
-        Capsule test_a = new Capsule(1.85f, 1f);
-        //sphere_data test_b = new sphere_data();
-
-        //Point3D test_a = new Point3D();
-        //Sphere test_a = new Sphere();
-        //Tetrahedron test_a = new Tetrahedron();
-        //Sphere test_b = new Sphere();
-        //Tetrahedron test_b = new Tetrahedron();
-
-        SDFSprite2D crosshair_sdf;
-
         private string print_ts(TimeSpan ts) {
             string s = string.Format("{0:F0}m{1:F0}s", ts.TotalMinutes, ts.Seconds);
             return s;
         }
+
         protected override void Draw(GameTime gameTime)
         {            
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
@@ -320,6 +340,8 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
 )           , Vector2.One * 2 + (Vector2.UnitX * 300), Color.White);
 
 
+            Draw2D.text_shadow("pf", list_active_binds_w_status(), (Vector2.One * 2) + (Vector2.UnitY * 200));
+
             EngineState.ui.draw();
 
             //Draw2D.image(world.test_light.depth_map, XYPair.One * 50, XYPair.One * 200, Color.White);
@@ -331,6 +353,7 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
             EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, ContentHandler.resources["sdf_pixel"].value_fx, null);
 
             crosshair_sdf.draw();
+            test_sdf.draw();
 
             EngineState.spritebatch.End();
 

@@ -49,3 +49,4 @@ C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug
 C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\sha\fill_gbuffer.xnb
 C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\sha\directionallight.xnb
 C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\sha\sdf_pixel.xnb
+C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\tex\sdf_test.xnb

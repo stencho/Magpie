@@ -5,34 +5,19 @@ using Magpie.Graphics.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using static Magpie.Engine.Controls;
 using static Magpie.Engine.DigitalControlBindings;
-
 namespace SDFTool2D {
     public class SDFEditor : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        RenderTarget2D buffer;
-        //RenderTarget2D preview_left, preview_right;
-
-        ImageViewer preview_left, preview_right;
+        ImageViewer image_view;
+        ImageViewer sdf_view;
 
         Effect sdf_effect;
-        SDFSprite2D sdf_sprite;
-
-        internal float _vsp = 0.2f;
-        float vertical_split_position {
-            get {
-                return _vsp;
-            }
-            set {
-                preview_left.change_size(graphics.PreferredBackBufferWidth * value, graphics.PreferredBackBufferHeight);
-                preview_right.change_size(graphics.PreferredBackBufferWidth * (1-value), graphics.PreferredBackBufferHeight);
-                _vsp = value;
-            }
-        }
 
         public SDFEditor()
         {
@@ -40,22 +25,37 @@ namespace SDFTool2D {
             Content.RootDirectory = "Content";
 
             graphics.PreferredBackBufferWidth = 1600;
-            graphics.PreferredBackBufferHeight = 800;
+            graphics.PreferredBackBufferHeight = 900;
             graphics.ApplyChanges();
 
             this.IsMouseVisible = true;
             this.graphics.SynchronizeWithVerticalRetrace = false;
             this.IsFixedTimeStep = false;
+            Window.AllowUserResizing = true;
+            Window.ClientSizeChanged += Window_ClientSizeChanged;
+        }
+               
+        private void Window_ClientSizeChanged(object sender, System.EventArgs e) {
+            Console.WriteLine(Window.ClientBounds.Size.ToVector2().simple_vector2_x_string_no_dec());
+
+            graphics.PreferredBackBufferWidth = Window.ClientBounds.Size.X;
+            graphics.PreferredBackBufferHeight = Window.ClientBounds.Size.Y;
+            graphics.ApplyChanges();
+
+            Console.WriteLine(graphics.PreferredBackBufferWidth);
+            Console.WriteLine(graphics.PreferredBackBufferHeight);
+            //image_view.change_size()
         }
 
         protected override void Initialize() { 
             base.Initialize();
+            Console.WriteLine(Window.ClientBounds.Size.ToVector2().simple_vector2_x_string_no_dec());
             EngineState.initialize(new XYPair(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Window, GraphicsDevice, graphics, this);
+                        
+            image_view = new ImageViewer(0,50, EngineState.resolution.X / 2, EngineState.resolution.Y-50);
 
-            buffer = new RenderTarget2D(GraphicsDevice, EngineState.resolution.X, EngineState.resolution.Y);
-
-            //preview_left = new RenderTarget2D(GraphicsDevice, EngineState.resolution.X / 2, EngineState.resolution.Y);
-            //preview_right = new RenderTarget2D(GraphicsDevice, EngineState.resolution.X / 2, EngineState.resolution.Y);
+            sdf_view = new ImageViewer(EngineState.resolution.X /2, 50, EngineState.resolution.X / 2, EngineState.resolution.Y-50);
+            sdf_view.shader = "sdf_pixel";
 
             add_bind(new KeyBind(Keys.LeftShift, "shift"));
             add_bind(new KeyBind(Keys.LeftControl, "ctrl"));
@@ -63,7 +63,9 @@ namespace SDFTool2D {
 
             add_bind(new KeyBind(Keys.F5, "screenshot"));
             add_bind(new KeyBind(Keys.OemTilde, "tilde"));
-            add_bind(new KeyBind(Keys.D1, "one"));
+
+            add_bind(new KeyBind(Keys.Home, "zero"));
+            add_bind(new KeyBind(Keys.End, "one"));            
 
             add_bind(new KeyBind(Keys.Left, "left"));
             add_bind(new KeyBind(Keys.Right, "right"));
@@ -83,6 +85,7 @@ namespace SDFTool2D {
             add_bind(new MouseButtonBind(MouseButtons.Middle, "click_middle"));
             add_bind(new MouseButtonBind(MouseButtons.ScrollUp, "scroll_up"));
             add_bind(new MouseButtonBind(MouseButtons.ScrollDown, "scroll_down"));
+            
         }
 
         protected override void LoadContent()
@@ -104,27 +107,11 @@ namespace SDFTool2D {
         {
             EngineState.Update(gameTime, this);
             
-
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (preview_left == null || preview_right == null) {
-                preview_left = new ImageViewer(0, 0, EngineState.resolution.X * vertical_split_position, EngineState.resolution.Y);
-                preview_right = new ImageViewer(EngineState.resolution.X * vertical_split_position, 0, EngineState.resolution.X * (1-vertical_split_position), EngineState.resolution.Y);
-                preview_right.active = false;
-            } else {
-                preview_left.update();
-                preview_right.update();
-            }
-
-            if (bind_just_pressed("activate_left")) {
-                preview_left.active = true;
-                preview_right.active = false;
-            }
-            if (bind_just_pressed("activate_right")) {
-                preview_left.active = false;
-                preview_right.active = true;
-            }
+            image_view.update();
+            sdf_view.update();
 
             base.Update(gameTime);
             Clock.update_fps();
@@ -132,35 +119,30 @@ namespace SDFTool2D {
 
         protected override void Draw(GameTime gameTime) {
             //draw SDF map preview on left preview pane if one is loaded
-            GraphicsDevice.SetRenderTarget(preview_left.image_viewed);
-            EngineState.spritebatch.Begin(SpriteSortMode.Immediate, null, null, null, null, null);
 
-            EngineState.spritebatch.End();
-            GraphicsDevice.Clear(Color.HotPink);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["tint"].SetValue(Color.Black.ToVector3());
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["alpha_scissor"].SetValue(0.5f);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["SDFTEX"].SetValue(ContentHandler.resources["zerocool_sharper"].value_tx);
 
-
-            //draw SDF using shader onto the right preview pane
-            GraphicsDevice.SetRenderTarget(preview_right.image_viewed);
-            EngineState.spritebatch.Begin(SpriteSortMode.Immediate, null, null, null, null, sdf_effect);
-
-            EngineState.spritebatch.End();
-            GraphicsDevice.Clear(Color.PowderBlue);
+            image_view.draw();
+            sdf_view.draw();
 
             //Draw both preview panes to the screen
             GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(Color.Transparent);
-
-            preview_left.draw();
-            preview_right.draw();
             
 
-            EngineState.spritebatch.Begin(SpriteSortMode.Immediate);
-            Draw2D.image(preview_left.image_viewed, XYPair.Zero, new XYPair(EngineState.resolution.X * vertical_split_position, EngineState.resolution.Y), Color.White);
-            Draw2D.image(preview_right.image_viewed, new XYPair(EngineState.resolution.X * vertical_split_position, 0), new XYPair(EngineState.resolution.X * (1f-vertical_split_position), EngineState.resolution.Y), Color.White);
+            EngineState.spritebatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap);
 
+            image_view.draw_output_to_screen();
+            sdf_view.draw_output_to_screen();
+
+            //Draw2D.image(image_view.image_viewed, XYPair.Zero, new XYPair(EngineState.resolution.X, EngineState.resolution.Y), Color.White);
+
+            Draw2D.image(sdf_view.image_viewed, sdf_view.viewport_position, sdf_view.viewport_size, Color.White);
 
             EngineState.spritebatch.End();
-            
+
 
             base.Draw(gameTime);
         }

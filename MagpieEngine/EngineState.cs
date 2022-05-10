@@ -43,11 +43,14 @@ namespace Magpie {
             buffer = new GBuffer();
             buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y);
 
-            Scene.configure_renderer();
-
             ui = new UILayer(EngineState.resolution);
 
+            try {
+                Scene.configure_renderer();
+            } catch (Exception ex) { return; }
+
             Draw3D.init();
+
         }
 
         public static void Update(GameTime gt, Game game) {

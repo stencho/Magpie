@@ -138,6 +138,7 @@ namespace Magpie.Engine {
         public static bool operator !=(XYPair a, XYPair b) => (a.X != b.X || a.Y != b.Y);
 
         public override string ToString() => string.Format("{{ {0} : {1} }}", X, Y);
+        public string ToXString() => string.Format("{0}x{1}", X, Y);
 
         public static string simple_string(XYPair input) {
             return string.Format("{0:F2}, {1:F2}", input.X, input.Y);

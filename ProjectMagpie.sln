@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie", "MagpieEngine\Magp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagpieTestbed", "MagpieTestbed\MagpieTestbed.csproj", "{B2DC76AE-07A2-4740-80F8-7FC31E13B7C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDFTool2D", "SDFTool2D\SDFTool2D.csproj", "{3DC0DAF8-BFFF-428A-8E1F-05682565068F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{B2DC76AE-07A2-4740-80F8-7FC31E13B7C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2DC76AE-07A2-4740-80F8-7FC31E13B7C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2DC76AE-07A2-4740-80F8-7FC31E13B7C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DC0DAF8-BFFF-428A-8E1F-05682565068F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DC0DAF8-BFFF-428A-8E1F-05682565068F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DC0DAF8-BFFF-428A-8E1F-05682565068F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DC0DAF8-BFFF-428A-8E1F-05682565068F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

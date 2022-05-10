@@ -198,6 +198,11 @@ namespace Magpie.Engine.Collision {
                 this.bottom_right = new Vector2(X+width, Y+height);
                 update_mg_bb();
             }
+            public AABB2D(float X, float Y, float width, float height) {
+                this.top_left = new Vector2(X, Y);
+                this.bottom_right = new Vector2(X + width, Y + height);
+                update_mg_bb();
+            }
             public AABB2D(Vector2 top_left, Vector2 bottom_right) {
                 this.top_left = top_left;
                 this.bottom_right = bottom_right;

@@ -19,7 +19,7 @@ float4 PS(float4 position : SV_Position, float4 color : COLOR0, float2 TexCoords
 	float a = (tex2D(SDFTEX, TexCoords) * color).r;
 	//a = smoothstep(1-alpha_scissor,alpha_scissor,a);
 
-	if (a > alpha_scissor*0.5f){
+	if (a < alpha_scissor){
 		clip(-1);
 	}
 	

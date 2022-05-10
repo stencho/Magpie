@@ -211,7 +211,7 @@ namespace Magpie.Engine {
         public static int count_cms => resources.Values.Where(a => a.resource_type == RESOURCE_TYPE.CUBEMAP).Count();
         public static int count_areas => resources.Values.Where(a => a.resource_type == RESOURCE_TYPE.AREAMAP).Count();
 
-        public static void LoadAll() {
+        public static void LoadAllResources() {
             foreach (Resource v in _resources.Values) {
                 v.Load();
             }
@@ -256,9 +256,10 @@ namespace Magpie.Engine {
                 AddResource(new Resource("OnePXGrey", _onePXGrey));
                 AddResource(new Resource("HalfGrey", _halfGrey));
 
+                AddResource(new Resource("checker", new Texture2D(gd, 2,2)));
                 AddResource(new Resource("center_glow", new Texture2D(gd, 1, 256)));
                 AddResource(new Resource("radial_glow", new Texture2D(gd, 256, 256)));
-                AddResource(new Resource("sdf_circle", new Texture2D(gd, 256, 256)));
+                AddResource(new Resource("sdf_circle", new Texture2D(gd, 2048, 2048)));
                 AddResource(new Resource("sdf_square", new Texture2D(gd, 256, 256)));
                 AddResource(new Resource("gradient_vertical", new Texture2D(gd, 256, 256)));
                 AddResource(new Resource("skybox_gradient", new Texture2D(gd, 512, 512)));
@@ -335,21 +336,21 @@ namespace Magpie.Engine {
                 ((Texture2D)resources["radial_glow"].value).SetData(glowData);
 
 
-                glowData = new Color[256 * 256];
+                glowData = new Color[2048 * 2048];
 
-                for (var i = 0; i < 256; i++) {
+                for (var i = 0; i < 2048; i++) {
 
                     float px, py;
 
-                    for (var x = 0; x < 256; x++) {
+                    for (var x = 0; x < 2048; x++) {
 
-                        px = x / 255f;
-                        py = i / 255f;
+                        px = x / 2048f;
+                        py = i / 2048f;
 
                         float t = Vector2.Distance(Vector2.One * 0.5f, new Vector2(px, py));
 
                         int o = (int)((t) * 255);
-                        glowData[(i * 256) + x] = Color.FromNonPremultiplied(o, o, o, 255);
+                        glowData[(i * 2048) + x] = Color.FromNonPremultiplied(255-o, 255-o, 255-o, 255);
                     }
                 }
 
@@ -375,6 +376,13 @@ namespace Magpie.Engine {
 
                 ((Texture2D)resources["sdf_square"].value).SetData(glowData);
 
+                glowData = new Color[2 * 2]
+                {
+                    Color.White, Color.LightGray,
+                    Color.LightGray, Color.White
+                };
+
+                ((Texture2D)resources["checker"].value).SetData(glowData);
                 glowData = null;
                 pixel_loaded = true;
             }

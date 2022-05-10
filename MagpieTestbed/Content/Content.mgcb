@@ -253,6 +253,18 @@
 /processorParam:TextureFormat=Color
 /build:tex/rhyth_head.png
 
+#begin tex/sdf_test.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:tex/sdf_test.png
+
 #begin tex/trump_map.png
 /importer:TextureImporter
 /processor:TextureProcessor

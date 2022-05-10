@@ -82,11 +82,13 @@
     <Compile Include="Graphics\Draw2D.cs" />
     <Compile Include="Graphics\DynamicLight.cs" />
     <Compile Include="Graphics\GBuffer.cs" />
+    <Compile Include="Graphics\UI\ImageViewer.cs" />
     <Compile Include="Graphics\Lights\PointLight.cs" />
     <Compile Include="Graphics\Lights\Spotlight.cs" />
     <Compile Include="Graphics\Instancing.cs" />
     <Compile Include="Graphics\Scene.cs" />
     <Compile Include="Graphics\SDF.cs" />
+    <Compile Include="Graphics\UI\StackedImageViews.cs" />
     <Compile Include="Graphics\UI\UIForm.cs" />
     <Compile Include="Graphics\UI\UIForms.cs" />
     <Compile Include="Graphics\UI\UILayer.cs" />

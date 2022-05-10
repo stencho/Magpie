@@ -241,7 +241,7 @@ namespace Magpie.Engine.Floors {
                                 col = Color.HotPink.ToVector4();
                             }
 
-                            Draw3D.xyz_cross(s.top_left + new Vector3(x, s.data[x, y], y), 0.5f, Color.FromNonPremultiplied(col));
+                            //Draw3D.xyz_cross(s.top_left + new Vector3(x, s.data[x, y], y), 0.5f, Color.FromNonPremultiplied(col));
                         }
                     }
                 }

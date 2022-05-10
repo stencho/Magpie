@@ -190,6 +190,20 @@ namespace Magpie.Graphics {
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, Color.Black);
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color);
         }
+        public static void text_shadow(string font, string s, XYPair position) {
+            //Console.WriteLine(s);
+
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, Color.Black);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, Color.White);
+        }
+        public static void text_shadow(string font, string s, Vector2 position) {
+            //Console.WriteLine(s);
+
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, Color.Black);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, Color.White);
+        }
+
+
         public static void text_shadow(string font, string s, Vector2 position, Color color) {
             //Console.WriteLine(s);
 
@@ -223,6 +237,21 @@ namespace Magpie.Graphics {
         public static void text_shadow(string font, string s, Vector2 position, Vector2 norm, Color color, Color shadow_color, float rotation, Vector2 origin, float scale, SpriteEffects effects) {
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position + norm, shadow_color, rotation, origin, scale, effects, 0);
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color, rotation, origin, scale, effects, 0);
+        }
+
+
+        public static void text_shadow(string font, XYPair position, Color color, string format, params string[] strings) {
+            //Console.WriteLine(s);
+
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, string.Format(format, strings), Vector2.One + position, Color.Black);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, string.Format(format, strings), Vector2.Zero + position, color);
+        }
+
+        public static void text_shadow(string font, Vector2 position, Color color, string format, params string[] strings) {
+            //Console.WriteLine(s);
+
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, string.Format(format, strings), Vector2.One + position, Color.Black);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, string.Format(format, strings), Vector2.Zero + position, color);
         }
 
 
@@ -360,17 +389,11 @@ namespace Magpie.Graphics {
 
         //ContentHandlerSingleFN
 
-        public static void image(ContentHandlerSingleFN content_handler, XYPair position, XYPair size, Color tint) {
-            image(content_handler, position.X, position.Y, size.X, size.Y, tint);
-        }
-        public static void image(ContentHandlerSingleFN content_handler, int X, int Y, int W, int H, Color tint) {
-            EngineState.spritebatch.Draw(content_handler.resource.value_tx, new Rectangle(X, Y, W, H), tint);
-        }
-        public static void image(RenderTarget2D rt, XYPair position, XYPair size, Color tint) {
-            image(rt, position.X, position.Y, size.X, size.Y, tint);
-        }
         public static void image(Texture2D texture, XYPair position, XYPair size, Color tint) {
             image(texture, position.X, position.Y, size.X, size.Y, tint, Vector2.Zero);
+        }
+        public static void image(Texture2D texture, Vector2 position, Vector2 size, Color tint) {
+            image(texture, position.X, position.Y, size.X, size.Y, tint);
         }
         public static void image(Texture2D texture, XYPair position, XYPair size, Color tint, SamplerState sampler_state) {
             //Renderer.gd.BlendState = blend_mode;
@@ -381,6 +404,9 @@ namespace Magpie.Graphics {
         }
         public static void image(Texture2D texture, XYPair position, XYPair size, Color tint, Vector2 origin) {
             image(texture, position.X, position.Y, size.X, size.Y, tint, origin);
+        }
+        public static void image(RenderTarget2D rt, XYPair position, XYPair size, Color tint) {
+            image(rt, position.X, position.Y, size.X, size.Y, tint);
         }
         public static void image(Texture2D texture, XYPair position, XYPair size, Color tint, Vector2 origin, SamplerState sampler_state) {
             //Renderer.gd.BlendState = blend_mode;
@@ -405,7 +431,10 @@ namespace Magpie.Graphics {
         public static void image(Texture2D texture, int X, int Y, int W, int H, Color tint, Vector2 origin) {
             EngineState.spritebatch.Draw(texture, new Rectangle(X, Y, W, H), null, tint, 0f, origin, SpriteEffects.None, 0f);
         }
-        public static void image(string name, XYPair position, XYPair size, Color tint, Vector2 origin) {
+        public static void image(string name, XYPair position, XYPair size, Color tint) {
+            image(name, position.X, position.Y, size.X, size.Y, tint);
+        }
+        public static void image(string name, Vector2 position, Vector2 size, Color tint) {
             image(name, position.X, position.Y, size.X, size.Y, tint);
         }
         public static void image(string name, XYPair offset_index, XYPair offset_cell_size, XYPair position, XYPair size, Color tint) {
@@ -433,13 +462,28 @@ namespace Magpie.Graphics {
                 new Rectangle(offset_cell_size.X * offset_index.X, offset_cell_size.Y * offset_index.Y, offset_cell_size.X, offset_cell_size.Y),
                 tint, 0f, origin, SpriteEffects.None, 10f);
         }
-        
+
         public static void image(string name, int X, int Y, int W, int H, Color tint) {
             EngineState.spritebatch.Draw(ContentHandler.resources[name].value_tx, new Rectangle(X, Y, W, H), tint);
+        }
+        public static void image(string name, float X, float Y, float W, float H, Color tint) {
+            EngineState.spritebatch.Draw(ContentHandler.resources[name].value_tx, new Rectangle((int)X, (int)Y, (int)W, (int)H), tint);
+        }
+        public static void image(Texture2D texture, float X, float Y, float W, float H, Color tint) {
+            EngineState.spritebatch.Draw(texture, new Rectangle((int)X, (int)Y, (int)W, (int)H), tint);
+        }
+        public static void image(RenderTarget2D rt2d, float X, float Y, float W, float H, Color tint) {
+            EngineState.spritebatch.Draw(rt2d, new Rectangle((int)X, (int)Y, (int)W, (int)H), tint);
         }
 
         public static void image(string name, XYPair position, XYPair size, Color tint, SpriteEffects flipmode) {
             EngineState.spritebatch.Draw(ContentHandler.resources[name].value_tx, new Rectangle(position.X, position.Y, size.X, size.Y), null, tint, 0f, Vector2.Zero, flipmode, 1f);
+        }
+        public static void image(ContentHandlerSingleFN content_handler, XYPair position, XYPair size, Color tint) {
+            image(content_handler, position.X, position.Y, size.X, size.Y, tint);
+        }
+        public static void image(ContentHandlerSingleFN content_handler, int X, int Y, int W, int H, Color tint) {
+            EngineState.spritebatch.Draw(content_handler.resource.value_tx, new Rectangle(X, Y, W, H), tint);
         }
 
         public static void cross(XYPair position, int sizeX, int sizeY, Color color) {
@@ -467,6 +511,14 @@ namespace Magpie.Graphics {
 
         public static void graph(int X, int Y, int width, int height, float[] values) {
 
+        }
+
+        public static void square(int x, int y, int w, int h, float line_width, Color col) {
+            square(new XYPair(x, y), new XYPair(x + w, y + h), 1f, col);
+        }
+
+        public static void square(float x, float y, float w, float h, float line_width, Color col) {
+            square(new Vector2(x, y), new Vector2(x + w, y + h), 1f, col);
         }
 
         public static void square(Vector2 top_left, Vector2 bottom_right, float line_width, Color col) {

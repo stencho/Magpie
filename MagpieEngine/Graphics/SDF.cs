@@ -96,6 +96,20 @@ namespace Magpie.Graphics {
             this.alpha_scissor = alpha_scissor;
         }
 
+        public SDFSprite2D(Vector2 position, Vector2 scale, float alpha_scissor, string sdf_texture) {
+            this.position = position;
+            this.scale = scale;
+            this.alpha_scissor = alpha_scissor;
+            this.resource_name = sdf_texture;
+        }
+        public SDFSprite2D(Vector2 position, Vector2 scale, float alpha_scissor, string sdf_texture, SDFDrawAnchor anchor) {
+            this.position = position;
+            this.scale = scale;
+            this.alpha_scissor = alpha_scissor;
+            this.resource_name = sdf_texture;
+            this.anchor = anchor;
+        }
+
         public void update() {
 
         }

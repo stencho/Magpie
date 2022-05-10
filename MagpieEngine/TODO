@@ -55,6 +55,3 @@ NEW COLLISION SYSTEM
 
 TRANSPARENCY HANDLING
 	- use alpha channel of lighting rendertarget to handle transparency storage, check fill_gbuffer.fx for more info
-
-POINT & SPOTLIGHTS 
-	- allow usage of baked, static-but-dynamic shadow maps- this should be a literal joke for spot lights and slightly less of a joke for point lights

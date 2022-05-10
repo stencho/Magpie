@@ -11,6 +11,7 @@
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/fill_gbuffer.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/light_depth.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/pointlight.fx</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/sdf_pixel.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/skybox.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/spotlight.fx</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/../../MagpieEngine/Shaders/terrain.fx</File>
@@ -27,6 +28,7 @@
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/lolmap.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/rhyth_body.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/rhyth_head.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/sdf_test.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/trump_map.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/trump_tex.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/trumpmapclean.png</File>
@@ -41,9 +43,11 @@
     <File>sha/fill_gbuffer.fx</File>
     <File>sha/light_depth.fx</File>
     <File>sha/pointlight.fx</File>
+    <File>sha/sdf_pixel.fx</File>
     <File>sha/skybox.fx</File>
     <File>sha/spotlight.fx</File>
     <File>sha/terrain.fx</File>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

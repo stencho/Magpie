@@ -17,6 +17,13 @@ namespace Magpie.Engine {
         public static string simple_vector2_string(this Vector2 input) {
             return string.Format("{0:F2}, {1:F2}", input.X, input.Y);
         }
+        public static string simple_vector2_x_string(this Vector2 input) {
+            return string.Format("{0:F2}x{1:F2}", input.X, input.Y);
+        }
+
+        public static string simple_vector2_x_string_no_dec(this Vector2 input) {
+            return string.Format("{0:F0}x{1:F0}", input.X, input.Y);
+        }
 
         public static string simple_vector3_string_brackets(this Vector3 input) {
             return string.Format("[{0:F2}, {1:F2}, {2:F2}]", input.X, input.Y, input.Z);
