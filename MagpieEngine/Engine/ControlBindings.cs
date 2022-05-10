@@ -364,6 +364,11 @@ namespace Magpie.Engine {
         public static bool bind_released(string bind) =>      (!bind_disabled(bind)) && (get_bind_result(bind) == digital_bind_result.released || get_bind_result(bind) == digital_bind_result.just_released);
         public static bool bind_just_released(string bind) => (!bind_disabled(bind)) && (get_bind_result(bind) == digital_bind_result.just_released);
 
+        private static void force_state(string bind, bind_state state) {
+            if (!String.IsNullOrEmpty(bind))
+                status[bind] = state;
+        }
+
         public static void update() {
             status.Clear();
             
@@ -373,13 +378,27 @@ namespace Magpie.Engine {
                 bind_state r = _digital_binds[i].state;
 
                 for (int b = 0; b < _digital_binds[i].binds.Length; b++) {
-                    if (!String.IsNullOrEmpty(_digital_binds[i].binds[b]))
-                        status.Add(_digital_binds[i].binds[b], r);                        
+                    if (!String.IsNullOrEmpty(_digital_binds[i].binds[b])) {
+                        if (!status.ContainsKey(_digital_binds[i].binds[b])) {
+                            status.Add(_digital_binds[i].binds[b], r);
+                        } else {
+                            if (r.result != digital_bind_result.released)
+                                force_state(_digital_binds[i].binds[b], r);
+                        }
+                    }
                 }
 
             }
         }
 
+        public static KeyBind get_keybind(string bind) {
+            foreach (IDigitalBind b in digital_binds) {
+                if (b.type == controller_type.keyboard && b.binds.Contains(bind)) {
+                    return ((KeyBind)b);
+                }
+            }
+            return null;
+        }
         public static Keys get_bind_key(string bind) {
             foreach(IDigitalBind b in digital_binds) {
                 if (b.type == controller_type.keyboard && b.binds.Contains(bind)) {
@@ -698,7 +717,6 @@ namespace Magpie.Engine {
         public class bind_state {
             public digital_bind_result result;
             public special_action_status special;
-
         }
 
         public interface IDigitalBind {
