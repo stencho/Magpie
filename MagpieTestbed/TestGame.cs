@@ -1,6 +1,6 @@
 ﻿using Magpie;
 using Magpie.Engine;
-using Magpie.Engine.Floors;
+using Magpie.Engine.Brushes;
 using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using MagpieTestbed.TestActors;
@@ -16,6 +16,8 @@ using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics.UI;
 using Magpie.Graphics.Lights;
+using Magpie.Engine.Physics;
+using System.Linq;
 
 namespace MagpieTestbed
 {
@@ -26,9 +28,7 @@ namespace MagpieTestbed
     {
         GraphicsDeviceManager graphics;
         World world;
-
-        SDFSprite2D test_sdf;
-
+        
         SDFSprite2D crosshair_sdf;
         
         Color crosshair_color = Color.White;
@@ -36,7 +36,6 @@ namespace MagpieTestbed
         GJK.gjk_result[] results;
 
         //Sphere test_a = new Sphere();
-        Capsule test_a = new Capsule(1.85f, 1f);
         //sphere_data test_b = new sphere_data();
 
         //Point3D test_a = new Point3D();
@@ -56,7 +55,7 @@ namespace MagpieTestbed
             graphics.PreferredBackBufferHeight = 900;
 
             this.IsMouseVisible = true;
-            this.graphics.SynchronizeWithVerticalRetrace = false;
+            this.graphics.SynchronizeWithVerticalRetrace = true;
             this.IsFixedTimeStep = false;
         }
 
@@ -86,6 +85,7 @@ namespace MagpieTestbed
             add_bind(new KeyBind(Keys.C, "down"));
 
             add_bind(new KeyBind(Keys.T, "test"));
+            add_bind(new KeyBind(Keys.Y, "test_sweep"));
             add_bind(new KeyBind(Keys.F2, "switch_buffer"));
             add_bind(new KeyBind(Keys.F3, "test", "switch_buffer"));
 
@@ -122,11 +122,11 @@ namespace MagpieTestbed
             */
 
             for (int i = 0; i < 150; i++) {
-                //world.current_map.add_object("test_sphere" + i, new TestSphere());
-                //world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
+                world.current_map.add_object("test_sphere" + i, new TestSphere());
+                world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
             }
 
-            world.current_map.add_floor("test_floor", new FloorPlane());
+            world.current_map.add_brush("test_floor", new FloorPlane());
             //world.current_map.floors["test_floor"].position = Vector3.Forward * 10f + Vector3.Up * 5f;
             //world.current_map.add_floor("test_floor2", new FloorPlane());
             //world.current_map.add_actor("test_actor", new MoveTestActor());
@@ -141,6 +141,8 @@ namespace MagpieTestbed
 
             //((Quad)test_b).position += Vector3.Forward * 40f;
 
+            world.current_map.add_actor("test_actor", new MoveTestActor());
+
             world.current_map.player_actor = new FreeCamActor();
             
             EngineState.camera = ((FreeCamActor)world.current_map.player_actor).cam;
@@ -148,21 +150,6 @@ namespace MagpieTestbed
             EngineState.ui.add_form("top_panel", new UIPanel(XYPair.One * -3, new XYPair(EngineState.resolution.X + 5, 16)));
 
             EngineState.ui.add_form("test_form", new UIButton(new XYPair(EngineState.resolution.X - 17, 0), new XYPair(17, 18), "close_button", "X", false));
-
-
-            test_sdf = new SDFSprite2D(
-                (Vector2.UnitY * 100f),
-                Vector2.One * 800,
-                0.5f, "sdf_quiet", SDFDrawAnchor.TopLeft);
-
-            test_sdf.inside_color = Color.White;
-            test_sdf.outline_color = Color.FromNonPremultiplied((int)(0.15f*255), (int)(0.15f * 255), (int)(0.15f * 255), 255);
-
-            test_sdf.enable_outline = true;
-            test_sdf.outline_width = 0.2f;
-            test_sdf.overlay_outline_texture_name = "checker";
-            test_sdf.overlay_inside_texture_name = "trumpmapclean";
-            test_sdf.outline_tile_count = new Vector2(69, 69);
 
 
             crosshair_sdf = new SDFSprite2D(
@@ -192,33 +179,6 @@ namespace MagpieTestbed
 
             world.Update();
 
-            //handle test actor shape movement
-            Vector3 mv = Vector3.Zero;
-
-            if (bind_pressed("t_forward")) {
-                mv += Vector3.Forward;
-            }
-            if (bind_pressed("t_backward")) {
-                mv += Vector3.Backward;
-            }
-            if (bind_pressed("t_left")) {
-                mv += Vector3.Left;
-            }
-            if (bind_pressed("t_right")) {
-                mv += Vector3.Right;
-            }
-            if (bind_pressed("t_up")) {
-                mv += Vector3.Up;
-            }
-            if (bind_pressed("t_down")) {
-                mv += Vector3.Down;
-            }
-            
-            if (mv != Vector3.Zero)
-                mv = (Vector3.Normalize(mv) * 4f * Clock.frame_time_delta);
-
-            test_a.position += mv;
-       
             //test collision detection between above test actor and all the objects in the scene
             results = new GJK.gjk_result[world.current_map.objects.Count];
 
@@ -235,6 +195,7 @@ namespace MagpieTestbed
             }
             */
 
+            /*
             if (bind_pressed("scroll_up") && bind_released("shift")) {
                 if (test_sdf.alpha_scissor < 1f)
                     test_sdf.alpha_scissor += 0.02f * (wheel_delta / 120f);
@@ -269,6 +230,7 @@ namespace MagpieTestbed
             if (bind_just_pressed("click_middle")) {
                 test_sdf.invert_map = !test_sdf.invert_map;
             }
+            */
 
 
             if (bind_just_pressed("screenshot")) Scene.screenshot_at_end_of_frame();
@@ -320,9 +282,7 @@ namespace MagpieTestbed
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
 
             world.Draw(GraphicsDevice, EngineState.camera);
-
-            // test_a.draw();
-
+            
 
             /*
             foreach (GJK.gjk_result result in results) {
@@ -334,8 +294,6 @@ namespace MagpieTestbed
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
-            world.test_hf.DrawDebug();
-
             //foreach (DynamicLight l in world.lights) {
             //if (l.type == LightType.POINT)
             //Draw3D.xyz_cross(GraphicsDevice, l.position, 0.1f, l.light_color, EngineState.camera.view, EngineState.camera.projection);
@@ -345,13 +303,29 @@ namespace MagpieTestbed
             ///Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (world.test_light.orientation.Forward * world.test_light.far_clip), Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
             //Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (Vector3.Transform(Vector3.Normalize(world.test_light.orientation.Forward + world.test_light.orientation.Down), ((SpotLight)world.test_light).actual_scale)), Color.Orange, EngineState.camera.view, EngineState.camera.projection);
 
+            foreach (Brush brush in world.current_map.brushes.Values) {
+                brush.debug_draw();
+            }
+            foreach (GameObject go in world.current_map.objects.Values) {
+                //go.debug_draw();
+            }
+            foreach (Actor actor in world.current_map.actors.Values) {
+                actor.debug_draw();
+                
+            }
+
+            foreach(Intersection i in PhysicsSolver.intersections) {
+                Draw3D.xyz_cross(i.gjkr.closest_point_A, 1f, Color.Blue);
+                Draw3D.xyz_cross(i.gjkr.closest_point_B, 1f, Color.ForestGreen);
+            }
+
             EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap);
 
             Draw2D.text_shadow("pf",
                 Clock.frame_rate.ToString() + " FPS [" + Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
 
                 "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Scene.buffer == -1) ? "combined" : ((Scene.buffers)Scene.buffer).ToString()) + "\n" +
-                "alpha_scissor " + string.Format("{0:F2}", test_sdf.alpha_scissor)
+                PhysicsSolver.list_intersections()
 
 
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
@@ -360,16 +334,16 @@ namespace MagpieTestbed
             //Draw2D.line(Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + Vector2.One, Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + (Vector2.UnitX * 200f) + Vector2.One, 1, Color.Black);
             //Draw2D.line(Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f), Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + (Vector2.UnitX * 200f), 1, Color.Red);
 
-            Draw2D.image(Scene.sun_moon.lerps.debug_band, XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f), XYPair.One + (XYPair.UnitY * 30) + (XYPair.UnitX * 256), Color.White);
+            //Draw2D.image(Scene.sun_moon.lerps.debug_band, XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f), XYPair.One + (XYPair.UnitY * 30) + (XYPair.UnitX * 256), Color.White);
 
-            Draw2D.image(ContentHandler.resources["OnePXWhite"].value_tx, XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f) - (XYPair.UnitX * 35), XYPair.One * 30, Scene.sun_moon.current_color);
+            //Draw2D.image(ContentHandler.resources["OnePXWhite"].value_tx, XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f) - (XYPair.UnitX * 35), XYPair.One * 30, Scene.sun_moon.current_color);
 
-            Draw2D.line(
+           /* Draw2D.line(
                 (XYPair.UnitX * ((float)Scene.sun_moon.current_day_value * 256)) + XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f),
                 (XYPair.UnitX * ((float)Scene.sun_moon.current_day_value * 256)) + XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 70f) + (XYPair.UnitY * 30), 
-                2f, Color.Red);
+                2f, Color.Red);*/
 
-
+            /*
             Draw2D.text_shadow("pf",
 string.Format(@"
 {0:F0}ms/{1}ms ({2:F3}%)
@@ -386,7 +360,7 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
 
 )           , Vector2.One * 2 + (Vector2.UnitX * 300), Color.White);
 
-
+    */
             Draw2D.text_shadow("pf", list_active_binds_w_status(), (Vector2.One * 2) + (Vector2.UnitY * 200));
 
             EngineState.ui.draw();
@@ -398,8 +372,6 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
             EngineState.spritebatch.End();
             
             crosshair_sdf.draw();
-            test_sdf.draw();
-
 
             GraphicsDevice.SetRenderTarget(null);
 

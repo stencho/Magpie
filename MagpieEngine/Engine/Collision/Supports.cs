@@ -43,7 +43,7 @@ namespace Magpie {
 
             return i;
         }
-
+        
         public static int Point(ref Vector3 support,  Vector3 direction, Vector3 P) {
             support = P;
             return 0;

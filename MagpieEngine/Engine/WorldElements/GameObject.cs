@@ -1,4 +1,5 @@
-﻿using Magpie.Graphics;
+﻿using Magpie.Engine.Physics;
+using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -12,10 +13,17 @@ namespace Magpie.Engine {
         Vector3 position { get; set; }
         Matrix orientation { get; set; }
         Vector3 scale { get; set; }
+
+        float velocity { get; set; }
+        Vector3 inertia_dir { get; set; }
+
         BoundingBox bounds { get; set; }
         Matrix world { get; }
 
         shape3D collision { get; set; }
+        shape3D sweep_collision { get; set; }
+
+        PhysicsInfo phys_info { get; set; }
 
         string model { get; set; }
         string[] textures { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Magpie.Engine;
-using Magpie.Engine.Floors;
+using Magpie.Engine.Brushes;
+using Magpie.Engine.Physics;
 using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using Magpie.Graphics.Lights;
@@ -38,7 +39,7 @@ namespace Magpie {
                      RNG.random_opaque_color()
                      ));
             }
-            current_map.floors.Add("test_heightfield", test_hf);
+            current_map.brushes.Add("test_heightfield", test_hf);
 
             current_map.lights.Add(test_light);
             //lights.Add(test_light2);
@@ -57,12 +58,12 @@ namespace Magpie {
         }
 
         
-        public (float, Floor) highest_floor(Vector3 pos) {
+        public (float, Brush) highest_floor(Vector3 pos) {
             float highest = float.MinValue;
             float c = 0f;
-            Floor f = null;
+            Brush f = null;
 
-            foreach (Floor floor in current_map.floors.Values) {
+            foreach (Brush floor in current_map.brushes.Values) {
                 if (!floor.within_vertical_bounds(pos)) continue;
 
                 c = floor.get_footing_height(pos);
@@ -80,12 +81,12 @@ namespace Magpie {
         }
         
 
-        public (float, Floor) highest_floor_below(Vector3 pos) {
+        public (float, Brush) highest_floor_below(Vector3 pos) {
             float highest = float.MinValue;
             float c = 0f;
-            Floor f = null;
+            Brush f = null;
 
-            foreach (Floor floor in current_map.floors.Values) {
+            foreach (Brush floor in current_map.brushes.Values) {
                 if (!floor.within_vertical_bounds(pos)) continue;
 
                 c = floor.get_footing_height(pos);
@@ -116,27 +117,23 @@ namespace Magpie {
                 go.Update();
             }
 
-            foreach (Floor floor in current_map.floors.Values) {
+            foreach (Brush floor in current_map.brushes.Values) {
                 floor.Update();
             }
 
             foreach (Actor actor in current_map.actors.Values) {
                 actor.Update();
-
-                if (actor.wants_movement != Vector3.Zero) {
-                    actor.position += actor.wants_movement;
-
-                    actor.wants_movement = Vector3.Zero;
-                }
             }
 
             current_map.player_actor.Update();
 
-            if (player_actor.wants_movement != Vector3.Zero) {
-                player_actor.position += player_actor.wants_movement;
+            PhysicsSolver.do_movement(current_map);
 
-                player_actor.wants_movement = Vector3.Zero;
-            }
+            PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
+
+            PhysicsSolver.finalize_collisions(current_map);
+
+
             Scene.sun_moon.update();
             //test_light.update();
             
@@ -144,19 +141,9 @@ namespace Magpie {
 
         SceneObject[] current_scene;
         public void Draw(GraphicsDevice gd, Camera camera) {
-             current_scene = Scene.create_scene_from_lists(current_map.floors, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
+             current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
 
-            /*
-            foreach (Floor floor in current_map.floors.Values) {
-                floor.Draw();
-            }
-            foreach (GameObject go in current_map.objects.Values) {
-                go.Draw();
-            }
-            foreach (Actor actor in current_map.actors.Values) {
-                actor.Draw();
-            }
-            */
+                      
 
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);

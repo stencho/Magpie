@@ -94,7 +94,7 @@ namespace Magpie.Engine.Collision {
         }
         
 
-        public static bool ray_intersects_AABB(Vector3 ray_start, Vector3 ray_dir, Vector3 aabb_min, Vector3 aabb_max, out raycast_result result) {
+        public static bool ray_intersects_BoundingBox(Vector3 ray_start, Vector3 ray_dir, Vector3 aabb_min, Vector3 aabb_max, out raycast_result result) {
             Vector3 min, max;
             result = new raycast_result();
 

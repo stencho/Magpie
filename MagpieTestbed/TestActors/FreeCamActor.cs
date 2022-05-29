@@ -1,6 +1,8 @@
 ﻿using Magpie;
 using Magpie.Engine;
-using Magpie.Engine.Floors;
+using Magpie.Engine.Brushes;
+using Magpie.Engine.Collision.Support3D;
+using Magpie.Engine.Physics;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -19,20 +21,30 @@ namespace MagpieTestbed.TestActors {
         public Camera cam;
         public Vector3 position { get; set; } = Vector3.Zero;
         public Vector3 wants_movement { get; set; } = (Vector3.Backward + Vector3.Up) * 2;
+        public Matrix world => Matrix.CreateTranslation(position);
+
+        public Vector3 wants_absolute_movement { get; set; } = Vector3.Zero;
+        public bool request_absolute_move { get; set; } = false;
+        public bool sweep_absolute_move { get; set; } = false;
 
         float movement_speed = 12f;
         float mouse_multi = 0.6f;
 
+        public shape3D collision { get; set; }
+        public shape3D sweep_collision { get; set; }
+
+        public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
 
         bool camera_enabled = false;
         XYPair last_mouse_pos = XYPair.Zero;
 
         public FreeCamActor() {
             cam = new Camera();
+            collision = new Sphere();
         }
 
         public void Update() {
-
+            
             if (bind_pressed("click_right")) {
                 if (bind_just_pressed("click_right")) {
                     last_mouse_pos = mouse_position;
@@ -86,12 +98,12 @@ namespace MagpieTestbed.TestActors {
             }
 
             if (mv != Vector3.Zero)
-                wants_movement = Vector3.Normalize(mv) * movement_speed * Clock.frame_time_delta;
+                wants_movement = Vector3.Normalize(mv) * movement_speed * (bind_pressed("shift") ? 3f : 1f) * Clock.frame_time_delta;
 
             cam.position = position;
             cam.update();
             cam.update_projection(EngineState.resolution);
         }
-        public void Draw() { }
+        public void debug_draw() { }
     }
 }

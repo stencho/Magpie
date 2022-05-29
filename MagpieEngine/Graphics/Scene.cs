@@ -1,5 +1,5 @@
 ﻿using Magpie.Engine;
-using Magpie.Engine.Floors;
+using Magpie.Engine.Brushes;
 using Magpie.Graphics.Lights;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -208,25 +208,25 @@ namespace Magpie.Graphics {
         public static void screenshot_at_end_of_frame() { screenshot = true; }
         public static bool taking_screenshot => screenshot;
 
-        public static SceneObject[] create_scene_from_lists(Dictionary<string,Floor> floors, Dictionary<string, GameObject> objects, Dictionary<string, Actor> actors, IEnumerable<DynamicLight> lights, BoundingFrustum view_frustum) {
+        public static SceneObject[] create_scene_from_lists(Dictionary<string,Brush> floors, Dictionary<string, GameObject> objects, Dictionary<string, Actor> actors, IEnumerable<DynamicLight> lights, BoundingFrustum view_frustum) {
             List<SceneObject> scene = new List<SceneObject>(floors.Count + objects.Count + actors.Count);
             bool any_visible_light_frustum = false;
 
-            foreach (Floor floor in floors.Values) {
+            foreach (Brush floor in floors.Values) {
                 //RE-ADD LIGHT/FRUSTUM CHECKS
 
                 //if (floor.bounds.Intersects(view_frustum) || any_visible_light_frustum) {
-                if (floor.type == FloorType.PLANE) {
+                if (floor.type == BrushType.PLANE) {
                     scene.Add(new SceneObject {
                         vertex_buffer = ((FloorPlane)floor).vertex_buffer,
                         index_buffer = ((FloorPlane)floor).index_buffer,
-                        mesh_bounds = floor.bounds,
+                        mesh_bounds = floor.collision.find_bounding_box(),
                         world = floor.world,
                         texture = floor.texture,
                         in_light = false,
                         shadow_maps = new List<Texture2D>()
                     });
-                } else if (floor.type == FloorType.SEGMENTED_HEIGHTFIELD) {
+                } else if (floor.type == BrushType.SEGMENTED_HEIGHTFIELD) {
                     //do frustum test here to see which segments are in view and get the correct LOD buffer
                     //then add a new scene object for each of the segments added, easy
 

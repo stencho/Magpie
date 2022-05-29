@@ -18,7 +18,8 @@ namespace Magpie {
         tri,
         capsule,
         line,
-        sphere
+        sphere,
+        dummy
     }
 
     public interface shape3D {
@@ -26,10 +27,12 @@ namespace Magpie {
         Vector3 position { get; set; }
         Vector3 start_point { get; }
 
-        AABB find_bounding_box();
+        BoundingBox find_bounding_box();
 
         shape_type shape { get; }
-             
+
+        float radius { get; set; }
+
         void draw();
     }  
 }

@@ -1,4 +1,4 @@
-﻿using Magpie.Engine.Floors;
+﻿using Magpie.Engine.Brushes;
 using Magpie.Graphics;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Magpie.Engine.Stages {
     [Serializable]
     public class Map {
-        public Dictionary<string, Floor> floors = new Dictionary<string, Floor>();
+        public Dictionary<string, Brush> brushes = new Dictionary<string, Brush>();
         public Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
         public Dictionary<string, Actor> actors = new Dictionary<string, Actor>();
 
@@ -17,8 +17,8 @@ namespace Magpie.Engine.Stages {
 
         public Actor player_actor;
 
-        public void add_floor(string name, Floor floor) {
-            floors.Add(name, floor);
+        public void add_brush(string name, Brush floor) {
+            brushes.Add(name, floor);
         }
 
         public void add_object(string name, GameObject gameobject) {

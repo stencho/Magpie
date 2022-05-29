@@ -49,8 +49,13 @@
     <Compile Include="Engine\Collision\OBB.cs" />
     <Compile Include="Engine\Collision\Raycasting.cs" />
     <Compile Include="Engine\Collision\Shapes.cs" />
+    <Compile Include="Engine\Collision\Support2D\AABB2D.cs" />
+    <Compile Include="Engine\Collision\Support2D\Circle2D.cs" />
+    <Compile Include="Engine\Collision\Support2D\Line2D.cs" />
+    <Compile Include="Engine\Collision\Support2D\Point2D.cs" />
     <Compile Include="Engine\Collision\Support3D\Capsule.cs" />
     <Compile Include="Engine\Collision\Support3D\Cube.cs" />
+    <Compile Include="Engine\Collision\Support3D\DummySupport.cs" />
     <Compile Include="Engine\Collision\Support3D\Line.cs" />
     <Compile Include="Engine\Collision\Support3D\Polyhedron.cs" />
     <Compile Include="Engine\Collision\Support3D\Quad.cs" />
@@ -58,6 +63,9 @@
     <Compile Include="Engine\Collision\Support3D\Triangle.cs" />
     <Compile Include="Engine\Collision\Supports.cs" />
     <Compile Include="Engine\Extensions.cs" />
+    <Compile Include="Engine\Physics\ISolver.cs" />
+    <Compile Include="Engine\Physics\Solvers\BasicSolver.cs" />
+    <Compile Include="Engine\Physics\Solvers\StaticSolver.cs" />
     <Compile Include="Engine\RNG.cs" />
     <Compile Include="Engine\WorldElements\Actor.cs" />
     <Compile Include="Engine\Clock.cs" />
@@ -65,10 +73,10 @@
     <Compile Include="Engine\ContentManager.cs" />
     <Compile Include="Engine\ControlBindings.cs" />
     <Compile Include="Engine\ControlRead.cs" />
-    <Compile Include="Engine\WorldElements\Floors\Floor.cs" />
-    <Compile Include="Engine\WorldElements\Floors\Heightfield.cs" />
-    <Compile Include="Engine\WorldElements\Floors\FloorPlane.cs" />
-    <Compile Include="Engine\WorldElements\Floors\SegmentedHeightfield.cs" />
+    <Compile Include="Engine\WorldElements\Brushes\Brush.cs" />
+    <Compile Include="Engine\WorldElements\Brushes\Heightfield.cs" />
+    <Compile Include="Engine\WorldElements\Brushes\Plane.cs" />
+    <Compile Include="Engine\WorldElements\Brushes\SegmentedHeightfield.cs" />
     <Compile Include="Engine\WorldElements\GameObject.cs" />
     <Compile Include="Engine\Math2D.cs" />
     <Compile Include="Engine\WorldElements\Prefabs\PrefabExporter.cs" />
@@ -99,7 +107,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Engine\Collision\Support2D\" />
     <Folder Include="Graphics\Animation\" />
   </ItemGroup>
   <ItemGroup>
@@ -119,4 +126,8 @@
     <None Include="TODO" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

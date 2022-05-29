@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Magpie.Graphics {
     public class Draw3D {
         static VertexPositionColor[] verts = new VertexPositionColor[2];
@@ -198,7 +199,7 @@ namespace Magpie.Graphics {
             capsule(A, B, radius, color, EngineState.camera.view, EngineState.camera.projection);
         }
         public static void capsule(Vector3 A, Vector3 B, float radius, Color color, Matrix view, Matrix projection) {
-            line_effect.Parameters["World"].SetValue(Matrix.Identity);
+            //line_effect.Parameters["World"].SetValue(Matrix.Identity);
 
             Vector3 AB = B - A;
             Vector3 normal = Vector3.Normalize(B - A);
@@ -261,6 +262,10 @@ namespace Magpie.Graphics {
             square(F, H, D, B, color, view, projection);
             //bottom
             square(D, H, G, C, color, view, projection);
+        }
+
+        public static void cube(BoundingBox bb, Color color, Matrix view, Matrix projection) {
+            Draw3D.cube((bb.Min + bb.Max) / 2, (bb.Max - bb.Min) / 2, Color.MonoGameOrange, Matrix.Identity, EngineState.camera.view, EngineState.camera.projection);
         }
 
         public static Texture2D tum;
@@ -340,8 +345,8 @@ namespace Magpie.Graphics {
             e_diffuse.Parameters["Projection"].SetValue(projection);
             e_diffuse.Parameters["DiffuseMap"].SetValue(texture);
             e_diffuse.Parameters["tint"].SetValue(color.ToVector3());
-            e_diffuse.Parameters["FarClip"].SetValue(2000f);
-            e_diffuse.Parameters["opacity"].SetValue(-1f);
+            //e_diffuse.Parameters["FarClip"].SetValue(2000f);
+            //e_diffuse.Parameters["opacity"].SetValue(-1f);
 
             EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;

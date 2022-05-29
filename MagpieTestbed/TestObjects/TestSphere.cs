@@ -2,6 +2,7 @@
 using Magpie.Engine;
 using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
+using Magpie.Engine.Physics;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -30,6 +31,12 @@ namespace MagpieTestbed.TestObjects {
         public string[] textures { get; set; } = new string[] { "OnePXWhite" };
 
         public shape3D collision { get; set; }
+        public shape3D sweep_collision { get; set; }
+
+        public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
+
+        public float velocity { get; set; } = 0f;
+        public Vector3 inertia_dir { get; set; } = Vector3.Zero;
 
         public TestSphere() {
              collision = new Cube(scale);

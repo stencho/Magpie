@@ -19,7 +19,7 @@ namespace Magpie {
         public Vector3 half_scale = Vector3.One / 2f;
         
         public Color color { get; set; } = Color.White;
-        public AABB? bounding_box { get; set; }
+        public BoundingBox? bounding_box { get; set; }
 
         public Vector3 A => origin + (orientation.Left * half_scale.X) + (orientation.Up * half_scale.Y) + (orientation.Forward * half_scale.Z);
         public Vector3 B => origin + (orientation.Right * half_scale.X) + (orientation.Up * half_scale.Y) + (orientation.Forward * half_scale.Z);
@@ -52,9 +52,9 @@ namespace Magpie {
             find_bounding_box(true);
         }
 
-        public AABB find_bounding_box(bool find_new_value = false) {
+        public BoundingBox find_bounding_box(bool find_new_value = false) {
             if (!bounding_box.HasValue || find_new_value)
-                bounding_box = CollisionHelper.AABB_around_OBB(this);
+                bounding_box = CollisionHelper.BoundingBox_around_OBB(this);
 
             return bounding_box.Value;
         }
