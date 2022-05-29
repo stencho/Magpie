@@ -15,10 +15,11 @@ namespace Magpie.Engine.Collision.Support3D {
         public shape_type shape { get; } = shape_type.sphere;
 
         public Vector3 P;
-        public float radius;
 
-        public AABB find_bounding_box() {
-            return new AABB(position - (Vector3.One * radius), position + (Vector3.One * radius));
+        public float radius { get; set; } = 0f;
+
+        public BoundingBox find_bounding_box() {
+            return new BoundingBox(position - (Vector3.One * radius), position + (Vector3.One * radius));
         }
 
         public Sphere() {
@@ -29,7 +30,7 @@ namespace Magpie.Engine.Collision.Support3D {
 
         public void draw() {
             Draw3D.sphere(position, radius, Color.MonoGameOrange);
-            find_bounding_box().draw(Vector3.Zero, Color.Red);
+            Draw3D.cube(find_bounding_box(), Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
         }
     }
 }

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Magpie.Engine.Floors {
-    public class SegmentedHeightfield : Floor {
-        public FloorType type => FloorType.SEGMENTED_HEIGHTFIELD;
+namespace Magpie.Engine.Brushes {
+    public class SegmentedHeightfield : Brush {
+        public BrushType type => BrushType.SEGMENTED_HEIGHTFIELD;
 
         public class HFSegment {
             public float[,] data;
@@ -90,9 +91,12 @@ namespace Magpie.Engine.Floors {
         float _highest_value = float.MinValue;
         float _lowest_value = float.MaxValue;
 
-        public BoundingBox bounds { get; set; }
-        
+        public shape3D collision { get; set; }
+
         public string texture { get; set; } = "zerocool_sharper";
+
+        public Vector3 movement_vector { get; set; } = Vector3.Zero;
+        public Vector3 final_position { get; set; }
 
         public SegmentedHeightfield(Vector3 position, XYPair size, XYPair segment_size) {
             this.position = position;
@@ -100,6 +104,8 @@ namespace Magpie.Engine.Floors {
             this.segment_size = segment_size;
 
             this.segment_count = size / segment_size;
+
+            collision = new DummySupport();
 
             initialize_segments();
         }
@@ -114,6 +120,8 @@ namespace Magpie.Engine.Floors {
 
             this.segment_size = size / segments_per_axis;
             this.segment_count = new XYPair(segments_per_axis);
+
+            collision = new DummySupport();
 
             initialize_segments();
         }
@@ -200,10 +208,21 @@ namespace Magpie.Engine.Floors {
         }
                
         public void Update() {
+
         }
-        public void Draw() {
+
+
+        public Vector3 get_footing(float X, float Z) {
+            throw new NotImplementedException();
         }
-        public void DrawDebug() {
+        public float get_footing_height(Vector3 pos) {
+            throw new NotImplementedException();
+        }
+        public bool within_vertical_bounds(Vector3 pos) {
+            throw new NotImplementedException();
+        }
+
+        public void debug_draw() {
             EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
 
             RenderTargetBinding[] rtb = EngineState.graphics_device.GetRenderTargets();
@@ -222,7 +241,7 @@ namespace Magpie.Engine.Floors {
                     var s = segments[sx, sy];
                     Draw3D.sphere(s.top_left, 0.1f, Color.White);
 
-                    
+
 
                     Vector4 col = new Vector4(1, 0, s.overall_UV_position.X, 1f);
                     Draw3D.line(s.top_left, s.top_right, Color.FromNonPremultiplied(col));
@@ -246,23 +265,12 @@ namespace Magpie.Engine.Floors {
                     }
                 }
             }
-            
+
 
             Draw3D.lines(Color.White, top_left, top_right, bottom_right, bottom_left, top_left);
-
+            
             EngineState.graphics_device.SetRenderTargets(rtb);
             //Draw3D.line()
-
-        }
-
-        public Vector3 get_footing(float X, float Z) {
-            throw new NotImplementedException();
-        }
-        public float get_footing_height(Vector3 pos) {
-            throw new NotImplementedException();
-        }
-        public bool within_vertical_bounds(Vector3 pos) {
-            throw new NotImplementedException();
         }
     }
 }

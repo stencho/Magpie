@@ -15,9 +15,11 @@ namespace Magpie.Engine.Collision.Support3D {
         public shape_type shape { get; } = shape_type.polyhedron;
 
         public List<Vector3> verts;
-        
-        public AABB find_bounding_box() {
-            return new AABB();
+
+        public float radius { get; set; } = 0f;
+
+        public BoundingBox find_bounding_box() {
+            return new BoundingBox();
         }
 
         public Polyhedron(params Vector3[] points) {

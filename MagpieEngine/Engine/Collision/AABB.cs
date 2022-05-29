@@ -8,7 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Magpie {
-    public struct AABB {
+
+    /*
+    public struct BoundingBox {
         Vector3 _min;
         Vector3 _max;
 
@@ -16,7 +18,7 @@ namespace Magpie {
         public Vector3 max { get { return _max; } set { _max = value; monogame_bb.Max = _max; } }
 
 
-        public AABB(Vector3 min, Vector3 max) {
+        public BoundingBox(Vector3 min, Vector3 max) {
             this._min = min;
             this._max = max;
 
@@ -26,30 +28,55 @@ namespace Magpie {
         public Vector3 origin => ((_min + _max) / 2f);
         public Vector3 half_scale => _max - origin;
         public Vector3 scale => _max - _min;
-
+        /*
         public Vector3 A => origin + half_scale;
         public Vector3 B => origin + (half_scale * (Vector3.One - (Vector3.UnitX * 2)));
+
         public Vector3 C => origin + (half_scale * (Vector3.One - (Vector3.UnitY * 2)));
         public Vector3 D => origin + (half_scale * (Vector3.One - (Vector3.UnitX * 2) - (Vector3.UnitY * 2)));
+
         public Vector3 E => origin + (half_scale * (Vector3.One - (Vector3.UnitZ * 2)));
         public Vector3 F => origin + (half_scale * (Vector3.One - (Vector3.UnitX * 2) - (Vector3.UnitZ * 2)));
+
         public Vector3 G => origin + (half_scale * (Vector3.One - (Vector3.UnitZ * 2) - (Vector3.UnitY * 2)));
         public Vector3 H => origin + (half_scale * (Vector3.One - (Vector3.UnitX * 2) - (Vector3.UnitY * 2) - (Vector3.UnitZ * 2)));
-
+        
         public Vector3 Top => origin + (Vector3.Up * half_scale.Y);
 
         public BoundingBox monogame_bb;
 
-        public static AABB operator +(AABB A, Vector3 B) {
-            return new AABB { _min = A._min + B, _max = A._max + B };
+        public static BoundingBox operator +(BoundingBox A, Vector3 B) {
+            return new BoundingBox { _min = A._min + B, _max = A._max + B };
         }
 
-        public static AABB operator -(AABB A, Vector3 B) {
-            return new AABB { _min = A._min - B, _max = A._max - B };
+        public static BoundingBox operator -(BoundingBox A, Vector3 B) {
+            return new BoundingBox { _min = A._min - B, _max = A._max - B };
+        }
+
+        public bool Intersects(BoundingBox bb) {
+            monogame_bb.Min = this._min;
+            monogame_bb.Max = this._max;
+
+            if (bb.Intersects(monogame_bb)) {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool Intersects(BoundingBox bb) {
+            monogame_bb.Min = this._min;
+            monogame_bb.Max = this._max;
+
+            if (bb.Intersects(monogame_bb)) {
+                return true;
+            }
+
+            return false;
         }
 
         public void draw(Vector3 offset, Color color) {
-            Draw3D.cube(A+ offset, B+ offset, C+ offset, D+ offset, E+ offset, F+ offset, G+ offset, H+ offset, color, EngineState.camera.view, EngineState.camera.projection);
-        }        
-    }
+            //Draw3D.cube(A+ offset, B+ offset, C+ offset, D+ offset, E+ offset, F+ offset, G+ offset, H+ offset, color, EngineState.camera.view, EngineState.camera.projection);
+        }       
+    }*/
 }

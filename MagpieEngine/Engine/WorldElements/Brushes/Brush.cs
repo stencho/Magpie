@@ -7,15 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Magpie.Engine.Floors {
-    public enum FloorType {
-        PLANE, 
+namespace Magpie.Engine.Brushes {
+    public enum BrushType {
+        PLANE,
         HEIGHTFIELD,
-        SEGMENTED_HEIGHTFIELD
+        SEGMENTED_HEIGHTFIELD,
+        BOX,
+        DUMMY
     }
 
-    public interface Floor {
-        FloorType type { get; }
+    public interface Brush {
+        BrushType type { get; }
 
         Vector3 position { get; set; }
         Matrix orientation { get; set; }
@@ -26,8 +28,14 @@ namespace Magpie.Engine.Floors {
         Vector3 get_footing(float X, float Z);
         bool within_vertical_bounds(Vector3 pos);
 
-        BoundingBox bounds { get; set; }
-        
+        //BoundingBox bounds { get; set; }
+        shape3D collision { get; set; }
+
+
+        Vector3 movement_vector { get; set; }
+        Vector3 final_position { get; set; }
+
         void Update();
+        void debug_draw();
     }
 }

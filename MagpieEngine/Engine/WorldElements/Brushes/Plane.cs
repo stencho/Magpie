@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Magpie.Engine.Collision;
+using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,9 +12,9 @@ using static Magpie.Engine.Controls;
 using static Magpie.Engine.DigitalControlBindings;
 
 
-namespace Magpie.Engine.Floors {
-    public class FloorPlane : Floor {
-        public FloorType type => FloorType.PLANE;
+namespace Magpie.Engine.Brushes {
+    public class FloorPlane : Brush {
+        public BrushType type => BrushType.PLANE;
 
         public Vector3 position { get; set; } = Vector3.Zero;
         public Vector2 size { get; set; } = Vector2.One * 50f;
@@ -25,7 +26,7 @@ namespace Magpie.Engine.Floors {
         public Vector3 C => (Vector3.Backward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f);
         public Vector3 D => (Vector3.Backward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f) ;
 
-        public BoundingBox bounds { get; set; }
+        public shape3D collision { get; set; }
 
         static ushort[] q_indices = { 0, 1, 2, 2, 3, 0 };
         public static VertexPositionNormalTexture[] quad = new VertexPositionNormalTexture[4] {
@@ -39,6 +40,9 @@ namespace Magpie.Engine.Floors {
         public VertexBuffer vertex_buffer { get; set; }
 
         public string texture { get; set; } =  "zerocool_sharper";
+
+        public Vector3 movement_vector { get; set; } = Vector3.Zero;
+        public Vector3 final_position { get; set; }
 
         public FloorPlane() {
 
@@ -56,18 +60,22 @@ namespace Magpie.Engine.Floors {
                 vertex_buffer.SetData<VertexPositionNormalTexture>(quad);
             }
 
+            collision = new Quad(size.X, size.Y);
+
         }
 
         public void Update() {
-           // bounds = CollisionHelper.find_bounding_box_around_points(A, B, C, D);
-           bounds = BoundingBox.CreateFromPoints(new Vector3[] {A,B,C,D});
-
+            // bounds = CollisionHelper.find_bounding_box_around_points(A, B, C, D);
+            //bounds = BoundingBox.CreateFromPoints(new Vector3[] {A,B,C,D});
+            collision.position = position;
+            collision.orientation = orientation;
         }
 
         public Vector3 get_footing(float X, float Z) {
             throw new NotImplementedException();
         }
 
+        //add normal to this
         public float get_footing_height(Vector3 pos) {
             Vector3 hit = Vector3.Zero;
             //this feels hacky but fuck it works
@@ -85,5 +93,9 @@ namespace Magpie.Engine.Floors {
                 A.XZ(),B.XZ(),C.XZ(),D.XZ());
         }
 
+        public void debug_draw() {
+            //Draw3D.cube((bounds.Min + bounds.Max) / 2, (bounds.Max - bounds.Min) / 2f, Color.MediumPurple, Matrix.Identity, EngineState.camera.view, EngineState.camera.projection);
+            collision.draw();
+        }
     }
 }

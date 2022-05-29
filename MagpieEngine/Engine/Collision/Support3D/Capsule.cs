@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Magpie.Engine.Collision;
 
 namespace Magpie.Engine.Collision.Support3D {
-    public class Capsule : shape3D {
-        public Vector3 AB_normal => Vector3.Normalize(B - A);
+    public class AACapsule : shape3D {
+        public Vector3 AB_normal => Vector3.Up;
         public float AB_length => Vector3.Distance(A, B);
         public float AB_full_length => Vector3.Distance(A - (AB_normal * radius), B + (AB_normal * radius));
 
@@ -16,45 +17,33 @@ namespace Magpie.Engine.Collision.Support3D {
 
         public Matrix orientation { get; set; } = Matrix.Identity;
         public Vector3 position { get; set; } = Vector3.Zero;
-        public Vector3 start_point => A;//A + ((B-A) / 2f);
+        public Vector3 start_point => A + ((B-A) / 2f);
 
         public shape_type shape { get; } = shape_type.capsule;
 
         public Vector3 A;
         public Vector3 B;
-        public float radius;
 
-        public AABB find_bounding_box() {
-            Vector3 min, max;
+        public float radius { get; set; } = 0f;
 
-            min = position;
-            max = position;
-
-            min += Vector3.Min(A, B);
-            max += Vector3.Max(A, B);
-
-            min -= (Vector3.One * radius);
-            max += (Vector3.One * radius);
-
-            min -= origin;
-            max -= origin;
-
-            return new AABB(min, max);
+        public BoundingBox find_bounding_box() {
+            Matrix w = orientation * Matrix.CreateTranslation(position);
+            return CollisionHelper.BoundingBox_around_capsule(Vector3.Transform(A, w), Vector3.Transform(B, w), radius);
         }
 
-        public Capsule() {
+        public AACapsule() {
             A = Vector3.Zero;
             B = Vector3.Up * 1.8f;
             radius = 1f;
         }
 
-        public Capsule(float height) {
+        public AACapsule(float height) {
             A = Vector3.Zero;
             B = Vector3.Up * height;
             radius = 0.4f;
         }
 
-        public Capsule(float height, float radius) {
+        public AACapsule(float height, float radius) {
             A = Vector3.Zero;
             B = Vector3.Up * height;
             this.radius = radius;
@@ -64,8 +53,14 @@ namespace Magpie.Engine.Collision.Support3D {
         public void draw() {
             Matrix w = orientation * Matrix.CreateTranslation(position);
             Draw3D.capsule(Vector3.Transform(A, w), Vector3.Transform(B, w), radius, Color.MonoGameOrange);
-            find_bounding_box().draw(origin, Color.Red);
+            //Draw3D.cube(find_bounding_box(), Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
+            BoundingBox bb = find_bounding_box();
+            Draw3D.cube(origin + position, (bb.Max - bb.Min)/2, Color.MonoGameOrange, Matrix.Identity, EngineState.camera.view, EngineState.camera.projection);
+
+            Draw3D.xyz_cross(A + position, 1f, Color.LightPink);
+            Draw3D.xyz_cross(B + position, 1f, Color.HotPink);
         }
+
 
     }
 }

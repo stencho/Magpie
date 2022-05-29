@@ -69,6 +69,19 @@ namespace Magpie {
             public shape3D shape_B;
             internal Vector3 last_un_hit_A;
             internal Vector3 last_un_hit_B;
+
+            public override string ToString() {
+                return string.Format(
+@"##{0} | {1}## 
+closest points:
+A: {2} B: {3}
+
+",
+                    hit, iterations,
+                    closest_point_A.simple_vector3_string(),
+                    closest_point_B.simple_vector3_string()
+                );
+            }
         }
 
         static Vector3 
@@ -673,7 +686,7 @@ namespace Magpie {
         static List<gjk_result> results = new List<gjk_result>();
         public static Vector3 cda = Vector3.Zero; public static Vector3 cdb = Vector3.Zero;
 
-        public static gjk_result gjk_intersects(shape3D shape_A, shape3D shape_B, Matrix w_a, Matrix w_b) {
+        public static gjk_result gjk_intersects(shape3D shape_A, shape3D shape_B, Matrix w_a, Matrix w_b, float radius_a = 0f, float radius_b = 0f) {
             if (shape_A == null || shape_B == null) throw new Exception();
             support s = new support();
             simplex si = new simplex();
@@ -712,7 +725,7 @@ namespace Magpie {
                         s.vert_ID_A = Supports.Tri(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Triangle)shape_A).A, ((Triangle)shape_A).B, ((Triangle)shape_A).C);
                         break;
                     case shape_type.capsule:
-                        s.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Capsule)shape_A).A, ((Capsule)shape_A).B);
+                        s.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((AACapsule)shape_A).A, ((AACapsule)shape_A).B);
                         break;
                     case shape_type.line:
                         s.vert_ID_A = Supports.Line(ref sa, s.DA, ((Line3D)shape_A).A, ((Line3D)shape_A).B);
@@ -737,7 +750,7 @@ namespace Magpie {
                         s.vert_ID_B = Supports.Tri(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w_b)), ((Triangle)shape_B).A, ((Triangle)shape_B).B, ((Triangle)shape_B).C);
                         break;
                     case shape_type.capsule:
-                        s.vert_ID_B = Supports.Line(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w_b)), ((Capsule)shape_B).A, ((Capsule)shape_B).B);
+                        s.vert_ID_B = Supports.Line(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w_b)), ((AACapsule)shape_B).A, ((AACapsule)shape_B).B);
                         break;
                     case shape_type.line:
                         s.vert_ID_B = Supports.Line(ref sb, s.DB, ((Line3D)shape_B).A, ((Line3D)shape_B).B);
@@ -767,7 +780,7 @@ namespace Magpie {
 
                 // REAL SHIT?
                 case shape_type.capsule:
-                    a_rad = ((Capsule)shape_A).radius;
+                    a_rad = ((AACapsule)shape_A).radius;
                     break;
                 case shape_type.sphere:
                     a_rad = ((Sphere)shape_A).radius;
@@ -782,13 +795,18 @@ namespace Magpie {
                     break;
 
                 case shape_type.capsule:
-                    b_rad = ((Capsule)shape_B).radius;
+                    b_rad = ((AACapsule)shape_B).radius;
                     break;
                 case shape_type.sphere:
                     b_rad = ((Sphere)shape_B).radius;
                     break;
             }
-            
+
+            if (radius_a > 0f)
+                a_rad += radius_a;
+            if (radius_b > 0f)
+                b_rad += radius_b;
+
             if ((a_rad != 0 || b_rad != 0))
                 GJK.gjk_quadratic_distance_solve(a_rad, b_rad, ref res);
 
@@ -834,8 +852,8 @@ namespace Magpie {
                         s.vert_ID_B = Supports.Tri(ref sb, s.DB, ((Triangle) shape).A, ((Triangle) shape).B, ((Triangle) shape).C);
                         break;
                     case shape_type.capsule:
-                        s.vert_ID_B = Supports.Line(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w)), ((Capsule) shape).A, ((Capsule) shape).B);
-                        rad = ((Capsule)shape).radius;
+                        s.vert_ID_B = Supports.Line(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w)), ((AACapsule) shape).A, ((AACapsule) shape).B);
+                        rad = ((AACapsule)shape).radius;
                         break;
                     case shape_type.line:
                         s.vert_ID_B = Supports.Line(ref sb, s.DB, ((Line3D) shape).A, ((Line3D) shape).B);

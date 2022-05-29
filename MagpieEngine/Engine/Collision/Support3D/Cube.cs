@@ -26,8 +26,10 @@ namespace Magpie.Engine.Collision.Support3D {
         OBB obb;
         public Vector3 half_scale;
 
-        public AABB find_bounding_box() {
-            return CollisionHelper.AABB_around_OBB(obb);
+        public float radius { get; set; } = 0f;
+
+        public BoundingBox find_bounding_box() {
+            return CollisionHelper.BoundingBox_around_OBB(obb);
         }
 
         public Cube() {

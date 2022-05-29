@@ -18,8 +18,10 @@ namespace Magpie.Engine.Collision.Support3D {
         public Vector3 B;
         public Vector3 C;
 
-        public AABB find_bounding_box() {
-            return new AABB();
+        public float radius { get; set; } = 0f;
+
+        public BoundingBox find_bounding_box() {
+            return new BoundingBox();
         }
 
         public Triangle() {
