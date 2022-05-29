@@ -1,4 +1,5 @@
 ﻿using Magpie.Engine;
+using Magpie.Engine.Collision.Support2D;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -26,7 +27,7 @@ namespace Magpie.Graphics.UI {
 
         bool[] viewport_toggles = new bool[max_viewports];
 
-        AABB2D[] viewport_collisions;
+        BoundingBox2D[] viewport_collisions;
         ImageViewer[] viewports;
 
         public RenderTarget2D output_rt;
@@ -44,13 +45,13 @@ namespace Magpie.Graphics.UI {
 
             output_rt = new RenderTarget2D(EngineState.graphics_device, EngineState.resolution.X, EngineState.resolution.Y);
 
-            viewport_collisions = new AABB2D[max_viewports];
+            viewport_collisions = new BoundingBox2D[max_viewports];
             viewports = new ImageViewer[max_viewports];
 
             for (int id = 0; id < max_viewports; id++) {
                 viewport_toggles[id] = false;
                 viewports[id] = new ImageViewer(0,0,size.X, size.Y);
-                viewport_collisions[id] = new AABB2D(0, 0, size.X, size.Y);
+                viewport_collisions[id] = new BoundingBox2D(0, 0, size.X, size.Y);
 
                 viewports[id].change_position(screen_position.X, screen_position.Y);
                 viewports[id].change_size(size.X, size.Y);
@@ -84,7 +85,7 @@ namespace Magpie.Graphics.UI {
         }
         public void configure_viewport(int id, float x, float y, float w, float h) {            
             move_viewport(id, x,y); resize_viewport(id, w, h);
-            viewport_collisions[id] = new AABB2D(x, y, w, h);
+            viewport_collisions[id] = new BoundingBox2D(x, y, w, h);
 
         }
 

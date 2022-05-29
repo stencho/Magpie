@@ -1,4 +1,5 @@
 ﻿using Magpie.Engine;
+using Magpie.Engine.Collision.Support2D;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -22,12 +23,12 @@ namespace Magpie.Graphics.UI {
 
         public virtual form_type type => form_type.NONE;
 
-        public AABB2D hover_aabb;
+        public BoundingBox2D hover_aabb;
         public virtual bool mouse_hover { get; set; }
         public bool mouse_down_prev = false;
         public bool mouse_down = false;
 
-        public Dictionary<string, AABB2D> collisions = new Dictionary<string, AABB2D>();
+        public Dictionary<string, BoundingBox2D> collisions = new Dictionary<string, BoundingBox2D>();
 
         public virtual object value { get; set; }
         public string click_hit = "";

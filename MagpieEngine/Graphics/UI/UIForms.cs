@@ -1,4 +1,5 @@
 ﻿using Magpie.Engine;
+using Magpie.Engine.Collision.Support2D;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -123,9 +124,9 @@ namespace Magpie.Graphics.UI {
                 this.size = new XYPair(size_x, size_y);
             }
 
-            hover_aabb = new AABB2D(position, position + size); 
+            hover_aabb = new BoundingBox2D(position, position + size); 
             if (this.collisions.Count == 0)
-                this.collisions.Add("button", new AABB2D(0, 0, size.X, size.Y));
+                this.collisions.Add("button", new BoundingBox2D(0, 0, size.X, size.Y));
         }
                 
         public UIButton(int X, int Y, XYPair size, string name = "button", string text = "button", bool autosize = false) : base(X, Y) { setup(X, Y, size.X, size.Y, 0, name, text, autosize); }
@@ -239,7 +240,7 @@ namespace Magpie.Graphics.UI {
             var ms = get_txt_size();
             this.size = (text_margin * 2) + ms;
 
-            hover_aabb = new AABB2D(position, position + size);
+            hover_aabb = new BoundingBox2D(position, position + size);
             if (this.collisions.Count == 0)
                 this.collisions.Add("label", hover_aabb);
         }
@@ -376,7 +377,7 @@ namespace Magpie.Graphics.UI {
             this.position = new XYPair(X, Y);
             this.size = new XYPair(size_x, size_y);
 
-            hover_aabb = new AABB2D(position, position + size);
+            hover_aabb = new BoundingBox2D(position, position + size);
             if (this.collisions.Count == 0)
                 this.collisions.Add("panel", hover_aabb);
         }
@@ -583,7 +584,7 @@ namespace Magpie.Graphics.UI {
             this.position = new XYPair(X, Y);
             this.size = new XYPair(size_x, size_y);
 
-            hover_aabb = new AABB2D(position, position + size);
+            hover_aabb = new BoundingBox2D(position, position + size);
             if (this.collisions.Count == 0)
                 this.collisions.Add(name, hover_aabb);
         }
@@ -744,7 +745,7 @@ namespace Magpie.Graphics.UI {
             this.position = position;
             this.size = size;
             this.name = name;
-            hover_aabb = new AABB2D(position, position + size);
+            hover_aabb = new BoundingBox2D(position, position + size);
             if (this.collisions.Count == 0)
                 this.collisions.Add("button", hover_aabb);
         }
@@ -753,7 +754,7 @@ namespace Magpie.Graphics.UI {
             this.position.X = X; this.position.Y = Y;
             this.size.X = W; this.size.Y = H;
             this.name = name;
-            hover_aabb = new AABB2D(position, position + size);
+            hover_aabb = new BoundingBox2D(position, position + size);
             if (this.collisions.Count == 0)
                 this.collisions.Add("button", hover_aabb);
         }

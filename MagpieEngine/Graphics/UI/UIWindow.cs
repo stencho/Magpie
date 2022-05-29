@@ -11,6 +11,7 @@ using static Magpie.Engine.Math2D;
 using static Magpie.Engine.Collision.Collision2D;
 using Magpie.Graphics.UI;
 using static Magpie.Engine.Controls;
+using Magpie.Engine.Collision.Support2D;
 
 namespace Magpie.Graphics {
     public class UIWindow : UIForm {
@@ -322,8 +323,8 @@ namespace Magpie.Graphics {
             this.position = new XYPair(X, Y);
             this.size = new XYPair(W, H);
 
-            hover_aabb = new AABB2D(position, position + size);
-            //top_handle = new AABB2D(position, position + (Vector2.UnitX * W) + (Vector2.UnitY * top_handle_height));
+            hover_aabb = new BoundingBox2D(position, position + size);
+            //top_handle = new BoundingBox2D(position, position + (Vector2.UnitX * W) + (Vector2.UnitY * top_handle_height));
 
             collisions["aabb"] = hover_aabb;
 
@@ -355,7 +356,7 @@ namespace Magpie.Graphics {
             this.name = name;
             this.title_text = name;
 
-            this.collisions.Add("aabb", new AABB2D(new Vector2(X, Y), Vector2.One * (position + (XYPair.UnitX * W))));
+            this.collisions.Add("aabb", new BoundingBox2D(new Vector2(X, Y), Vector2.One * (position + (XYPair.UnitX * W))));
 
 
             sub_forms.Add("close_button", new UIButton((XYPair.UnitX * (W - 16)), XYPair.One * 16, "close_button", "X", true));
