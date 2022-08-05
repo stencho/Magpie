@@ -29,7 +29,7 @@ namespace Magpie.Engine.Brushes {
         bool within_vertical_bounds(Vector3 pos);
 
         //BoundingBox bounds { get; set; }
-        shape3D collision { get; set; }
+        Shape3D collision { get; set; }
 
 
         Vector3 movement_vector { get; set; }

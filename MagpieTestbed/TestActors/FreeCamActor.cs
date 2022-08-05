@@ -30,8 +30,8 @@ namespace MagpieTestbed.TestActors {
         float movement_speed = 12f;
         float mouse_multi = 0.6f;
 
-        public shape3D collision { get; set; }
-        public shape3D sweep_collision { get; set; }
+        public Shape3D collision { get; set; }
+        public Shape3D sweep_collision { get; set; }
 
         public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
 

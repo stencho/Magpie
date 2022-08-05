@@ -51,7 +51,7 @@ namespace Magpie.Engine {
         }
 
         public static void draw_debug(this BoundingBox bb, Color color) {
-            Draw3D.cube(A(bb), B(bb), C(bb), D(bb), E(bb), F(bb), G(bb), H(bb), color, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.cube(A(bb), B(bb), C(bb), D(bb), E(bb), F(bb), G(bb), H(bb), color);
         }
 
         public static Vector3 A (this BoundingBox bb) { return bb.center() + bb.half_size(); }

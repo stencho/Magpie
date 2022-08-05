@@ -6,9 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Magpie.Engine.Collision;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Magpie.Engine.Collision.Support3D {
-    public class Quad : shape3D {
+    public class Quad : Shape3D {
         public Matrix orientation {
             get { return Matrix.Identity; }
             set {
@@ -18,7 +19,7 @@ namespace Magpie.Engine.Collision.Support3D {
 
         private Matrix _orientation = Matrix.Identity;
         public Vector3 position { get; set; }
-        public Vector3 start_point => A;
+        public Vector3 start_point => A; 
 
         public float radius { get; set; } = 0f;
 
@@ -36,10 +37,20 @@ namespace Magpie.Engine.Collision.Support3D {
         public Vector3 wC => Vector3.Transform(C, Matrix.CreateTranslation(position));
         public Vector3 wD => Vector3.Transform(D, Matrix.CreateTranslation(position));
 
+        public VertexBuffer debug_vertex_buffer => null;
+        public IndexBuffer debug_index_buffer => null;
+
+        private void create_buffers() {
+
+        }
+        public void draw_debug_buffers() {
+
+        }
+
         public BoundingBox find_bounding_box() {
             return CollisionHelper.BoundingBox_around_BoundingBoxes(
-                CollisionHelper.BoundingBox_around_capsule(D, A, radius),
-                CollisionHelper.BoundingBox_around_capsule(C, B, radius)
+                CollisionHelper.BoundingBox_around_capsule(A, D, radius),
+                CollisionHelper.BoundingBox_around_capsule(B, C, radius)
                 );
         }
 
@@ -61,6 +72,7 @@ namespace Magpie.Engine.Collision.Support3D {
             B = (Vector3.Right * 0.5f * scale_x) + (Vector3.Forward * 0.5f * scale_y);
             D = (Vector3.Left * 0.5f * scale_x) + (Vector3.Backward* 0.5f * scale_y);
             C = (Vector3.Right * 0.5f * scale_x) + (Vector3.Backward* 0.5f * scale_y);
+            create_buffers();
         }
 
         public void create(Vector3 A, Vector3 B, Vector3 C, Vector3 D) {
@@ -68,6 +80,7 @@ namespace Magpie.Engine.Collision.Support3D {
             this.B = B;
             this.C = C;
             this.D = D;
+            create_buffers();
         }
 
         public void draw() {
@@ -94,20 +107,26 @@ namespace Magpie.Engine.Collision.Support3D {
 
             Draw3D.line(
                 A + (c * radius),
-                B + (c * radius), Color.LightPink);
+                B + (c * radius), Color.Red);
             Draw3D.line(
                 D + -(c * radius),
-                C + -(c * radius), Color.LightPink);
-                
+                C + -(c * radius), Color.Red);
+            Draw3D.line(
+                D + (c * radius),
+                C + (c * radius), Color.Red);
+            Draw3D.line(
+                A + -(c * radius),
+                B + -(c * radius), Color.Red);
+
             Draw3D.line(
                 A + -(Vector3.Normalize(wD - wA) * radius),
-                B + -(Vector3.Normalize(wC - wB) * radius), Color.LightPink);
+                B + -(Vector3.Normalize(wC - wB) * radius), Color.Green);
 
             Draw3D.line(
                 D + (Vector3.Normalize(wD - wA) * radius),
-                C + (Vector3.Normalize(wC - wB) * radius), Color.LightPink);
+                C + (Vector3.Normalize(wC - wB) * radius), Color.Green);
                 
-            Draw3D.cube(find_bounding_box(), Color.Magenta, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.cube(find_bounding_box(), Color.Magenta);
         }
     }
 }

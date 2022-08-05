@@ -27,15 +27,15 @@ namespace MagpieTestbed.TestActors {
 
         XYPair last_mouse_pos = XYPair.Zero;
 
-        public shape3D collision { get; set; }
-        public shape3D sweep_collision { get; set; }
+        public Shape3D collision { get; set; }
+        public Shape3D sweep_collision { get; set; }
 
         public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
 
 
 
         public MoveTestActor() {
-            collision = new AACapsule(1.85f, 1f);
+            collision = new Capsule(1.85f, 1f);
             phys_info.stick_to_ground = true;
         }
 
@@ -96,7 +96,9 @@ namespace MagpieTestbed.TestActors {
         }
         public void debug_draw() {
             collision.draw();
-            sweep_collision.draw();
+            //sweep_collision.draw();
+            //if (sweep_collision.shape == shape_type.quad)
+                //Draw3D.capsule(((Capsule)collision).A+ ((Quad)sweep_collision).B, ((Capsule)collision).B + ((Quad)sweep_collision).B, collision.radius, Color.Green);
         }
     }
 }

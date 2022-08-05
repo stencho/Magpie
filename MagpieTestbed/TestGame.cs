@@ -30,7 +30,10 @@ namespace MagpieTestbed
         World world;
         
         SDFSprite2D crosshair_sdf;
-        
+
+        SDFSprite2D test_sdf;
+        SDFSprite2D test_sdf2;
+
         Color crosshair_color = Color.White;
 
         GJK.gjk_result[] results;
@@ -151,6 +154,16 @@ namespace MagpieTestbed
 
             EngineState.ui.add_form("test_form", new UIButton(new XYPair(EngineState.resolution.X - 17, 0), new XYPair(17, 18), "close_button", "X", false));
 
+            /*
+            test_sdf = new SDFSprite2D(Vector2.One * 330, Vector2.One * 350);
+            test_sdf.inside_color = Color.HotPink;
+            test_sdf.resource_name = "sdf_quiet";
+
+            test_sdf2 = new SDFSprite2D((Vector2.One * 330f) + (Vector2.UnitX * 300f), Vector2.One * 450 * (Vector2.One - (Vector2.UnitX * 0.5f)));
+            test_sdf2.inside_color = Color.Orange;
+            //test_sdf2.alpha_scissor = 0.01f;
+            test_sdf2.resource_name = "sdf_quiet_2";
+            */
 
             crosshair_sdf = new SDFSprite2D(
                 (EngineState.resolution.ToVector2() * 0.5f), 
@@ -235,6 +248,7 @@ namespace MagpieTestbed
 
             if (bind_just_pressed("screenshot")) Scene.screenshot_at_end_of_frame();
             bool held_test = true;
+
             if (bind_pressed("test")) {
                 if (bind_pressed("scroll_up") || bind_pressed("scroll_down")) {
                     DigitalControlBindings.set_bind_special("test", special_action_status.held);
@@ -302,7 +316,7 @@ namespace MagpieTestbed
             //Draw3D.xyz_cross(GraphicsDevice, world.test_light.position, 1f, Color.Red, EngineState.camera.view, EngineState.camera.projection);
             ///Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (world.test_light.orientation.Forward * world.test_light.far_clip), Color.HotPink, EngineState.camera.view, EngineState.camera.projection);
             //Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (Vector3.Transform(Vector3.Normalize(world.test_light.orientation.Forward + world.test_light.orientation.Down), ((SpotLight)world.test_light).actual_scale)), Color.Orange, EngineState.camera.view, EngineState.camera.projection);
-
+           
             foreach (Brush brush in world.current_map.brushes.Values) {
                 brush.debug_draw();
             }
@@ -313,11 +327,12 @@ namespace MagpieTestbed
                 actor.debug_draw();
                 
             }
-
+            
             foreach(Intersection i in PhysicsSolver.intersections) {
                 Draw3D.xyz_cross(i.gjkr.closest_point_A, 1f, Color.Blue);
                 Draw3D.xyz_cross(i.gjkr.closest_point_B, 1f, Color.ForestGreen);
             }
+           
 
             EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap);
 
@@ -372,6 +387,8 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
             EngineState.spritebatch.End();
             
             crosshair_sdf.draw();
+            //test_sdf.draw();
+            //test_sdf2.draw();
 
             GraphicsDevice.SetRenderTarget(null);
 

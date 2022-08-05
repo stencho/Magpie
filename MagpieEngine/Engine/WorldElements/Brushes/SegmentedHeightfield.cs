@@ -91,7 +91,7 @@ namespace Magpie.Engine.Brushes {
         float _highest_value = float.MinValue;
         float _lowest_value = float.MaxValue;
 
-        public shape3D collision { get; set; }
+        public Shape3D collision { get; set; }
 
         public string texture { get; set; } = "zerocool_sharper";
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
 namespace Magpie.Engine.Collision.Support3D {
-    class DummySupport : shape3D {
+    class DummySupport : Shape3D {
         public Matrix orientation { get; set; } = Matrix.Identity;
         public Vector3 position { get; set; } = Vector3.Zero;
 

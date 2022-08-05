@@ -45,6 +45,7 @@
     <Compile Include="EngineState.cs" />
     <Compile Include="Engine\Collision\AABB.cs" />
     <Compile Include="Engine\Collision\Collision.cs" />
+    <Compile Include="Engine\Collision\CollisionList.cs" />
     <Compile Include="Engine\Collision\GJK3D.cs" />
     <Compile Include="Engine\Collision\OBB.cs" />
     <Compile Include="Engine\Collision\Raycasting.cs" />
@@ -61,12 +62,13 @@
     <Compile Include="Engine\Collision\Support3D\Quad.cs" />
     <Compile Include="Engine\Collision\Support3D\Sphere.cs" />
     <Compile Include="Engine\Collision\Support3D\Triangle.cs" />
-    <Compile Include="Engine\Collision\Supports.cs" />
+    <Compile Include="Engine\Collision\SupportFunctions.cs" />
     <Compile Include="Engine\Extensions.cs" />
     <Compile Include="Engine\Physics\ISolver.cs" />
     <Compile Include="Engine\Physics\Solvers\BasicSolver.cs" />
     <Compile Include="Engine\Physics\Solvers\StaticSolver.cs" />
     <Compile Include="Engine\RNG.cs" />
+    <Compile Include="Engine\Collision\Support3D\Cylinder.cs" />
     <Compile Include="Engine\WorldElements\Actor.cs" />
     <Compile Include="Engine\Clock.cs" />
     <Compile Include="Engine\Collision\GJK2D.cs" />
@@ -90,6 +92,7 @@
     <Compile Include="Graphics\Draw2D.cs" />
     <Compile Include="Graphics\DynamicLight.cs" />
     <Compile Include="Graphics\GBuffer.cs" />
+    <Compile Include="Graphics\Lights\PointLightLine.cs" />
     <Compile Include="Graphics\UI\ImageViewer.cs" />
     <Compile Include="Graphics\Lights\PointLight.cs" />
     <Compile Include="Graphics\Lights\Spotlight.cs" />

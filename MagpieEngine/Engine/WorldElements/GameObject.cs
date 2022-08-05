@@ -20,8 +20,15 @@ namespace Magpie.Engine {
         BoundingBox bounds { get; set; }
         Matrix world { get; }
 
-        shape3D collision { get; set; }
-        shape3D sweep_collision { get; set; }
+        //updating these to use a specific object type that holds shape3D lists and approximations like overall AABBs and cylinder type stuff
+        //instead of just one shape, actual lists of bone-linked hitshapes woah
+
+        Shape3D collision { get; set; }
+        Shape3D sweep_collision { get; set; }
+
+        //need to do the same for actors 
+        //and maybe brushes could do the meme of having a list of brushes in them instead for easy environmental code traversal
+        //instead of many many loops
 
         PhysicsInfo phys_info { get; set; }
 

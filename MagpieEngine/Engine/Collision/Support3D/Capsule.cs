@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Magpie.Engine.Collision;
 
 namespace Magpie.Engine.Collision.Support3D {
-    public class AACapsule : shape3D {
+    public class Capsule : Shape3D {
         public Vector3 AB_normal => Vector3.Up;
         public float AB_length => Vector3.Distance(A, B);
         public float AB_full_length => Vector3.Distance(A - (AB_normal * radius), B + (AB_normal * radius));
@@ -31,36 +31,41 @@ namespace Magpie.Engine.Collision.Support3D {
             return CollisionHelper.BoundingBox_around_capsule(Vector3.Transform(A, w), Vector3.Transform(B, w), radius);
         }
 
-        public AACapsule() {
+        public Capsule() {
             A = Vector3.Zero;
             B = Vector3.Up * 1.8f;
             radius = 1f;
         }
 
-        public AACapsule(float height) {
+        public Capsule(float height) {
             A = Vector3.Zero;
             B = Vector3.Up * height;
             radius = 0.4f;
         }
 
-        public AACapsule(float height, float radius) {
+        public Capsule(float height, float radius) {
             A = Vector3.Zero;
             B = Vector3.Up * height;
             this.radius = radius;
         }
+        
+        public Capsule(Vector3 A, Vector3 B, float radius) {
+            this.A = A;
+            this.B = B;
+            this.radius = radius;
 
+            this.position = Vector3.Zero;
+        }
 
         public void draw() {
             Matrix w = orientation * Matrix.CreateTranslation(position);
-            Draw3D.capsule(Vector3.Transform(A, w), Vector3.Transform(B, w), radius, Color.MonoGameOrange);
+            Draw3D.cylinder(Vector3.Transform(A, w), Vector3.Transform(B, w), radius, Color.MonoGameOrange);
             //Draw3D.cube(find_bounding_box(), Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
             BoundingBox bb = find_bounding_box();
-            Draw3D.cube(origin + position, (bb.Max - bb.Min)/2, Color.MonoGameOrange, Matrix.Identity, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.cube(origin + position, (bb.Max - bb.Min)/2, Color.MonoGameOrange, Matrix.Identity);
 
             Draw3D.xyz_cross(A + position, 1f, Color.LightPink);
             Draw3D.xyz_cross(B + position, 1f, Color.HotPink);
         }
-
-
     }
 }

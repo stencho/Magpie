@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Magpie.Engine.Collision.Support3D {
-    public class Polyhedron : shape3D {
+    public class Polyhedron : Shape3D {
         public Matrix orientation { get; set; } = Matrix.Identity;
         public Vector3 position { get; set; } = Vector3.Zero;
         public Vector3 start_point => verts[0];

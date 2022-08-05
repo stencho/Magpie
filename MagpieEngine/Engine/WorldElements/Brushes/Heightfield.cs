@@ -16,7 +16,7 @@ namespace Magpie.Engine.Brushes {
         public Matrix orientation { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Matrix world { get; }
 
-        public shape3D collision { get; set; }
+        public Shape3D collision { get; set; }
 
         public IndexBuffer index_buffer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public VertexBuffer vertex_buffer { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

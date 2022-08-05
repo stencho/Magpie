@@ -117,8 +117,8 @@ namespace Magpie {
                 go.Update();
             }
 
-            foreach (Brush floor in current_map.brushes.Values) {
-                floor.Update();
+            foreach (Brush brush in current_map.brushes.Values) {
+                brush.Update();
             }
 
             foreach (Actor actor in current_map.actors.Values) {
@@ -143,7 +143,7 @@ namespace Magpie {
         public void Draw(GraphicsDevice gd, Camera camera) {
              current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
 
-                      
+            
 
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);

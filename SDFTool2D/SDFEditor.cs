@@ -120,7 +120,7 @@ namespace SDFTool2D {
         protected override void Draw(GameTime gameTime) {
             //draw SDF map preview on left preview pane if one is loaded
 
-            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["tint"].SetValue(Color.Black.ToVector3());
+            //ContentHandler.resources["sdf_pixel"].value_fx.Parameters["tint"].SetValue(Color.Black.ToVector3());
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["alpha_scissor"].SetValue(0.5f);
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["SDFTEX"].SetValue(ContentHandler.resources["zerocool_sharper"].value_tx);
 

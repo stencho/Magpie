@@ -29,6 +29,7 @@
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/rhyth_body.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/rhyth_head.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/sdf_quiet.png</File>
+    <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/sdf_quiet_2.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/sdf_test.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/trump_map.png</File>
     <File>C:/Users/nat/source/repos/ProjectMagpie/MagpieTestbed/Content/tex/trump_tex.png</File>
@@ -48,6 +49,7 @@
     <File>sha/skybox.fx</File>
     <File>sha/spotlight.fx</File>
     <File>sha/terrain.fx</File>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Magpie.Engine.Collision.Support3D {
-    public class Line3D : shape3D {
+    public class Line3D : Shape3D {
         public Matrix orientation { get; set; } = Matrix.Identity;
         public Vector3 position { get; set; } = Vector3.Zero;
         public Vector3 start_point => A;
@@ -39,7 +39,7 @@ namespace Magpie.Engine.Collision.Support3D {
             Draw3D.line(
                 Vector3.Transform(A, w),
                 Vector3.Transform(B, w),
-                Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
+                Color.MonoGameOrange);
         }
 
     }

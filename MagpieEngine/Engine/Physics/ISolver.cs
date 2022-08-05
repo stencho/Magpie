@@ -88,18 +88,27 @@ namespace Magpie.Engine.Physics {
 
 
     public class Intersection {
-        public shape3D A, B;
+        public Shape3D A, B;
         public intersection_level level = intersection_level.NONE;
         public Vector3 position;
         public int id;
 
         public GJK.gjk_result gjkr;
 
-        public Intersection(shape3D A, shape3D B, Vector3 pos, intersection_level level) {
+        public object parent_a, parent_b;
+        public string tag_a, tag_b;
+
+        public Intersection(Shape3D A, Shape3D B, Vector3 pos, intersection_level level, object parent_a=null, object parent_b=null, string tag_a=null, string tag_b=null) {
             this.A = A;
             this.B = B;
             this.position = pos;
             this.level = level;
+
+            this.tag_a = tag_a;
+            this.tag_b = tag_b;
+
+            this.parent_a = parent_a;
+            this.parent_b = parent_b;
 
             id = 0;
         }        
@@ -180,10 +189,10 @@ namespace Magpie.Engine.Physics {
                             switch (actor.collision.shape) {
                                 case shape_type.capsule:
                                     actor.sweep_collision = new Quad(
-                                        actor.collision.position + ((AACapsule)actor.collision).A,
-                                        actor.wants_absolute_movement + ((AACapsule)actor.collision).A,
-                                        actor.wants_absolute_movement + ((AACapsule)actor.collision).B,
-                                        actor.collision.position + ((AACapsule)actor.collision).B
+                                        actor.collision.position + ((Capsule)actor.collision).A,
+                                        actor.wants_absolute_movement + ((Capsule)actor.collision).A,
+                                        actor.wants_absolute_movement + ((Capsule)actor.collision).B,
+                                        actor.collision.position + ((Capsule)actor.collision).B
                                         );
 
                                     break;
@@ -208,23 +217,36 @@ namespace Magpie.Engine.Physics {
                         case shape_type.cube:
                             break;
                         case shape_type.polyhedron:
+                            //find most extreme points on shape in all 360 degrees, perpendicular to sweep direction, 
+                            //then remove any duplicates and add in all the points from the original shape
+                            //which are in the opposite direction of the sweep
+                            //I think
+                            //ultimately this probably won't need to be swept like ever and would be kind of slow
+                            //but might be useful for, say, boss hitboxes
+                            //if a big dude swings a big arm at you and it hits you but shouldn't have, that feels bad
+                            //so actual large fitted hitshapes are probs preferred here
+                            //regular hitshapes should be preferred for everything else tho
                             break;
                         case shape_type.quad:
+                            //cube
                             break;
                         case shape_type.tri:
+                            //will need to make a specific class for this
                             break;
                         case shape_type.capsule:
                             actor.sweep_collision = new Quad(
-                                ((AACapsule)actor.collision).A + actor.collision.position,
-                                actor.collision.position + actor.wants_movement + ((AACapsule)actor.collision).A,
-                                actor.collision.position + actor.wants_movement + ((AACapsule)actor.collision).B,
-                                ((AACapsule)actor.collision).B + actor.collision.position
+                                ((Capsule)actor.collision).A + actor.collision.position,
+                                actor.collision.position + actor.wants_movement + ((Capsule)actor.collision).A,
+                                actor.collision.position + actor.wants_movement + ((Capsule)actor.collision).B,
+                                ((Capsule)actor.collision).B + actor.collision.position
                                 );
 
                             break;
                         case shape_type.line:
+                            //quad w/ no radius
                             break;
                         case shape_type.sphere:
+                            //capsule
                             break;
                         case shape_type.dummy:
                             break;
@@ -238,31 +260,31 @@ namespace Magpie.Engine.Physics {
 
                     foreach (Brush brush in map.brushes.Values) {
                         if (brush.collision.shape != shape_type.dummy) {
-                            var intersection = new Intersection(actor.sweep_collision, brush.collision, Vector3.Zero, intersection_level.NONE);
+                            var intersection = new Intersection(actor.sweep_collision, brush.collision, Vector3.Zero, intersection_level.NONE, actor, brush, "actor", "brush");
 
-                            //if (actor.sweep_collision.find_bounding_box().Contains(brush.collision.find_bounding_box()) != ContainmentType.Disjoint) {
-                            intersection.level = intersection_level.AABB;
+                            if (actor.sweep_collision.find_bounding_box().Contains(brush.collision.find_bounding_box()) != ContainmentType.Disjoint) {
+                                intersection.level = intersection_level.AABB;
 
-                            int id = 0;
-                            id = RNG.rng_int();
-                            while (intersection_ids.Contains(id)) {
+                                int id = 0;
                                 id = RNG.rng_int();
-                            }
-                            intersection.id = id;
+                                while (intersection_ids.Contains(id)) {
+                                    id = RNG.rng_int();
+                                }
+                                intersection.id = id;
 
-                            intersection.gjkr = GJK.gjk_intersects(actor.sweep_collision, brush.collision, Matrix.Identity, brush.world, actor.sweep_collision.radius, brush.collision.radius);
+                                intersection.gjkr = GJK.gjk_intersects(actor.sweep_collision, brush.collision, Matrix.Identity, brush.world, actor.sweep_collision.radius, brush.collision.radius);
                                 
-                            if (intersection.gjkr.hit) {
-                                intersection.level = intersection_level.COLLIDING;
+                                if (intersection.gjkr.hit) {
+                                    intersection.level = intersection_level.COLLIDING;
 
-                                if (actor.phys_info.stick_to_ground) {
-                                    actor.phys_info.current_ground = brush;
+                                    if (actor.phys_info.stick_to_ground) {
+                                        actor.phys_info.current_ground = brush;
+                                    }
+
                                 }
 
+
                             }
-
-
-                            //}
 
                             intersections.Add(intersection);
                         }

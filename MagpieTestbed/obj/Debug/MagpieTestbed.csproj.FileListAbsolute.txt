@@ -51,3 +51,4 @@ C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug
 C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\sha\sdf_pixel.xnb
 C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\tex\sdf_test.xnb
 C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\tex\sdf_quiet.xnb
+C:\Users\nat\source\repos\ProjectMagpie\MagpieTestbed\bin\DesktopGL\AnyCPU\Debug\Content\tex\sdf_quiet_2.xnb

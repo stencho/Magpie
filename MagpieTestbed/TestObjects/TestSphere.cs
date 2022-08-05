@@ -30,8 +30,8 @@ namespace MagpieTestbed.TestObjects {
         public string model { get; set; } = "sphere";
         public string[] textures { get; set; } = new string[] { "OnePXWhite" };
 
-        public shape3D collision { get; set; }
-        public shape3D sweep_collision { get; set; }
+        public Shape3D collision { get; set; }
+        public Shape3D sweep_collision { get; set; }
 
         public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
 

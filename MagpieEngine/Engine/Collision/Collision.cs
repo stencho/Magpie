@@ -482,7 +482,7 @@ namespace Magpie.Engine.Collision {
             return new BoundingBox(new Vector3(Xmin, Ymin, Zmin), new Vector3(Xmax, Ymax, Zmax));
         }
 
-        public static BoundingBox BoundingBox_around_capsule(AACapsule capsule) {
+        public static BoundingBox BoundingBox_around_capsule(Capsule capsule) {
             var min = capsule.position + capsule.A + -((Vector3.UnitX + Vector3.UnitZ + Vector3.UnitY) * capsule.radius);
             var max = capsule.position + capsule.B + ((Vector3.UnitX + Vector3.UnitZ + Vector3.UnitY) * capsule.radius);
 

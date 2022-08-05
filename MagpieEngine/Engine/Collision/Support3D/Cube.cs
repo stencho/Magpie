@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Magpie.Engine.Collision.Support3D {
-    public class Cube : shape3D {
+    public class Cube : Shape3D {
         public Matrix orientation { get; set; } = Matrix.Identity;
         public Vector3 position { get; set; } = Vector3.Zero;
         public Vector3 start_point => position;
@@ -96,7 +96,7 @@ namespace Magpie.Engine.Collision.Support3D {
                 Vector3.Transform(F, orientation * Matrix.CreateTranslation(position)),
                 Vector3.Transform(G, orientation * Matrix.CreateTranslation(position)),
                 Vector3.Transform(H, orientation * Matrix.CreateTranslation(position)),
-                Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
+                Color.MonoGameOrange);
         }
 
     }

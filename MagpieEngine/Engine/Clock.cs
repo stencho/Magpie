@@ -55,8 +55,8 @@ namespace Magpie.Engine {
         public static void update(GameTime gt, Game game) {
             game.IsFixedTimeStep = frame_limiter_fps > 0;
             if (frame_limiter_fps > 0) {
-                game.MaxElapsedTime = new TimeSpan((long)(TimeSpan.TicksPerMillisecond * (1000f / frame_limiter_fps / 3f)));
-                game.TargetElapsedTime = new TimeSpan((long)(TimeSpan.TicksPerMillisecond * (1000f / frame_limiter_fps)));
+                game.TargetElapsedTime = new TimeSpan(0, 0, 0, 0, (int)(1000 / frame_limiter_fps));
+                game.MaxElapsedTime = new TimeSpan(0,0,0,0,(int)(1000 / frame_limiter_fps));
             }
             set_gametime(gt);
             

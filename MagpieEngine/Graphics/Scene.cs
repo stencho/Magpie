@@ -298,7 +298,7 @@ namespace Magpie.Graphics {
                     for (int i = 0; i < scene.Length; i++) {
                         SceneObject so = scene[i];
 
-                        if (((SpotLight)light).frustum.Intersects(so.mesh_bounds) && ((SpotLight)light).frustum.Intersects(EngineState.camera.frustum)) {
+                        //if (((SpotLight)light).frustum.Intersects(so.mesh_bounds) && ((SpotLight)light).frustum.Intersects(EngineState.camera.frustum)) {
                             scene[i].in_light = true;
 
                             e_exp_light_depth.Parameters["World"].SetValue(so.world);
@@ -321,7 +321,7 @@ namespace Magpie.Graphics {
                             scene[i].light_clip = light.far_clip;
                             scene[i].light_pos = light.position;
                             so.shadow_maps.Add(((SpotLight)light).depth_map);
-                        }
+                       // }
                     }
                 } else if (light.type == LightType.POINT) {
                     //build lighting cubemap

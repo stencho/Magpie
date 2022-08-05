@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Magpie.Engine.Collision.Support3D {
-    public class Triangle : shape3D {
+    public class Triangle : Shape3D {
         public Matrix orientation { get; set; } = Matrix.Identity;
         public Vector3 position { get; set; } = Vector3.Zero;
         public Vector3 start_point => A;
@@ -43,9 +43,9 @@ namespace Magpie.Engine.Collision.Support3D {
         public void draw() {
             Matrix w = orientation * Matrix.CreateTranslation(position);
 
-            Draw3D.fill_tri(w, A, B, C, Color.White * 0.9f, EngineState.camera.view, EngineState.camera.projection);
+            Draw3D.fill_tri(w, A, B, C, Color.White * 0.9f);
 
-            Draw3D.lines(Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection,
+            Draw3D.lines(Color.MonoGameOrange,
                 Vector3.Transform(A, w),
                 Vector3.Transform(B, w),
                 Vector3.Transform(C, w),

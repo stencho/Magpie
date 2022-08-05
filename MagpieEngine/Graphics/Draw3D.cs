@@ -31,18 +31,14 @@ namespace Magpie.Graphics {
             return Vector3.Normalize(cross);
         }
 
-
         public static void line(Vector3 A, Vector3 B, Color color) {
-            line(A, B, color, EngineState.camera.view, EngineState.camera.projection);
-        }
-        public static void line(Vector3 A, Vector3 B, Color color, Matrix view, Matrix projection) {
             
             line_effect = ContentHandler.resources["fill_gbuffer"].value_fx;
             //ContentHandler.resources["diffuse"].value_fx. = color.ToVector3();
 
             line_effect.Parameters["World"].SetValue(Matrix.Identity);
-            line_effect.Parameters["View"].SetValue(view);
-            line_effect.Parameters["Projection"].SetValue(projection);
+            line_effect.Parameters["View"].SetValue(EngineState.camera.view);
+            line_effect.Parameters["Projection"].SetValue(EngineState.camera.projection);
             line_effect.Parameters["DiffuseMap"].SetValue(onePXWhite);
             line_effect.Parameters["tint"].SetValue(color.ToVector3());
             //line_effect.Parameters["FarClip"].SetValue(2000f);
@@ -60,17 +56,14 @@ namespace Magpie.Graphics {
 
             line_effect.Parameters["tint"].SetValue(Color.White.ToVector3());
         }
-
+        
         public static void lines(Color color, params Vector3[] points) {
-            lines(color, EngineState.camera.view, EngineState.camera.projection, points);
-        }
-        public static void lines(Color color, Matrix view, Matrix projection, params Vector3[] points) {
 
             line_effect = ContentHandler.resources["fill_gbuffer"].value_fx;
             //ContentHandler.resources["diffuse"].value_fx. = color.ToVector3();
             line_effect.Parameters["World"].SetValue(Matrix.Identity);
-            line_effect.Parameters["View"].SetValue(view);
-            line_effect.Parameters["Projection"].SetValue(projection);
+            line_effect.Parameters["View"].SetValue(EngineState.camera.view);
+            line_effect.Parameters["Projection"].SetValue(EngineState.camera.projection);
             line_effect.Parameters["DiffuseMap"].SetValue(onePXWhite);
             line_effect.Parameters["tint"].SetValue(color.ToVector3());
             //line_effect.Parameters["FarClip"].SetValue(2000f);
@@ -92,20 +85,20 @@ namespace Magpie.Graphics {
             line_effect.Parameters["tint"].SetValue(Color.White.ToVector3());
         }
 
-        public static void swept_capsule(float radius, Vector3 AA, Vector3 AB, Vector3 BA, Vector3 BB, Color color, Matrix view, Matrix projection) {
+        public static void swept_capsule(float radius, Vector3 AA, Vector3 AB, Vector3 BA, Vector3 BB, Color color) {
             Vector3 AAAB = Vector3.Normalize(AB - AA);
             Vector3 BABB = Vector3.Normalize(BB - BA);
 
-            capsule(AA, AB, radius, color, view, projection);
-            capsule(BA, BB, radius, color, view, projection);
+            capsule(AA, AB, radius, color);
+            capsule(BA, BB, radius, color);
 
-            lines(color, view, projection,
+            lines(color,
                 AA - (AAAB * radius), AB + (AAAB * radius),
                 BA - (BABB * radius), BB + (BABB * radius),
                 AA - (AAAB * radius)
             );
 
-            lines(color, view, projection,
+            lines(color,
                 AA - (AAAB * radius),
                 AB + (AAAB * radius),
                 BA - (BABB * radius),
@@ -118,10 +111,10 @@ namespace Magpie.Graphics {
             Vector3 ABH = ((AA + AB) / 2f);
             Vector3 BBH = ((BA + BB) / 2f);
 
-            line(ABH - (C * radius), BBH - (C * radius), color, view, projection);
-            line(ABH + (C * radius), BBH + (C * radius), color, view, projection);
+            line(ABH - (C * radius), BBH - (C * radius), color);
+            line(ABH + (C * radius), BBH + (C * radius), color);
 
-            lines(color, view, projection,
+            lines(color,
                 AA - (C * radius),
                 AB - (C * radius),
                 BA - (C * radius),
@@ -129,7 +122,7 @@ namespace Magpie.Graphics {
                 AA - (C * radius)
             );
 
-            lines(color, view, projection,
+            lines(color,
                 AA + (C * radius),
                 AB + (C * radius),
                 BA + (C * radius),
@@ -140,17 +133,12 @@ namespace Magpie.Graphics {
         }
 
         public static void xyz_cross(Vector3 P, float line_distance, Color color) {
-            line(P - (Vector3.UnitX * (line_distance / 2)), P + (Vector3.UnitX * (line_distance / 2)), color, EngineState.camera.view, EngineState.camera.projection);
-            line(P - (Vector3.UnitY * (line_distance / 2)), P + (Vector3.UnitY * (line_distance / 2)), color, EngineState.camera.view, EngineState.camera.projection);
-            line(P - (Vector3.UnitZ * (line_distance / 2)), P + (Vector3.UnitZ * (line_distance / 2)), color, EngineState.camera.view, EngineState.camera.projection);
-        }
-        public static void xyz_cross(Vector3 P, float line_distance, Color color, Matrix view, Matrix projection) {
-            line(P - (Vector3.UnitX * (line_distance / 2)), P + (Vector3.UnitX * (line_distance / 2)), color, view, projection);
-            line(P - (Vector3.UnitY * (line_distance / 2)), P + (Vector3.UnitY * (line_distance / 2)), color, view, projection);
-            line(P - (Vector3.UnitZ * (line_distance / 2)), P + (Vector3.UnitZ * (line_distance / 2)), color, view, projection);
+            line(P - (Vector3.UnitX * (line_distance / 2)), P + (Vector3.UnitX * (line_distance / 2)), color);
+            line(P - (Vector3.UnitY * (line_distance / 2)), P + (Vector3.UnitY * (line_distance / 2)), color);
+            line(P - (Vector3.UnitZ * (line_distance / 2)), P + (Vector3.UnitZ * (line_distance / 2)), color);
         }
 
-        public static void circle(Vector3 p, float radius, Vector3 normal, int subdivs, Color color, Matrix view, Matrix projection) {
+        public static void circle(Vector3 p, float radius, Vector3 normal, int subdivs, Color color) {
             if (subdivs < 6) return;
             VertexPositionColor[] verts = new VertexPositionColor[subdivs];
 
@@ -171,8 +159,8 @@ namespace Magpie.Graphics {
 
             //ContentHandler.resources["diffuse"].value_fx. = color.ToVector3();
             ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["World"].SetValue(Matrix.Identity);
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["View"].SetValue(view);
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["Projection"].SetValue(projection);
+            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["View"].SetValue(EngineState.camera.view);
+            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["Projection"].SetValue(EngineState.camera.projection);
             ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["DiffuseMap"].SetValue(onePXWhite);
             ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["tint"].SetValue(color.ToVector3());
             //ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["FarClip"].SetValue(2000f);
@@ -184,21 +172,14 @@ namespace Magpie.Graphics {
                 EngineState.graphics_device.DrawUserPrimitives(PrimitiveType.LineStrip, verts, 0, verts.Length - 1);
             }
         }
-
+        
         public static void sphere(Vector3 P, float radius, Color color) {
-            sphere(P, radius, color, EngineState.camera.view, EngineState.camera.projection);
-        }
-
-        public static void sphere(Vector3 P, float radius, Color color, Matrix view, Matrix projection) {
-            Draw3D.circle(P, radius, Vector3.Up, 32, color, view, projection);
-            Draw3D.circle(P, radius, Vector3.Right, 32, color, view, projection);
-            Draw3D.circle(P, radius, Vector3.Forward, 32, color, view, projection);
+            Draw3D.circle(P, radius, Vector3.Up, 32, color);
+            Draw3D.circle(P, radius, Vector3.Right, 32, color);
+            Draw3D.circle(P, radius, Vector3.Forward, 32, color);
         }
 
         public static void capsule(Vector3 A, Vector3 B, float radius, Color color) {
-            capsule(A, B, radius, color, EngineState.camera.view, EngineState.camera.projection);
-        }
-        public static void capsule(Vector3 A, Vector3 B, float radius, Color color, Matrix view, Matrix projection) {
             //line_effect.Parameters["World"].SetValue(Matrix.Identity);
 
             Vector3 AB = B - A;
@@ -208,26 +189,46 @@ namespace Magpie.Graphics {
             var cross = find_any_line_perpendicular(A, B);
             var criss = Vector3.Normalize(Vector3.Cross(normal, cross));
 
-            Draw3D.line(A - (normal * radius), B + (normal * radius), color, view, projection);
+            Draw3D.line(A - (normal * radius), B + (normal * radius), color);
 
-            Draw3D.circle(origin, radius, AB, 19, color, view, projection);
-            Draw3D.circle(A, radius, AB, 19, color, view, projection);
-            Draw3D.circle(B, radius, AB, 19, color, view, projection);
+            Draw3D.circle(origin, radius, AB, 19, color);
+            Draw3D.circle(A, radius, AB, 19, color);
+            Draw3D.circle(B, radius, AB, 19, color);
 
-            Draw3D.circle(A, radius, cross, 19, color, view, projection);
-            Draw3D.circle(B, radius, cross, 19, color, view, projection);
+            Draw3D.circle(A, radius, cross, 19, color);
+            Draw3D.circle(B, radius, cross, 19, color);
 
-            Draw3D.line(A + (cross * radius), B + (cross * radius), color, view, projection);
-            Draw3D.line(A - (cross * radius), B - (cross * radius), color, view, projection);
+            Draw3D.line(A + (cross * radius), B + (cross * radius), color);
+            Draw3D.line(A - (cross * radius), B - (cross * radius), color);
 
-            Draw3D.circle(A, radius, criss, 19, color, view, projection);
-            Draw3D.circle(B, radius, criss, 19, color, view, projection);
+            Draw3D.circle(A, radius, criss, 19, color);
+            Draw3D.circle(B, radius, criss, 19, color);
 
-            Draw3D.line(A + (criss * radius), B + (criss * radius), color, view, projection);
-            Draw3D.line(A - (criss * radius), B - (criss * radius), color, view, projection);
+            Draw3D.line(A + (criss * radius), B + (criss * radius), color);
+            Draw3D.line(A - (criss * radius), B - (criss * radius), color);
         }
 
-        public static void cube(Vector3 center, Vector3 size, Color color, Matrix world, Matrix view, Matrix projection) {
+        public static void cylinder(Vector3 A, Vector3 B, float radius, Color color) {
+            Vector3 AB = B - A;
+            Vector3 normal = Vector3.Normalize(B - A);
+            Vector3 origin = (A + B) / 2f;
+
+            var cross = find_any_line_perpendicular(A, B);
+            var criss = Vector3.Normalize(Vector3.Cross(normal, cross));
+
+            Draw3D.line(A, B, color);
+
+            Draw3D.circle(origin, radius, AB, 19, color);
+            Draw3D.circle(A, radius, AB, 19, color);
+            Draw3D.circle(B, radius, AB, 19, color);
+
+            Draw3D.line(A + (cross * radius), B + (cross * radius), color);
+            Draw3D.line(A - (cross * radius), B - (cross * radius), color);
+            Draw3D.line(A + (criss * radius), B + (criss * radius), color);
+            Draw3D.line(A - (criss * radius), B - (criss * radius), color);
+        }
+
+        public static void cube(Vector3 center, Vector3 size, Color color, Matrix world) {
             cube(
                 Vector3.Transform(center + ((size.X) * Vector3.Right) + ((size.Y) * Vector3.Up) + ((size.Z) * Vector3.Forward), world),     //A
                 Vector3.Transform(center + ((size.X) * Vector3.Left) + ((size.Y) * Vector3.Up) + ((size.Z) * Vector3.Forward), world),     //B
@@ -239,7 +240,7 @@ namespace Magpie.Graphics {
                 Vector3.Transform(center + ((size.X) * Vector3.Right) + ((size.Y) * Vector3.Down) + ((size.Z) * Vector3.Backward), world),     //H
                 Vector3.Transform(center + ((size.X) * Vector3.Left) + ((size.Y) * Vector3.Down) + ((size.Z) * Vector3.Backward), world),     //G
 
-            color, view, projection);
+            color);
         }
 
         public static void dot() {
@@ -247,25 +248,22 @@ namespace Magpie.Graphics {
         }
 
         public static void square(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color) {
-            square(A, B, C, D, color, EngineState.camera.view, EngineState.camera.projection);
-        }
-        public static void square(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color, Matrix view, Matrix projection) {
-            lines(color, view, projection, A, B, C, D, A);
+            lines(color, A, B, C, D, A);
         }
 
-        public static void cube(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Vector3 E, Vector3 F, Vector3 G, Vector3 H, Color color, Matrix view, Matrix projection) {
+        public static void cube(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Vector3 E, Vector3 F, Vector3 G, Vector3 H, Color color) {
             //top
-            square(A, E, F, B, color, view, projection);
+            square(A, E, F, B, color);
             //right
-            square(A, C, G, E, color, view, projection);
+            square(A, C, G, E, color);
             //left
-            square(F, H, D, B, color, view, projection);
+            square(F, H, D, B, color);
             //bottom
-            square(D, H, G, C, color, view, projection);
+            square(D, H, G, C, color);
         }
 
-        public static void cube(BoundingBox bb, Color color, Matrix view, Matrix projection) {
-            Draw3D.cube((bb.Min + bb.Max) / 2, (bb.Max - bb.Min) / 2, Color.MonoGameOrange, Matrix.Identity, EngineState.camera.view, EngineState.camera.projection);
+        public static void cube(BoundingBox bb, Color color) {
+            Draw3D.cube((bb.Min + bb.Max) / 2, (bb.Max - bb.Min) / 2, Color.MonoGameOrange, Matrix.Identity);
         }
 
         public static Texture2D tum;
@@ -295,11 +293,11 @@ namespace Magpie.Graphics {
         }
 
         public static BasicEffect text_effect;
-        public static void text_3D(SpriteBatch sb, string text, string fontname, Vector3 offset, Vector3? normal, float scale, Matrix view, Matrix projection, Color color, bool always_visible = false) {
+        public static void text_3D(SpriteBatch sb, string text, string fontname, Vector3 offset, Vector3? normal, float scale, Color color, bool always_visible = false) {
             Vector2 origin = ContentHandler.resources[fontname].value_ft.MeasureString(text) / 2f;
-            text_effect.World = Matrix.CreateScale(scale, -scale, 0) * Matrix.CreateLookAt(Vector3.Zero, view.Forward, Vector3.Up) * Matrix.CreateTranslation(offset);
-            text_effect.View = view;
-            text_effect.Projection = projection;
+            text_effect.World = Matrix.CreateScale(scale, -scale, 0) * Matrix.CreateLookAt(Vector3.Zero, EngineState.camera.view.Forward, Vector3.Up) * Matrix.CreateTranslation(offset);
+            text_effect.View = EngineState.camera.view;
+            text_effect.Projection = EngineState.camera.projection;
             text_effect.DiffuseColor = color.ToVector3();
             text_effect.TextureEnabled = true;
             sb.Begin(0, null, SamplerState.PointWrap, (always_visible ? DepthStencilState.None : DepthStencilState.DepthRead), RasterizerState.CullNone, text_effect);
@@ -307,13 +305,13 @@ namespace Magpie.Graphics {
             sb.End();
         }
 
-        public static void draw_buffers_diffuse_color(VertexBuffer vb, IndexBuffer ib, Color color, Matrix world, Matrix view, Matrix projection) {
+        public static void draw_buffers_diffuse_color(VertexBuffer vb, IndexBuffer ib, Color color, Matrix world) {
             Effect e_diffuse = ContentHandler.resources["fill_gbuffer"].value_fx;
 
             //ContentHandler.resources["diffuse"].value_fx. = color.ToVector3();
             e_diffuse.Parameters["World"].SetValue(world);
-            e_diffuse.Parameters["View"].SetValue(view);
-            e_diffuse.Parameters["Projection"].SetValue(projection);
+            e_diffuse.Parameters["View"].SetValue(EngineState.camera.view);
+            e_diffuse.Parameters["Projection"].SetValue(EngineState.camera.projection);
             e_diffuse.Parameters["DiffuseMap"].SetValue(onePXWhite);
             e_diffuse.Parameters["tint"].SetValue(color.ToVector3());
             e_diffuse.Parameters["FarClip"].SetValue(2000f);
@@ -336,13 +334,13 @@ namespace Magpie.Graphics {
 
         }
 
-        public static void draw_buffers_diffuse_texture(VertexBuffer vb, IndexBuffer ib, Texture2D texture, Color color, Matrix world, Matrix view, Matrix projection) {
+        public static void draw_buffers_diffuse_texture(VertexBuffer vb, IndexBuffer ib, Texture2D texture, Color color, Matrix world) {
             Effect e_diffuse = ContentHandler.resources["fill_gbuffer"].value_fx;
 
             //ContentHandler.resources["diffuse"].value_fx. = color.ToVector3();
             e_diffuse.Parameters["World"].SetValue(world);
-            e_diffuse.Parameters["View"].SetValue(view);
-            e_diffuse.Parameters["Projection"].SetValue(projection);
+            e_diffuse.Parameters["View"].SetValue(EngineState.camera.view);
+            e_diffuse.Parameters["Projection"].SetValue(EngineState.camera.projection);
             e_diffuse.Parameters["DiffuseMap"].SetValue(texture);
             e_diffuse.Parameters["tint"].SetValue(color.ToVector3());
             //e_diffuse.Parameters["FarClip"].SetValue(2000f);
@@ -360,7 +358,7 @@ namespace Magpie.Graphics {
         }
 
 
-        public static void draw_buffers(VertexBuffer vb, IndexBuffer ib, Matrix world, Color color, Matrix view, Matrix projection) {
+        public static void draw_buffers(VertexBuffer vb, IndexBuffer ib, Matrix world, Color color) {
             init();
 
             if (basic_effect == null) {
@@ -376,8 +374,8 @@ namespace Magpie.Graphics {
             basic_effect.Texture = tum;
 
             basic_effect.World = world;
-            basic_effect.View = view;
-            basic_effect.Projection = projection;
+            basic_effect.View = EngineState.camera.view;
+            basic_effect.Projection = EngineState.camera.projection;
             basic_effect.EnableDefaultLighting();
 
             EngineState.graphics_device.SetVertexBuffer(vb, 0);
@@ -418,7 +416,7 @@ namespace Magpie.Graphics {
 
         static string[] q_textures = new string[] { "OnePXWhite" };
 
-        public static void fill_tri(Matrix world, Vector3 A, Vector3 B, Vector3 C, Color color, Matrix view, Matrix projection) {
+        public static void fill_tri(Matrix world, Vector3 A, Vector3 B, Vector3 C, Color color) {
             if (t_index_buffer == null) {
                 t_index_buffer = new IndexBuffer(EngineState.graphics_device, IndexElementSize.SixteenBits, t_indices.Length, BufferUsage.None);
                 t_index_buffer.SetData<ushort>(t_indices);
@@ -432,10 +430,10 @@ namespace Magpie.Graphics {
             t_vertex_buffer = new VertexBuffer(EngineState.graphics_device, VertexPositionNormalTexture.VertexDeclaration, tri.Length, BufferUsage.None);
             t_vertex_buffer.SetData<VertexPositionNormalTexture>(tri);
 
-            draw_buffers(t_vertex_buffer, t_index_buffer, world, color, view, projection);
+            draw_buffers(t_vertex_buffer, t_index_buffer, world, color);
         }
 
-        public static void fill_tris_big_buffer(Matrix world, (Vector3 A, Vector3 B, Vector3 C)[] tris, Color color, Matrix view, Matrix projection) {
+        public static void fill_tris_big_buffer(Matrix world, (Vector3 A, Vector3 B, Vector3 C)[] tris, Color color) {
             if (t_index_buffer == null) {
                 t_index_buffer = new IndexBuffer(EngineState.graphics_device, IndexElementSize.SixteenBits, t_indices.Length, BufferUsage.None);
                 t_index_buffer.SetData<ushort>(t_indices);
@@ -445,10 +443,10 @@ namespace Magpie.Graphics {
             t_vertex_buffer = new VertexBuffer(EngineState.graphics_device, VertexPositionNormalTexture.VertexDeclaration, tri.Length, BufferUsage.None);
             t_vertex_buffer.SetData<VertexPositionNormalTexture>(tri);
 
-            draw_buffers(t_vertex_buffer, t_index_buffer, world, color, view, projection);
+            draw_buffers(t_vertex_buffer, t_index_buffer, world, color);
         }
 
-        public static void fill_quad(Matrix world, Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color, Matrix view, Matrix projection) {
+        public static void fill_quad(Matrix world, Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color) {
 
             if (q_index_buffer == null) {
                 q_index_buffer = new IndexBuffer(EngineState.graphics_device, IndexElementSize.SixteenBits, q_indices.Length, BufferUsage.None);
@@ -463,21 +461,21 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
             q_vertex_buffer = new VertexBuffer(EngineState.graphics_device, VertexPositionNormalTexture.VertexDeclaration, quad.Length, BufferUsage.None);
             q_vertex_buffer.SetData<VertexPositionNormalTexture>(quad);
-            draw_buffers_diffuse_texture(q_vertex_buffer, q_index_buffer, tum, Color.White, world, view, projection);
-            //draw_buffers(gd, q_vertex_buffer, q_index_buffer, world, color, view, projection);
+            draw_buffers_diffuse_texture(q_vertex_buffer, q_index_buffer, tum, Color.White, world);
+            //draw_buffers(gd, q_vertex_buffer, q_index_buffer, world, color, EngineState.camera.view, EngineState.camera.projection);
         }
 
 
-        public static void arrow(Vector3 A, Vector3 B, float chevron_distance_percent, Vector3 color, Matrix view, Matrix projection) { arrow(A, B, chevron_distance_percent, Color.FromNonPremultiplied(new Vector4(color, 1.0f)), view, projection); }
+        public static void arrow(Vector3 A, Vector3 B, float chevron_distance_percent, Vector3 color) { arrow(A, B, chevron_distance_percent, Color.FromNonPremultiplied(new Vector4(color, 1.0f))); }
 
-        public static void arrow(Vector3 A, Vector3 B, float chevron_distance_percent, Vector4 color, Matrix view, Matrix projection) { arrow(A, B, chevron_distance_percent, Color.FromNonPremultiplied(color), view, projection); }
+        public static void arrow(Vector3 A, Vector3 B, float chevron_distance_percent, Vector4 color) { arrow(A, B, chevron_distance_percent, Color.FromNonPremultiplied(color)); }
 
-        public static void arrow(Vector3 A, Vector3 B, float chevron_distance_percent, Color color, Matrix view, Matrix projection) {
-            line(A, B, color, view, projection);
+        public static void arrow(Vector3 A, Vector3 B, float chevron_distance_percent, Color color) {
+            line(A, B, color);
             Vector3 BA = (A - B) * chevron_distance_percent;
             
-            line_effect.Parameters["View"].SetValue(view);
-            line_effect.Parameters["Projection"].SetValue(projection);
+            line_effect.Parameters["View"].SetValue(EngineState.camera.view);
+            line_effect.Parameters["Projection"].SetValue(EngineState.camera.projection);
             
             VertexPositionColor[] verts = new VertexPositionColor[9];
 

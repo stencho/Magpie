@@ -26,7 +26,7 @@ namespace Magpie.Engine.Brushes {
         public Vector3 C => (Vector3.Backward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f);
         public Vector3 D => (Vector3.Backward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f) ;
 
-        public shape3D collision { get; set; }
+        public Shape3D collision { get; set; }
 
         static ushort[] q_indices = { 0, 1, 2, 2, 3, 0 };
         public static VertexPositionNormalTexture[] quad = new VertexPositionNormalTexture[4] {
@@ -61,6 +61,7 @@ namespace Magpie.Engine.Brushes {
             }
 
             collision = new Quad(size.X, size.Y);
+            collision.radius = 0.02f;
 
         }
 

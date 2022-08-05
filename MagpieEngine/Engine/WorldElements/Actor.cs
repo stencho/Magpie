@@ -18,8 +18,8 @@ namespace Magpie.Engine {
 
         Matrix world { get; }
 
-        shape3D collision { get; set; }
-        shape3D sweep_collision{ get; set; }
+        Shape3D collision { get; set; }
+        Shape3D sweep_collision{ get; set; }
 
         PhysicsInfo phys_info { get; set; }
 
