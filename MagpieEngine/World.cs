@@ -25,7 +25,7 @@ namespace Magpie {
         public World() {
             load_map();
 
-            test_hf = new SegmentedHeightfield(Vector3.Zero, XYPair.One * 128, 4);
+            test_hf = new SegmentedHeightfield(Vector3.Zero, 64, 8);
 
             test_light = new SpotLight();
             test_light2 = new SpotLight();

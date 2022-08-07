@@ -74,14 +74,14 @@ PSO PS(VSO input)
 
 	float Depth = tex2D(DEPTH,input.TexCoord).r;
 
-	float NL = dot(-dNormal , normalize(LightDirection)) * 1;	  
+	float NL = (dot(-dNormal , normalize(LightDirection)) * 1);	  
 	
 	if (Depth == 1)
 		clip(-1);
 		
-		output.Lighting.rgb = NL * saturate((LightColor * LightIntensity));
+	output.Lighting.rgb = NL * saturate((LightColor * LightIntensity));
 
-	output.Lighting.a = NL;
+	output.Lighting.a = 1;
 
 	return output;
 }

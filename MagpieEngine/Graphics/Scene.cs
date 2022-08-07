@@ -30,7 +30,10 @@ namespace Magpie.Graphics {
 
         public bool in_light { get; set; }
         public List<LightInfo> lights { get; set; }
+
+        public bool wireframe { get; set; }
     }
+
     public struct LightInfo {
         public Texture2D shadow_map { get; set; }
         public Matrix LightWVP { get; set; }
@@ -212,21 +215,38 @@ namespace Magpie.Graphics {
             List<SceneObject> scene = new List<SceneObject>(floors.Count + objects.Count + actors.Count);
             bool any_visible_light_frustum = false;
 
-            foreach (Brush floor in floors.Values) {
+            foreach (Brush brush in floors.Values) {
                 //RE-ADD LIGHT/FRUSTUM CHECKS
 
                 //if (floor.bounds.Intersects(view_frustum) || any_visible_light_frustum) {
-                if (floor.type == BrushType.PLANE) {
+                if (brush.type == BrushType.PLANE) {
                     scene.Add(new SceneObject {
-                        vertex_buffer = ((FloorPlane)floor).vertex_buffer,
-                        index_buffer = ((FloorPlane)floor).index_buffer,
-                        mesh_bounds = floor.collision.find_bounding_box(),
-                        world = floor.world,
-                        texture = floor.texture,
+                        vertex_buffer = ((FloorPlane)brush).vertex_buffer,
+                        index_buffer = ((FloorPlane)brush).index_buffer,
+                        mesh_bounds = brush.collision.find_bounding_box(),
+                        world = brush.world,
+                        texture = brush.texture,
                         in_light = false,
-                        shadow_maps = new List<Texture2D>()
+                        shadow_maps = new List<Texture2D>(),
+                        wireframe = false
                     });
-                } else if (floor.type == BrushType.SEGMENTED_HEIGHTFIELD) {
+                } else if (brush.type == BrushType.SEGMENTED_HEIGHTFIELD) {
+
+                    for (int y = 0; y < ((SegmentedHeightfield)brush).segment_count.Y; y++) {
+                        for (int x = 0; x < ((SegmentedHeightfield)brush).segment_count.X; x++) { 
+                            scene.Add(new SceneObject {
+                                vertex_buffer = ((SegmentedHeightfield)brush).segments[x, y].LOD_vertex_buffers[0],
+                                index_buffer = ((SegmentedHeightfield)brush).segments[x, y].LOD_index_buffers[0],
+                                mesh_bounds = brush.collision.find_bounding_box(),
+                                world = brush.world,
+                                texture = brush.texture,
+                                in_light = false,
+                                shadow_maps = new List<Texture2D>(),
+                                wireframe = false
+                            });
+                        }
+                    }
+                
                     //do frustum test here to see which segments are in view and get the correct LOD buffer
                     //then add a new scene object for each of the segments added, easy
 
@@ -330,6 +350,11 @@ namespace Magpie.Graphics {
             }
         }
 
+        static RasterizerState rs_wireframe = new RasterizerState() {
+            CullMode = CullMode.None,
+            FillMode = FillMode.WireFrame
+        };
+
         public static void draw(IEnumerable<SceneObject> scene) {
             EngineState.graphics_device.SetRenderTargets(EngineState.buffer.buffer_targets);
             
@@ -348,6 +373,12 @@ namespace Magpie.Graphics {
                 e_gbuffer.Parameters["DiffuseMap"].SetValue(ContentHandler.resources[so.texture].value_tx);
                 //e_gbuffer.Parameters["ambient_light"].SetValue(Color.White.ToVector3());
                 
+                if (so.wireframe) {
+                    EngineState.graphics_device.RasterizerState = rs_wireframe;
+                } else {
+                    EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+                }
+
                 EngineState.graphics_device.SetVertexBuffer(so.vertex_buffer);
                 EngineState.graphics_device.Indices = so.index_buffer;
 

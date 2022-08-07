@@ -129,7 +129,7 @@ namespace MagpieTestbed
                 world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
             }
 
-            world.current_map.add_brush("test_floor", new FloorPlane());
+            //world.current_map.add_brush("test_floor", new FloorPlane());
             //world.current_map.floors["test_floor"].position = Vector3.Forward * 10f + Vector3.Up * 5f;
             //world.current_map.add_floor("test_floor2", new FloorPlane());
             //world.current_map.add_actor("test_actor", new MoveTestActor());

@@ -41,6 +41,8 @@ namespace MG2DSDFTool
             engine = new Engine(
                 new XYPair(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), 
                 Content, GraphicsDevice, graphics, spriteBatch, Window);
+
+            IsMouseVisible = true;
         }
 
         protected override void LoadContent() {
