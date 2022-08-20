@@ -10,7 +10,7 @@ namespace Magpie.Engine.Collision.Support3D {
     public class Cube : Shape3D {
         public Matrix orientation { get; set; } = Matrix.Identity;
         public Vector3 position { get; set; } = Vector3.Zero;
-        public Vector3 start_point => position;
+        public Vector3 start_point => A;
                 
         public shape_type shape { get; } = shape_type.cube;
 

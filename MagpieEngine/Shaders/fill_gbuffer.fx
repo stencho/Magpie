@@ -72,11 +72,10 @@ float3 decode(half3 enc)
 
 float3 ambient_light;
 
-
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {
 	VertexShaderOutput output = (VertexShaderOutput)0;
-
+	
 	float4x4 wvp = mul(World, mul(View, Projection));
 		
 	output.Position = mul(input.Position, wvp);

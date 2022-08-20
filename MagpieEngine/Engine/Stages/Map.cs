@@ -23,6 +23,8 @@ namespace Magpie.Engine.Stages {
 
         public void add_object(string name, GameObject gameobject) {
             objects.Add(name, gameobject);
+            objects[name].name = name;
+            objects[name].parent_map = this;
         }
 
         public void add_actor(string name, Actor actor) {

@@ -15,9 +15,7 @@ using static Magpie.Engine.DigitalControlBindings;
 namespace Magpie.Graphics.UI {
     public class UILayer {
         public Dictionary<string, UIForm> forms { get; internal set; } = new Dictionary<string, UIForm>();
-
-        XYPair resolution;
-
+        
         string[] window_layers;
         string[] layers_tmp;
 
@@ -46,8 +44,7 @@ namespace Magpie.Graphics.UI {
         public bool hide { get; set; } = false;
 
 
-        public UILayer(XYPair resolution) {
-            this.resolution = resolution;
+        public UILayer() {
             window_layers = new string[0];
         }
 

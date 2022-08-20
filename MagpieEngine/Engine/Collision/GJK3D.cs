@@ -250,9 +250,9 @@ A: {2} B: {3}
                     }
 
                     //region ABC
-                    if (U_ABC > 0f && V_ABC > 0f && W_ABC > 0f) {
+                    if (!(U_ABC > 0f && V_ABC > 0f && W_ABC > 0f)) {
 
-                        //throw new Exception("what the fuck man");
+                        throw new Exception("what the fuck man");
                         //s.count = 2;
                         //break;
                     } 
@@ -406,13 +406,13 @@ A: {2} B: {3}
                     W_ABCD = box(D, A, B) * volume;
                     X_ABCD = box(B, A, C) * volume;
 
-                    
+                    /*
                     Vector3 PA, PB, PC, PD;
                     PA = s.verts[0].P * (denom * U_ABCD);
                     PB = s.verts[1].P * (denom * V_ABCD);
                     PC = s.verts[2].P * (denom * W_ABCD);
                     PD = s.verts[3].P * (denom * X_ABCD);
-                    /*
+                    
                     Vector3 point = PA + PB + PC + PD;
 
                     if (Vector3.Dot(point, point) >= epsilon * epsilon) {
@@ -421,10 +421,10 @@ A: {2} B: {3}
                         s.bc[2] = W_ABCD;
                         s.bc[3] = X_ABCD;
                         s.count = 4;
-                        //break;
-                        return 1;
-                    }*/
-                    
+                        break;
+                        //return 1;
+                    }
+                    */
 
                     //ABC
                     if (X_ABCD <= 0f && U_ABC > 0f && V_ABC > 0f && W_ABC > 0f) {
@@ -469,8 +469,8 @@ A: {2} B: {3}
                     }
 
                     //ABCD
-                    if (U_ABCD > 0f && V_ABCD > 0f && W_ABCD > 0f && X_ABCD > 0f) {
-                        //throw new Exception("what the fuck man");
+                    if (!(U_ABCD > 0f && V_ABCD > 0f && W_ABCD > 0f && X_ABCD > 0f)) {
+                        throw new Exception("what the fuck man");
                         //s.count =3;
                         //break;
                     }
@@ -719,7 +719,7 @@ A: {2} B: {3}
                         s.vert_ID_A = Supports.Polyhedron(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Polyhedron)shape_A).verts.ToArray());
                         break;
                     case shape_type.quad:
-                        s.vert_ID_A = Supports.Quad(ref sa, s.DA, ((Quad)shape_A).A, ((Quad)shape_A).B, ((Quad)shape_A).C, ((Quad)shape_A).D, (Quad)shape_A);
+                        s.vert_ID_A = Supports.Quad(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Quad)shape_A).A, ((Quad)shape_A).B, ((Quad)shape_A).C, ((Quad)shape_A).D, (Quad)shape_A);
                         break;
                     case shape_type.tri:
                         s.vert_ID_A = Supports.Tri(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Triangle)shape_A).A, ((Triangle)shape_A).B, ((Triangle)shape_A).C);
@@ -728,7 +728,7 @@ A: {2} B: {3}
                         s.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Capsule)shape_A).A, ((Capsule)shape_A).B);
                         break;
                     case shape_type.line:
-                        s.vert_ID_A = Supports.Line(ref sa, s.DA, ((Line3D)shape_A).A, ((Line3D)shape_A).B);
+                        s.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Line3D)shape_A).A, ((Line3D)shape_A).B);
                         break;
                     case shape_type.sphere:
                         s.vert_ID_A = Supports.Point(ref sa, s.DA, ((Sphere)shape_A).P);
@@ -737,20 +737,19 @@ A: {2} B: {3}
 
                 switch (shape_B.shape) {
                     case shape_type.cube:
-
                         s.vert_ID_B = Supports.Cube(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w_b)), ((Cube)shape_B) );
                         break;
                     case shape_type.polyhedron:
-                        s.vert_ID_B = Supports.Polyhedron(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w_b)), ((Polyhedron)shape_B).verts.ToArray());
+                        s.vert_ID_B = Supports.Polyhedron(ref sb, s.DB, ((Polyhedron)shape_B).verts.ToArray());
                         break;
                     case shape_type.quad:
                         s.vert_ID_B = Supports.Quad(ref sb, s.DB, ((Quad)shape_B).A, ((Quad)shape_B).B, ((Quad)shape_B).C, ((Quad)shape_B).D, (Quad)shape_B);
                         break;
                     case shape_type.tri:
-                        s.vert_ID_B = Supports.Tri(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w_b)), ((Triangle)shape_B).A, ((Triangle)shape_B).B, ((Triangle)shape_B).C);
+                        s.vert_ID_B = Supports.Tri(ref sb, s.DB, ((Triangle)shape_B).A, ((Triangle)shape_B).B, ((Triangle)shape_B).C);
                         break;
                     case shape_type.capsule:
-                        s.vert_ID_B = Supports.Line(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w_b)), ((Capsule)shape_B).A, ((Capsule)shape_B).B);
+                        s.vert_ID_B = Supports.Line(ref sb, s.DB, ((Capsule)shape_B).A, ((Capsule)shape_B).B);
                         break;
                     case shape_type.line:
                         s.vert_ID_B = Supports.Line(ref sb, s.DB, ((Line3D)shape_B).A, ((Line3D)shape_B).B);

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Magpie {
     public class Supports {
         public static Vector3 highest_dot(Vector3[] verts, Vector3 direction, out int index, out float dot) {
-            dot = float.MinValue; index = 0;
+            dot = float.MinValue; index = -1;
             Vector3 v = Vector3.Zero;
 
             for (int i = 0; i < verts.Length; i++) {
@@ -44,7 +44,7 @@ namespace Magpie {
             return i;
         }
         
-        public static int Point(ref Vector3 support,  Vector3 direction, Vector3 P) {
+        public static int Point(ref Vector3 support, Vector3 direction, Vector3 P) {
             support = P;
             return 0;
         }
@@ -64,7 +64,15 @@ namespace Magpie {
         public static int Cube(ref Vector3 support, Vector3 direction, Cube cube) {
             int i = 0;
 
-            support = highest_dot(new Vector3[8] { cube.A, cube.B, cube.C, cube.D, cube.E, cube.F, cube.G, cube.H }, 
+            support = highest_dot(new Vector3[8] {
+                Vector3.Transform(cube.A, Matrix.Invert(cube.orientation)),
+                Vector3.Transform(cube.B, Matrix.Invert(cube.orientation)),
+                Vector3.Transform(cube.C, Matrix.Invert(cube.orientation)),
+                Vector3.Transform(cube.D, Matrix.Invert(cube.orientation)),
+                Vector3.Transform(cube.E, Matrix.Invert(cube.orientation)),
+                Vector3.Transform(cube.F, Matrix.Invert(cube.orientation)),
+                Vector3.Transform(cube.G, Matrix.Invert(cube.orientation)),
+                Vector3.Transform(cube.H, Matrix.Invert(cube.orientation)) }, 
                 direction, out i, out _);
             
             return i;

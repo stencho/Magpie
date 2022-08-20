@@ -264,6 +264,8 @@ namespace Magpie.Engine {
                 AddResource(new Resource("gradient_vertical", new Texture2D(gd, 256, 256)));
                 AddResource(new Resource("skybox_gradient", new Texture2D(gd, 512, 512)));
 
+                AddResource(new Resource("terrain_test", new Texture2D(gd, 16, 16)));
+
                 var glowData = new Color[256];
                 for (var i = 0; i < glowData.Length; i++) {
                     var p = i / (glowData.Length / 2f);
@@ -353,9 +355,31 @@ namespace Magpie.Engine {
                         glowData[(i * 2048) + x] = Color.FromNonPremultiplied(255-o, 255-o, 255-o, 255);
                     }
                 }
+                                
 
                 ((Texture2D)resources["sdf_circle"].value).SetData(glowData);
-                
+
+
+                glowData = new Color[16 * 16];
+
+                for (var i = 0; i < 16; i++) {
+
+                    float px, py;
+
+                    for (var x = 0; x < 16; x++) {
+
+                        px = x / 16f;
+                        py = i / 16f;
+
+                        float t = 0.4f - Vector2.Distance(Vector2.One * 0.5f, new Vector2(px, py));
+
+                        int o = (int)((t * 6) * 255);
+                        glowData[(i * 16) + x] = Color.FromNonPremultiplied(o, o, o, 255);
+                    }
+                }
+
+                ((Texture2D)resources["terrain_test"].value).SetData(glowData);
+
                 glowData = new Color[256 * 256];
 
                 for (var i = 0; i < 256; i++) {
@@ -367,7 +391,7 @@ namespace Magpie.Engine {
                         px = x / 255f;
                         py = i / 255f;
 
-                        float t = Vector2.DistanceSquared(Vector2.One * 0.5f, new Vector2(px, py)) ;
+                        float t = Vector2.Distance(Vector2.One * 0.5f, new Vector2(px, py)) ;
 
                         int o = (int)((t) * 255);
                         glowData[(i * 256) + x] = Color.FromNonPremultiplied(o, o, o, 255);

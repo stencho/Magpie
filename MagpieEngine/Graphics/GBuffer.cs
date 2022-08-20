@@ -93,7 +93,7 @@ namespace Magpie.Graphics {
             rt_final = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None);
             rt_final_half = new RenderTarget2D(gd, (int)(width / 2), (int)(height / 2), false, SurfaceFormat.Color, DepthFormat.None);
 
-            rt_2D = new RenderTarget2D(gd, (int)(width), (int)(height), false, SurfaceFormat.Color, DepthFormat.None);
+            rt_2D = new RenderTarget2D(gd, (int)(width), (int)(height), false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
 
             buffer_targets[0] = rt_diffuse;
             buffer_targets[1] = rt_normal;

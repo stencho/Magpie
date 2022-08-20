@@ -247,6 +247,7 @@ namespace Magpie.Engine.Physics {
                             break;
                         case shape_type.sphere:
                             //capsule
+                            actor.sweep_collision = new Capsule(actor.position, actor.wants_movement, actor.collision.radius);
                             break;
                         case shape_type.dummy:
                             break;

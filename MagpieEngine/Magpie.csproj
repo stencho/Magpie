@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework, Version=3.8.0.947, Culture=neutral, processorArchitecture=MSIL" />
@@ -76,9 +78,10 @@
     <Compile Include="Engine\ControlBindings.cs" />
     <Compile Include="Engine\ControlRead.cs" />
     <Compile Include="Engine\WorldElements\Brushes\Brush.cs" />
-    <Compile Include="Engine\WorldElements\Brushes\Heightfield.cs" />
+    <Compile Include="Engine\WorldElements\Brushes\Terrain.cs" />
     <Compile Include="Engine\WorldElements\Brushes\Plane.cs" />
-    <Compile Include="Engine\WorldElements\Brushes\SegmentedHeightfield.cs" />
+    <Compile Include="Engine\WorldElements\Brushes\SegmentedTerrain.cs" />
+    <Compile Include="Engine\WorldElements\Brushes\TerrainSegment.cs" />
     <Compile Include="Engine\WorldElements\GameObject.cs" />
     <Compile Include="Engine\Math2D.cs" />
     <Compile Include="Engine\WorldElements\Prefabs\PrefabExporter.cs" />
@@ -106,6 +109,11 @@
     <Compile Include="Graphics\UI\UIWindow.cs" />
     <Compile Include="Graphics\VerticalQuad.cs" />
     <Compile Include="Graphics\wm_skyboxtessellator.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="World.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -126,6 +134,10 @@
     <Content Include="Shaders\terrain.fx" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="TODO" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

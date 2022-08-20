@@ -35,7 +35,8 @@ namespace MagpieTestbed.TestActors {
 
 
         public MoveTestActor() {
-            collision = new Capsule(1.85f, 1f);
+            //collision = new Capsule(1.85f, 1f);
+            collision = new Sphere(1f);
             phys_info.stick_to_ground = true;
         }
 

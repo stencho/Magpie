@@ -20,12 +20,12 @@ namespace Magpie {
         public SpotLight test_light;
         public SpotLight test_light2;
 
-        public SegmentedHeightfield test_hf;
+        public SegmentedTerrain test_hf;
 
         public World() {
             load_map();
 
-            test_hf = new SegmentedHeightfield(Vector3.Zero, 64, 8);
+            test_hf = new SegmentedTerrain(Vector3.Zero, 5000, 50);
 
             test_light = new SpotLight();
             test_light2 = new SpotLight();
@@ -42,6 +42,8 @@ namespace Magpie {
             current_map.brushes.Add("test_heightfield", test_hf);
 
             current_map.lights.Add(test_light);
+
+            //Scene.parent_world = this;
             //lights.Add(test_light2);
         }
         //float3 Depth = tex2D(DEPTH, UV).rgb;
@@ -103,7 +105,8 @@ namespace Magpie {
                 return (float.MinValue, null);
         }
 
-        
+
+        List<string> dead_objects = new List<string>();
 
         public void Update() {
             test_light.position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.6f) + (EngineState.camera.orientation.Down * 0.2f);
@@ -113,12 +116,22 @@ namespace Magpie {
                 light.update();
             }
 
-            foreach (GameObject go in current_map.objects.Values) {
-                go.Update();
-            }
 
             foreach (Brush brush in current_map.brushes.Values) {
                 brush.Update();
+            }
+
+            foreach (GameObject go in current_map.objects.Values) {
+                if (go.dead) {
+                    dead_objects.Add(go.name);                    
+                    continue;
+                }
+
+                go.Update();                
+            }
+
+            for (int i = 0; i < dead_objects.Count; i++) {
+                current_map.objects.Remove(dead_objects[i]);
             }
 
             foreach (Actor actor in current_map.actors.Values) {
@@ -136,25 +149,36 @@ namespace Magpie {
 
             Scene.sun_moon.update();
             //test_light.update();
-            
+
+            dead_objects.Clear();
         }
 
         SceneObject[] current_scene;
         public void Draw(GraphicsDevice gd, Camera camera) {
-             current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
+            current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
 
-            
+
 
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);
-            
+
             Scene.build_lighting(current_map.lights, current_scene);
 
             Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
 
             Scene.draw(current_scene);
 
+            //EngineState.graphics_device.BlendState = BlendState.Opaque;
+
+            foreach (Brush brush in current_map.brushes.Values) {
+                //brush.debug_draw();
+            }
+
+            //EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
             Scene.draw_lighting(current_map.lights);
+
+
+
         }
 
 

@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
+using Magpie.Engine.Stages;
 
 namespace MagpieHitBuilder.ObjectViewer {
     class ObjectViewerObject : GameObject {
@@ -35,6 +36,15 @@ namespace MagpieHitBuilder.ObjectViewer {
 
         public string model { get; set; }
         public string[] textures { get; set; }
+
+        public string name { get; set; }
+
+        public bool dead { get; set; } = false;
+
+        public Map parent_map { get; set; }
+
+        public Color tint { get; set; }
+
 
         public CollisionList collisions { get; set; } = new CollisionList();
         /*

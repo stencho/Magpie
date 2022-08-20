@@ -232,6 +232,37 @@ namespace Magpie.Engine.Collision {
             }
         }
 
+        public static Vector3 closest_point_on_AABB(Vector3 point, Vector3 min, Vector3 max) {
+            //low/high aka min/max
+            float lx = min.X; float hx = max.X;
+            float ly = min.Y; float hy = max.Y;
+            float lz = min.Z; float hz = max.Z;
+
+            //point
+            float px = point.X;
+            float py = point.Y;
+            float pz = point.Z;
+
+            //output
+            float ox = 0;
+            float oy = 0;
+            float oz = 0;
+
+            //X, Y and Z checks respectively
+            if (px >= lx && px <= hx) ox = px;
+            else if (px < lx) ox = lx;
+            else if (px > hx) ox = hx;            
+
+            if (py >= ly && py <= hy) oy = py;
+            else if (py < ly) oy = ly;
+            else if (py > hy) oy = hy;            
+
+            if (pz >= lz && pz <= hz) oz = pz;
+            else if (pz < lz) oz = lz;
+            else if (pz > hz) oz = hz;
+            
+            return new Vector3(ox, oy, oz);
+        }
 
         public static Vector3 closest_point_on_OBB(Vector3 point, Vector3 obb_origin, Matrix obb_orientation, Vector3 obb_half_scale) {
             Vector3 d = point - obb_origin;
@@ -319,23 +350,6 @@ namespace Magpie.Engine.Collision {
             var t3 = point_inside_plane_facing(B, D, C, A, Vector3.Zero);
             var t4 = point_inside_plane_facing(A, C, D, B, Vector3.Zero);
             return (t && t2 && t3 && t4);
-        }
-
-        public static Vector3 highest_dot(Vector3 direction, out int index, params Vector3[] verts) {
-            float dot = float.MinValue; index = 0;
-            Vector3 v = Vector3.Zero;
-
-            for (int i = 0; i < verts.Length; i++) {
-                float d = Vector3.Dot(verts[i], direction);
-
-                if (d > dot) {
-                    index = i;
-                    dot = d;
-                    v = verts[i];
-                }
-            }
-
-            return v;
         }
         
         public static Vector3 point_of_minimum_norm(Vector3 a, Vector3 b, Vector3 p) {
@@ -434,6 +448,13 @@ namespace Magpie.Engine.Collision {
 
             return new BoundingBox(new Vector3(Xmin, Ymin, Zmin), new Vector3(Xmax, Ymax, Zmax));
         }
+
+        public static BoundingBox BoundingBox_around_sphere(Sphere sphere, Matrix world) {
+            Vector3 tmp_pos = Vector3.Transform(sphere.position, world);
+
+            return new BoundingBox(tmp_pos - (Vector3.One * sphere.radius), tmp_pos + (Vector3.One * sphere.radius));
+        }
+
         public static BoundingBox BoundingBox_around_OBB(Cube obb, Matrix world) {
             float Xmin = float.MaxValue, Ymin = float.MaxValue, Zmin = float.MaxValue;
             float Xmax = float.MinValue, Ymax = float.MinValue, Zmax = float.MinValue;

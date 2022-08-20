@@ -1,4 +1,6 @@
 ﻿using Magpie.Engine;
+using Magpie.Engine.Collision;
+using Magpie.Engine.Collision.Support3D;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -7,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Magpie.Engine.Collision.Raycasting;
 
 namespace Magpie.Engine {
     public static class Controls {
@@ -22,12 +25,48 @@ namespace Magpie.Engine {
 
         public static XYPair mouse_position => new XYPair(mouse_state.Position.X, mouse_state.Position.Y);
         public static Vector2 mouse_position_float => new Vector2(mouse_state.Position.X, mouse_state.Position.Y);
+        public static bool mouse_in_bounds => is_mouse_in_bounds();
+        static bool is_mouse_in_bounds() {
+            return (mouse_position.X > 0 
+                 && mouse_position.Y > 0
+                 && mouse_position.X < EngineState.resolution.X 
+                 && mouse_position.Y < EngineState.resolution.Y);
+        }
 
         static GamePadState[] xs = new GamePadState[4];
         public static GamePadState[] xinput_state => xs;
         static GamePadState[] xsp = new GamePadState[4];
         public static GamePadState[] xinput_state_prev => xsp;
 
+        public static class picker_raycasts {
+            public static raycast crosshair_ray;
+            public static raycast mouse_pick_ray;
+
+            public static Line3D gjk_crosshair_ray = new Line3D();
+            public static Line3D gjk_mouse_pick_ray = new Line3D();
+
+            public static void update() {
+                crosshair_ray = new raycast(EngineState.camera.position, EngineState.camera.direction);
+
+                gjk_crosshair_ray.A = EngineState.camera.position;
+                gjk_crosshair_ray.B = EngineState.camera.direction;
+
+                //mouse picker stuff
+                Vector3 n = new Vector3(mouse_position.X, mouse_position.Y, 0);
+                Vector3 f = new Vector3(mouse_position.X, mouse_position.Y, 1);
+
+                Vector3 near = EngineState.viewport.Unproject(n, EngineState.camera.projection, EngineState.camera.view, Matrix.Identity);
+                Vector3 far = EngineState.viewport.Unproject(f, EngineState.camera.projection, EngineState.camera.view, Matrix.Identity);
+
+                Vector3 d = far - near;
+                d.Normalize();
+
+                mouse_pick_ray = new raycast(near, d);
+                
+                gjk_mouse_pick_ray.A = near;
+                gjk_mouse_pick_ray.B = d;
+            }
+        }
 
         //public static float xinput_deadzone_ls = 0f;
         //public static float xinput_deadzone_rs = 0f;
@@ -290,6 +329,8 @@ namespace Magpie.Engine {
 
             window_was_active = window_active;
             mouse_lock_p = mouse_lock;
+
+            picker_raycasts.update();
 
             xsp[0] = xs[0];
             xsp[1] = xs[1];

@@ -1,5 +1,6 @@
 ﻿using Magpie.Engine;
 using Magpie.Engine.Brushes;
+using Magpie.Engine.WorldElements.Brushes;
 using Magpie.Graphics.Lights;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,6 +13,12 @@ using System.Threading.Tasks;
 using static Magpie.Graphics.Draw2D;
 
 namespace Magpie.Graphics {
+    public enum ObjectType {
+        BRUSH,
+        OBJECT,
+        ACTOR
+    }
+
     public struct SceneObject {
         public IndexBuffer index_buffer { get; set; }
         public VertexBuffer vertex_buffer { get; set; }
@@ -22,8 +29,8 @@ namespace Magpie.Graphics {
         public BoundingBox mesh_bounds { get; set; }
 
         public string texture { get; set; }        
+        public Color tint { get; set; }
 
-        public List<Texture2D> shadow_maps { get; set; }
         public Matrix light_wvp { get; set; }
         public Vector3 light_pos { get; set; }
         public float light_clip { get; set; }
@@ -32,6 +39,10 @@ namespace Magpie.Graphics {
         public List<LightInfo> lights { get; set; }
 
         public bool wireframe { get; set; }
+        public bool debug_draw { get; set; }
+
+        public object actual_object { get; set; }
+        public ObjectType object_type { get; set; }
     }
 
     public struct LightInfo {
@@ -101,6 +112,8 @@ namespace Magpie.Graphics {
             lerps.add_lerp(night_ambient, 1f);
 
             lerps.build_debug_band_texture();
+
+            current_time_ms = entire_day_cycle_length_ms / 2f;
         }
 
         public void update() {
@@ -210,10 +223,14 @@ namespace Magpie.Graphics {
         static bool screenshot = false;
         public static void screenshot_at_end_of_frame() { screenshot = true; }
         public static bool taking_screenshot => screenshot;
-
+        public static int terrain_segments_rendered = 0;
+        public static int vertex_buffer_draws = 0;
+        static List<SceneObject> scene = new List<SceneObject>();
         public static SceneObject[] create_scene_from_lists(Dictionary<string,Brush> floors, Dictionary<string, GameObject> objects, Dictionary<string, Actor> actors, IEnumerable<DynamicLight> lights, BoundingFrustum view_frustum) {
-            List<SceneObject> scene = new List<SceneObject>(floors.Count + objects.Count + actors.Count);
-            bool any_visible_light_frustum = false;
+            scene.Clear();
+
+            terrain_segments_rendered = 0;
+            vertex_buffer_draws = 0;
 
             foreach (Brush brush in floors.Values) {
                 //RE-ADD LIGHT/FRUSTUM CHECKS
@@ -226,27 +243,18 @@ namespace Magpie.Graphics {
                         mesh_bounds = brush.collision.find_bounding_box(),
                         world = brush.world,
                         texture = brush.texture,
+                        tint = Color.White,
                         in_light = false,
-                        shadow_maps = new List<Texture2D>(),
-                        wireframe = false
+                        wireframe = false,
+                        object_type = ObjectType.BRUSH
                     });
-                } else if (brush.type == BrushType.SEGMENTED_HEIGHTFIELD) {
+                    vertex_buffer_draws++;
+                } else if (brush.type == BrushType.SEGMENTED_TERRAIN) {            
 
-                    for (int y = 0; y < ((SegmentedHeightfield)brush).segment_count.Y; y++) {
-                        for (int x = 0; x < ((SegmentedHeightfield)brush).segment_count.X; x++) { 
-                            scene.Add(new SceneObject {
-                                vertex_buffer = ((SegmentedHeightfield)brush).segments[x, y].LOD_vertex_buffers[0],
-                                index_buffer = ((SegmentedHeightfield)brush).segments[x, y].LOD_index_buffers[0],
-                                mesh_bounds = brush.collision.find_bounding_box(),
-                                world = brush.world,
-                                texture = brush.texture,
-                                in_light = false,
-                                shadow_maps = new List<Texture2D>(),
-                                wireframe = false
-                            });
-                        }
+                    foreach ((TerrainSegment,int,int,float) ts in ((SegmentedTerrain)brush).visible_terrain) {
+                        scene.Add(ts.Item1.scene_object);
                     }
-                
+
                     //do frustum test here to see which segments are in view and get the correct LOD buffer
                     //then add a new scene object for each of the segments added, easy
 
@@ -278,10 +286,11 @@ namespace Magpie.Graphics {
                                 world = go.world,
                                 mesh_bounds = go.bounds,
                                 texture = go.textures[texture_index],
-                                in_light = false,
-                                shadow_maps = new List<Texture2D>()                               
+                                tint =  go.tint == Color.Transparent ? Color.White : go.tint,
+                                in_light = false
                                 
                             });
+                            vertex_buffer_draws++;
                         }
                         texture_index++;
                     }
@@ -296,7 +305,7 @@ namespace Magpie.Graphics {
 
             return scene.ToArray();
         }
-
+        static SceneObject so;
         public static void build_lighting(IEnumerable<DynamicLight> lights, SceneObject[] scene) {
 
             EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_lighting);
@@ -316,7 +325,7 @@ namespace Magpie.Graphics {
                     //e_exp_light_depth.Parameters["LVP"].SetValue(((SpotLight)light).view * ((SpotLight)light).projection);
 
                     for (int i = 0; i < scene.Length; i++) {
-                        SceneObject so = scene[i];
+                        so = scene[i];
 
                         //if (((SpotLight)light).frustum.Intersects(so.mesh_bounds) && ((SpotLight)light).frustum.Intersects(EngineState.camera.frustum)) {
                             scene[i].in_light = true;
@@ -340,7 +349,7 @@ namespace Magpie.Graphics {
                             scene[i].light_wvp = so.world * ((SpotLight)light).view * ((SpotLight)light).projection;
                             scene[i].light_clip = light.far_clip;
                             scene[i].light_pos = light.position;
-                            so.shadow_maps.Add(((SpotLight)light).depth_map);
+                            //so.shadow_maps.Add(((SpotLight)light).depth_map);
                        // }
                     }
                 } else if (light.type == LightType.POINT) {
@@ -357,7 +366,7 @@ namespace Magpie.Graphics {
 
         public static void draw(IEnumerable<SceneObject> scene) {
             EngineState.graphics_device.SetRenderTargets(EngineState.buffer.buffer_targets);
-            
+
             //e_lit_diffuse.Parameters["FarClip"].SetValue(EngineState.camera.far_clip);
             e_gbuffer.Parameters["View"].SetValue(EngineState.camera.view);
             e_gbuffer.Parameters["Projection"].SetValue(EngineState.camera.projection);
@@ -366,13 +375,15 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
             EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
 
-            foreach (SceneObject so in scene) {
+            foreach (SceneObject so in scene) {               
+
                 e_gbuffer.Parameters["World"].SetValue(so.world);
                 e_gbuffer.Parameters["WVIT"].SetValue(Matrix.Transpose(Matrix.Invert(so.world * EngineState.camera.view)));
 
                 e_gbuffer.Parameters["DiffuseMap"].SetValue(ContentHandler.resources[so.texture].value_tx);
+                e_gbuffer.Parameters["tint"].SetValue(so.tint.ToVector3());
                 //e_gbuffer.Parameters["ambient_light"].SetValue(Color.White.ToVector3());
-                
+
                 if (so.wireframe) {
                     EngineState.graphics_device.RasterizerState = rs_wireframe;
                 } else {
@@ -384,7 +395,7 @@ namespace Magpie.Graphics {
 
                 e_gbuffer.CurrentTechnique.Passes[0].Apply();
                 EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, so.vertex_buffer.VertexCount);
-                    
+
             }
         }
 

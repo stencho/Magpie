@@ -9,8 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Magpie.Engine.Brushes {
     [Serializable]
-    class Heightfield : Brush {
-        public BrushType type => BrushType.HEIGHTFIELD;
+    class Terrain : Brush {
+        public BrushType type => BrushType.TERRAIN;
 
         public Vector3 position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Matrix orientation { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

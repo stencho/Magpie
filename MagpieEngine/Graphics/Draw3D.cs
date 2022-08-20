@@ -49,6 +49,9 @@ namespace Magpie.Graphics {
 
             //line_effect.DiffuseColor = color.ToVector3();
 
+            EngineState.graphics_device.BlendState = BlendState.Opaque;
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.DepthRead;
+
             for (int i = 0; i < line_effect.CurrentTechnique.Passes.Count; i++) {
                 line_effect.CurrentTechnique.Passes[i].Apply();
                 EngineState.graphics_device.DrawUserPrimitives(PrimitiveType.LineList, verts, 0, 1);
@@ -76,6 +79,7 @@ namespace Magpie.Graphics {
             }
 
             EngineState.graphics_device.BlendState = BlendState.Opaque;
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.DepthRead;
 
             for (int i = 0; i < line_effect.CurrentTechnique.Passes.Count; i++) {
                 line_effect.CurrentTechnique.Passes[i].Apply();
@@ -263,7 +267,7 @@ namespace Magpie.Graphics {
         }
 
         public static void cube(BoundingBox bb, Color color) {
-            Draw3D.cube((bb.Min + bb.Max) / 2, (bb.Max - bb.Min) / 2, Color.MonoGameOrange, Matrix.Identity);
+            Draw3D.cube((bb.Min + bb.Max) / 2, (bb.Max - bb.Min) / 2, color, Matrix.Identity);
         }
 
         public static Texture2D tum;
@@ -275,7 +279,6 @@ namespace Magpie.Graphics {
                 onePXWhite = new Texture2D(EngineState.graphics_device, 1, 1);
                 onePXWhite.SetData<Color>(new Color[1] { Color.White });
 
-                tum = Texture2D.FromFile(EngineState.graphics_device, @"C:\Users\nat\source\repos\Magpie\MagpieDemo\Content\tex\zerocool_sharper.jpg");
                 testing_gradient = new Texture2D(EngineState.graphics_device, 256, 256);
 
                 Color[] glowData = new Color[256 * 256];
@@ -415,6 +418,10 @@ namespace Magpie.Graphics {
         static IndexBuffer q_index_buffer;
 
         static string[] q_textures = new string[] { "OnePXWhite" };
+
+        public static void triangle(Vector3 A, Vector3 B, Vector3 C, Color color) {
+            lines(color, A, B, C, A);
+        }
 
         public static void fill_tri(Matrix world, Vector3 A, Vector3 B, Vector3 C, Color color) {
             if (t_index_buffer == null) {

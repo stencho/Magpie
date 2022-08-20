@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Magpie.Engine.Collision {
-    public class Raycasting {
+    public static class Raycasting {
         public struct raycast {
             public Vector3 start;
             public Vector3 direction;
@@ -93,6 +93,48 @@ namespace Magpie.Engine.Collision {
             return false;
         }
         
+        public static bool ray_intersects_triangle(Vector3 ray_start, Vector3 ray_dir, Vector3 A, Vector3 B, Vector3 C, out raycast_result result) {           
+            Vector3 tri_normal = Vector3.Cross(B-A, C-A);
+            float area_sq = tri_normal.Length();
+
+            float norm_dot_ray = Vector3.Dot(tri_normal, ray_dir);
+            result = new raycast_result() { hit = false };
+
+            //parallel case
+            if (Math.Abs(norm_dot_ray) < epsilon) return false; 
+
+            float d = Vector3.Dot(-tri_normal, A);
+            float t = -(Vector3.Dot(tri_normal, ray_start) + d) / norm_dot_ray;
+
+            //behind the ray
+            if (t < 0) return false;
+
+            //intersection point
+            var P = ray_start + t * ray_dir;
+
+            result.point = P;
+            result.distance = Vector3.Distance(ray_start, P);
+
+            var E = B - A;
+            var EP = P - A;
+            var cr = Vector3.Cross(E,EP);
+            if (Vector3.Dot(tri_normal, cr) < 0) return false;
+
+            E = C - B;
+            EP = P - B;
+            cr = Vector3.Cross(E, EP);
+            if (Vector3.Dot(tri_normal, cr) < 0) return false;
+
+            E = A - C;
+            EP = P - C;
+            cr = Vector3.Cross(E, EP);
+            if (Vector3.Dot(tri_normal, cr) < 0) return false;
+
+            result.hit = true;
+            result.hit_normal = tri_normal;
+            return true;
+        }
+
 
         public static bool ray_intersects_BoundingBox(Vector3 ray_start, Vector3 ray_dir, Vector3 aabb_min, Vector3 aabb_max, out raycast_result result) {
             Vector3 min, max;

@@ -24,6 +24,7 @@ namespace Magpie {
         public static Game game;
         public static UILayer ui;
         public static SpriteBatch spritebatch;
+        public static Viewport viewport => graphics_device.Viewport;
 
         public static bool ui_layer_clicked;
         public static bool is_active;
@@ -37,20 +38,29 @@ namespace Magpie {
             EngineState.game = game;
             graphics = gdm;
             graphics_device = gd;
-
             spritebatch = new SpriteBatch(graphics_device);
 
             buffer = new GBuffer();
             buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y);
 
-            ui = new UILayer(EngineState.resolution);
+            ui = new UILayer();
 
             try {
                 Scene.configure_renderer();
             } catch (Exception ex) { return; }
 
             Draw3D.init();
+        }
 
+        public static void change_resolution(int X, int Y) {
+
+            graphics.PreferredBackBufferWidth = X;
+            graphics.PreferredBackBufferHeight = Y;
+            
+            graphics.ApplyChanges();
+
+            resolution = new XYPair(X, Y);
+            buffer.change_resolution(graphics_device, X, Y);            
         }
 
         public static void Update(GameTime gt, Game game) {

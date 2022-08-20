@@ -1,4 +1,5 @@
 ﻿using Magpie.Engine.Physics;
+using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -20,6 +21,8 @@ namespace Magpie.Engine {
         BoundingBox bounds { get; set; }
         Matrix world { get; }
 
+        bool dead { get; set; }
+
         //updating these to use a specific object type that holds shape3D lists and approximations like overall AABBs and cylinder type stuff
         //instead of just one shape, actual lists of bone-linked hitshapes woah
 
@@ -32,8 +35,14 @@ namespace Magpie.Engine {
 
         PhysicsInfo phys_info { get; set; }
 
+        Map parent_map { get; set; }
+
+        Color tint { get; set; }
+
         string model { get; set; }
         string[] textures { get; set; }
+        
+        string name { get; set; }
 
         void Update();
     }

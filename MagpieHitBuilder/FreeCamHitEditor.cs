@@ -40,7 +40,7 @@ namespace MagpieHitBuilder.Actors {
 
         public FreeCamActor() {
             cam = new Camera();
-            collision = new Sphere();
+            collision = new Sphere(1f);
         }
 
         public void Update() {            

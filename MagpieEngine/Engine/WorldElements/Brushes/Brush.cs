@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 namespace Magpie.Engine.Brushes {
     public enum BrushType {
         PLANE,
-        HEIGHTFIELD,
-        SEGMENTED_HEIGHTFIELD,
+        TERRAIN,
+        SEGMENTED_TERRAIN,
         BOX,
         DUMMY
     }

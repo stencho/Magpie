@@ -19,17 +19,17 @@ namespace Magpie.Engine.Collision.Support3D {
         public float radius { get; set; } = 0f;
 
         public BoundingBox find_bounding_box() {
-            return new BoundingBox(position - (Vector3.One * radius), position + (Vector3.One * radius));
+            return new BoundingBox(Vector3.Transform(position, orientation) - (Vector3.One * radius), Vector3.Transform(position, orientation) + (Vector3.One * radius));
         }
 
-        public Sphere() {
+        public Sphere(float radius) {
             P = Vector3.Zero;
 
-            radius = 1.1f;
+            this.radius = radius;
         }
 
         public void draw() {
-            Draw3D.sphere(position, radius, Color.MonoGameOrange);
+            Draw3D.sphere(Vector3.Transform(Vector3.Zero, orientation * Matrix.CreateTranslation(position)), radius, Color.MonoGameOrange);
             Draw3D.cube(find_bounding_box(), Color.MonoGameOrange);
         }
     }
