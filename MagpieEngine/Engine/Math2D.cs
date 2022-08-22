@@ -16,6 +16,16 @@ namespace Magpie.Engine {
             return new XYPair(v.X, v.Y);
         }
 
+        public static float measure_string_x(string font, string str) {
+            var v = ContentHandler.resources[font].value_ft.MeasureString(str);
+            return v.X;
+        }
+        public static float measure_string_y(string font, string str) {
+            var v = ContentHandler.resources[font].value_ft.MeasureString(str);
+            return v.Y;
+        }
+
+
         public static void clamp(Vector2 input, out Vector2 output, float Xmin, float Ymin, float Xmax, float Ymax) {
             output = input;
             if (output.X > Xmax) output.X = Xmax;

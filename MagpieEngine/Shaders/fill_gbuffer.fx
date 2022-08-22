@@ -13,7 +13,7 @@ matrix Projection;
 
 float3x3 WVIT;
 
-float FarClip = 2000;
+float FarClip = 1000;
 float NearClip;
 float LightBias;
 
@@ -49,7 +49,8 @@ struct VertexShaderOutput
     float4 Position : POSITION;
     float2 TexCoord : TEXCOORD0;
     float4 Depth : TEXCOORD1;
-    float3x3 TBN : TEXCOORD2;
+	float3 wp : TEXCOORD2;
+    float3x3 TBN : TEXCOORD3;
 };
 struct PSO
 {
@@ -68,6 +69,21 @@ half3 encode(half3 n)
 float3 decode(half3 enc)
 {
     return (2.0f * enc.xyz - 1.0f);
+}
+
+float3 color_lerp(float3 a, float3 b, float position) {
+    return float3(
+                a.r + ((a.r - b.r) * position),
+                a.g + ((a.g - b.g) * position),
+                a.b + ((a.b - b.b) * position));
+}
+float4 color_lerp(float4 a, float4 b, float position)
+{
+    return float4(
+                a.r + ((b.r - a.r) * position),
+                a.g + ((b.g - a.g) * position),
+                a.b + ((b.b - a.b) * position),
+                a.a + ((b.a - a.a) * position));
 }
 
 float3 ambient_light;
@@ -89,6 +105,8 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	output.Depth.y = output.Position.w;
 	output.Depth.z = mul(mul(input.Position, World),View).z;
 
+	output.wp = input.Position.xyz;
+
 	output.TBN[0] = normalize(mul(input.Tangent, (float3x3)WVIT));
 	output.TBN[1] = normalize(mul(input.BiTangent, (float3x3)WVIT));
 	output.TBN[2] = normalize(mul(input.Normal, (float3x3)WVIT));
@@ -101,6 +119,10 @@ float PCF(float depth, float NdotL, float2 shadowmap_UV) {
 	return 0.5f;
 }
 
+float3 camera_pos;
+float3 atmosphere_color;
+float3 sky_color;
+bool fog = false;
 PSO MainPS(VertexShaderOutput input)
 {
     PSO output = (PSO)0;
@@ -118,16 +140,41 @@ PSO MainPS(VertexShaderOutput input)
     output.Normals.rgb = encode(normalize(input.TBN[2]));
 	output.Normals.a = 1;
 
-    output.Diffuse = rgba * float4(tint,1);
 
+	//float fog_val = 1;
+	//if (fog && exp(input.Depth.x / FarClip) > 0.5) {
+	//	fog_val = ((exp(input.Depth.x / FarClip) - 0.5) * 2);
+	//}
 	//TODO vvvUSE ALPHA CHANNEL OF LIGHTINGvvv FOR KEEPING TRACK OF SCENE ALPHA
 	// this will allow for at the very least 1 bit of alpha through obviously Lighting.w.a = 0;
 	// but also with a bit of work, well, a float is a lot of bytes, it would be possible to do stuff like storing a set of bytes in a float in the alpha, representing an ID from a list of 255 possible values
 	// I think this would allow up to 4 transparencies in a row before it'd break, and would allow individual IDs 0-255
 	// 4 8-bit ints packed into a 32-bit float, [AAAA/AAAA][BBBB/BBBB][CCCC/CCCC][DDDD/DDDD]
 	//										    0xAA,      0xBB,      0xCC,      0xDD
+
+	float d = 1;
+	float dist = (distance(camera_pos, input.wp)) / (FarClip);
+	float fog_start = 0.85;
+	float fog_end = 1;
+	float3 atmos = color_lerp(atmosphere_color.rgb, sky_color.rgb, clamp(input.wp.y*0.3, 0.0, 1));
+
 	output.Lighting = float4(0,0,0,1);
-		
+
+	if (fog && dist > fog_start) {
+		d = 1 - ((dist - fog_start) * (1/(1-fog_start)));
+		output.Lighting.a = d;	
+	}
+
+    output.Diffuse = color_lerp(rgba * float4(tint, 1), float4(atmos,d), (1-(d))) ;
+	//output.Diffuse.a *= d;
+
+
+	if (dist >= 0.999) { 
+		output.Lighting.a = 0;	
+		output.Diffuse.a = 0;
+	}
+	//output.Diffuse.a = 1-fog_val;
+
 	return output;
 }
 	

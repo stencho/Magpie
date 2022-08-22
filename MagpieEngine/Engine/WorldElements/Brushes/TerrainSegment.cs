@@ -134,9 +134,7 @@ namespace Magpie.Engine.WorldElements.Brushes {
                 bottom_right + (Vector3.Up * highest_point));
 
         public (int, int) index { get; }
-
-        public SceneObject scene_object;
-
+        
         public TerrainSegment(SegmentedTerrain parent, (int, int) index, XYPair offset, Vector2 UV_pos) {
             this.parent = parent;
             this.offset = offset;
@@ -215,7 +213,7 @@ namespace Magpie.Engine.WorldElements.Brushes {
             }
         }
 
-        public void fill_with_random(float max_height = 1f)  {
+        public void fill_with_random(float max_height = 3f)  {
             highest_point = float.MinValue;
             lowest_point = float.MaxValue;
 
@@ -445,17 +443,6 @@ namespace Magpie.Engine.WorldElements.Brushes {
             LOD_vertex_buffers[0].SetData(data);
             LOD_index_buffers[0].SetData(indices);
 
-            this.scene_object = new SceneObject() {
-                vertex_buffer = LOD_vertex_buffers[0],
-                index_buffer = LOD_index_buffers[0],
-                mesh_bounds = aabb,
-                world = parent.world,
-                texture = parent.texture,
-                tint = Color.White,
-                in_light = false,
-                wireframe = false,
-                object_type = ObjectType.BRUSH
-            };
         }
 
         public const int octree_depth = 3;

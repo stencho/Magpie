@@ -1,5 +1,6 @@
 ﻿using Magpie.Engine;
 using Magpie.Engine.Brushes;
+using Magpie.Engine.Stages;
 using Magpie.Engine.WorldElements.Brushes;
 using Magpie.Graphics.Lights;
 using Microsoft.Xna.Framework;
@@ -43,6 +44,8 @@ namespace Magpie.Graphics {
 
         public object actual_object { get; set; }
         public ObjectType object_type { get; set; }
+
+        public float camera_distance { get; set; }
     }
 
     public struct LightInfo {
@@ -142,6 +145,12 @@ namespace Magpie.Graphics {
 
         public void configure_dlight_shader(Effect e_directionallight) {
 
+            e_directionallight.Parameters["fog"].SetValue(true);
+            //e_directionallight.Parameters["fog_start"].SetValue(0.5f);
+
+            //e_directionallight.Parameters["camera_pos"].SetValue(EngineState.camera.position);
+            //e_directionallight.Parameters["FarClip"].SetValue(EngineState.camera.far_clip);
+
             e_directionallight.Parameters["NORMAL"].SetValue(EngineState.buffer.rt_normal);
             e_directionallight.Parameters["DEPTH"].SetValue(EngineState.buffer.rt_depth);
 
@@ -151,6 +160,7 @@ namespace Magpie.Graphics {
             e_directionallight.Parameters["LightIntensity"].SetValue(1f);
 
             e_directionallight.Parameters["LightDirection"].SetValue(sun_direction);
+
             e_directionallight.CurrentTechnique.Passes[0].Apply();
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);
 
@@ -246,13 +256,26 @@ namespace Magpie.Graphics {
                         tint = Color.White,
                         in_light = false,
                         wireframe = false,
-                        object_type = ObjectType.BRUSH
+                        object_type = ObjectType.BRUSH,
+                        camera_distance = Vector3.Distance(EngineState.camera.position, ((FloorPlane)brush).center)
                     });
                     vertex_buffer_draws++;
-                } else if (brush.type == BrushType.SEGMENTED_TERRAIN) {            
-
+                } else if (brush.type == BrushType.SEGMENTED_TERRAIN) {   
                     foreach ((TerrainSegment,int,int,float) ts in ((SegmentedTerrain)brush).visible_terrain) {
-                        scene.Add(ts.Item1.scene_object);
+                       scene.Add(new SceneObject() {
+                           vertex_buffer = ts.Item1.LOD_vertex_buffers[0],
+                           index_buffer = ts.Item1.LOD_index_buffers[0],
+                           mesh_bounds = ts.Item1.aabb,
+                           world = ((SegmentedTerrain)brush).world,
+                           texture = ((SegmentedTerrain)brush).texture,
+                           tint = Color.White,
+                           in_light = false,
+                           wireframe = false,
+                           object_type = ObjectType.BRUSH,
+                           camera_distance = Vector3.Distance(EngineState.camera.position, (ts.Item1.top_left + ts.Item1.bottom_right) / 2)
+                       });
+                       terrain_segments_rendered++;
+                       vertex_buffer_draws++;
                     }
 
                     //do frustum test here to see which segments are in view and get the correct LOD buffer
@@ -363,20 +386,98 @@ namespace Magpie.Graphics {
             CullMode = CullMode.None,
             FillMode = FillMode.WireFrame
         };
+        /*
+        public static void draw_world(World world) {
+            Map current_map = world.current_map;
 
+            int brush_index = 0;
+            int object_index = 0;
+            int actor_index = 0;
+
+            List<DynamicLight> lights = world.current_map.lights;
+
+            //build lighting
+            EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_lighting);
+            EngineState.graphics_device.Clear(sun_moon.atmosphere_color);
+
+            foreach (DynamicLight light in lights) {
+                if (light.type == LightType.SPOT) {
+                    EngineState.graphics_device.SetRenderTarget(((SpotLight)light).depth_map);
+                    EngineState.graphics_device.BlendState = BlendState.Opaque;
+                    EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
+
+                    EngineState.graphics_device.Clear(Color.Transparent);
+
+                    e_exp_light_depth.Parameters["View"].SetValue(((SpotLight)light).view);
+                    e_exp_light_depth.Parameters["Projection"].SetValue(((SpotLight)light).projection);
+
+                    //e_exp_light_depth.Parameters["LVP"].SetValue(((SpotLight)light).view * ((SpotLight)light).projection);
+
+                    for (int i = 0; i < scene.Length; i++) {
+                        so = scene[i];
+
+                        //if (((SpotLight)light).frustum.Intersects(so.mesh_bounds) && ((SpotLight)light).frustum.Intersects(EngineState.camera.frustum)) {
+                        scene[i].in_light = true;
+
+                        e_exp_light_depth.Parameters["World"].SetValue(so.world);
+                        e_exp_light_depth.Parameters["LightPosition"].SetValue(light.position);
+                        e_exp_light_depth.Parameters["DepthPrecision"].SetValue(((SpotLight)light).far_clip);
+
+                        EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
+
+                        EngineState.graphics_device.SetVertexBuffer(so.vertex_buffer);
+                        EngineState.graphics_device.Indices = so.index_buffer;
+
+                        foreach (EffectTechnique tech in e_exp_light_depth.Techniques) {
+                            foreach (EffectPass pass in tech.Passes) {
+                                pass.Apply();
+                                EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, so.vertex_buffer.VertexCount);
+                            }
+                        }
+
+                        scene[i].light_wvp = so.world * ((SpotLight)light).view * ((SpotLight)light).projection;
+                        scene[i].light_clip = light.far_clip;
+                        scene[i].light_pos = light.position;
+                        //so.shadow_maps.Add(((SpotLight)light).depth_map);
+                        // }
+                    }
+                } else if (light.type == LightType.POINT) {
+                    //build lighting cubemap
+                    //oh boy might just never do this
+                }
+            }
+
+
+
+        }
+        */
         public static void draw(IEnumerable<SceneObject> scene) {
+            terrain_segments_rendered = 0;
+            vertex_buffer_draws = 0;
+
             EngineState.graphics_device.SetRenderTargets(EngineState.buffer.buffer_targets);
 
-            //e_lit_diffuse.Parameters["FarClip"].SetValue(EngineState.camera.far_clip);
+            
+            e_gbuffer.Parameters["atmosphere_color"].SetValue(sun_moon.atmosphere_color.ToVector3());
+            e_gbuffer.Parameters["sky_color"].SetValue(sun_moon.sky_color.ToVector3());
+
+            e_gbuffer.Parameters["FarClip"].SetValue(EngineState.camera.far_clip);
+            e_gbuffer.Parameters["camera_pos"].SetValue(EngineState.camera.position);
+
             e_gbuffer.Parameters["View"].SetValue(EngineState.camera.view);
             e_gbuffer.Parameters["Projection"].SetValue(EngineState.camera.projection);
 
             EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
-            EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
+            EngineState.graphics_device.BlendState = BlendState.NonPremultiplied;
+            EngineState.graphics_device.BlendFactor = Color.Transparent;
             EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
 
-            foreach (SceneObject so in scene) {               
+            scene.OrderByDescending(a => a.camera_distance);
 
+            e_gbuffer.Parameters["fog"].SetValue(true);
+            foreach (SceneObject so in scene) {
+
+                vertex_buffer_draws++;
                 e_gbuffer.Parameters["World"].SetValue(so.world);
                 e_gbuffer.Parameters["WVIT"].SetValue(Matrix.Transpose(Matrix.Invert(so.world * EngineState.camera.view)));
 
@@ -397,6 +498,10 @@ namespace Magpie.Graphics {
                 EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, so.vertex_buffer.VertexCount);
 
             }
+
+            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+            e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
+            e_gbuffer.Parameters["fog"].SetValue(false);
         }
 
         public static void draw_lighting(IEnumerable<DynamicLight> lights) {
@@ -559,6 +664,7 @@ namespace Magpie.Graphics {
             e_gbuffer.Parameters["World"].SetValue(Matrix.Identity);
             e_gbuffer.Parameters["View"].SetValue(Matrix.Identity);
             e_gbuffer.Parameters["Projection"].SetValue(Matrix.Identity);
+            e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
             e_gbuffer.Techniques["BasicColorDrawing"].Passes[0].Apply();
 
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);

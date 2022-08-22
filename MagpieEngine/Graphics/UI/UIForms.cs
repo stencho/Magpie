@@ -358,7 +358,8 @@ namespace Magpie.Graphics.UI {
             // else
             Draw2D.fill_square(position, size, Color.Plum);
 
-            Draw2D.image(form_rt, position, size, Color.White);
+            if (form_rt != null)
+                Draw2D.image(form_rt, position, size, Color.White);
 
             if (draw_border)
                 Draw2D.square(position, position + size, 1f, Color.Red);

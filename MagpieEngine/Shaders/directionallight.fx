@@ -32,6 +32,7 @@ struct VSI {
 struct VSO {
 	float4 Position : POSITION0;
 	float2 TexCoord : TEXCOORD0;
+	float3 pos : TEXCOORD1;
 };
 
 //Pixel Shader Out
@@ -46,6 +47,7 @@ VSO VS(VSI input)
 	VSO output = (VSO)0;
 
 	output.Position = input.Position;
+	output.pos = input.Position;
 	output.TexCoord = input.TexCoord;
 		
 	return output;
@@ -65,6 +67,11 @@ float4 decode(float4 enc) {
 	return (2.0f * enc.xyzw- 1.0f);
 }
 
+bool fog = true;
+float fog_start;
+float3 camera_pos;
+float FarClip;
+
 PSO PS(VSO input)
 {
 	PSO output = (PSO)0;
@@ -74,14 +81,21 @@ PSO PS(VSO input)
 
 	float Depth = tex2D(DEPTH,input.TexCoord).r;
 
-	float NL = (dot(-dNormal , normalize(LightDirection)) * 1);	  
-	
+	float NL = (dot(-dNormal , normalize(LightDirection)) * 1) + 0.1;	  
+
 	if (Depth == 1)
 		clip(-1);
 		
-	output.Lighting.rgb = NL * saturate((LightColor * LightIntensity));
+	output.Lighting.rgb = ((LightColor * LightIntensity) * 0.5) + (NL * saturate((LightColor * LightIntensity)) / 2) ;
 
 	output.Lighting.a = 1;
+	if (fog && Depth > fog_start) {
+		//output.Lighting.a = Depth - fog_start;
+	} 
+	
+	if (fog && Depth >= .999) {
+		output.Lighting.a = 0;
+	}
 
 	return output;
 }

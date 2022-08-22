@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Magpie { 
@@ -22,10 +23,12 @@ namespace Magpie {
 
         public SegmentedTerrain test_hf;
 
+        public bool running = true;
+
         public World() {
             load_map();
 
-            test_hf = new SegmentedTerrain(Vector3.Zero, 5000, 50);
+            test_hf = new SegmentedTerrain(Vector3.Zero, 400, 10);
 
             test_light = new SpotLight();
             test_light2 = new SpotLight();
@@ -43,6 +46,9 @@ namespace Magpie {
 
             current_map.lights.Add(test_light);
 
+            physics_movement_thread = new Thread(do_world_update);
+            physics_movement_thread.Start();
+            
             //Scene.parent_world = this;
             //lights.Add(test_light2);
         }
@@ -108,7 +114,99 @@ namespace Magpie {
 
         List<string> dead_objects = new List<string>();
 
+        private Thread physics_movement_thread;
+
+        private double world_update_thread_frame_rate = 60;
+        private double world_update_thread_frame_time_ms => 1000f / world_update_thread_frame_rate;
+
+        public double world_update_thread_timer = 0;
+        public bool world_update_thread_timer_tick = false;
+        public bool world_running_slow = false;
+
+        public double last_tick_timer_val = 0;
+
+        public double[] last_ticks = new double[60*5];
+        public bool update_timer_tick = false;
+        public double update_frame_rate_avg = 0;
+
+        private void do_world_update() {
+            DateTime dt = DateTime.Now;
+            double loop_time = 0;
+
+            while (running) {
+                while ((DateTime.Now - dt).TotalMilliseconds <= (world_running_slow ? Clock.frame_time_delta_ms : world_update_thread_frame_time_ms) - (loop_time * .5)) {
+                    world_running_slow = Clock.frame_time_delta_ms > world_update_thread_frame_time_ms;
+                }
+
+                update_frame_rate_avg = 0;
+                for (int i = 0; i < last_ticks.Length - 1; i++) {
+                    last_ticks[i] = last_ticks[i + 1];
+                    update_frame_rate_avg += last_ticks[i];
+                } 
+
+                PhysicsSolver.do_movement(current_map);
+
+                PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
+
+                PhysicsSolver.finalize_collisions(current_map);
+
+                last_tick_timer_val = (DateTime.Now - dt).TotalMilliseconds;
+                last_ticks[last_ticks.Length - 1] = last_tick_timer_val;
+
+                update_frame_rate_avg += last_ticks[last_ticks.Length - 1];
+                update_frame_rate_avg /= last_ticks.Length;
+
+                loop_time = (DateTime.Now - dt).TotalMilliseconds - world_update_thread_frame_time_ms;
+                dt = DateTime.Now;
+            }
+            /*
+            while (running) {
+
+                if (force) {
+                    world_update_thread_timer = world_running_slow ? Clock.frame_time_delta_ms : world_update_thread_frame_time_ms;
+                } else {
+                    world_update_thread_timer += Clock.frame_time_delta_ms;                    
+                }
+
+                if (world_update_thread_timer >= (
+                    world_running_slow ? Clock.frame_time_delta_ms : world_update_thread_frame_time_ms
+                    )) {
+
+                    last_tick_timer_val = world_update_thread_timer;
+
+                    for (int i = 0; i < last_ticks.Length - 1; i++) {
+                        last_ticks[i] = last_ticks[i + 1];
+                    } last_ticks[last_ticks.Length - 1] = last_tick_timer_val;
+
+                    world_update_thread_timer = 0;
+                    update_timer_tick = true;
+
+
+                    PhysicsSolver.do_movement(current_map);
+
+                    PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
+
+                    PhysicsSolver.finalize_collisions(current_map);
+
+                } else {
+                    update_timer_tick = false;
+                }
+
+                if (world_update_thread_timer < (world_running_slow ? Clock.frame_time_delta_ms : world_update_thread_frame_time_ms)) {
+                    Thread.Sleep(TimeSpan.FromMilliseconds(world_update_thread_frame_time_ms));
+                    force = true;
+                }
+            }
+            */
+
+        }
+
         public void Update() {
+
+            if (running == false) {
+                EngineState.game.Exit();
+            }
+
             test_light.position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.6f) + (EngineState.camera.orientation.Down * 0.2f);
             test_light.orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
 
@@ -123,7 +221,7 @@ namespace Magpie {
 
             foreach (GameObject go in current_map.objects.Values) {
                 if (go.dead) {
-                    dead_objects.Add(go.name);                    
+                   // dead_objects.Add(go.name);                    
                     continue;
                 }
 
@@ -140,11 +238,14 @@ namespace Magpie {
 
             current_map.player_actor.Update();
 
+
+            /*
             PhysicsSolver.do_movement(current_map);
 
             PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
 
             PhysicsSolver.finalize_collisions(current_map);
+            */
 
 
             Scene.sun_moon.update();
@@ -153,12 +254,12 @@ namespace Magpie {
             dead_objects.Clear();
         }
 
+
+        int frame_count = 0;
         SceneObject[] current_scene;
         public void Draw(GraphicsDevice gd, Camera camera) {
             current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
-
-
-
+                       
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);
 
@@ -178,7 +279,7 @@ namespace Magpie {
             Scene.draw_lighting(current_map.lights);
 
 
-
+            frame_count++;
         }
 
 

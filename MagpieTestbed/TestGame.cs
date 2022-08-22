@@ -81,6 +81,7 @@ namespace MagpieTestbed
             this.IsMouseVisible = true;
             this.graphics.SynchronizeWithVerticalRetrace = false;
             this.IsFixedTimeStep = false;
+            this.graphics.PreferHalfPixelOffset = true;
         }
 
 
@@ -259,8 +260,10 @@ namespace MagpieTestbed
         {
             EngineState.Update(gameTime, this);
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape) || ((UIButton)EngineState.ui.forms["test_form"]).clicking)
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape) || ((UIButton)EngineState.ui.forms["test_form"]).clicking) {
+                world.running = false;
                 Exit();
+            }
 
 
             world.Update();
@@ -460,22 +463,49 @@ namespace MagpieTestbed
             //Draw3D.line(GraphicsDevice, world.test_light.position, world.test_light.position + (Vector3.Transform(Vector3.Normalize(world.test_light.orientation.Forward + world.test_light.orientation.Down), ((SpotLight)world.test_light).actual_scale)), Color.Orange, EngineState.camera.view, EngineState.camera.projection);
 
             
-            foreach(Intersection i in PhysicsSolver.intersections) {
+            //foreach(Intersection i in PhysicsSolver.intersections) {
                 //Draw3D.xyz_cross(i.gjkr.closest_point_A, 1f, Color.Blue);
                 //Draw3D.xyz_cross(i.gjkr.closest_point_B, 1f, Color.ForestGreen);
-            }
+            //}
            
 
             EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap);
+            /*
+            Draw2D.graph(280, 25, 400, 100, 30, 
+                world.last_ticks, Clock.delta_buffer, 
+                Color.Violet, 
+                Color.Red, Color.Blue, 
+                string.Format("last {0} ticks", world.last_ticks.Length),
+                string.Format("last {0} update deltas", world.last_ticks.Length),
+
+                true);
+                */
+            Draw2D.graph(50, EngineState.resolution.Y - 80, 200, 50,
+                60, "FPS", true, true, Color.HotPink,
+                (Clock.FPS_immediate_buffer, string.Format("last {0} ticks", Clock.FPS_immediate_buffer.Length), Color.Red)
+                );
+
+            Draw2D.graph(350, EngineState.resolution.Y - 80, 200, 50, 
+                20, "deltas", true, true, Color.HotPink,
+                (world.last_ticks, string.Format("world update thread \n{0:F2} fps", 1000f*(1/world.update_frame_rate_avg)), Color.Red),
+                (Clock.delta_buffer, "clock delta ms", Color.Blue)
+                );
+
 
             Draw2D.text_shadow("pf",
                 Clock.frame_rate.ToString() + " FPS [" + Clock.frame_rate_immediate + " average/" + Clock.FPS_buffer_length + " frames] " + Clock.frame_time_delta_ms + "ms\n" +
 
-                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" + (((int)Scene.buffer == -1) ? "combined" : ((Scene.buffers)Scene.buffer).ToString()) + "\n" +
-                PhysicsSolver.list_intersections() + Scene.terrain_segments_rendered + "\n" +
-                "test_hf cursor/crosshair\n hit: " + world.test_hf.cursor_hit_result.hit + "\n seg: " +  world.test_hf.cursor_segment_index.Item1 + "," +  world.test_hf.cursor_segment_index.Item2 +
+                "Position " + world.player_actor.position.simple_vector3_string_brackets() + "\n" +
+                "\n" +
+                (((int)Scene.buffer == -1) ? "combined" : ((Scene.buffers)Scene.buffer).ToString()) + "\n" +
+
+                "vertex buffer draws: " + Scene.vertex_buffer_draws + "\n" +
+
+                "test_hf cursor/crosshair\n hit: " + world.test_hf.cursor_hit_result.hit + "\n seg: " + world.test_hf.cursor_segment_index.Item1 + "," + world.test_hf.cursor_segment_index.Item2 +
                 "\n quad: " + world.test_hf.cursor_quad_index.Item1 + "," + world.test_hf.cursor_quad_index.Item2 + " (global: " + ((world.test_hf.cursor_segment_index.Item1 * world.test_hf.segment_size.X) + world.test_hf.cursor_quad_index.Item1) + "," + ((world.test_hf.cursor_segment_index.Item2 * world.test_hf.segment_size.Y) + world.test_hf.cursor_quad_index.Item2) + ")" +
-                "\n point: " + world.test_hf.cursor_hit_result.point.simple_vector3_string()
+                "\n point: " + world.test_hf.cursor_hit_result.point.simple_vector3_string() +
+                "\n\n" +
+                "update thread: \n tick: " + world.world_update_thread_timer_tick + "\n update thread timer:" + world.last_tick_timer_val.ToString() 
 
 
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);

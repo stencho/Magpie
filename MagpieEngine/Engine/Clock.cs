@@ -70,17 +70,29 @@ namespace Magpie.Engine {
             total_ms += _gt.ElapsedGameTime.TotalMilliseconds;
         }
 
-        public static int FPS_buffer_length = 10;
-        static double[] FPS_immediate_buffer = new double[FPS_buffer_length];
+        public static int FPS_buffer_length = 60 * 5;
+        public static int delta_buffer_length = 60 * 5;
+
+        public static double[] FPS_immediate_buffer = new double[FPS_buffer_length];
+        public static double[] delta_buffer = new double[delta_buffer_length];
+        public static double delta_buffer_average = 0;
 
         public static void update_fps() {           
             _frame_rate_timer += _gt.ElapsedGameTime.TotalMilliseconds;
             _frame_rate_timer_i++;
             
             for (int i = 0; i< FPS_buffer_length-1; i++) {
-                FPS_immediate_buffer[i + 1] = FPS_immediate_buffer[i];
+                FPS_immediate_buffer[i] = FPS_immediate_buffer[i + 1];
             }
-            FPS_immediate_buffer[0] = (1000 / Clock.frame_time_delta_ms);
+            FPS_immediate_buffer[FPS_buffer_length - 1] = (1000 / Clock.frame_time_delta_ms);
+
+            for (int i = 0; i < delta_buffer_length-1;i++) {
+                delta_buffer[i] = delta_buffer[i + 1];
+                delta_buffer_average += delta_buffer[i];
+            }
+            delta_buffer[delta_buffer_length - 1] = Clock.frame_time_delta_ms;
+            delta_buffer_average += delta_buffer[delta_buffer_length - 1];
+            delta_buffer_average /= delta_buffer_length;
 
             frame_rate_immediate = (int)(FPS_immediate_buffer.Aggregate((a, b) => a + b) / (double)FPS_buffer_length);
 

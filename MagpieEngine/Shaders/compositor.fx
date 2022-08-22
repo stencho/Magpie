@@ -76,14 +76,6 @@ float3 atmosphere_color;
 
 bool fullbright = false;
 
-float3 color_lerp(float3 a, float3 b, float position)
-{
-    return float3(
-                a.r - ((a.r - b.r) * position),
-                a.g - ((a.g - b.g) * position),
-                a.b - ((a.b - b.b) * position));
-}
-
 float cubicPulse( float c, float w, float x )
 {
     x = abs(x - c);
@@ -99,18 +91,19 @@ float4 MainPS(VSO input) : COLOR
     float4 n = tex2D(NormalSampler, input.UV);
     float3 d = tex2D(DepthSampler, input.UV).rgb;
 	
-    if (buffer == -1)        
-        return saturate((rgba.rgba * l) * 1.25);
+    if (buffer == -1)    
+        return (l * 0.1) + saturate((rgba.rgba * l) * 1.15);
+        //return (rgba.rgba * 0.25) + ((rgba.rgba * l) * 1.15);
     else if (buffer == 0 || fullbright)
         return rgba.rgba;
     else if (buffer == 1)
         return n; //normals
     else if (buffer == 2)
-        return float4(d.r, d.g, d.b, 1); //depth
+        return float4(d.r, d.r, d.r, 1) ; //depth
     else if (buffer == 3)
         return l; //lighting
 	else 
-		return rgba.rgba * l;
+        return (l * 0.1) + saturate((rgba.rgba * l) * 1.15);
     
 }
 

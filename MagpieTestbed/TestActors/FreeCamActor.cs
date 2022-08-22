@@ -98,7 +98,7 @@ namespace MagpieTestbed.TestActors {
             }
 
             if (mv != Vector3.Zero)
-                wants_movement = Vector3.Normalize(mv) * movement_speed * (bind_pressed("shift") ? 3f : 1f) * Clock.frame_time_delta;
+                wants_movement = Vector3.Normalize(mv) * movement_speed * (bind_pressed("shift") ? 6f : 1f) * (1000f/60f/1000f);
 
             cam.position = position;
             cam.update();

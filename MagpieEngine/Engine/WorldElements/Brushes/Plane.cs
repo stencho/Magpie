@@ -26,6 +26,8 @@ namespace Magpie.Engine.Brushes {
         public Vector3 C => (Vector3.Backward * size.Y * 0.5f) + (Vector3.Right * size.X * 0.5f);
         public Vector3 D => (Vector3.Backward * size.Y * 0.5f) + (Vector3.Left * size.X * 0.5f) ;
 
+        public Vector3 center => (A + B + C + D) / 4f;
+
         public Shape3D collision { get; set; }
 
         static ushort[] q_indices = { 0, 1, 2, 2, 3, 0 };

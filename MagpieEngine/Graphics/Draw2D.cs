@@ -190,6 +190,12 @@ namespace Magpie.Graphics {
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, Color.Black);
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color);
         }
+        public static void text_shadow(string font, string s, XYPair position, Color color, Color shadow_color) {
+            //Console.WriteLine(s);
+
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, shadow_color);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color);
+        }
         public static void text_shadow(string font, string s, XYPair position) {
             //Console.WriteLine(s);
 
@@ -210,12 +216,22 @@ namespace Magpie.Graphics {
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position + Vector2.One, Color.Black);
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color);
         }
+        public static void text_shadow(string font, string s, Vector2 position, Color color, Color shadow_color) {
+            //Console.WriteLine(s);
+
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position + Vector2.One, shadow_color);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color);
+        }
         public static void text_shadow(string font, string s, XYPair position, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float depth) {
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.One + position, Color.Black, rotation, origin, scale, effects, depth - 1);
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, Vector2.Zero + position, color, rotation, origin, scale, effects, depth);
         }
         public static void text_shadow(string font, string s, Vector2 position, Color color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float depth) {
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position + Vector2.One, Color.Black, rotation, origin, scale, effects, depth - 1);
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color, rotation, origin, scale, effects, depth);
+        }
+        public static void text_shadow(string font, string s, Vector2 position, Color color, Color shadow_color, float rotation, Vector2 origin, float scale, SpriteEffects effects, float depth) {
+            EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position + Vector2.One, shadow_color, rotation, origin, scale, effects, depth - 1);
             EngineState.spritebatch.DrawString(ContentHandler.resources[font].value_ft, s, position, color, rotation, origin, scale, effects, depth);
         }
         public static void text_shadow(string font, string s, XYPair position, Vector2 norm, Color color, Color shadow_color) {
@@ -281,6 +297,12 @@ namespace Magpie.Graphics {
             var scale = new Vector2(tan.Length(), line_width);
 
             EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, a.ToVector2(), null, color, rotation, middlePoint, scale, SpriteEffects.None, 0f);
+        }
+
+        public static void line(int a_x, int a_y, int b_x, int b_y, float line_width, Color color) {
+            Vector2 a = new Vector2(a_x, a_y);
+            Vector2 b = new Vector2(b_x, b_y);
+            line(a, b, line_width, color);
         }
 
         public static void line(LineSegment segment, float line_width) {
@@ -498,19 +520,106 @@ namespace Magpie.Graphics {
             line(position, position + (Vector2.UnitX * sizeX / 2f), 1f, color);
             line(position, position + (Vector2.UnitY * sizeY / 2f), 1f, color);
         }
+        
+        /// <summary>
+        /// draws a simple graph
+        /// </summary>
+        /// <param name="X">X position</param>
+        /// <param name="Y">Y position</param>
+        /// <param name="width">entire graph width</param>
+        /// <param name="height">entire graph height</param>
+        /// <param name="y_max">maximum Y value, for scaling</param>
+        /// <param name="show_avgs">show average across entire data set on the left side of the graph</param>
+        /// <param name="axis_bars">color of the X/Y axis bars</param>
+        /// <param name="lines">item1 is the double[] data for displaying on the graph, item2 is its title, item3 is the color scheme the line uses</param>
+        public static void graph(int X, int Y, int width, int height, double y_max, string top_title, bool show_avgs, bool autosize, Color axis_bars, params (double[], string, Color)[] lines) {
+            line(X, Y, X, Y + height, 1f, axis_bars);
+            line(X, Y + height, X + width, Y + height, 1f, axis_bars);
 
-        /*
-        public static bool image_from_file(string filename, int X, int Y, int W, int H, Color tint) {
-            if (File.Exists(filename)) {
 
+            float current_title_x = 0;
+            float current_title_y = 0;
+
+            double y_scale = height / y_max;
+            double y_tallest = y_max;
+
+            if (autosize) {
+                foreach ((double[], string, Color) line in lines) {
+                var data = line.Item1;           
+                    for (int i = 0; i < data.Length; i++) {
+                        if (data[i] > y_tallest) {
+                            y_tallest = data[i];
+                        }
+                    }
+                }
+                y_scale = height / y_tallest;
+            }
+
+            var ms = Math2D.measure_string("pf", top_title);
+
+            //top text
+            text_shadow("pf", top_title,
+                new Vector2(X, Y - ms.Y - 3), Color.White, axis_bars, 0f,
+                Vector2.Zero, 1f, SpriteEffects.None, 1f);
+
+            ms = Math2D.measure_string("pf", string.Format("{0:F0}", (double.IsInfinity(y_tallest) ? 0 : y_tallest)));
+            text_shadow("pf", string.Format("{0:F0}", (double.IsInfinity(y_tallest) ? 0 : y_tallest)), new Vector2(X + width - ms.X, Y - (ms.Y + 3)), Color.White, axis_bars);
+            line(X + width - ms.X, Y, X + width, Y, 1f, axis_bars);
+
+            foreach ((double[], string, Color) line in lines) {
+                var data = line.Item1;
+                var title = line.Item2;
+                var color = line.Item3;                
+
+                double x_dist_scale = width / (float)data.Length;
+
+                double avg = 0;
+
+                for (int i = 0; i < data.Length - 1; i++) {
+                    Draw2D.line(
+                        X + (int)(x_dist_scale * i),
+                       (Y + height) - (int)(data[i] * y_scale),
+
+                        X + (int)(x_dist_scale * (i + 1)),
+
+                       (Y + height) - (int)(data[i+1] * y_scale),
+
+                        1f, color);
+                    
+                    avg += data[i];
+                }
+                avg /= data.Length;
+
+                //bottom text
+                ms = Math2D.measure_string("pf", title + "  ");
+                
+                text_shadow("pf", title,
+                    new Vector2(X + current_title_x, Y + height + 3 + current_title_y), Color.White, color, 0f,
+                    Vector2.Zero, 1f, SpriteEffects.None, 1f);
+
+                //because there will be more than one bottom title and they might be too wide, 
+                //stack them underneath the graph
+                //fill the X of the area under the graph, and once it's full, drop down a line and start the X over
+                current_title_x += ms.X;
+
+                if (current_title_x > width) {
+                    current_title_x = 0;
+                    current_title_y += ms.Y + 3;
                 }
 
+                if (show_avgs) {
+                    if (double.IsInfinity(avg)) avg = 0;                    
 
-                return true;
-            }*/
+                    ms = Math2D.measure_string("pf", string.Format("{0:F2} ", avg));
 
-        public static void graph(int X, int Y, int width, int height, float[] values) {
+                    text_shadow("pf", string.Format("{0:F2} ", avg),
+                        new Vector2(X, (Y + height) - (int)(avg * y_scale)),
+                        Color.White, color, 0f,
+                        (Vector2.UnitX * ms.X) + (Vector2.UnitY * (ms.Y / 2)),
+                        1f, SpriteEffects.None, 1f);
 
+                }
+            }
         }
 
         public static void square(int x, int y, int w, int h, float line_width, Color col) {
