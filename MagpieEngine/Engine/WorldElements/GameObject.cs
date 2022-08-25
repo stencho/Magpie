@@ -35,10 +35,10 @@ namespace Magpie.Engine {
 
         PhysicsInfo phys_info { get; set; }
 
+        SceneRenderInfo render_info { get; set; }
+        float distance_to_camera { get; }
         Map parent_map { get; set; }
-
-        Color tint { get; set; }
-
+        
         string model { get; set; }
         string[] textures { get; set; }
         

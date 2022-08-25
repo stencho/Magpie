@@ -70,6 +70,12 @@ namespace Magpie.Engine.Brushes {
         public Vector3 movement_vector { get; set; } = Vector3.Zero;
         public Vector3 final_position { get; set; }
 
+        public float distance_to_camera => visible_terrain.Count > 0 ? visible_terrain[0].Item4 : float.MaxValue;
+
+        public SceneRenderInfo render_info { get; set; }
+
+        public BoundingBox bounds => new BoundingBox(top_left, bottom_right + (Vector3.Up * highest_segment.Item3));
+
         public SegmentedTerrain(Vector3 position, XYPair size, XYPair segment_size) {
             this.position = position;
 

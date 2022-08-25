@@ -79,7 +79,7 @@ namespace MagpieTestbed
             graphics.PreferredBackBufferHeight = 900;
 
             this.IsMouseVisible = true;
-            this.graphics.SynchronizeWithVerticalRetrace = false;
+            this.graphics.SynchronizeWithVerticalRetrace = true;
             this.IsFixedTimeStep = false;
             this.graphics.PreferHalfPixelOffset = true;
         }
@@ -148,8 +148,8 @@ namespace MagpieTestbed
             */
 
             for (int i = 0; i < 150; i++) {
-                //world.current_map.add_object("test_sphere" + i, new TestSphere());
-                //world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
+                world.current_map.add_object("test_sphere" + i, new TestSphere());
+                world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
             }
 
 
@@ -480,15 +480,15 @@ namespace MagpieTestbed
 
                 true);
                 */
-            Draw2D.graph(50, EngineState.resolution.Y - 80, 200, 50,
-                60, "FPS", true, true, Color.HotPink,
+            Draw2D.graph_line(50, EngineState.resolution.Y - 80, 200, 50,
+                "FPS", 60, true, true, true, Color.HotPink,
                 (Clock.FPS_immediate_buffer, string.Format("last {0} ticks", Clock.FPS_immediate_buffer.Length), Color.Red)
                 );
-
-            Draw2D.graph(350, EngineState.resolution.Y - 80, 200, 50, 
-                20, "deltas", true, true, Color.HotPink,
-                (world.last_ticks, string.Format("world update thread \n{0:F2} fps", 1000f*(1/world.update_frame_rate_avg)), Color.Red),
-                (Clock.delta_buffer, "clock delta ms", Color.Blue)
+            double fps = 1000f * (1 / world.last_ticks[world.last_ticks.Length - 1]);
+            Draw2D.graph_line(350, EngineState.resolution.Y - 80, 200, 50,
+                "deltas", 20, true, true, true, Color.HotPink,
+                (world.last_ticks, string.Format("world update thread \n{0:F2} fps", double.IsInfinity(fps) ? 0.0 : fps), Color.DarkMagenta),
+                (Clock.delta_buffer, "clock delta ms", Color.DarkGreen)
                 );
 
 
@@ -546,7 +546,7 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
             EngineState.ui.draw();
 
             //Draw2D.image(ContentHandler.resources["radial_glow"].value_tx, XYPair.One * 50, XYPair.One * 200, Color.White);
-            //Draw2D.image(ContentHandler.resources["circle"].value_tx, XYPair.One * 150, XYPair.One * 200, Color.White);
+            //Draw2D.image(((SpotLight)world.current_map.lights[world.current_map.lights.Count-1]).depth_map, XYPair.One * 150, XYPair.One * 200, Color.White);
 
 
             EngineState.spritebatch.End();
@@ -560,6 +560,7 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
 
             Scene.compose();
             //base.Draw(gameTime);
+            Clock.update_fps();
         }
     }
 }

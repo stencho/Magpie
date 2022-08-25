@@ -69,7 +69,6 @@ namespace Magpie {
             gametime = gt;
 
             Clock.update(gametime, game);
-            Clock.update_fps();
 
             Controls.update(window,game.IsActive, resolution);
 

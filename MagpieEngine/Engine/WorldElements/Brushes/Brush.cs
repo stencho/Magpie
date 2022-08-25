@@ -28,12 +28,15 @@ namespace Magpie.Engine.Brushes {
         Vector3 get_footing(float X, float Z);
         bool within_vertical_bounds(Vector3 pos);
 
-        //BoundingBox bounds { get; set; }
+        BoundingBox bounds { get; }
         Shape3D collision { get; set; }
 
+        float distance_to_camera { get; }
 
         Vector3 movement_vector { get; set; }
         Vector3 final_position { get; set; }
+
+        SceneRenderInfo render_info { get; set; }
 
         void Update();
         void debug_draw();

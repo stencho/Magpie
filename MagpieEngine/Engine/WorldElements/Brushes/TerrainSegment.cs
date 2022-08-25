@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static Magpie.Engine.Collision.Raycasting;
 using static Magpie.Engine.Controls;
@@ -134,13 +135,29 @@ namespace Magpie.Engine.WorldElements.Brushes {
                 bottom_right + (Vector3.Up * highest_point));
 
         public (int, int) index { get; }
-        
+
+        public float distance_to_camera => Vector3.Distance(CollisionHelper.closest_point_on_AABB(EngineState.camera.position, aabb.Min, aabb.Max), EngineState.camera.position);
+
+        public SceneRenderInfo render_info { get; set; }
+
+        public bool built { get; set; } = false;
+
         public TerrainSegment(SegmentedTerrain parent, (int, int) index, XYPair offset, Vector2 UV_pos) {
             this.parent = parent;
             this.offset = offset;
             this.size = parent.segment_size;
             this.overall_UV_position = UV_pos;
             this.index = index;
+
+            render_info = new SceneRenderInfo() {
+                textures = new string[1] { parent.texture },
+                vertex_buffers = LOD_vertex_buffers,
+                index_buffers = LOD_index_buffers,
+                draw_buffers = new bool[3] { true, false, false },
+                tint = Color.White,
+                render = true
+            };
+
         }
 
         public void debug_draw(Color color, bool draw_all_quads) {
@@ -414,9 +431,12 @@ namespace Magpie.Engine.WorldElements.Brushes {
                 Vector3 CA = data[indices[i * 3]].Position - data[indices[i * 3 + 2]].Position;
                 Vector3 norm = Vector3.Cross(AB, CA);
                 norm.Normalize();
-                data[indices[i * 3]].Normal += norm;
-                data[indices[i * 3+1]].Normal += norm;
-                data[indices[i * 3+2]].Normal += norm;
+                data[indices[i * 3]].Normal = norm;
+                data[indices[i * 3+1]].Normal = norm;
+                data[indices[i * 3+2]].Normal = norm;
+                data[indices[i * 3]].Normal.Normalize();
+                data[indices[i * 3 + 1]].Normal.Normalize();
+                data[indices[i * 3 + 2]].Normal.Normalize();
             }
 
             //X = 0, Y != 0, left side, get corner data from above
@@ -436,13 +456,23 @@ namespace Magpie.Engine.WorldElements.Brushes {
                 //data[0].Normal = parent.segments[index.Item1, index.Item2].data_v3_pos[parent.segment_size.X, parent.segment_size.Y]
             }
             
-            for (int i = 0; i < data.Length; i++) {
-                if (data[i].Normal != Vector3.Zero) data[i].Normal.Normalize();
-            }
+            //for (int i = 0; i < data.Length; i++) {
+            //    if (data[i].Normal != Vector3.Zero) data[i].Normal.Normalize();
+            //}
 
             LOD_vertex_buffers[0].SetData(data);
             LOD_index_buffers[0].SetData(indices);
+            Thread.Sleep(2);
+            render_info = new SceneRenderInfo() {
+                textures = new string[1] { parent.texture },
+                vertex_buffers = LOD_vertex_buffers,
+                index_buffers = LOD_index_buffers,
+                draw_buffers = new bool[3] { true, false, false },
+                tint = Color.White,
+                render = true
+            };
 
+            built = true;
         }
 
         public const int octree_depth = 3;

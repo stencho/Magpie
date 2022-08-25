@@ -37,9 +37,7 @@ namespace MagpieTestbed.TestObjects {
         public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
 
         public Map parent_map { get; set; }
-
-        public Color tint { get; set; }
-
+        
         public float velocity { get; set; } = 0f;
         public Vector3 inertia_dir { get; set; } = Vector3.Zero;
 
@@ -47,12 +45,23 @@ namespace MagpieTestbed.TestObjects {
 
         public bool dead { get; set; } = false;
 
+        public float distance_to_camera => Vector3.Distance(CollisionHelper.closest_point_on_AABB(EngineState.camera.position, bounds.Min, bounds.Max), EngineState.camera.position);
+
+        public SceneRenderInfo render_info { get; set; }
+
         public TestSphere() {
-             collision = new Cube(scale);
+            collision = new Cube(scale);
+            render_info = new SceneRenderInfo() {
+                model = this.model,
+                textures = this.textures,
+                tint = Color.White,
+                render = true
+            };
         }
 
         public void Update() {
-
+            render_info.model = this.model;
+            textures = this.textures;
             bounds = CollisionHelper.BoundingBox_around_OBB((Cube)collision, world);
         }
     }

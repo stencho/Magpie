@@ -532,10 +532,11 @@ namespace Magpie.Graphics {
         /// <param name="show_avgs">show average across entire data set on the left side of the graph</param>
         /// <param name="axis_bars">color of the X/Y axis bars</param>
         /// <param name="lines">item1 is the double[] data for displaying on the graph, item2 is its title, item3 is the color scheme the line uses</param>
-        public static void graph(int X, int Y, int width, int height, double y_max, string top_title, bool show_avgs, bool autosize, Color axis_bars, params (double[], string, Color)[] lines) {
+        public static void graph_line(int X, int Y, int width, int height,
+            string top_title, double y_max, bool show_current, bool show_avgs, bool autosize, Color axis_bars, 
+            params (double[], string, Color)[] lines) {
             line(X, Y, X, Y + height, 1f, axis_bars);
             line(X, Y + height, X + width, Y + height, 1f, axis_bars);
-
 
             float current_title_x = 0;
             float current_title_y = 0;
@@ -588,6 +589,8 @@ namespace Magpie.Graphics {
                     
                     avg += data[i];
                 }
+
+                avg += data[data.Length-1];
                 avg /= data.Length;
 
                 //bottom text
@@ -608,7 +611,7 @@ namespace Magpie.Graphics {
                 }
 
                 if (show_avgs) {
-                    if (double.IsInfinity(avg)) avg = 0;                    
+                    if (double.IsInfinity(avg)) avg = 0;
 
                     ms = Math2D.measure_string("pf", string.Format("{0:F2} ", avg));
 
@@ -616,6 +619,19 @@ namespace Magpie.Graphics {
                         new Vector2(X, (Y + height) - (int)(avg * y_scale)),
                         Color.White, color, 0f,
                         (Vector2.UnitX * ms.X) + (Vector2.UnitY * (ms.Y / 2)),
+                        1f, SpriteEffects.None, 1f);
+
+                }
+                if (show_current) {
+                    double cdata = data[data.Length - 1];
+                    if (double.IsInfinity(cdata)) cdata = 0;                    
+
+                    ms = Math2D.measure_string("pf", string.Format("{0:F2} ", cdata));
+
+                    text_shadow("pf", string.Format("{0:F2} ", cdata),
+                        new Vector2(X+width, (Y + height) - (int)(cdata * y_scale)),
+                        Color.White, color, 0f,
+                        (Vector2.UnitY * (ms.Y / 2)),
                         1f, SpriteEffects.None, 1f);
 
                 }

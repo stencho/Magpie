@@ -47,15 +47,27 @@ namespace MagpieTestbed.TestObjects {
         public Map parent_map { get; set; }
 
         double lifetime = 0;
-
-        public Color tint { get; set; } = Color.SaddleBrown;
         
+        public SceneRenderInfo render_info { get; set; }
+
+        public float distance_to_camera => Vector3.Distance(CollisionHelper.closest_point_on_AABB(EngineState.camera.position, bounds.Min, bounds.Max), EngineState.camera.position);
+
         public TestPoo() {
-             collision = new Sphere(radius);
+            collision = new Sphere(radius);
+            render_info = new SceneRenderInfo() {
+                model = this.model,
+                textures = this.textures,
+                tint = Color.SaddleBrown,
+                render = true
+            };
+
         }
 
         Vector3 last_pos;
         public void Update() {
+            render_info.model = this.model;
+            textures = this.textures;
+            render_info.camera_distance = distance_to_camera;
             last_pos = this.position;
 
             this.position += inertia_dir * velocity * Clock.frame_time_delta;

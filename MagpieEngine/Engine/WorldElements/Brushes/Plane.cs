@@ -46,6 +46,12 @@ namespace Magpie.Engine.Brushes {
         public Vector3 movement_vector { get; set; } = Vector3.Zero;
         public Vector3 final_position { get; set; }
 
+        public BoundingBox bounds => throw new NotImplementedException();
+
+        public float distance_to_camera => throw new NotImplementedException();
+
+        public SceneRenderInfo render_info { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public FloorPlane() {
 
             quad = new VertexPositionNormalTexture[4] {

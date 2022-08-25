@@ -37,23 +37,32 @@ namespace Magpie.Graphics {
         public float light_clip { get; set; }
 
         public bool in_light { get; set; }
-        public List<LightInfo> lights { get; set; }
 
         public bool wireframe { get; set; }
-        public bool debug_draw { get; set; }
 
-        public object actual_object { get; set; }
         public ObjectType object_type { get; set; }
 
         public float camera_distance { get; set; }
     }
 
-    public struct LightInfo {
-        public Texture2D shadow_map { get; set; }
-        public Matrix LightWVP { get; set; }
-        public Vector3 LightPosition { get; set; }
-        public Vector3 LightDirection { get; set; }
+    public class SceneRenderInfo {
+        public IndexBuffer[] index_buffers { get; set; }
+        public VertexBuffer[] vertex_buffers { get; set; }
+
+        public bool[] draw_buffers { get; set; }
+
+        public bool render { get; set; }
+        public bool wireframe { get; set; }
+
+        public string[] textures { get; set; }
+        public string model { get; set; }
+
+        public float camera_distance { get; set; }
+
+        public Color tint { get; set; }
+
     }
+
 
     public class SunMoonSystem {
         public Color night_ambient = Color.FromNonPremultiplied(3,1,3, 255);
@@ -130,8 +139,6 @@ namespace Magpie.Graphics {
             if (current_time_ms < 0)
                 current_time_ms = entire_day_cycle_length_ms - Math.Abs(current_time_ms);
 
-
-
             current_color = lerps.get_color_at((float)Scene.sun_moon.current_day_value);
 
             sky_color = Color.Lerp(Color.MidnightBlue, current_color, 0.7f) * 0.3f;
@@ -162,31 +169,7 @@ namespace Magpie.Graphics {
             e_directionallight.Parameters["LightDirection"].SetValue(sun_direction);
 
             e_directionallight.CurrentTechnique.Passes[0].Apply();
-            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);
-
-            /*
-            e_directionallight.Parameters["LightDirection"].SetValue((sun_orientation * Matrix.CreateRotationY(MathHelper.ToRadians(90))).Forward);
-            e_directionallight.CurrentTechnique.Passes[0].Apply();
-            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);
-
-            e_directionallight.Parameters["LightDirection"].SetValue((sun_orientation * Matrix.CreateRotationY(MathHelper.ToRadians(-90))).Forward);
-            e_directionallight.CurrentTechnique.Passes[0].Apply();
-            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);
-
-            e_directionallight.Parameters["LightDirection"].SetValue((sun_orientation * Matrix.CreateRotationY(MathHelper.ToRadians(180))).Forward);
-            e_directionallight.CurrentTechnique.Passes[0].Apply();
-            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);
-            */
-
-            /*
-            //sun
-            e_directionallight.Parameters["LightColor"].SetValue(Color.LightGoldenrodYellow.ToVector3());
-            e_directionallight.Parameters["LightDirection"].SetValue(Vector3.Down);
-            e_directionallight.Parameters["LightIntensity"].SetValue(0.3f);
-
-            e_directionallight.CurrentTechnique.Passes[0].Apply();
-            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);
-            */
+            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);           
 
         }
 
@@ -237,7 +220,7 @@ namespace Magpie.Graphics {
         public static int vertex_buffer_draws = 0;
         static List<SceneObject> scene = new List<SceneObject>();
         public static SceneObject[] create_scene_from_lists(Dictionary<string,Brush> floors, Dictionary<string, GameObject> objects, Dictionary<string, Actor> actors, IEnumerable<DynamicLight> lights, BoundingFrustum view_frustum) {
-            scene.Clear();
+            
 
             terrain_segments_rendered = 0;
             vertex_buffer_draws = 0;
@@ -254,7 +237,6 @@ namespace Magpie.Graphics {
                         world = brush.world,
                         texture = brush.texture,
                         tint = Color.White,
-                        in_light = false,
                         wireframe = false,
                         object_type = ObjectType.BRUSH,
                         camera_distance = Vector3.Distance(EngineState.camera.position, ((FloorPlane)brush).center)
@@ -269,7 +251,6 @@ namespace Magpie.Graphics {
                            world = ((SegmentedTerrain)brush).world,
                            texture = ((SegmentedTerrain)brush).texture,
                            tint = Color.White,
-                           in_light = false,
                            wireframe = false,
                            object_type = ObjectType.BRUSH,
                            camera_distance = Vector3.Distance(EngineState.camera.position, (ts.Item1.top_left + ts.Item1.bottom_right) / 2)
@@ -309,8 +290,7 @@ namespace Magpie.Graphics {
                                 world = go.world,
                                 mesh_bounds = go.bounds,
                                 texture = go.textures[texture_index],
-                                tint =  go.tint == Color.Transparent ? Color.White : go.tint,
-                                in_light = false
+                                tint = Color.White
                                 
                             });
                             vertex_buffer_draws++;
@@ -328,6 +308,7 @@ namespace Magpie.Graphics {
 
             return scene.ToArray();
         }
+
         static SceneObject so;
         public static void build_lighting(IEnumerable<DynamicLight> lights, SceneObject[] scene) {
 
@@ -351,7 +332,6 @@ namespace Magpie.Graphics {
                         so = scene[i];
 
                         //if (((SpotLight)light).frustum.Intersects(so.mesh_bounds) && ((SpotLight)light).frustum.Intersects(EngineState.camera.frustum)) {
-                            scene[i].in_light = true;
 
                             e_exp_light_depth.Parameters["World"].SetValue(so.world);
                             e_exp_light_depth.Parameters["LightPosition"].SetValue(light.position);
@@ -369,9 +349,6 @@ namespace Magpie.Graphics {
                                 }
                             }
 
-                            scene[i].light_wvp = so.world * ((SpotLight)light).view * ((SpotLight)light).projection;
-                            scene[i].light_clip = light.far_clip;
-                            scene[i].light_pos = light.position;
                             //so.shadow_maps.Add(((SpotLight)light).depth_map);
                        // }
                     }
@@ -381,76 +358,11 @@ namespace Magpie.Graphics {
                 }
             }
         }
-
         static RasterizerState rs_wireframe = new RasterizerState() {
             CullMode = CullMode.None,
             FillMode = FillMode.WireFrame
         };
-        /*
-        public static void draw_world(World world) {
-            Map current_map = world.current_map;
 
-            int brush_index = 0;
-            int object_index = 0;
-            int actor_index = 0;
-
-            List<DynamicLight> lights = world.current_map.lights;
-
-            //build lighting
-            EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_lighting);
-            EngineState.graphics_device.Clear(sun_moon.atmosphere_color);
-
-            foreach (DynamicLight light in lights) {
-                if (light.type == LightType.SPOT) {
-                    EngineState.graphics_device.SetRenderTarget(((SpotLight)light).depth_map);
-                    EngineState.graphics_device.BlendState = BlendState.Opaque;
-                    EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
-
-                    EngineState.graphics_device.Clear(Color.Transparent);
-
-                    e_exp_light_depth.Parameters["View"].SetValue(((SpotLight)light).view);
-                    e_exp_light_depth.Parameters["Projection"].SetValue(((SpotLight)light).projection);
-
-                    //e_exp_light_depth.Parameters["LVP"].SetValue(((SpotLight)light).view * ((SpotLight)light).projection);
-
-                    for (int i = 0; i < scene.Length; i++) {
-                        so = scene[i];
-
-                        //if (((SpotLight)light).frustum.Intersects(so.mesh_bounds) && ((SpotLight)light).frustum.Intersects(EngineState.camera.frustum)) {
-                        scene[i].in_light = true;
-
-                        e_exp_light_depth.Parameters["World"].SetValue(so.world);
-                        e_exp_light_depth.Parameters["LightPosition"].SetValue(light.position);
-                        e_exp_light_depth.Parameters["DepthPrecision"].SetValue(((SpotLight)light).far_clip);
-
-                        EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
-
-                        EngineState.graphics_device.SetVertexBuffer(so.vertex_buffer);
-                        EngineState.graphics_device.Indices = so.index_buffer;
-
-                        foreach (EffectTechnique tech in e_exp_light_depth.Techniques) {
-                            foreach (EffectPass pass in tech.Passes) {
-                                pass.Apply();
-                                EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, so.vertex_buffer.VertexCount);
-                            }
-                        }
-
-                        scene[i].light_wvp = so.world * ((SpotLight)light).view * ((SpotLight)light).projection;
-                        scene[i].light_clip = light.far_clip;
-                        scene[i].light_pos = light.position;
-                        //so.shadow_maps.Add(((SpotLight)light).depth_map);
-                        // }
-                    }
-                } else if (light.type == LightType.POINT) {
-                    //build lighting cubemap
-                    //oh boy might just never do this
-                }
-            }
-
-
-
-        }
-        */
         public static void draw(IEnumerable<SceneObject> scene) {
             terrain_segments_rendered = 0;
             vertex_buffer_draws = 0;
@@ -507,7 +419,7 @@ namespace Magpie.Graphics {
         public static void draw_lighting(IEnumerable<DynamicLight> lights) {
 
             EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_lighting);
-            
+
             e_pointlight.Parameters["View"].SetValue(EngineState.camera.view);
             e_pointlight.Parameters["Projection"].SetValue(EngineState.camera.projection);
             e_pointlight.Parameters["InverseView"].SetValue(Matrix.Invert(EngineState.camera.view));
@@ -536,7 +448,7 @@ namespace Magpie.Graphics {
             foreach (DynamicLight light in lights) {
                 switch (light.type) {
                     case LightType.SPOT:
-                        
+
                         e_spotlight.Parameters["World"].SetValue(light.world);
 
                         e_spotlight.Parameters["NORMAL"].SetValue(EngineState.buffer.rt_normal);
@@ -570,7 +482,7 @@ namespace Magpie.Graphics {
 
                         e_spotlight.CurrentTechnique.Passes[0].Apply();
                         EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, ContentHandler.resources["cone"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer.VertexCount);
-                                                
+
                         break;
 
                     case LightType.POINT:
@@ -608,8 +520,8 @@ namespace Magpie.Graphics {
 
                         e_pointlight.CurrentTechnique.Passes[0].Apply();
                         EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer.VertexCount);
-                            
-                        
+
+
                         break;
                 }
             }
@@ -693,7 +605,6 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
             EngineState.graphics_device.BlendState = BlendState.Opaque;
 
-
             e_skybox.Parameters["atmosphere_color"].SetValue(sun_moon.atmosphere_color.ToVector4());
             e_skybox.Parameters["sky_color"].SetValue(sun_moon.sky_color.ToVector4());
 
@@ -704,6 +615,246 @@ namespace Magpie.Graphics {
             e_skybox.Techniques["draw"].Passes[0].Apply();
 
             EngineState.graphics_device.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, skybox_data, 0, 2, skybox_indices, 0, skybox_indices.Length / 3, VertexPositionNormalColorUv.VertexDeclaration);
+
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
+        }
+
+        public static void draw_world_immediate(World world) {
+            //STILL NEED:
+            //OBJECTS, SUB-OBJECTS, BRUSH SUB-OBJECTS, BRUSH SUB-BRUSHES, ACTORS, ACTOR SUB-OBJECTS,
+            //OBJECT LIGHTS, BRUSH LIGHTS, ACTOR LIGHTS
+
+            EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_lighting);
+            EngineState.graphics_device.Clear(sun_moon.atmosphere_color);
+
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
+
+            //build lighting
+            foreach (DynamicLight light in world.current_map.lights) {
+
+                if (light.type == LightType.SPOT) {
+                    EngineState.graphics_device.SetRenderTarget(((SpotLight)light).depth_map);
+                    EngineState.graphics_device.Clear(Color.Transparent);
+
+                    e_exp_light_depth.Parameters["View"].SetValue(((SpotLight)light).view);
+                    e_exp_light_depth.Parameters["Projection"].SetValue(((SpotLight)light).projection);
+                    e_exp_light_depth.Parameters["LightPosition"].SetValue(light.position);
+                    e_exp_light_depth.Parameters["DepthPrecision"].SetValue(((SpotLight)light).far_clip);
+
+                    EngineState.graphics_device.BlendState = BlendState.Opaque;
+
+                    foreach (Brush b in world.current_map.brushes.Values) {
+                        switch (b.type) {
+                            case BrushType.PLANE:
+                                break;
+                            case BrushType.TERRAIN:
+                                break;
+                            case BrushType.SEGMENTED_TERRAIN:
+                                for (int i = 0; i < ((SegmentedTerrain)b).visible_terrain.Count; i++) {
+
+                                    e_exp_light_depth.Parameters["World"].SetValue(b.world);
+
+                                    if (((SegmentedTerrain)b).visible_terrain[i].Item1.aabb.Intersects(((SpotLight)light).frustum) && EngineState.camera.frustum.Intersects(((SpotLight)light).frustum)) {
+
+                                        var ri = ((SegmentedTerrain)b).visible_terrain[i].Item1.render_info;
+
+                                        EngineState.graphics_device.SetVertexBuffer(ri.vertex_buffers[0]);
+                                        EngineState.graphics_device.Indices = ri.index_buffers[0];
+
+                                        foreach (EffectTechnique tech in e_exp_light_depth.Techniques) {
+                                            foreach (EffectPass pass in tech.Passes) {
+                                                pass.Apply();
+                                                EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, ri.vertex_buffers[0].VertexCount);
+                                            }
+                                        }
+
+                                    }
+                                }
+                                break;
+                            case BrushType.BOX:
+                                break;
+                            case BrushType.DUMMY:
+                                break;
+                        }
+                    }
+
+
+
+                } else if (light.type == LightType.POINT) { }
+            }
+
+            //clear output buffers and draw skybox to them
+            clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
+
+            //draw actual geometry
+            EngineState.graphics_device.SetRenderTargets(EngineState.buffer.buffer_targets);
+
+            e_gbuffer.Parameters["atmosphere_color"].SetValue(sun_moon.atmosphere_color.ToVector3());
+            e_gbuffer.Parameters["sky_color"].SetValue(sun_moon.sky_color.ToVector3());
+
+            e_gbuffer.Parameters["FarClip"].SetValue(EngineState.camera.far_clip);
+            e_gbuffer.Parameters["camera_pos"].SetValue(EngineState.camera.position);
+
+            e_gbuffer.Parameters["View"].SetValue(EngineState.camera.view);
+            e_gbuffer.Parameters["Projection"].SetValue(EngineState.camera.projection);
+
+            EngineState.graphics_device.BlendState = BlendState.NonPremultiplied;
+            EngineState.graphics_device.BlendFactor = Color.Transparent;
+
+            terrain_segments_rendered = 0;
+            vertex_buffer_draws = 0;
+
+            e_gbuffer.Parameters["fog"].SetValue(true);
+            //draw objects
+            foreach (Brush b in world.current_map.brushes.Values) {
+                switch (b.type) {
+                    case BrushType.PLANE:
+                        break;
+                    case BrushType.TERRAIN:
+                        break;
+                    case BrushType.SEGMENTED_TERRAIN:
+                        for (int i = 0; i < ((SegmentedTerrain)b).visible_terrain.Count; i++) {
+                            var ri = ((SegmentedTerrain)b).visible_terrain[i].Item1.render_info;
+
+                            e_gbuffer.Parameters["World"].SetValue(b.world);
+                            e_gbuffer.Parameters["WVIT"].SetValue(Matrix.Transpose(Matrix.Invert(b.world * EngineState.camera.view)));
+
+                            e_gbuffer.Parameters["DiffuseMap"].SetValue(ContentHandler.resources[ri.textures[0]].value_tx);
+                            e_gbuffer.Parameters["tint"].SetValue(ri.tint.ToVector3());
+                            //e_gbuffer.Parameters["ambient_light"].SetValue(Color.White.ToVector3());
+
+                            if (ri.wireframe) {
+                                EngineState.graphics_device.RasterizerState = rs_wireframe;
+                            } else {
+                                EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+                            }
+
+                            EngineState.graphics_device.SetVertexBuffer(ri.vertex_buffers[0]);
+                            EngineState.graphics_device.Indices = ri.index_buffers[0];
+
+                            e_gbuffer.CurrentTechnique.Passes[0].Apply();
+                            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, ri.vertex_buffers[0].VertexCount);
+
+                            vertex_buffer_draws++;
+                        }
+                        break;
+                    case BrushType.BOX:
+                        break;
+                    case BrushType.DUMMY:
+                        break;
+                }
+
+                EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+            }
+
+            e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
+            e_gbuffer.Parameters["fog"].SetValue(false);
+
+            //draw lighting
+            EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_lighting);
+
+            //directional light
+            EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.None;
+
+            EngineState.graphics_device.SetVertexBuffer(quad.vertex_buffer);
+            EngineState.graphics_device.Indices = quad.index_buffer;
+
+            sun_moon.configure_dlight_shader(e_directionallight);
+
+            //actual lights
+            e_pointlight.Parameters["View"].SetValue(EngineState.camera.view);
+            e_pointlight.Parameters["Projection"].SetValue(EngineState.camera.projection);
+            e_pointlight.Parameters["InverseView"].SetValue(Matrix.Invert(EngineState.camera.view));
+            e_pointlight.Parameters["InverseViewProjection"].SetValue(Matrix.Invert(EngineState.camera.view * EngineState.camera.projection));
+
+            e_spotlight.Parameters["View"].SetValue(EngineState.camera.view);
+            e_spotlight.Parameters["Projection"].SetValue(EngineState.camera.projection);
+            e_spotlight.Parameters["InverseView"].SetValue(Matrix.Invert(EngineState.camera.view));
+            e_spotlight.Parameters["InverseViewProjection"].SetValue(Matrix.Invert(EngineState.camera.view * EngineState.camera.projection));
+
+            EngineState.graphics_device.BlendState = DynamicLightRequirements.blend_state;
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.DepthRead;
+
+            foreach (DynamicLight light in world.current_map.lights) {
+                switch (light.type) {
+                    case LightType.SPOT:
+                        e_spotlight.Parameters["World"].SetValue(light.world);
+
+                        e_spotlight.Parameters["NORMAL"].SetValue(EngineState.buffer.rt_normal);
+                        e_spotlight.Parameters["DEPTH"].SetValue(EngineState.buffer.rt_depth);
+                        e_spotlight.Parameters["COOKIE"].SetValue(ContentHandler.resources["radial_glow"].value_tx);
+                        e_spotlight.Parameters["SHADOW"].SetValue(((SpotLight)light).depth_map);
+
+                        e_spotlight.Parameters["LightViewProjection"].SetValue(((SpotLight)light).view * ((SpotLight)light).projection);
+                        e_spotlight.Parameters["LightColor"].SetValue(light.light_color.ToVector4());
+                        e_spotlight.Parameters["LightPosition"].SetValue(light.position);
+                        e_spotlight.Parameters["LightDirection"].SetValue(((SpotLight)light).orientation.Forward);
+                        e_spotlight.Parameters["LightAngleCos"].SetValue(((SpotLight)light).angle_cos);
+                        e_spotlight.Parameters["LightClip"].SetValue(((SpotLight)light).far_clip);
+                        e_spotlight.Parameters["DepthBias"].SetValue(0.0002f);
+                        e_spotlight.Parameters["shadowMapSize"].SetValue((float)((SpotLight)light).depth_map_resolution);
+
+                        e_spotlight.Parameters["Shadows"].SetValue(true);
+
+                        e_spotlight.Parameters["GBufferTextureSize"].SetValue(EngineState.resolution.ToVector2());
+
+                        EngineState.graphics_device.SetVertexBuffer(ContentHandler.resources["cone"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer);
+                        EngineState.graphics_device.Indices = ContentHandler.resources["cone"].value_gfx.Meshes[0].MeshParts[0].IndexBuffer;
+
+                        float SL = Math.Abs(Vector3.Dot(Vector3.Normalize(light.position - EngineState.camera.position), ((SpotLight)light).orientation.Forward));
+
+                        if (SL < ((SpotLight)light).angle_cos) {
+                            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+                        } else {
+                            EngineState.graphics_device.RasterizerState = RasterizerState.CullClockwise;
+                        }
+
+                        e_spotlight.CurrentTechnique.Passes[0].Apply();
+                        EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, ContentHandler.resources["cone"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer.VertexCount);
+
+                        break;
+                    case LightType.POINT:
+                        e_pointlight.Parameters["World"].SetValue(light.world);
+
+                        e_pointlight.Parameters["NORMAL"].SetValue(EngineState.buffer.rt_normal);
+                        EngineState.graphics_device.SamplerStates[0] = SamplerState.LinearClamp;
+
+                        e_pointlight.Parameters["DEPTH"].SetValue(EngineState.buffer.rt_depth);
+                        EngineState.graphics_device.SamplerStates[1] = SamplerState.LinearClamp;
+
+                        //e_pointlight.Parameters["CameraPosition"].SetValue(EngineState.camera.position);
+                        e_pointlight.Parameters["LightColor"].SetValue(light.light_color.ToVector4());
+                        e_pointlight.Parameters["LightPosition"].SetValue(light.position);
+                        e_pointlight.Parameters["LightIntensity"].SetValue(1f);
+                        e_pointlight.Parameters["LightRadius"].SetValue(((PointLight)light).radius);
+
+                        e_pointlight.Parameters["Shadows"].SetValue(false);
+                        e_pointlight.Parameters["quantized"].SetValue(quantized);
+
+                        e_pointlight.Parameters["GBufferTextureSize"].SetValue(EngineState.resolution.ToVector2());
+
+
+                        EngineState.graphics_device.SetVertexBuffer(ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer);
+                        EngineState.graphics_device.Indices = ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].IndexBuffer;
+
+                        Vector3 sdiff = (EngineState.camera.position) - light.position;
+                        float skyCameraToLight = (float)Math.Sqrt((float)Vector3.Dot(sdiff, sdiff)) / 100.0f;
+
+                        if (skyCameraToLight <= ((PointLight)light).radius) {
+                            EngineState.graphics_device.RasterizerState = RasterizerState.CullClockwise;
+                        } else {
+                            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+                        }
+
+                        e_pointlight.CurrentTechnique.Passes[0].Apply();
+                        EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer.VertexCount);
+
+                        break;
+                }
+            }
+
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
         }
 
         public static void compose() {
@@ -773,6 +924,7 @@ namespace Magpie.Graphics {
 
             }
 
+            scene.Clear();
         }
 
     }

@@ -28,7 +28,7 @@ namespace Magpie {
         public World() {
             load_map();
 
-            test_hf = new SegmentedTerrain(Vector3.Zero, 400, 10);
+            test_hf = new SegmentedTerrain(Vector3.Zero, 200, 5);
 
             test_light = new SpotLight();
             test_light2 = new SpotLight();
@@ -50,7 +50,7 @@ namespace Magpie {
             physics_movement_thread.Start();
             
             //Scene.parent_world = this;
-            //lights.Add(test_light2);
+            //lights.Add(test_light);
         }
         //float3 Depth = tex2D(DEPTH, UV).rgb;
 
@@ -134,7 +134,7 @@ namespace Magpie {
             double loop_time = 0;
 
             while (running) {
-                while ((DateTime.Now - dt).TotalMilliseconds <= (world_running_slow ? Clock.frame_time_delta_ms : world_update_thread_frame_time_ms) - (loop_time * .5)) {
+                while ((DateTime.Now - dt).TotalMilliseconds <= (world_running_slow ? Clock.frame_time_delta_ms : world_update_thread_frame_time_ms) - (loop_time * .75)) {
                     world_running_slow = Clock.frame_time_delta_ms > world_update_thread_frame_time_ms;
                 }
 
@@ -207,8 +207,8 @@ namespace Magpie {
                 EngineState.game.Exit();
             }
 
-            test_light.position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.6f) + (EngineState.camera.orientation.Down * 0.2f);
-            test_light.orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
+            current_map.lights[current_map.lights.Count-1].position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.6f) + (EngineState.camera.orientation.Down * 0.2f);
+            ((SpotLight)current_map.lights[current_map.lights.Count-1]).orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
 
             foreach (DynamicLight light in current_map.lights) {
                 light.update();
@@ -238,6 +238,8 @@ namespace Magpie {
 
             current_map.player_actor.Update();
 
+            //BUILD LIST OF VISIBLE OBJECTS HERE THAT SEEMS TO NOT BE A HUGE ISSUE WITH THE GC
+
 
             /*
             PhysicsSolver.do_movement(current_map);
@@ -258,26 +260,23 @@ namespace Magpie {
         int frame_count = 0;
         SceneObject[] current_scene;
         public void Draw(GraphicsDevice gd, Camera camera) {
-            current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
-                       
+
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);
 
-            Scene.build_lighting(current_map.lights, current_scene);
+           // current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
+           // Scene.build_lighting(current_map.lights, current_scene);
+           // Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
+           // Scene.draw(current_scene);
+           // EngineState.graphics_device.BlendState = BlendState.Opaque;
+           // foreach (Brush brush in current_map.brushes.Values) {
+           //     brush.debug_draw();
+           // }
+           // EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
+           // Scene.draw_lighting(current_map.lights);
 
-            Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
 
-            Scene.draw(current_scene);
-
-            //EngineState.graphics_device.BlendState = BlendState.Opaque;
-
-            foreach (Brush brush in current_map.brushes.Values) {
-                //brush.debug_draw();
-            }
-
-            //EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
-            Scene.draw_lighting(current_map.lights);
-
+            Scene.draw_world_immediate(this);
 
             frame_count++;
         }
