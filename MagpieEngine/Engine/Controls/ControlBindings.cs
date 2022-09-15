@@ -334,20 +334,26 @@ namespace Magpie.Engine {
         public static List<IDigitalBind> digital_binds { get => _digital_binds; set => _digital_binds = value; }
 
 
+        static bool updating = false;
+
         public static digital_bind_result get_bind_result(string bind) {
+            while (updating) { }
             if (status.ContainsKey(bind)) {
                 return button_bind_status[bind].result;
 
             } //else throw new Exception("invalid bind name: " + bind);
             else return digital_bind_result.released;
+            
         }
         public static special_action_status get_bind_special(string bind) {
+            while (updating) { }
             if (status.ContainsKey(bind)) {
                 return button_bind_status[bind].special;
             } //else throw new Exception("invalid bind name: " + bind);
             else return special_action_status.none;
         }
         public static void set_bind_special(string bind, special_action_status special) {
+            while (updating) { }
             if (status.ContainsKey(bind)) {
                 status[bind].special = special;
             } //else throw new Exception("invalid bind name: " + bind);
@@ -370,6 +376,7 @@ namespace Magpie.Engine {
         }
 
         public static void update() {
+            updating = true;
             status.Clear();
             
             for (int i = 0; i < _digital_binds.Count; i++) {
@@ -389,9 +396,12 @@ namespace Magpie.Engine {
                 }
 
             }
+
+            updating = false;
         }
 
         public static KeyBind get_keybind(string bind) {
+            while (updating) { }
             foreach (IDigitalBind b in digital_binds) {
                 if (b.type == controller_type.keyboard && b.binds.Contains(bind)) {
                     return ((KeyBind)b);
@@ -400,7 +410,8 @@ namespace Magpie.Engine {
             return null;
         }
         public static Keys get_bind_key(string bind) {
-            foreach(IDigitalBind b in digital_binds) {
+            while (updating) { }
+            foreach (IDigitalBind b in digital_binds) {
                 if (b.type == controller_type.keyboard && b.binds.Contains(bind)) {
                     return ((KeyBind)b).key;
                 }
@@ -409,18 +420,21 @@ namespace Magpie.Engine {
         }
 
         public static string list_binds() {
+            while (updating) { }
             string st = "";
             foreach (string s in status.Keys)
                 st += s + "\n";
             return st;
         }
         public static string list_disabled_binds() {
+            while (updating) { }
             string st = "";
             foreach (string s in disabled_binds)
                 st += s + "\n";
             return st;
         }
         public static string list_binds_w_status() {
+            while (updating) { }
             string st = "";
             foreach (string s in status.Keys) {
                 st += s + " " + status[s].ToString() + "\n";
@@ -428,6 +442,7 @@ namespace Magpie.Engine {
             return st;
         }
         public static string list_active_binds_w_status() {
+            while (updating) { }
             string st = "binds:\n";
            // foreach (IDigitalBind db in digital_binds) {
            foreach (string s in status.Keys) {
@@ -439,6 +454,7 @@ namespace Magpie.Engine {
         }
 
         public static int count_active_binds() {
+            while (updating) { }
             // foreach (IDigitalBind db in digital_binds) {
             int c = 0;
             foreach (string s in status.Keys) {
@@ -451,6 +467,7 @@ namespace Magpie.Engine {
 
         //ADD BINDS
         public static void add_bind(KeyBind key_bind) {
+            while (updating) { }
             if (!is_bound(key_bind.key)) {
                 //key not bound, easy mode, just add the new bind and you're off
                 _digital_binds.Add(key_bind);
@@ -472,6 +489,7 @@ namespace Magpie.Engine {
         }
 
         public static void add_bind(MouseButtonBind m_bind) {
+            while (updating) { }
             if (!is_bound(m_bind.button)) {
                 _digital_binds.Add(m_bind);
             } else {
@@ -486,6 +504,7 @@ namespace Magpie.Engine {
         }
 
         public static void add_bind(XInputButtonBind xi_bind) {
+            while (updating) { }
             if (!is_bound(xi_bind.button)) {
                 _digital_binds.Add(xi_bind);
             } else {

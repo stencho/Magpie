@@ -116,7 +116,7 @@ namespace Magpie {
 
         private Thread physics_movement_thread;
 
-        private double world_update_thread_frame_rate = 60;
+        private double world_update_thread_frame_rate = 58;
         private double world_update_thread_frame_time_ms => 1000f / world_update_thread_frame_rate;
 
         public double world_update_thread_timer = 0;
@@ -125,11 +125,13 @@ namespace Magpie {
 
         public double last_tick_timer_val = 0;
 
-        public double[] last_ticks = new double[60*5];
+        public double[] last_ticks = new double[58*5];
         public bool update_timer_tick = false;
         public double update_frame_rate_avg = 0;
 
-        private void do_world_update() {
+        public double[] last_fps = new double[58 * 5];
+
+        private void do_world_update() {            
             DateTime dt = DateTime.Now;
             double loop_time = 0;
 
@@ -142,7 +144,36 @@ namespace Magpie {
                 for (int i = 0; i < last_ticks.Length - 1; i++) {
                     last_ticks[i] = last_ticks[i + 1];
                     update_frame_rate_avg += last_ticks[i];
-                } 
+                }                
+
+                foreach (DynamicLight light in current_map.lights) {
+                    light.update();
+                }
+
+
+                foreach (Brush brush in current_map.brushes.Values) {
+                    brush.Update();
+                }
+
+                foreach (GameObject go in current_map.objects.Values) {
+                    if (go.dead) {
+                        // dead_objects.Add(go.name);                    
+                        continue;
+                    }
+
+                    go.Update();
+                }
+
+                for (int i = 0; i < dead_objects.Count; i++) {
+                    current_map.objects.Remove(dead_objects[i]);
+                }
+
+                foreach (Actor actor in current_map.actors.Values) {
+                    actor.Update();
+                }
+
+
+                current_map.player_actor.Update();
 
                 PhysicsSolver.do_movement(current_map);
 
@@ -153,8 +184,15 @@ namespace Magpie {
                 last_tick_timer_val = (DateTime.Now - dt).TotalMilliseconds;
                 last_ticks[last_ticks.Length - 1] = last_tick_timer_val;
 
+
                 update_frame_rate_avg += last_ticks[last_ticks.Length - 1];
                 update_frame_rate_avg /= last_ticks.Length;
+
+
+                for (int i = 0; i < last_fps.Length - 1; i++) {
+                    last_fps[i] = last_fps[i + 1];
+                }
+                last_fps[last_fps.Length - 1] = 1000.0 / last_ticks[last_ticks.Length - 1];
 
                 loop_time = (DateTime.Now - dt).TotalMilliseconds - world_update_thread_frame_time_ms;
                 dt = DateTime.Now;
@@ -203,6 +241,8 @@ namespace Magpie {
 
         public void Update() {
 
+            Controls.update(EngineState.window, EngineState.game.IsActive, EngineState.resolution);
+
             if (running == false) {
                 EngineState.game.Exit();
             }
@@ -210,33 +250,6 @@ namespace Magpie {
             current_map.lights[current_map.lights.Count-1].position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.6f) + (EngineState.camera.orientation.Down * 0.2f);
             ((SpotLight)current_map.lights[current_map.lights.Count-1]).orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
 
-            foreach (DynamicLight light in current_map.lights) {
-                light.update();
-            }
-
-
-            foreach (Brush brush in current_map.brushes.Values) {
-                brush.Update();
-            }
-
-            foreach (GameObject go in current_map.objects.Values) {
-                if (go.dead) {
-                   // dead_objects.Add(go.name);                    
-                    continue;
-                }
-
-                go.Update();                
-            }
-
-            for (int i = 0; i < dead_objects.Count; i++) {
-                current_map.objects.Remove(dead_objects[i]);
-            }
-
-            foreach (Actor actor in current_map.actors.Values) {
-                actor.Update();
-            }
-
-            current_map.player_actor.Update();
 
             //BUILD LIST OF VISIBLE OBJECTS HERE THAT SEEMS TO NOT BE A HUGE ISSUE WITH THE GC
 
@@ -264,17 +277,22 @@ namespace Magpie {
 
             //test_light.view = Matrix.CreateLookAt(test_light.position, test_light.position + (camera.orientation.Forward * camera.far_clip), Vector3.Up);
 
-           // current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
-           // Scene.build_lighting(current_map.lights, current_scene);
-           // Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
-           // Scene.draw(current_scene);
-           // EngineState.graphics_device.BlendState = BlendState.Opaque;
-           // foreach (Brush brush in current_map.brushes.Values) {
-           //     brush.debug_draw();
-           // }
-           // EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
-           // Scene.draw_lighting(current_map.lights);
+            // current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
+            // Scene.build_lighting(current_map.lights, current_scene);
+            // Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
+            // Scene.draw(current_scene);
+            // EngineState.graphics_device.BlendState = BlendState.Opaque;
+            // foreach (Brush brush in current_map.brushes.Values) {
+            //     brush.debug_draw();
+            // }
+            // EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
+            // Scene.draw_lighting(current_map.lights);
 
+
+            foreach (Brush brush in current_map.brushes.Values) {
+                if (brush.type == BrushType.SEGMENTED_TERRAIN)
+                    ((SegmentedTerrain)brush).update_visible_terrain();
+            }
 
             Scene.draw_world_immediate(this);
 

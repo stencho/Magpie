@@ -65,6 +65,7 @@
     <Compile Include="Engine\Collision\Support3D\Sphere.cs" />
     <Compile Include="Engine\Collision\Support3D\Triangle.cs" />
     <Compile Include="Engine\Collision\SupportFunctions.cs" />
+    <Compile Include="Engine\Controls\InstancedBindings.cs" />
     <Compile Include="Engine\Extensions.cs" />
     <Compile Include="Engine\Physics\ISolver.cs" />
     <Compile Include="Engine\Physics\Solvers\BasicSolver.cs" />
@@ -75,8 +76,8 @@
     <Compile Include="Engine\Clock.cs" />
     <Compile Include="Engine\Collision\GJK2D.cs" />
     <Compile Include="Engine\ContentManager.cs" />
-    <Compile Include="Engine\ControlBindings.cs" />
-    <Compile Include="Engine\ControlRead.cs" />
+    <Compile Include="Engine\Controls\ControlBindings.cs" />
+    <Compile Include="Engine\Controls\ControlRead.cs" />
     <Compile Include="Engine\WorldElements\Brushes\Brush.cs" />
     <Compile Include="Engine\WorldElements\Brushes\Terrain.cs" />
     <Compile Include="Engine\WorldElements\Brushes\Plane.cs" />
@@ -96,17 +97,11 @@
     <Compile Include="Graphics\DynamicLight.cs" />
     <Compile Include="Graphics\GBuffer.cs" />
     <Compile Include="Graphics\Lights\PointLightLine.cs" />
-    <Compile Include="Graphics\UI\ImageViewer.cs" />
     <Compile Include="Graphics\Lights\PointLight.cs" />
     <Compile Include="Graphics\Lights\Spotlight.cs" />
     <Compile Include="Graphics\Instancing.cs" />
     <Compile Include="Graphics\Scene.cs" />
     <Compile Include="Graphics\SDF.cs" />
-    <Compile Include="Graphics\UI\StackedImageViews.cs" />
-    <Compile Include="Graphics\UI\UIForm.cs" />
-    <Compile Include="Graphics\UI\UIForms.cs" />
-    <Compile Include="Graphics\UI\UILayer.cs" />
-    <Compile Include="Graphics\UI\UIWindow.cs" />
     <Compile Include="Graphics\VerticalQuad.cs" />
     <Compile Include="Graphics\wm_skyboxtessellator.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -119,6 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Graphics\Animation\" />
+    <Folder Include="Graphics\UI\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Shaders\clear.fx" />

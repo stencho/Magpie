@@ -221,21 +221,23 @@ namespace Magpie.Engine.Brushes {
             }
         }
 
-
-        public void Update() {
+        public void update_visible_terrain() {
             visible_terrain.Clear();
 
             //we do a little culling            
             for (int sy = 0; sy < segment_count.Y; sy++) {
                 for (int sx = 0; sx < segment_count.X; sx++) {
-                    var bb = segments[sx,sy].aabb;
+                    var bb = segments[sx, sy].aabb;
                     if (bb.Intersects(EngineState.camera.frustum)) {
                         visible_terrain.Add((segments[sx, sy], sx, sy, Vector3.Distance(EngineState.camera.position, CollisionHelper.closest_point_on_AABB(EngineState.camera.position, bb.Min, bb.Max))));
                     }
                 }
             }
-            
+
             visible_terrain.Sort((a, b) => a.Item4.CompareTo(b.Item4));
+        }
+
+        public void Update() {
             
             /*
             for (int sy = 0; sy < segment_count.Y; sy++) {

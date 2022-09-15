@@ -618,7 +618,7 @@ namespace Magpie.Graphics {
 
             EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
         }
-
+        
         public static void draw_world_immediate(World world) {
             //STILL NEED:
             //OBJECTS, SUB-OBJECTS, BRUSH SUB-OBJECTS, BRUSH SUB-BRUSHES, ACTORS, ACTOR SUB-OBJECTS,
@@ -650,6 +650,7 @@ namespace Magpie.Graphics {
                             case BrushType.TERRAIN:
                                 break;
                             case BrushType.SEGMENTED_TERRAIN:
+                                
                                 for (int i = 0; i < ((SegmentedTerrain)b).visible_terrain.Count; i++) {
 
                                     e_exp_light_depth.Parameters["World"].SetValue(b.world);

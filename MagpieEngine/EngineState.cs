@@ -1,6 +1,5 @@
 ﻿using Magpie.Engine;
 using Magpie.Graphics;
-using Magpie.Graphics.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -22,13 +21,17 @@ namespace Magpie {
         public static GraphicsDevice graphics_device;
         public static GameTime gametime;
         public static Game game;
-        public static UILayer ui;
         public static SpriteBatch spritebatch;
         public static Viewport viewport => graphics_device.Viewport;
 
         public static bool ui_layer_clicked;
         public static bool is_active;
         public static bool was_active;
+
+        public static InstancedBinds player_binds_one;
+        public static InstancedBinds player_binds_two;
+        public static InstancedBinds player_binds_three;
+        public static InstancedBinds player_binds_four;
 
         public static void initialize(XYPair game_resolution, GameWindow game_window, 
             GraphicsDevice gd, GraphicsDeviceManager gdm, Game game) {
@@ -43,7 +46,6 @@ namespace Magpie {
             buffer = new GBuffer();
             buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y);
 
-            ui = new UILayer();
 
             try {
                 Scene.configure_renderer();
@@ -70,10 +72,10 @@ namespace Magpie {
 
             Clock.update(gametime, game);
 
-            Controls.update(window,game.IsActive, resolution);
-
-            ui.update(out ui_layer_clicked);
-            ui.hit_scan(mouse_position.X, mouse_position.Y);
+            if (player_binds_one != null && player_binds_one.player_index != PlayerIndex.One) {player_binds_one.change_player_index(PlayerIndex.One);}
+            if (player_binds_two != null && player_binds_two.player_index != PlayerIndex.Two) {player_binds_two.change_player_index(PlayerIndex.Two);}
+            if (player_binds_three != null && player_binds_three.player_index != PlayerIndex.Three) {player_binds_three.change_player_index(PlayerIndex.Three);}
+            if (player_binds_four != null && player_binds_four.player_index != PlayerIndex.Four) {player_binds_four.change_player_index(PlayerIndex.Four);}
 
             is_active = game.IsActive;
             

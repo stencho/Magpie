@@ -14,7 +14,6 @@ using static Magpie.Engine.Controls;
 using static Magpie.Engine.DigitalControlBindings;
 using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
-using Magpie.Graphics.UI;
 using Magpie.Graphics.Lights;
 using Magpie.Engine.Physics;
 using System.Linq;
@@ -40,26 +39,7 @@ namespace MagpieTestbed
         Color crosshair_color = Color.White;
 
         GJK.gjk_result[] results;
-
-        List<string> poos = new List<string>();
-        
-        private void add_poo() {
-            int r = RNG.rng_int();
-
-            while (poos.Contains(r.ToString())) {
-                r = RNG.rng_int();
-            }
-
-            world.current_map.add_object(r.ToString(), new TestPoo());
-
-            world.current_map.objects[r.ToString()].position = Vector3.Up * 85 + (Vector3.Backward * 25f);
-
-            world.current_map.objects[r.ToString()].inertia_dir = Vector3.Down * 10 + (RNG.rng_v3_neg_one_to_one * 5f);
-            world.current_map.objects[r.ToString()].inertia_dir = Vector3.Normalize(world.current_map.objects[r.ToString()].inertia_dir);
-            world.current_map.objects[r.ToString()].velocity = 60f + (RNG.rng_float * 50f);           
-
-        }
-
+                
         //Sphere test_a = new Sphere();
         //sphere_data test_b = new sphere_data();
 
@@ -80,7 +60,9 @@ namespace MagpieTestbed
 
             this.IsMouseVisible = true;
             this.graphics.SynchronizeWithVerticalRetrace = true;
-            this.IsFixedTimeStep = false;
+            //this.TargetElapsedTime = TimeSpan.FromMilliseconds(1000f/60f);
+            
+            this.IsFixedTimeStep = true;
             this.graphics.PreferHalfPixelOffset = true;
         }
 
@@ -215,10 +197,6 @@ namespace MagpieTestbed
             
             EngineState.camera = ((FreeCamActor)world.current_map.player_actor).cam;
 
-            EngineState.ui.add_form("top_panel", new UIPanel(XYPair.One * -3, new XYPair(EngineState.resolution.X + 5, 16)));
-
-            EngineState.ui.add_form("test_form", new UIButton(new XYPair(EngineState.resolution.X - 17, 0), new XYPair(17, 18), "close_button", "X", false));
-
             /*
             test_sdf = new SDFSprite2D(Vector2.One * 330, Vector2.One * 350);
             test_sdf.inside_color = Color.HotPink;
@@ -236,14 +214,14 @@ namespace MagpieTestbed
 
         }
 
-        SoundEffect fart;
+
 
         protected override void LoadContent()
         {
             ContentHandler.LoadContent(Content, GraphicsDevice);
             ContentHandler.LoadAllResources();
 
-            fart = Content.Load<SoundEffect>("snd/hchv");
+
 
         }
 
@@ -251,16 +229,13 @@ namespace MagpieTestbed
             ContentHandler.UnloadAll();
         }
 
-        bool do_poo = false;
-        float poo_timer = 0;
-        double poo_timer_number_2 = 0;
-        
-
         protected override void Update(GameTime gameTime)
         {
+
+
             EngineState.Update(gameTime, this);
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape) || ((UIButton)EngineState.ui.forms["test_form"]).clicking) {
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
                 world.running = false;
                 Exit();
             }
@@ -328,52 +303,7 @@ namespace MagpieTestbed
             }
             */
 
-
-
-            //start poo
-            if (bind_just_pressed("poopy_butt") && !do_poo) {
-                fart.Play();
-                do_poo = true;
-            }
-
-            //pooing   ||  vv pause near the start for silent part of the sound file || vv stop caring about this at end 
-            if (do_poo && (poo_timer_number_2 < 3200 || poo_timer_number_2 > 4800) && (poo_timer_number_2 < 16000)) {
-                while ((poo_timer > 50 && poo_timer_number_2 < 11000) || (poo_timer > 250)) {
-                    poo_timer -= poo_timer_number_2 < 11000 ? 50 : 125;
-
-                    int poo_count = RNG.rng_int(1, 4);
-
-                    while (poo_count > 0) {
-                        add_poo();
-                        poo_count--;
-                    }
-                }
-            }
-
-            //do final spurt and then reset
-            if (do_poo && poo_timer_number_2 > 16350) {
-                poo_timer = 375;
-                do_poo = false;
-
-                while (poo_timer > 250) {
-                    poo_timer -= 125;
-
-                    int poo_count = RNG.rng_int(1, 4);
-
-                    while (poo_count > 0) {
-                        add_poo();
-                        poo_count--;
-                    }
-                }
-            }
-
-            //advance poo timers
-            if (do_poo) {
-                poo_timer += Clock.frame_time_delta_ms;
-                poo_timer_number_2 += Clock.frame_time_delta_ms;
-            }
-
-
+            
 
             if (bind_just_pressed("screenshot")) Scene.screenshot_at_end_of_frame();
             bool held_test = true;
@@ -419,7 +349,7 @@ namespace MagpieTestbed
             string s = string.Format("{0:F0}m{1:F0}s", ts.TotalMinutes, ts.Seconds);
             return s;
         }
-
+        bool[] test_data = new bool[] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false };
         protected override void Draw(GameTime gameTime)
         {            
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
@@ -480,15 +410,20 @@ namespace MagpieTestbed
 
                 true);
                 */
+
+
             Draw2D.graph_line(50, EngineState.resolution.Y - 80, 200, 50,
                 "FPS", 60, true, true, true, Color.HotPink,
-                (Clock.FPS_immediate_buffer, string.Format("last {0} ticks", Clock.FPS_immediate_buffer.Length), Color.Red)
+                (Clock.FPS_immediate_buffer, string.Format("render fps [{0} ticks]", Clock.FPS_immediate_buffer.Length), Color.Red),
+                (world.last_fps, string.Format("world fps [{0} ticks]", world.last_fps.Length), Color.DarkGreen)
                 );
+
             double fps = 1000f * (1 / world.last_ticks[world.last_ticks.Length - 1]);
+
             Draw2D.graph_line(350, EngineState.resolution.Y - 80, 200, 50,
                 "deltas", 20, true, true, true, Color.HotPink,
-                (world.last_ticks, string.Format("world update thread \n{0:F2} fps", double.IsInfinity(fps) ? 0.0 : fps), Color.DarkMagenta),
-                (Clock.delta_buffer, "clock delta ms", Color.DarkGreen)
+                (Clock.delta_buffer, "clock delta ms", Color.Red),
+                (world.last_ticks, "world update thread", Color.DarkGreen)
                 );
 
 
@@ -505,7 +440,7 @@ namespace MagpieTestbed
                 "\n quad: " + world.test_hf.cursor_quad_index.Item1 + "," + world.test_hf.cursor_quad_index.Item2 + " (global: " + ((world.test_hf.cursor_segment_index.Item1 * world.test_hf.segment_size.X) + world.test_hf.cursor_quad_index.Item1) + "," + ((world.test_hf.cursor_segment_index.Item2 * world.test_hf.segment_size.Y) + world.test_hf.cursor_quad_index.Item2) + ")" +
                 "\n point: " + world.test_hf.cursor_hit_result.point.simple_vector3_string() +
                 "\n\n" +
-                "update thread: \n tick: " + world.world_update_thread_timer_tick + "\n update thread timer:" + world.last_tick_timer_val.ToString() 
+                "update thread: " + "\n update thread timer:" + world.last_tick_timer_val.ToString() + "\n\n" + ((FreeCamActor)world.player_actor).binds.get_axis("mouse_x").ToString()//+ db.list()
 
 
                 , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);
@@ -541,9 +476,7 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
 )           , Vector2.One * 2 + (Vector2.UnitX * 300), Color.White);
 
     */
-            Draw2D.text_shadow("pf", list_active_binds_w_status(), (Vector2.One * 2) + (Vector2.UnitY * 200));
-
-            EngineState.ui.draw();
+            //Draw2D.text_shadow("pf", list_active_binds_w_status(), (Vector2.One * 2) + (Vector2.UnitY * 200));
 
             //Draw2D.image(ContentHandler.resources["radial_glow"].value_tx, XYPair.One * 50, XYPair.One * 200, Color.White);
             //Draw2D.image(((SpotLight)world.current_map.lights[world.current_map.lights.Count-1]).depth_map, XYPair.One * 150, XYPair.One * 200, Color.White);

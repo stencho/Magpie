@@ -9,7 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using static Magpie.Engine.Collision.Raycasting;
+using static Magpie.Engine.DigitalControlBindings;
 
 namespace Magpie.Engine {
     public static class Controls {
@@ -280,6 +282,7 @@ namespace Magpie.Engine {
         private static XYPair current_res;
         public static bool window_active = true;
         private static bool window_was_active;
+        private static XYPair pre_pos = XYPair.Zero;
         private static XYPair window_center = XYPair.Zero;
         public static bool mouse_lock = false;
         static bool mouse_lock_p = false;
@@ -305,7 +308,7 @@ namespace Magpie.Engine {
             pressed_keys = ks.GetPressedKeys();
 
             //mouse_lock = true;
-
+            
             if (mouse_lock && window_active)
                 Mouse.SetPosition(window_center.X, window_center.Y);
 
@@ -315,6 +318,7 @@ namespace Magpie.Engine {
                                 - (XYPair.UnitY * ms.Y);
 
                 mouse_delta = new Vector2(mdel.X, mdel.Y);
+
             } else if (!mouse_lock && !mouse_lock_p) {
                 mdel = ((XYPair.UnitX * -(msp.X - ms.X)) + (XYPair.UnitY * -(msp.Y - ms.Y)));
 

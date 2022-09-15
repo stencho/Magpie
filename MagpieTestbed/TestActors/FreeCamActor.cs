@@ -13,7 +13,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 using static Magpie.Engine.Controls;
-using static Magpie.Engine.DigitalControlBindings;
+//using static Magpie.Engine.DigitalControlBindings;
+
+using Magpie.Engine.DigitalBinds;
+using static Magpie.Engine.InstancedBinds;
+using Magpie.Engine.AnalogBinds;
 
 namespace MagpieTestbed.TestActors {
     [Serializable]
@@ -38,33 +42,55 @@ namespace MagpieTestbed.TestActors {
         bool camera_enabled = false;
         XYPair last_mouse_pos = XYPair.Zero;
 
+        public InstancedBinds binds = new InstancedBinds(
+            (bind_type.digital, digital_bind_type.keyboard, Keys.W, new string[] { "forward" }),
+            (bind_type.digital, digital_bind_type.keyboard, Keys.A, new string[] { "left" }),
+            (bind_type.digital, digital_bind_type.keyboard, Keys.S, new string[] { "backward" }),
+            (bind_type.digital, digital_bind_type.keyboard, Keys.D, new string[] { "right" }),
+
+            (bind_type.digital, digital_bind_type.keyboard, Keys.Space, new string[] { "up" }),
+            (bind_type.digital, digital_bind_type.keyboard, Keys.C, new string[] { "down" }),
+
+            (bind_type.digital, digital_bind_type.keyboard, Keys.LeftShift, new string[] { "boost" }),
+
+            (bind_type.digital, digital_bind_type.mouse, MouseButtons.Left, new string[] { "fire", "picker" }),
+            (bind_type.digital, digital_bind_type.mouse, MouseButtons.Right, new string[] { "mouse_aim", "context_menu" })//,
+
+            //(bind_type.analog, analog_bind_type.mouse_delta_axis,   MouseAxis.X,            new string[] { "mouse_x" }),
+            //(bind_type.analog, analog_bind_type.mouse_delta_axis,   MouseAxis.Y,            new string[] { "mouse_y" })
+            );
+
         public FreeCamActor() {
             cam = new Camera();
             collision = new Sphere(1f);
+            EngineState.player_binds_one = binds;
         }
+        
 
+        
         public void Update() {
-            
-            if (bind_pressed("click_right")) {
-                if (bind_just_pressed("click_right")) {
+            binds.update();
+            if (binds.held("mouse_aim")) {
+                if (binds.just_held("mouse_aim")) {
                     last_mouse_pos = mouse_position;
                 }
 
-                if (!bind_just_pressed("click_right")) {
+                if (!binds.just_held("mouse_aim")) {
                     camera_enabled = true;
                     EngineState.game.IsMouseVisible = false;
-
                     mouse_lock = true;
                 }
 
-            } else if (bind_just_released("click_right") || (camera_enabled && !EngineState.is_active && EngineState.was_active)) {
+            } else if (binds.just_released("mouse_aim") || (camera_enabled && !EngineState.is_active && EngineState.was_active)) {
                 camera_enabled = false;
                 EngineState.game.IsMouseVisible = true;
                 mouse_lock = false;
                 Mouse.SetPosition(last_mouse_pos.X, last_mouse_pos.Y);                
             }
 
-            if (camera_enabled && !bind_just_pressed("click_right") && !bind_released("click_right")) {
+            if (camera_enabled && !binds.just_held("mouse_aim") && !binds.released("mouse_aim")) {
+
+
                 cam.orientation *= Matrix.CreateRotationY(mouse_delta.X / (EngineState.resolution.X * mouse_multi));
                                                
                 //first person camera pitch
@@ -78,27 +104,27 @@ namespace MagpieTestbed.TestActors {
 
             Vector3 mv = Vector3.Zero;
 
-            if (bind_pressed("forward")) {
+            if (binds.pressed("forward")) {
                 mv += Vector3.Cross(Vector3.Up, cam.orientation.Right);
             }
-            if (bind_pressed("backward")) {
+            if (binds.pressed("backward")) {
                 mv += -Vector3.Cross(Vector3.Up, cam.orientation.Right);
             }
-            if (bind_pressed("left")) {
+            if (binds.pressed("left")) {
                 mv += cam.orientation.Left;
             }
-            if (bind_pressed("right")) {
+            if (binds.pressed("right")) {
                 mv += cam.orientation.Right;
             }
-            if (bind_pressed("up")) {
+            if (binds.pressed("up")) {
                 mv += Vector3.Up;
             }
-            if (bind_pressed("down")) {
+            if (binds.pressed("down")) {
                 mv += Vector3.Down;
             }
 
             if (mv != Vector3.Zero)
-                wants_movement = Vector3.Normalize(mv) * movement_speed * (bind_pressed("shift") ? 6f : 1f) * ((1000f/60f)/1000f);
+                wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("shift") ? 6f : 1f) * Clock.frame_time_delta;
 
             cam.position = position;
             cam.update();

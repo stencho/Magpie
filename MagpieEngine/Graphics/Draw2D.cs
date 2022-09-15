@@ -622,6 +622,7 @@ namespace Magpie.Graphics {
                         1f, SpriteEffects.None, 1f);
 
                 }
+
                 if (show_current) {
                     double cdata = data[data.Length - 1];
                     if (double.IsInfinity(cdata)) cdata = 0;                    
@@ -635,6 +636,73 @@ namespace Magpie.Graphics {
                         1f, SpriteEffects.None, 1f);
 
                 }
+            }
+        }
+
+        public static void graph_pwm(int X, int Y, int width, int height, string top_title, params bool[] data) {
+            line(X, Y, X, Y + height, 1f, Color.HotPink);
+            line(X, Y + height, X + width, Y + height, 1f, Color.HotPink);
+
+            var ms = Math2D.measure_string("pf", top_title);
+
+            text_shadow("pf", top_title,
+                new Vector2(X, Y - ms.Y - 3), Color.White, Color.HotPink, 0f,
+                Vector2.Zero, 1f, SpriteEffects.None, 1f);
+
+            var data_prev = data[0];
+            float segment_width = width / (float)(data.Length);
+
+            for (int i = 0; i < data.Length-1; i++) {
+                bool pp = data[i] != data[i + 1];
+                bool pm = false;
+
+                if (i>0)
+                    pm = data[i] != data[i - 1];
+
+                line(
+                    X + (int)(segment_width * (i - (pm ? 1 : 0))),
+                    (data[i] ? Y : Y + height - 1),
+
+                    X + (int)(segment_width * (i + (pp ? 0 : 1))),
+                    (data[i+1] ? Y : Y + height - 1),                    
+
+                    1f,
+                    Color.White);
+                    
+            }
+        }
+
+        public static void graph_pwm(int X, int Y, int width, int height, string top_title, int max, params int[] data) {
+            line(X, Y, X, Y + height, 1f, Color.HotPink);
+            line(X, Y + height, X + width, Y + height, 1f, Color.HotPink);
+
+            var ms = Math2D.measure_string("pf", top_title);
+
+            text_shadow("pf", top_title,
+                new Vector2(X, Y - ms.Y - 3), Color.White, Color.HotPink, 0f,
+                Vector2.Zero, 1f, SpriteEffects.None, 1f);
+
+            var data_prev = data[0];
+            float segment_width = width / (float)(data.Length);
+            float segment_height = height / (float)(max);
+
+            for (int i = 0; i < data.Length - 1; i++) {
+                bool pp = data[i] != data[i + 1];
+                bool pm = false;
+
+                if (i > 0)
+                    pm = data[i] != data[i - 1];
+
+                line(
+                    X + (int)(segment_width * (i - (pm ? 1 : 0))),
+                    (Y + height - 1) - (int)(data[i] * segment_height),
+
+                    X + (int)(segment_width * (i + (pp ? 0 : 1))),
+                    (Y + height - 1) - (int)(data[i] * segment_height),
+
+                    3f,
+                    Color.White);
+
             }
         }
 
