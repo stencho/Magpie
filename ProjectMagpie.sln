@@ -1,17 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1500
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie", "MagpieEngine\Magpie.csproj", "{5B39C1AD-CB52-452D-B1A8-79672FB92778}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Magpie", "Magpie\Magpie.csproj", "{DCFB9293-3D5D-4CC2-A6C2-204A36FF5BC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagpieTestbed", "MagpieTestbed\MagpieTestbed.csproj", "{B2DC76AE-07A2-4740-80F8-7FC31E13B7C6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageViewer", "SDFTool2D\ImageViewer.csproj", "{3DC0DAF8-BFFF-428A-8E1F-05682565068F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagpieHitBuilder", "MagpieHitBuilder\MagpieHitBuilder.csproj", "{A81EDD87-F6D9-4EE4-8D45-AA7D351EA1EA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MG2DSDFTool", "MG2DSDFTool\MG2DSDFTool.csproj", "{457BC1F0-4CCF-4D72-96A7-B52601615974}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MagpieBuild", "MagpieBuild\MagpieBuild.csproj", "{E8B31E84-0A47-4FBD-98CF-76CDFACE07F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,31 +13,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5B39C1AD-CB52-452D-B1A8-79672FB92778}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B39C1AD-CB52-452D-B1A8-79672FB92778}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B39C1AD-CB52-452D-B1A8-79672FB92778}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B39C1AD-CB52-452D-B1A8-79672FB92778}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2DC76AE-07A2-4740-80F8-7FC31E13B7C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2DC76AE-07A2-4740-80F8-7FC31E13B7C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2DC76AE-07A2-4740-80F8-7FC31E13B7C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2DC76AE-07A2-4740-80F8-7FC31E13B7C6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3DC0DAF8-BFFF-428A-8E1F-05682565068F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DC0DAF8-BFFF-428A-8E1F-05682565068F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3DC0DAF8-BFFF-428A-8E1F-05682565068F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3DC0DAF8-BFFF-428A-8E1F-05682565068F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A81EDD87-F6D9-4EE4-8D45-AA7D351EA1EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A81EDD87-F6D9-4EE4-8D45-AA7D351EA1EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A81EDD87-F6D9-4EE4-8D45-AA7D351EA1EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A81EDD87-F6D9-4EE4-8D45-AA7D351EA1EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{457BC1F0-4CCF-4D72-96A7-B52601615974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{457BC1F0-4CCF-4D72-96A7-B52601615974}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{457BC1F0-4CCF-4D72-96A7-B52601615974}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{457BC1F0-4CCF-4D72-96A7-B52601615974}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCFB9293-3D5D-4CC2-A6C2-204A36FF5BC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCFB9293-3D5D-4CC2-A6C2-204A36FF5BC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCFB9293-3D5D-4CC2-A6C2-204A36FF5BC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCFB9293-3D5D-4CC2-A6C2-204A36FF5BC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8B31E84-0A47-4FBD-98CF-76CDFACE07F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8B31E84-0A47-4FBD-98CF-76CDFACE07F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8B31E84-0A47-4FBD-98CF-76CDFACE07F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8B31E84-0A47-4FBD-98CF-76CDFACE07F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8AE1374E-6033-46F8-9804-3BC218A0BE84}
+		SolutionGuid = {38ABB422-C666-4F8B-AEAA-CD1FA99AE7A8}
 	EndGlobalSection
 EndGlobal
