@@ -49,8 +49,20 @@ float2 inside_tile_count = (float2)1;
 float2 outside_tile_count = (float2)1;
 float2 outline_tile_count = (float2)1;
 
+
+float4x4 World;
+float4x4 View;
+float4x4 Projection;
+
+//vestigial vs
+float4 VS(float4 Position : POSITION0) : POSITION0
+{
+	float4x4 wvp = mul(World, mul(View, Projection));
+
+	return mul(Position, wvp);
+}
+
 //Pixel Shader
-float4 color;
 float4 PS(float4 position : SV_Position, float4 color : COLOR0, float2 TexCoords : TEXCOORD0) : COLOR0
 {
 	float a = (tex2D(SDFTEX, TexCoords).r);	
@@ -90,9 +102,6 @@ float4 PS(float4 position : SV_Position, float4 color : COLOR0, float2 TexCoords
 		rgba = inside_color * rgba_inside_overlay; 
 	}
 
-	
-
-
 	return rgba * float4(1,1,1, opacity);
 }
 
@@ -101,6 +110,15 @@ technique Default
 {
 	pass p0
 	{
+		PixelShader = compile ps_3_0 PS();
+	}
+}
+
+technique Full
+{
+	pass p0
+	{
+		VertexShader = compile vs_3_0 VS();
 		PixelShader = compile ps_3_0 PS();
 	}
 }

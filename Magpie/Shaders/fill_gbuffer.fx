@@ -187,3 +187,11 @@ technique BasicColorDrawing
 		PixelShader = compile PS_SHADERMODEL MainPS();
 	}
 };
+	
+technique just_vs
+{
+	pass P0
+	{
+		VertexShader = compile VS_SHADERMODEL MainVS();
+	}
+};

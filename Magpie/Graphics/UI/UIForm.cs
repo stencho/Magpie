@@ -798,7 +798,7 @@ namespace Magpie.Graphics.UI {
         public Action draw_action;
 
         public void render_internal() {
-            if (!_update_render_targets) return;
+            if (!_update_render_targets || !_visible) return;
             
             EngineState.graphics_device.SetRenderTarget(top_bar_render_target);
 
@@ -839,6 +839,7 @@ namespace Magpie.Graphics.UI {
         }
 
         public void draw() {
+            if (!_visible) return;
             Draw2D.fill_square(top_left, top_bar_size, Color.FromNonPremultiplied(color_header.R, color_header.G, color_header.B, 128));
             Draw2D.fill_square(client_top_left, client_size, Color.FromNonPremultiplied(color_bg.R, color_bg.G, color_bg.B, 128));
 
@@ -854,6 +855,7 @@ namespace Magpie.Graphics.UI {
             if ((_resize_handle_B_mo || _resize_handle_B_grabbed) && top_of_mouse_stack) { Draw2D.line(bottom_left, bottom_right, 3f, color_drag_border); }
 
             draw_action?.Invoke();
+
             /*
             if (_draw_collision) {
                 foreach (string is2d in collision.Keys) {

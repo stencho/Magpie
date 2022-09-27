@@ -131,7 +131,7 @@ namespace Magpie.Engine {
                 return gvar_data_type.INT;
             }
 
-            if (input.StartsWith("[") && input.EndsWith("]")) {
+            //if (input.StartsWith("[") && input.EndsWith("]")) {
                 if (XYPair.TryParse(input, out _)) {
                     return gvar_data_type.XYPAIR;
                 }
@@ -141,7 +141,7 @@ namespace Magpie.Engine {
                 if (Vector3TryParse(input, out _)) {
                     return gvar_data_type.VECTOR3;
                 }
-            }
+            //}
             return gvar_data_type.UNKNOWN;
         }
 

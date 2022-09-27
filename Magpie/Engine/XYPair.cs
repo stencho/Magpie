@@ -154,7 +154,7 @@ namespace Magpie.Engine {
             if (split.Length != 2) return false;
 
             for (int i = 0; i < split.Length; i++) {
-                split[i] = split[i].Trim(' ', '[', ']', '{', '}');
+                split[i] = split[i].Trim(' ', '[', ']', '{', '}', '(', ')');
             }
 
             if (int.TryParse(split[0], out result.X) && int.TryParse(split[1], out result.Y)) {

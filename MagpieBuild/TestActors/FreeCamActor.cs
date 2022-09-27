@@ -20,7 +20,7 @@ using static Magpie.Engine.ControlBinds;
 namespace MagpieTestbed.TestActors {
     [Serializable]
     class FreeCamActor : Actor {
-        public Camera cam;
+        public volatile Camera cam;
         public Vector3 position { get; set; } = Vector3.Zero;
         public Vector3 wants_movement { get; set; } = (Vector3.Backward + Vector3.Up) * 2;
         public Matrix world => Matrix.CreateTranslation(position);
@@ -40,7 +40,7 @@ namespace MagpieTestbed.TestActors {
         bool camera_enabled = false;
         XYPair last_mouse_pos = XYPair.Zero;
 
-        public ControlBinds binds = new ControlBinds(
+        public volatile ControlBinds binds = new ControlBinds(
             (bind_type.digital, controller_type.keyboard, Keys.W, new string[] { "forward" }),
             (bind_type.digital, controller_type.keyboard, Keys.A, new string[] { "left" }),
             (bind_type.digital, controller_type.keyboard, Keys.S, new string[] { "backward" }),
@@ -71,7 +71,8 @@ namespace MagpieTestbed.TestActors {
         bool was_aiming = false;
 
         public void Update() {
-            binds.update();
+            lock(binds)
+                binds.update();
             /*
             if (binds.held("mouse_aim")) {
                 if (binds.just_held("mouse_aim")) {

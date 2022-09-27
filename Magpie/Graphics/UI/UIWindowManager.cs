@@ -236,7 +236,7 @@ namespace Magpie.Graphics.UI {
         }
         
         public void render_window_internals() {
-            Clock.frame_probe.set("wm_internal");
+            Clock.frame_probe.set("draw_wm_internals");
             foreach (IUIForm window in windows) {
                 if (window.visible)
                     window.render_internal();
@@ -244,7 +244,7 @@ namespace Magpie.Graphics.UI {
         }
 
         public void draw() {
-            Clock.frame_probe.set("wm_draw");
+            Clock.frame_probe.set("draw_window_manager");
             EngineState.spritebatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap);
             foreach (IUIForm window in windows) {
                 if (window.visible)

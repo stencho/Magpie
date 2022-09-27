@@ -1,5 +1,6 @@
 ﻿using Magpie.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +9,11 @@ using System.Threading.Tasks;
 
 namespace Magpie.Engine {
     public class frame_probe {
-        List<(string name, probe probe)> probes = new List<(string name, probe probe)>();
+        volatile List<(string name, probe probe)> probes = new List<(string name, probe probe)>();
 
-        bool ignore_this_frame = false;
+        volatile bool ignore_this_frame = false;
 
+        public volatile string last_probe_name = "";
         public class probe {
             public DateTime dt = DateTime.Now;
             public void setup() {
@@ -26,48 +28,67 @@ namespace Magpie.Engine {
         }
 
         public int probe_index(string name) {
-            while (drawing) { }
-            return probes.FindIndex(a => a.name == name);
+            lock(probes)
+                return probes.FindIndex(a => a.name == name);
         }
         public bool probe_exists(string name) {
-            while (drawing) { }
-            return (probe_index(name) > -1);
+            lock (probes)
+                return (probe_index(name) > -1);
         }
 
         int ins = 0;
         public void false_set(string name) {
-            if (probe_exists(name))
-                probes[probe_index(name)].probe.set_this_frame = true;
+            lock (probes) {
+                if (probe_exists(name)) {
+                    probes[probe_index(name)].probe.set_this_frame = true;
+
+                    last_probe_name = name;
+                }
+            }
         }
 
         public void set(string name) {
-            if (ignore_this_frame) return;
-            while (drawing) { }
-            if (probe_exists(name)) {
-                probes[probe_index(name)].probe.setup();
-            } else {
-                probes.Add((name, new probe())); 
-            }
-            probes[probe_index(name)].probe.frame_pos = (probes[probe_index(name)].probe.dt - frame_dt).TotalMilliseconds;
-            probes[probe_index(name)].probe.set_this_frame = true;
+            lock (probes) {
+                if (ignore_this_frame) return;
 
-            ins++;
+                if (probe_exists(name)) {
+                    probes[probe_index(name)].probe.setup();
+                } else {
+                    probes.Add((name, new probe()));
+                }
+                probes[probe_index(name)].probe.frame_pos = (probes[probe_index(name)].probe.dt - frame_dt).TotalMilliseconds;
+                probes[probe_index(name)].probe.set_this_frame = true;
+
+                last_probe_name = name;
+
+                ins++;
+            }
         }
         public double since(string name) {
-            if (probe_exists(name)) {
-                return probes[probe_index(name)].probe.since;   
-            } else {
-                return 1;
+            lock (probes) {
+                if (probe_exists(name)) {
+                    return probes[probe_index(name)].probe.since;
+                } else {
+                    return 1;
+                }
             }
         }
         public float sinceF(string name) {
-            if (probe_exists(name)) {
-                return probes[probe_index(name)].probe.sinceF;
-            } else {
-                return 1;
+            lock (probes) {
+                if (probe_exists(name)) {
+                    return probes[probe_index(name)].probe.sinceF;
+                } else {
+                    return 1;
+                }
             }
         }
-
+        
+        public double since_frame_start() {
+            return (DateTime.Now - frame_start_dt).TotalMilliseconds;
+        }
+        public double since_frame_startF() {
+            return (float)(DateTime.Now - frame_start_dt).TotalMilliseconds;
+        }
 
         public DateTime frame_start_dt = DateTime.Now;
         public DateTime frame_dt = DateTime.Now;
@@ -78,10 +99,12 @@ namespace Magpie.Engine {
             ins = 0;
             frame_start_dt = DateTime.Now;
             //ignore_this_frame = (Clock.frame_count % profile_every_n_frames != 0);
-
+                        
             if (ignore_this_frame) return;
-            foreach ((string name, probe probe) v in probes) {
-                v.probe.set_this_frame = false;
+            lock (probes) {
+                foreach ((string name, probe probe) v in probes) {
+                    v.probe.set_this_frame = false;
+                }
             }
         }
 
@@ -90,18 +113,22 @@ namespace Magpie.Engine {
             frame_time = (DateTime.Now - frame_dt).TotalMilliseconds;
             frame_dt = DateTime.Now;
             if (ignore_this_frame) return;
-            probes.RemoveAll(a => !a.probe.set_this_frame);
+
+            lock (probes)
+                probes.RemoveAll(a => !a.probe.set_this_frame);
         }
         public void end_of_frame(double time) {
             frame_time = time;
             frame_dt = DateTime.Now;
             if (ignore_this_frame) return;
-            probes.RemoveAll(a => !a.probe.set_this_frame);
+            lock (probes)
+                probes.RemoveAll(a => !a.probe.set_this_frame);
         }
 
 
-        public bool drawing = false;
-        public void draw(int x, int y, int graph_width) {
+        public void draw(int x, int y, int graph_width, out int total_width, out int total_height) {
+            total_width = 0;
+            total_height = 0;
             if (probes.Count <= 0) return;
 
             int xx = 0;
@@ -113,95 +140,107 @@ namespace Magpie.Engine {
 
             var ms1 = Math2D.measure_string("pf", "a");
 
-            drawing = true;
-            foreach ((string name, probe) v in probes) {
-                var ms = Math2D.measure_string("pf", v.name);
-                if (graph_width + ms.X + (ms1.X * 3) > xx)
-                    xx = graph_width + ms.X + (ms1.X * 3);
-                y_tot += ms.Y + 2;
+            lock (probes) {
+                foreach ((string name, probe) v in probes) {
+                    var ms = Math2D.measure_string("pf", v.name);
+                    if (graph_width + ms.X + (ms1.X * 3) > xx)
+                        xx = graph_width + ms.X + (ms1.X * 3);
+                    y_tot += ms.Y + 2;
+                }
             }
-            drawing = false;
+
             y_tot += ms1.Y + 2;
 
             Draw2D.fill_square(x - border, y - border, xx + (border * 2), y_tot + (border * 2), Color.FromNonPremultiplied(0, 0, 0, 128));
 
+            total_width = xx + (border * 2);
+            total_height = y_tot + (border * 2);
+
             Draw2D.line(x + (ms1.X * 2), y + y_tot - (ms1.Y), x + graph_width, y + y_tot - (ms1.Y), 1, Color.DeepPink);
-           
-            Draw2D.line(x + (ms1.X * 2), y + y_tot - (int)((ms1.Y * 1.3f) + 1), x + (ms1.X * 2), y + y_tot, 1, Color.DeepPink); 
-            Draw2D.line(x + graph_width, y + y_tot - (int)((ms1.Y * 1.3f)+ 1), x + graph_width, y + y_tot, 1, Color.DeepPink);
-            
+
+            Draw2D.fill_square(x + (ms1.X * 2)-2, y + y_tot - (int)(ms1.Y) - 1, 2, (int)(ms1.Y) + 2, Color.White);
+            Draw2D.fill_square(x + graph_width - 1, y + y_tot - (int)(ms1.Y) - 1, 2, (int)(ms1.Y) + 2, Color.White);
+
             Draw2D.text_shadow("pf", "0", new Vector2(x, y + y_tot - (ms1.Y)), Color.White);
-            Draw2D.text_shadow("pf", string.Format("{0:F2}", since_start_of_frame), new Vector2(x + ms1.X + graph_width , y + y_tot - (ms1.Y)), Color.White);
-            
+            Draw2D.text_shadow("pf", string.Format("{0:F2}", since_start_of_frame), new Vector2(x + ms1.X + graph_width, y + y_tot - (ms1.Y)), Color.White);
+
             int last_x = x + (ms1.X * 2);
 
             Color c = Color.Transparent;
             Color last_c = Color.Transparent;
 
-            drawing = true;
-            foreach ((string name, probe probe) v in probes) {
-                c = Draw2D.ColorRandomFromString(v.name);
-                var ms = Math2D.measure_string("pf", v.name);
 
-                Draw2D.fill_circle(
-                    new Vector2(graph_width + x + (ms1.X*0.5f) + (ms1.X * 1), y + (ms1.Y * 0.5f) + yy + 1), 
-                    ms1.X/2, c);
+            lock (probes) {
+                foreach ((string name, probe probe) v in probes) {
+                    c = Draw2D.ColorRandomFromString(v.name);
+                    var ms = Math2D.measure_string("pf", v.name);
 
-                Draw2D.text_shadow("pf", v.name, 
-                    new Vector2(graph_width + x + (ms1.X * 3), y+yy + 1), 
-                    Color.White);
+                    Draw2D.fill_circle(
+                        new Vector2(graph_width + x + (ms1.X * 0.5f) + (ms1.X * 1), y + (ms1.Y * 0.5f) + yy + 1),
+                        ms1.X / 2, c);
 
-                var f = (v.probe.frame_pos / since_start_of_frame);
+                    Draw2D.text_shadow("pf", v.name,
+                        new Vector2(graph_width + x + (ms1.X * 3), y + yy + 1),
+                        Color.White);
 
-                if (f > 1) f = 1;
-                if (f < 0) f = 0;
+                    var f = (v.probe.frame_pos / since_start_of_frame);
 
-                var current_x = (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f));
-                Draw2D.fill_square(last_x, y + y_tot - (ms1.Y), current_x - last_x, ms1.Y, last_c);
+                    if (f > 1) f = 1;
+                    if (f < 0) f = 0;
 
-                if (f >= 0 && f <= 1) {
-                    Draw2D.line(
-                        (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
-                        (int)(y + (ms1.Y * 0.5f) + yy + 2),
-                        (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2))),
-                        (int)(y + (ms1.Y * 0.5f) + yy + 2),
-                        1, c);
+                    var current_x = (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f));
+                    if (count == probes.Count - 1) {
+                        Draw2D.fill_square(current_x, y + y_tot - (ms1.Y), (graph_width - (ms1.X * 2)) - (int)((graph_width - (ms1.X * 2)) * f), ms1.Y, c);
+                    }
 
-                    Draw2D.line(
-                        (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
-                        (int)(y + (ms1.Y * 0.5f) + yy + 1),
-                        (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
-                        (int)(y + (ms1.Y * 0.5f) + y_tot - border - 2),
-                        1, c);
+                    Draw2D.fill_square(last_x, y + y_tot - (ms1.Y), current_x - last_x, ms1.Y, last_c);
 
-                    Draw2D.line(
-                        (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2))),
-                        (int)(y + (ms1.Y * 0.5f) + yy + 2),
-                        (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2)) + ms1.X),
-                        (int)(y + (ms1.Y * 0.5f) + yy + 2),
-                        1, c);
-                } else {
-                    Draw2D.line(
-                        (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2))),
-                        (int)(y + (ms1.Y * 0.5f) + yy + 2),
-                        (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2)) + ms1.X),
-                        (int)(y + (ms1.Y * 0.5f) + yy + 2),
-                        1, c);
+                    if (f >= 0 && f <= 1) {
+
+                        //top
+                        Draw2D.line(
+                            (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
+                            (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
+                            (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2))),
+                            (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
+                            1, c);
+
+                        Draw2D.line(
+                            (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
+                            (int)(y + (ms1.Y * 0.5f) + yy + 1),
+                            (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
+                            (int)(y + (ms1.Y * 0.5f) + y_tot - border - 2),
+                            1, c);
+
+                        Draw2D.line(
+                            (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2))),
+                            (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
+                            (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2)) + ms1.X),
+                            (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
+                            1, c);
+                    } else {
+                        Draw2D.line(
+                            (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2))),
+                            (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
+                            (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2)) + ms1.X),
+                            (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
+                            1, c);
 
 
-                    Draw2D.line(
-                        (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
-                        (int)(y + (ms1.Y * 0.5f) + yy + 1),
-                        (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
-                        (int)(y + (ms1.Y * 0.5f) + y_tot - border - 2),
-                        1, c);
+                        Draw2D.line(
+                            (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
+                            (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
+                            (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
+                            (int)Math.Round(y + (ms1.Y * 0.5f) + y_tot - border - 1),
+                            1, c);
+                    }
+
+                    last_c = c;
+                    last_x = current_x;
+                    yy += ms1.Y + 2;
+                    count++;
                 }
-                last_c = c;
-                last_x = current_x;
-                yy += ms1.Y + 2;
-                count++;
-            }
-            drawing = false;
+            }            
         }
     }
 
@@ -233,8 +272,7 @@ namespace Magpie.Engine {
 
         public static int internal_frame_rate_immediate;
 
-        public static frame_probe frame_probe = new frame_probe();
-        public static frame_probe internal_frame_probe = new frame_probe();
+        public static volatile frame_probe frame_probe = new frame_probe();
 
         //public static float minimum_tolerated_fps = (frame_limiter_fps > 0 ? frame_limiter_fps / 3 : 20);
 
@@ -306,7 +344,7 @@ namespace Magpie.Engine {
             delta_buffer_average /= delta_buffer_length;
 
             frame_rate_immediate = (int)(FPS_immediate_buffer.Aggregate((a, b) => a + b) / (double)FPS_buffer_length);
-            internal_frame_rate_immediate = (int)(Math.Round(EngineState.world.last_fps[EngineState.world.last_fps.Length - 1]));
+            internal_frame_rate_immediate = (int)(Math.Round(World.last_fps[World.last_fps.Length - 1]));
 
 
             if (_frame_rate_timer >= 200.0) {

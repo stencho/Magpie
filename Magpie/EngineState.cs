@@ -114,7 +114,7 @@ namespace Magpie {
         }
 
         public static void draw2d() {
-
+            EngineState.window_manager.draw();
         }
     }
 }

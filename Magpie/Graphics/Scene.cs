@@ -589,6 +589,26 @@ namespace Magpie.Graphics {
 
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
         }
+        public static void draw_texture_to_screen(Texture2D tex, Vector2 pos, Vector2 size) {
+            EngineState.graphics_device.SetVertexBuffer(quad.vertex_buffer);
+            EngineState.graphics_device.Indices = quad.index_buffer;
+
+            EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
+
+            e_gbuffer.Parameters["DiffuseMap"].SetValue(tex);
+            e_gbuffer.Parameters["World"].SetValue(
+                Matrix.CreateTranslation(new Vector3((pos / EngineState.resolution.ToVector2()) * (Vector2.UnitX + (-Vector2.UnitY)), 0)) *
+                Matrix.CreateScale(new Vector3(size / EngineState.resolution.ToVector2(),1))
+                
+                );
+
+            e_gbuffer.Parameters["View"].SetValue(Matrix.Identity);
+            e_gbuffer.Parameters["Projection"].SetValue(Matrix.Identity);
+            e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
+            e_gbuffer.Techniques["BasicColorDrawing"].Passes[0].Apply();
+
+            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
+        }
 
         public static void spritebatch_draw_to_screen(Vector2 offset, Texture2D tex) {
             EngineState.graphics_device.SetRenderTarget(null);
@@ -597,9 +617,8 @@ namespace Magpie.Graphics {
             EngineState.spritebatch.End();
         }
 
-        public static void clear_all_and_draw_skybox(Camera camera, GBuffer graphics_buffer) {
-            
-            Clock.frame_probe.set("skybox");
+        public static void clear_all_and_draw_skybox(Camera camera, GBuffer graphics_buffer) {            
+
             EngineState.graphics_device.DepthStencilState = DepthStencilState.DepthRead;
 
             EngineState.graphics_device.SetRenderTargets(graphics_buffer.buffer_targets);
@@ -643,13 +662,25 @@ namespace Magpie.Graphics {
         static List<GameObject> objects_by_distance_temp = new List<GameObject>();
         static List<Actor> actors_by_distance_temp = new List<Actor>();
         static List<Brush> brushes_by_distance_temp= new List<Brush>();
-
+        static int total_draw_objects = 0;
+        
+        static SceneRenderInfo ri;
+        static float SL;
+        static Vector3 sdiff;
+        static float skyCameraToLight;
         public static void draw_world_immediate(World world) {
-            Clock.frame_probe.set("draw_world");
+            Clock.frame_probe.set("draw_world_immediate");
+            total_draw_objects = 0;
             //STILL NEED:
             //OBJECTS, SUB-OBJECTS, BRUSH SUB-OBJECTS, BRUSH SUB-BRUSHES, ACTORS, ACTOR SUB-OBJECTS,
             //OBJECT LIGHTS, BRUSH LIGHTS, ACTOR LIGHTS
+            
+            
+            foreach (Brush b in world.current_map.brushes.Values) {
 
+            }
+
+            Clock.frame_probe.set("build_lighting");
             EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_lighting);
             EngineState.graphics_device.Clear(sun_moon.atmosphere_color);
 
@@ -694,7 +725,7 @@ namespace Magpie.Graphics {
 
                                     if (((SegmentedTerrain)b).visible_terrain[i].Item1.aabb.Intersects(((SpotLight)light).frustum) && EngineState.camera.frustum.Intersects(((SpotLight)light).frustum)) {
 
-                                        var ri = ((SegmentedTerrain)b).visible_terrain[i].Item1.render_info;
+                                        ri = ((SegmentedTerrain)b).visible_terrain[i].Item1.render_info;
 
                                         EngineState.graphics_device.SetVertexBuffer(ri.vertex_buffers[0]);
                                         EngineState.graphics_device.Indices = ri.index_buffers[0];
@@ -722,9 +753,12 @@ namespace Magpie.Graphics {
 
             }
 
+            Clock.frame_probe.set("draw_skybox");
             //clear output buffers and draw skybox to them
             clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
 
+
+            Clock.frame_probe.set("draw_diffuse");
             //draw actual geometry
             EngineState.graphics_device.SetRenderTargets(EngineState.buffer.buffer_targets);
 
@@ -753,7 +787,7 @@ namespace Magpie.Graphics {
                         break;
                     case BrushType.SEGMENTED_TERRAIN:
                         for (int i = 0; i < ((SegmentedTerrain)b).visible_terrain.Count; i++) {
-                            var ri = ((SegmentedTerrain)b).visible_terrain[i].Item1.render_info;
+                            ri = ((SegmentedTerrain)b).visible_terrain[i].Item1.render_info;
 
                             e_gbuffer.Parameters["World"].SetValue(b.world);
                             e_gbuffer.Parameters["WVIT"].SetValue(Matrix.Transpose(Matrix.Invert(b.world * EngineState.camera.view)));
@@ -789,6 +823,7 @@ namespace Magpie.Graphics {
             e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
             e_gbuffer.Parameters["fog"].SetValue(false);
 
+            Clock.frame_probe.set("draw_lights");
             //draw lighting
             EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_lighting);
 
@@ -841,7 +876,7 @@ namespace Magpie.Graphics {
                         EngineState.graphics_device.SetVertexBuffer(ContentHandler.resources["cone"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer);
                         EngineState.graphics_device.Indices = ContentHandler.resources["cone"].value_gfx.Meshes[0].MeshParts[0].IndexBuffer;
 
-                        float SL = Math.Abs(Vector3.Dot(Vector3.Normalize(light.position - EngineState.camera.position), ((SpotLight)light).orientation.Forward));
+                        SL = Math.Abs(Vector3.Dot(Vector3.Normalize(light.position - EngineState.camera.position), ((SpotLight)light).orientation.Forward));
 
                         if (SL < ((SpotLight)light).angle_cos) {
                             EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
@@ -877,8 +912,8 @@ namespace Magpie.Graphics {
                         EngineState.graphics_device.SetVertexBuffer(ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer);
                         EngineState.graphics_device.Indices = ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].IndexBuffer;
 
-                        Vector3 sdiff = (EngineState.camera.position) - light.position;
-                        float skyCameraToLight = (float)Math.Sqrt((float)Vector3.Dot(sdiff, sdiff)) / 100.0f;
+                        sdiff = (EngineState.camera.position) - light.position;
+                        skyCameraToLight = (float)Math.Sqrt((float)Vector3.Dot(sdiff, sdiff)) / 100.0f;
 
                         if (skyCameraToLight <= ((PointLight)light).radius) {
                             EngineState.graphics_device.RasterizerState = RasterizerState.CullClockwise;

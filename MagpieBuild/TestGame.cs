@@ -69,7 +69,7 @@ namespace MagpieBuild
         }
 
         private void BuildGame_Disposed(object sender, EventArgs e) {
-            world.running = false;
+            World.running = false;
         }
 
         protected override void Initialize() {
@@ -253,8 +253,8 @@ namespace MagpieBuild
 
             //EngineState.window_manager.add_window(test_window2);
 
-            Clock.frame_probe.set("monogame_sleep");
-            Clock.frame_probe.false_set("monogame_sleep");
+            Clock.frame_probe.set("overhead");
+            Clock.frame_probe.false_set("overhead");
 
             results = new GJK.gjk_result[world.current_map.objects.Count];
         }
@@ -274,9 +274,9 @@ namespace MagpieBuild
         }
 
         protected override void Update(GameTime gameTime) {
-            Clock.frame_probe.false_set("monogame_sleep");
+            Clock.frame_probe.false_set("overhead");
             Clock.frame_probe.start_of_frame();
-            Clock.frame_probe.false_set("monogame_sleep");
+            Clock.frame_probe.false_set("overhead");
 
             Clock.frame_probe.set("frame_start");
 
@@ -284,16 +284,18 @@ namespace MagpieBuild
 
             EngineState.Update(gameTime, this);
 
+            world.Update();
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
-                world.running = false;
+                World.running = false;
                 Exit();
             }
 
+            /*
             if (world.current_map.objects.Count != results.Length) {
                 results = new GJK.gjk_result[world.current_map.objects.Count];
             }
 
-            world.Update();
 
             //test collision detection between above test actor and all the objects in the scene
 
@@ -307,7 +309,6 @@ namespace MagpieBuild
                 //}
             }
 
-            /*
             //int i = 0;
             foreach (GameObject o in world.current_map.objects.Values) {
                 //if (i % 3 == 0)
@@ -396,11 +397,11 @@ namespace MagpieBuild
 
         protected override void Draw(GameTime gameTime)
         {
+
             Clock.frame_probe.set("draw_start");
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
 
-
-
+            Clock.frame_probe.set("draw_world");
             world.Draw(GraphicsDevice, EngineState.camera);
 
             world.current_map.actors["test_actor"].debug_draw();
@@ -411,6 +412,8 @@ namespace MagpieBuild
 
             EngineState.window_manager.render_window_internals();
 
+
+            Clock.frame_probe.set("draw_2D");
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
             GraphicsDevice.Clear(Color.Transparent);
 
@@ -420,23 +423,21 @@ namespace MagpieBuild
             Draw2D.graph_line(50, EngineState.resolution.Y - 80, 200, 50,
                 "FPS", 60, true, true, true, Color.HotPink,
                 (Clock.FPS_immediate_buffer, string.Format("render fps [{0} ticks]", Clock.FPS_immediate_buffer.Length), Color.Red),
-                (world.last_fps, string.Format("world fps [{0} ticks]", world.last_fps.Length), Color.LimeGreen)
+                (World.last_fps, string.Format("world fps [{0} ticks]", World.last_fps.Length), Color.LimeGreen)
                 );
 
-            double fps = 1000f * (1 / world.last_ticks[world.last_ticks.Length - 1]);
+            double fps = 1000f * (1 / World.last_ticks[World.last_ticks.Length - 1]);
 
             Draw2D.graph_line(350, EngineState.resolution.Y - 80, 200, 50,
                 "deltas", 20, true, true, true, Color.HotPink,
                 (Clock.delta_buffer, "clock delta ms", Color.Red),
-                (world.last_ticks, "world update thread", Color.LimeGreen)
+                (World.last_ticks, "world update thread", Color.LimeGreen)
                 );
 
 
             Draw2D.text_shadow("pf",
                 $"ext {Clock.frame_rate.ToString()}/{Clock.frame_limit}FPS\n" +
                 $"int {Clock.internal_frame_rate_immediate.ToString()}/{Clock.internal_frame_limit}FPS\n" +
-                "\n" +
-                $"running slow [ {world.running_slow} ]\n" +
                 "\n" +
                 string.Format("[ delta s  [int {0:F3}] [ext {1:F3}] ]\n", Clock.internal_frame_time_delta, Clock.frame_time_delta) +
                 string.Format("[ delta ms [int {0:F3}] [ext {1:F3}] ]\n", Clock.internal_frame_time_delta_ms, Clock.frame_time_delta_ms) + "\n"+
@@ -445,8 +446,8 @@ namespace MagpieBuild
                 "[ actor position " + world.player_actor.position.simple_vector3_string_brackets() + " ]\n\n" +
                 "[ buffer [" + (((int)Scene.buffer == -1) ? "combined" : ((Scene.buffers)Scene.buffer).ToString()) + "] ]\n\n" +
                 "mouse over UI: " + EngineState.window_manager.mouse_over_UI() + "\n\n" +
-
-                gvars.list_all() + "\n" + 
+                "## gvars ##\n" +
+                gvars.list_all() + "\n\n" + 
                 EngineState.window_manager.list_windows()
 
 
@@ -454,65 +455,18 @@ namespace MagpieBuild
 
 
 
-            //Draw2D.line(Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + Vector2.One, Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + (Vector2.UnitX * 200f) + Vector2.One, 1, Color.Black);
-            //Draw2D.line(Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f), Vector2.One * 2 + (Vector2.UnitX * 330) + (Vector2.UnitY * 42f) + (Vector2.UnitX * 200f), 1, Color.Red);
 
-            //Draw2D.image(Scene.sun_moon.lerps.debug_band, XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f), XYPair.One + (XYPair.UnitY * 30) + (XYPair.UnitX * 256), Color.White);
-
-            //Draw2D.image(ContentHandler.resources["OnePXWhite"].value_tx, XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f) - (XYPair.UnitX * 35), XYPair.One * 30, Scene.sun_moon.current_color);
-
-            /* Draw2D.line(
-                 (XYPair.UnitX * ((float)Scene.sun_moon.current_day_value * 256)) + XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 69f),
-                 (XYPair.UnitX * ((float)Scene.sun_moon.current_day_value * 256)) + XYPair.One * 2 + (XYPair.UnitX * 300) + (XYPair.UnitY * 70f) + (XYPair.UnitY * 30), 
-                 2f, Color.Red);*/
-
-            /*
-            Draw2D.text_shadow("pf",
-string.Format(@"
-{0:F0}ms/{1}ms ({2:F3}%)
-{3:F0}/{4:F0} {5} 
-1 day = {7}/{6:F2}x speed multiplier ({8})
-
-",
-Scene.sun_moon.current_time_ms, Scene.sun_moon.entire_day_cycle_length_ms, Scene.sun_moon.current_day_value * 100f,
-Scene.sun_moon.current_time_ms / 1000f, Scene.sun_moon.entire_day_cycle_length_ms / 1000f, "Time is " + (Scene.sun_moon.time_stopped ? "stopped" : "ticking"),
-Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scene.sun_moon.cycle_ts_scaled)
-
-
-
-
-)           , Vector2.One * 2 + (Vector2.UnitX * 300), Color.White);
-
-    */
-            //Draw2D.text_shadow("pf", list_active_binds_w_status(), (Vector2.One * 2) + (Vector2.UnitY * 200));
-
-           // Draw2D.image(ContentHandler.resources["gradient_vertical"].value_tx, XYPair.One * 256, XYPair.One * 256, Color.Black);
-            //Draw2D.image(((SpotLight)world.current_map.lights[world.current_map.lights.Count-1]).depth_map, XYPair.One * 150, XYPair.One * 200, Color.White);
-
-
-
+            Clock.frame_probe.set("draw_bind_states");
             StaticControlBinds.draw_state(200, 650, 100, 15, 15);
-
             ((FreeCamActor)world.player_actor).binds.draw_state(6, 650, 100, 15, 15, "player");
 
-            //test_window.draw();
-            //test_window2.draw();
 
             EngineState.spritebatch.End();
-
-            EngineState.window_manager.draw();
 
             EngineState.draw2d();
+
             //test_sdf.draw();
             //test_sdf2.draw();
-
-
-            EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap);
-            Clock.frame_probe.end_of_frame();
-            Clock.frame_probe.set("monogame_sleep");
-            Clock.frame_probe.draw(310, 10, 300);
-            Clock.internal_frame_probe.draw(750, 10, 300);
-            EngineState.spritebatch.End();
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
 
@@ -523,15 +477,29 @@ Scene.sun_moon.time_multiplier, print_ts(Scene.sun_moon.cycle_ts), print_ts(Scen
             }
             crosshair_sdf.draw();
 
-
-
-
+            //Draw2D.draw_texture_to_screen(ContentHandler.resources["zerocool_sharper"].value_tx, Vector2.One * 300, Vector2.One * 20);
+            Draw2D.SDFCircle(Vector2.One * 300, 200f, Color.White);
             GraphicsDevice.SetRenderTarget(null);
-
 
             Scene.compose();
             //base.Draw(gameTime);
             Clock.update_fps();
+
+            EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap);
+            Clock.frame_probe.end_of_frame();
+            Clock.frame_probe.set("overhead");
+
+            Clock.frame_probe.draw(EngineState.resolution.X - 450, 60, 300, out _, out th);
+            int t = th;
+
+            lock (World.internal_frame_probe)
+                World.internal_frame_probe.draw(EngineState.resolution.X - 402, th + 70, 300, out _, out t);
+
+            lock (Controls.control_poll_probe)
+                Controls.control_poll_probe.draw(EngineState.resolution.X - 360, th + t + 80, 300, out _, out _);
+
+            EngineState.spritebatch.End();
         }
+        int th = 0;
     }
 }

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static Magpie.Engine.Collision.Collision2D;
 using static Magpie.Engine.Collision.Raycasting;
@@ -279,21 +280,108 @@ namespace Magpie.Engine {
 
 #endregion
 
-        private static XYPair current_res;
         public static bool window_active = true;
         private static bool window_was_active;
-        private static XYPair pre_pos = XYPair.Zero;
         private static XYPair window_center = XYPair.Zero;
-        public static bool mouse_lock = false;
-        static bool mouse_lock_p = false;
-        public static Vector2 mouse_delta;
-        public static Vector2 mouse_delta_actual;
+        public volatile static bool mouse_lock = false;
+        static volatile bool mouse_lock_p = false;
+        public  static Vector2 mouse_delta;
+        public  static Vector2 mouse_delta_actual;
         static XYPair mdel;
+
+        static Vector2 md = Vector2.Zero;
 
         static Keys[] pressed_keys;
         static Keys[] pressed_keys_previous;
         
+        public static Thread control_thread;
+
+        public static volatile int control_thread_poll_hz = 120;
+        public static volatile float mouse_multi = 15f;
+        public static double control_thread_ms => (1000.0 / control_thread_poll_hz);
+        public static volatile frame_probe control_poll_probe = new frame_probe();
+        
+        public static void control_thread_update() {
+            while (World.running) {
+                control_poll_probe.start_of_frame();
+
+                msp = ms;
+                ms = Mouse.GetState();
+
+                control_poll_probe.set("mouse");
+
+                window_center.X = (EngineState.window.ClientBounds.Width / 2);
+                window_center.Y = (EngineState.window.ClientBounds.Height / 2);
+                window_active = EngineState.game.IsActive;
+
+                if (mouse_lock && window_active) {
+                    Mouse.SetPosition(window_center.X, window_center.Y);
+                }
+
+                if (mouse_lock && mouse_lock_p && window_active && window_was_active) {
+                    mdel = (window_center)
+                                    - (XYPair.UnitX * ms.X)
+                                    - (XYPair.UnitY * ms.Y);
+
+                    mouse_delta = new Vector2(mdel.X, mdel.Y);
+
+                } else if (!mouse_lock && !mouse_lock_p) {
+                    mdel = ((XYPair.UnitX * -(msp.X - ms.X)) + (XYPair.UnitY * -(msp.Y - ms.Y)));
+                    mouse_delta = new Vector2(mdel.X, mdel.Y);
+
+                } else {
+                    mouse_delta = Vector2.Zero;
+                }
+
+                //mouse_delta_actual = mouse_delta + Vector2.Zero;
+                md += mouse_delta;
+                mouse_delta *= (float)(1 / control_thread_ms);
+                mouse_delta *= mouse_multi;
+
+
+                scroll_wheel_changed();
+
+                mouse_lock_p = mouse_lock;
+
+                control_poll_probe.set("sleep");
+                while (World.running) {
+                    if (control_poll_probe.since_frame_start() >= control_thread_ms) break;
+                }
+                control_poll_probe.end_of_frame();
+            }
+        }
         public static void update(GameWindow window, bool is_active, XYPair res) {
+            
+            if (control_thread == null) {
+                control_thread = new Thread(control_thread_update);
+                control_thread.Start();
+            }
+
+            ksp = ks;
+            xsp = xs;
+
+            ks = Keyboard.GetState();
+
+            pressed_keys_previous = pressed_keys;
+            pressed_keys = ks.GetPressedKeys();
+
+            mouse_delta_actual = md;
+            md = Vector2.Zero;
+
+            xsp[0] = xs[0];
+            xsp[1] = xs[1];
+            xsp[2] = xs[2];
+            xsp[3] = xs[3];
+
+            xs[0] = GamePad.GetState(PlayerIndex.One);
+            xs[1] = GamePad.GetState(PlayerIndex.Two);
+            xs[2] = GamePad.GetState(PlayerIndex.Three);
+            xs[3] = GamePad.GetState(PlayerIndex.Four);
+
+            window_was_active = window_active;
+
+            _mouse_coll_obj = new Circle2D(Controls.mouse_position_float, 1f);
+            /*
             window_center.X = (window.ClientBounds.Width / 2);
             window_center.Y = (window.ClientBounds.Height / 2) ;
             window_active = is_active;
@@ -331,9 +419,9 @@ namespace Magpie.Engine {
             }
 
             mouse_delta_actual = mouse_delta + Vector2.Zero;
-
-            mouse_delta *= 1 / Clock.frame_probe.sinceF("mouse_delta");
-            mouse_delta *= 16f;
+            
+            mouse_delta = mouse_delta * (float)(1 / Clock.d_frame_time_delta_ms);
+            
             Clock.frame_probe.set("mouse_delta");
 
             //mouse_delta *= 1/(float)tp.since;
@@ -358,7 +446,7 @@ namespace Magpie.Engine {
             xs[1] = GamePad.GetState(PlayerIndex.Two);
             xs[2] = GamePad.GetState(PlayerIndex.Three);
             xs[3] = GamePad.GetState(PlayerIndex.Four);
-
+            */
         }
 
     }

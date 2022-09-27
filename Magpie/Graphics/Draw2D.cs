@@ -9,6 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using Magpie.Engine.Collision;
+using System.Drawing;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
+using Magpie.Engine.Collision.Support3D;
+using static System.Net.Mime.MediaTypeNames;
+using System.Security.Policy;
 
 namespace Magpie.Graphics {
     public static class Draw2D {
@@ -479,13 +486,6 @@ namespace Magpie.Graphics {
         public static void image(RenderTarget2D rt, Vector2 position, Vector2 size, Color tint, Vector2 origin_n) {
             EngineState.spritebatch.Draw(rt, (origin_n * size) + position, null, tint);
         }
-        public static void SDFToScreenImmediate(Texture2D tex, Vector2 position, Vector2 size, Color tint, Vector2 origin_n, float alpha_scissor) {
-            //ContentHandler.resources["sdf_pixel"].value_fx.Parameters["billboard_size"].SetValue(EngineState.resolution.ToVector2());
-            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["tint"].SetValue(tint.ToVector3());
-            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["alpha_scissor"].SetValue(alpha_scissor);
-
-            EngineState.spritebatch.Draw(tex, new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y), null, tint, 0f, origin_n, SpriteEffects.None, 0f);
-        }
         public static void image(RenderTarget2D rt, int X, int Y, int W, int H) {
             EngineState.spritebatch.Draw(rt, new Rectangle(X, Y, W, H), Color.White);
         }
@@ -549,7 +549,68 @@ namespace Magpie.Graphics {
         public static void image(ContentHandlerSingleFN content_handler, int X, int Y, int W, int H, Color tint) {
             EngineState.spritebatch.Draw(content_handler.resource.value_tx, new Rectangle(X, Y, W, H), tint);
         }
+        
+        public static void SDF_start() {
+            EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap, null, null, ContentHandler.resources["sdf_pixel"].value_fx, null);
+        }
+        public static void SDFToScreenImmediate(Texture2D tex, Vector2 position, Vector2 size, Color tint, Vector2 origin_n, float alpha_scissor) {
+            //ContentHandler.resources["sdf_pixel"].value_fx.Parameters["billboard_size"].SetValue(EngineState.resolution.ToVector2());
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["alpha_scissor"].SetValue(alpha_scissor);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["invert_map"].SetValue(false);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["opacity"].SetValue(1f);
 
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["enable_outline"].SetValue(false);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["inside_color"].SetValue(tint.ToVector3());
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outside_color"].SetValue(Color.Transparent.ToVector3());
+
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["inside_tile_count"].SetValue(Vector2.One);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outside_tile_count"].SetValue(Vector2.One);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outline_tile_count"].SetValue(Vector2.One);
+
+            EngineState.spritebatch.Draw(tex, 
+                new Rectangle((int)position.X, (int)position.Y, (int)size.X, (int)size.Y), 
+                null, tint, 0f, origin_n, SpriteEffects.None, 0f);
+        }
+
+        public static void SDFCircle(Vector2 position, float radius, Color color) {
+            var p = (position - (Vector2.One * radius)).ToXYPair();
+            var s = ((Vector2.One * radius) * 2).ToXYPair();
+
+
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["alpha_scissor"].SetValue(0.5f);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["invert_map"].SetValue(false);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["opacity"].SetValue(1f);
+
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["enable_outline"].SetValue(false);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["inside_color"].SetValue(color.ToVector3());
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outside_color"].SetValue(Color.Transparent.ToVector3());
+
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["inside_tile_count"].SetValue(Vector2.One);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outside_tile_count"].SetValue(Vector2.One);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outline_tile_count"].SetValue(Vector2.One);
+
+            EngineState.graphics_device.SetVertexBuffer(Scene.quad.vertex_buffer);
+            EngineState.graphics_device.Indices = Scene.quad.index_buffer;
+
+            EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
+
+            var v3pos = new Vector3((position / EngineState.resolution.ToVector2()) * (Vector2.UnitX + (-Vector2.UnitY)), 1);
+            var v3size = new Vector3((Vector2.One * radius * 2) / EngineState.resolution.ToVector2(), 1);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["SDFTEX"].SetValue(ContentHandler.resources["sdf_circle"].value_tx);
+            
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["World"].SetValue(
+                Matrix.CreateTranslation(v3pos - (v3size / 2)) * Matrix.CreateScale(v3size));
+
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["View"].SetValue(Matrix.Identity);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["Projection"].SetValue(Matrix.Identity);
+
+            ContentHandler.resources["sdf_pixel"].value_fx.Techniques["Full"].Passes[0].Apply();
+            
+            EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
+            //this should be converted to a quad so SDF_start() doesn't need to exist
+            //EngineState.spritebatch.Draw(ContentHandler.resources["sdf_circle"].value_tx,
+            //    new Rectangle(p.X, p.Y, s.X, s.Y), null, color, 0f, Vector2.One * 0.5f, SpriteEffects.None, 0);
+        }
         public static void cross(XYPair position, int sizeX, int sizeY, Color color) {
             line(position, position - (Vector2.UnitX * sizeX / 2f), 1f, color);
             line(position, position - (Vector2.UnitY * sizeY / 2f), 1f, color);

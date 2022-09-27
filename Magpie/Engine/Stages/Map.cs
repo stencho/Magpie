@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 namespace Magpie.Engine.Stages {
     [Serializable]
     public class Map {
-        public Dictionary<string, Brush> brushes = new Dictionary<string, Brush>();
-        public Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
-        public Dictionary<string, Actor> actors = new Dictionary<string, Actor>();
+        public volatile Dictionary<string, Brush> brushes = new Dictionary<string, Brush>();
+        public volatile Dictionary<string, GameObject> objects = new Dictionary<string, GameObject>();
+        public volatile Dictionary<string, Actor> actors = new Dictionary<string, Actor>();
 
-        public List<DynamicLight> lights = new List<DynamicLight>();
+        public volatile List<DynamicLight> lights = new List<DynamicLight>();
 
-        public Actor player_actor;
+        public volatile Actor player_actor;
 
         public void add_brush(string name, Brush floor) {
             brushes.Add(name, floor);

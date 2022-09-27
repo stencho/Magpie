@@ -140,11 +140,9 @@ namespace Magpie.Engine.Physics {
 
             //map.player_actor find movement goes here
 
-            while (map.player_actor == null) {
+            //while (map.player_actor == null) {}
 
-            }
-
-            if (map.player_actor.wants_movement != Vector3.Zero) {
+            if (map.player_actor != null && map.player_actor.wants_movement != Vector3.Zero) {
                 map.player_actor.position += map.player_actor.wants_movement;
 
                 map.player_actor.wants_movement = Vector3.Zero;
