@@ -281,7 +281,7 @@ namespace Magpie.Engine {
             }
         }
 
-        static string get_string(string name) {
+        public static string get_string(string name) {
             string s = "";
             gvar_data_type gdt = _gvars[name].data_type;
 
@@ -313,7 +313,7 @@ namespace Magpie.Engine {
             }
             return s;
         }
-        static string get_string(string name, int decimal_places) {
+        public static string get_string(string name, int decimal_places) {
             string s = "";
             gvar_data_type gdt = _gvars[name].data_type;
 

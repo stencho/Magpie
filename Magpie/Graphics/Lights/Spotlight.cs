@@ -19,7 +19,7 @@ namespace Magpie.Graphics.Lights {
         public float far_clip { get; set; } = 50;
         public float near_clip { get; set; } = 0.1f;
 
-        public float fov { get; set; } = MathHelper.Pi /5;
+        public float fov { get; set; } = MathHelper.Pi / 4;
 
         public BoundingFrustum frustum { get; set; }
         public Vector3 position { get; set; } = (Vector3.Up * 15.91909f) + (Vector3.Forward *3.921314f);
@@ -29,12 +29,12 @@ namespace Magpie.Graphics.Lights {
         public Matrix projection { get; set; }
         public Matrix world { get; set; }
 
-        public Color light_color { get; set; } = Color.White;
+        public Color light_color { get; set; } = Color.Wheat;
 
         public float radial_scale;
         public Matrix actual_scale;
 
-        public float angle_cos => (float)Math.Cos((double)fov);
+        public float angle_cos => (float)Math.Cos(fov);
 
         public SpotLight() {
             _depth = new RenderTarget2D(EngineState.graphics_device, depth_map_resolution, depth_map_resolution, false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);

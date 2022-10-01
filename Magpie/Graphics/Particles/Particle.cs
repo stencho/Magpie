@@ -88,17 +88,17 @@ namespace Magpie.Graphics.Particles {
         string _texture;
 
         public Texture2D texture => ContentHandler.resources[_texture].value_tx;
-
+        bool bbset = false;
         public Particle2D(string texture) {
             if (Particle.e_particle == null)
                 Particle.e_particle = ContentHandler.resources["particle"].value_fx;
 
             this._texture = texture;
-
-            vertex_buffer_binding[0] = new VertexBufferBinding(Scene.quad.vertex_buffer);
-
+            
             vb = new VertexBuffer(EngineState.graphics_device, VertexPositionNormalTexture.VertexDeclaration, _quad.Length, BufferUsage.None);
             ib = new IndexBuffer(EngineState.graphics_device, IndexElementSize.SixteenBits, _indices.Length, BufferUsage.None);
+
+            vertex_buffer_binding[0] = new VertexBufferBinding(vb, 0, 0);
 
             vb.SetData(_quad);
             ib.SetData(_indices);
@@ -109,11 +109,9 @@ namespace Magpie.Graphics.Particles {
             //lock (vertex_buffer_binding) {
             //EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
             EngineState.graphics_device.BlendState = BlendState.NonPremultiplied;
+
             pc.GenerateWorldMatrixBuffer();
-
-            vertex_buffer_binding[0] = new VertexBufferBinding(vb, 0, 0);
             vertex_buffer_binding[1] = new VertexBufferBinding(pc.instance_buffer, 0, 1);
-
 
             //Particle.e_particle.Parameters["World"].SetValue(Matrix.Identity);
             Particle.e_particle.Parameters["View"].SetValue( EngineState.camera.view);

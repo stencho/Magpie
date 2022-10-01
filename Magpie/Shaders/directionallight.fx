@@ -93,7 +93,7 @@ PSO PS(VSO input)
 	float3 half = normalize(toEye + (-LightDirection));
 	float NdotH = saturate(dot(half, Normal));
 
-	output.Lighting.rgb += (LightColor.rgb * pow(NdotH, 1) * 0.2);
+	//output.Lighting.rgb += (LightColor.rgb * NdotH * 0.2);
 	
 
 

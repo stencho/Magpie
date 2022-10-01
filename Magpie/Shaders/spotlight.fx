@@ -6,6 +6,7 @@ float4x4 InverseViewProjection;
 
 float3 CameraPosition;
 float4x4 LightViewProjection;
+float4x4 LightProjection;
 float3 LightPosition;
 float4 LightColor;
 float LightIntensity;
@@ -109,7 +110,6 @@ float RGBADecode(float4 value) {
 	const float4 bits = float4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1);
 	return dot(value.xyzw , bits);
 }
-
 float4 PS(VSO input) : COLOR0 {
 	input.ScreenPosition.xy /= input.ScreenPosition.w;
 
@@ -143,8 +143,10 @@ float4 PS(VSO input) : COLOR0 {
 
 	float ShadowFactor = 1;
 	if(Shadows) {
-		float len = max(0.001f, distance(LightPosition, Position)) / LightClip;
-		ShadowFactor = (lZ * exp(-(LightClip * 0.5f) * (len - DepthBias)));
+		float len = max(0.001f, distance(LightPosition, Position) / LightClip);
+		ShadowFactor = (lZ * exp(-(LightClip * 0.5f) * (len - DepthBias))); 
+		if (ShadowFactor == 0) 
+			ShadowFactor = 1;
 	}
 
 	return Phong(Position.xyz, Normal, Attenuation, 1, 1) * saturate(ShadowFactor);

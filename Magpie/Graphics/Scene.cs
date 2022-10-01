@@ -172,7 +172,7 @@ namespace Magpie.Graphics {
             e_directionallight.Parameters["LightIntensity"].SetValue(1f);
 
             e_directionallight.Parameters["LightDirection"].SetValue(sun_direction);
-            e_directionallight.Parameters["camera_pos"].SetValue(EngineState.camera.position);
+            //e_directionallight.Parameters["camera_pos"].SetValue(EngineState.camera.position);
 
             e_directionallight.CurrentTechnique.Passes[0].Apply();
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);           
@@ -446,7 +446,7 @@ namespace Magpie.Graphics {
             e_spotlight.Parameters["InverseViewProjection"].SetValue(Matrix.Invert(EngineState.camera.view * EngineState.camera.projection));
 
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
-            EngineState.graphics_device.DepthStencilState = DepthStencilState.None;
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.DepthRead;
 
             EngineState.graphics_device.SetVertexBuffer(quad.vertex_buffer);
             EngineState.graphics_device.Indices = quad.index_buffer;
@@ -472,12 +472,14 @@ namespace Magpie.Graphics {
                         e_spotlight.Parameters["SHADOW"].SetValue(((SpotLight)light).depth_map);
 
                         e_spotlight.Parameters["LightViewProjection"].SetValue(((SpotLight)light).view * ((SpotLight)light).projection);
+                        //e_spotlight.Parameters["LightProjection"].SetValue(Matrix.Invert(((SpotLight)light).projection));
                         e_spotlight.Parameters["LightColor"].SetValue(light.light_color.ToVector4());
                         e_spotlight.Parameters["LightPosition"].SetValue(light.position);
                         e_spotlight.Parameters["LightDirection"].SetValue(((SpotLight)light).orientation.Forward);
                         e_spotlight.Parameters["LightAngleCos"].SetValue(((SpotLight)light).angle_cos);
                         e_spotlight.Parameters["LightClip"].SetValue(((SpotLight)light).far_clip);
                         e_spotlight.Parameters["DepthBias"].SetValue(0.01f);
+                        //e_spotlight.Parameters["radial"].SetValue((float)(((SpotLight)light).radial_scale/2));
                         //e_spotlight.Parameters["shadowMapSize"].SetValue((float)((SpotLight)light).depth_map_resolution);
 
                         e_spotlight.Parameters["Shadows"].SetValue(true);
@@ -489,7 +491,7 @@ namespace Magpie.Graphics {
 
                         float SL = Math.Abs(Vector3.Dot(Vector3.Normalize(light.position - EngineState.camera.position), ((SpotLight)light).orientation.Forward));
 
-                        if (SL < ((SpotLight)light).angle_cos) {
+                        if (SL <= ((SpotLight)light).angle_cos) {
                             EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
                         } else {
                             EngineState.graphics_device.RasterizerState = RasterizerState.CullClockwise;
@@ -602,9 +604,9 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
 
             e_gbuffer.Parameters["DiffuseMap"].SetValue(tex);
-            e_gbuffer.Parameters["World"].SetValue(
-                Matrix.CreateTranslation(new Vector3((pos / EngineState.resolution.ToVector2()) * (Vector2.UnitX + (-Vector2.UnitY)), 0)) *
-                Matrix.CreateScale(new Vector3(size / EngineState.resolution.ToVector2(),1))
+            e_gbuffer.Parameters["World"].SetValue(Matrix.CreateScale(new Vector3(size / EngineState.resolution.ToVector2(), 1)) *
+                Matrix.CreateTranslation(new Vector3(((pos - (EngineState.resolution.ToVector2() - (size ))) / EngineState.resolution.ToVector2()) * (Vector2.UnitX + (-Vector2.UnitY)), 0))
+                
                 
                 );
 
@@ -638,7 +640,7 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
 
             EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
-            EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
+            EngineState.graphics_device.BlendState = BlendState.NonPremultiplied;
 
             e_skybox.Parameters["atmosphere_color"].SetValue(sun_moon.atmosphere_color.ToVector4());
             e_skybox.Parameters["sky_color"].SetValue(sun_moon.sky_color.ToVector4());

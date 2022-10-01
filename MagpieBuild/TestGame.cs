@@ -403,7 +403,7 @@ namespace MagpieBuild
             parttest.instance_onto_point_cloud(pctest);
             pctest.draw_debug();
         }
-        bool draw_debug_info = false;
+        bool draw_debug_info = true;
         protected override void Draw(GameTime gameTime) {
             Scene.render_after_world = renderextra;
             Clock.frame_probe.set("draw_world");
@@ -486,7 +486,7 @@ namespace MagpieBuild
             }
             crosshair_sdf.draw();
 
-            //Scene.draw_texture_to_screen(world.test_light.depth_map, Vector2.One * 200, Vector2.One * 200);
+            //Scene.draw_texture_to_screen(world.test_light.depth_map, Vector2.One * 20, Vector2.One * 300);
             //Scene.draw_texture_to_screen(ContentHandler.resources["radial_glow"].value_tx, Vector2.One * 200, Vector2.One * 200);
             //Draw2D.SDFCircle(Vector2.One * 300, 200f, Color.White);
             GraphicsDevice.SetRenderTarget(null);

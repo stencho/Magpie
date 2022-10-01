@@ -204,7 +204,16 @@ namespace Magpie {
                     PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
                     PhysicsSolver.finalize_collisions(current_map);
                 }
-                
+
+                EngineState.camera.update();
+                EngineState.camera.update_projection(EngineState.resolution);
+
+
+                current_map.lights[current_map.lights.Count - 1].position
+                    = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.3f) + (EngineState.camera.orientation.Down * 0.4f) + (EngineState.camera.orientation.Forward * 0.3f);
+                ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation
+                    = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
+
                 lock (last_fps) {
                     for (int i = 0; i < last_fps.Length - 1; i++) {
                         last_fps[i] = last_fps[i + 1];
@@ -254,10 +263,6 @@ namespace Magpie {
             }
 
             
-            current_map.lights[current_map.lights.Count-1].position 
-                = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.8f) + (EngineState.camera.orientation.Down * 0.2f);
-            ((SpotLight)current_map.lights[current_map.lights.Count-1]).orientation 
-                = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
 
             /*
             current_map.lights[current_map.lights.Count - 1].position

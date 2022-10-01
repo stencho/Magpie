@@ -160,8 +160,6 @@ namespace MagpieTestbed.TestActors {
                 wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("shift") ? 6f : 1f) * Clock.internal_frame_time_delta;
 
             cam.position = position;
-            cam.update();
-            cam.update_projection(EngineState.resolution);
         }
         public void debug_draw() { }
     }
