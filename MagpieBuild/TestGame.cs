@@ -86,8 +86,6 @@ namespace MagpieBuild
             world.current_map.player_actor = new FreeCamActor();
             EngineState.camera = ((FreeCamActor)world.current_map.player_actor).cam;
 
-            parttest = new Particle2D("trump_tex");
-            pctest = new PointCloud(50);
 
             add_bindings(            
                 (bind_type.digital, controller_type.keyboard, Keys.Up, "t_forward"),
@@ -251,6 +249,9 @@ namespace MagpieBuild
                 (EngineState.resolution.ToVector2() * 0.5f), 
                 new Vector2(16, 16), 0.75f);
 
+            parttest = new Particle2D("trump_tex");
+            pctest = new PointCloud(test_trums);
+
             //test_window = new Magpie.Graphics.UI.UIWindow(new XYPair(100,100), new XYPair(500,250));
 
             //EngineState.window_manager.add_window(test_window);
@@ -264,7 +265,7 @@ namespace MagpieBuild
             results = new GJK.gjk_result[world.current_map.objects.Count];
         }
 
-
+        int test_trums = 10000;
 
         protected override void LoadContent()
         {
@@ -396,14 +397,18 @@ namespace MagpieBuild
             return s;
         }
 
-        Magpie.Graphics.UI.UIWindow test_window;
-        Magpie.Graphics.UI.UIWindow test_window2;
+        frame_snapshot snap = new frame_snapshot();
+
         public void renderextra() {
 
+            snap.snap("tump");
             parttest.instance_onto_point_cloud(pctest);
-            pctest.draw_debug();
+            snap.snap("another tum");
+
+            //pctest.draw_debug();
+            snap.snap("another tump");
         }
-        bool draw_debug_info = true;
+        bool draw_debug_info = false;
         protected override void Draw(GameTime gameTime) {
             Scene.render_after_world = renderextra;
             Clock.frame_probe.set("draw_world");
@@ -507,6 +512,11 @@ namespace MagpieBuild
             lock (Controls.control_poll_probe)
                 Controls.control_poll_probe.draw(EngineState.resolution.X - 360, th + t + 80, 300, out _, out _);
 
+            snap.draw(test_trums.ToString(), EngineState.resolution.X - 360, 10, 300);
+
+
+            //lock (trum_sphere_probe)
+                //trum_sphere_probe.draw(EngineState.resolution.X / 2, EngineState.resolution.Y / 2, 200, out _, out _);
         }
         int th = 0;
     }

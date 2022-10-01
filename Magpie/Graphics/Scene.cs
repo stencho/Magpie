@@ -72,7 +72,7 @@ namespace Magpie.Graphics {
 
         public Color sky_color = Color.Lerp(Color.Purple, Color.LightSkyBlue, 0.2f);
 
-        public Vector3 sun_direction => Vector3.Down + Vector3.Right + Vector3.Forward;
+        public Vector3 sun_direction => Vector3.Normalize((Vector3.Down * 5) + (Vector3.Down * 3) + Vector3.Forward);
 
         private Matrix sun_orientation = Matrix.Identity * Matrix.CreateRotationX(MathHelper.ToRadians(-75f)) * Matrix.CreateRotationZ(MathHelper.ToRadians(-15f));
         public Color current_color = Color.White;
@@ -640,7 +640,7 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
 
             EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
-            EngineState.graphics_device.BlendState = BlendState.NonPremultiplied;
+            EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
 
             e_skybox.Parameters["atmosphere_color"].SetValue(sun_moon.atmosphere_color.ToVector4());
             e_skybox.Parameters["sky_color"].SetValue(sun_moon.sky_color.ToVector4());

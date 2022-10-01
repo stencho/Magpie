@@ -40,11 +40,6 @@ struct instancedVSI {
 	float4 row3 : TEXCOORD3;
 	float4 row4 : TEXCOORD4;
 
-	float4 row1IT : TEXCOORD5;
-	float4 row2IT : TEXCOORD6;
-	float4 row3IT : TEXCOORD7;
-	float4 row4IT : TEXCOORD8;
-
 	float3 normal : TEXCOORD9;
 };
 
@@ -89,7 +84,6 @@ VSO mVSInstanced(VSI input, instancedVSI instance) {
 	VSO output = (VSO)0;
 
 	float4x4 world_instance = CreateMatrixFromCols(instance.row1, instance.row2, instance.row3, instance.row4);		
-	float4x4 world_instance_IT = CreateMatrixFromCols(instance.row1IT, instance.row2IT, instance.row3IT, instance.row4IT);	
 	
 	float4 pos = mul(input.Position, world_instance);
 	float4 viewpos = mul(pos, View);
@@ -138,9 +132,9 @@ PSO mPS(VSO input) {
 	output.Depth.a = output.Diffuse.rgba.a;
 	
 	float4 d = tex2D(DEPTH, input.screen_pos);
-	//if (output.Depth.r < d.r) {
-		//clip(-1);
-	//}
+	if (output.Depth.r < d.r) {
+		clip(-1);
+	}
 
 
 	float4 l = tex2D(LIGHTING, input.screen_pos);

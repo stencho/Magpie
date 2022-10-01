@@ -8,6 +8,100 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Magpie.Engine {
+    public class frame_snapshot {
+        volatile List<(string name, snapshot snapshot)> snapshots = new List<(string name, snapshot snapshot)>();
+        public class snapshot {
+            public DateTime dt = DateTime.Now;
+            public TimeSpan since_last;
+            public TimeSpan to_next;
+        }
+
+        public TimeSpan total = TimeSpan.Zero;
+        TimeSpan t= TimeSpan.Zero;
+
+        public int snapshot_index(string name) {
+            lock (snapshots)
+                return snapshots.FindIndex(a => a.name == name);
+        }
+        public bool snapshot_exists(string name) {
+            lock (snapshots)
+                return (snapshot_index(name) > -1);
+        }
+
+        public void snap(string name) {
+            lock (snapshots) {
+                if (snapshot_exists(name)) {
+                    var si = snapshot_index(name);
+                    snapshots[si].snapshot.dt = DateTime.Now;
+                    if (si > 0) {
+                        snapshots[si].snapshot.since_last = snapshots[si].snapshot.dt - snapshots[si - 1].snapshot.dt;
+                        snapshots[si - 1].snapshot.to_next = snapshots[si].snapshot.dt - snapshots[si - 1].snapshot.dt;
+
+                        t += snapshots[si].snapshot.since_last;
+                    } else {
+                        total = t;
+                        t = TimeSpan.Zero;
+                    }
+                    
+                } else {
+                    snapshots.Add((name, new snapshot()));
+                    var si = snapshot_index(name);
+                    snapshots[si].snapshot.dt = DateTime.Now;
+                    if (si > 0) {
+                        snapshots[si].snapshot.since_last = snapshots[si].snapshot.dt - snapshots[si - 1].snapshot.dt;
+                        snapshots[si - 1].snapshot.to_next = snapshots[si].snapshot.dt - snapshots[si - 1].snapshot.dt;
+
+                        t += snapshots[si].snapshot.since_last;
+                    }
+                }
+            }
+        }
+
+        int border = 5;
+
+        public void draw(string header, int X, int Y, int W) {
+            var ms = Math2D.measure_string("pf", header);
+
+            if (ms.X > W)
+                W = ms.X + (border*2);
+
+            int raw_w = W - (border*2);
+
+            EngineState.spritebatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap);
+
+            Draw2D.fill_square(X, Y, W, (int)ms.Y * 3 + (border * 2), Color.FromNonPremultiplied(128,128,128,128));
+            Draw2D.text_shadow("pf", header, new Vector2(X + border+2, Y + border + 2));
+
+
+            double total_ms = t.TotalMilliseconds;
+            double current_ms = 0;
+            float current_percent=0;
+            float current_width=0;
+            for (int i = 0; i < snapshots.Count; i++) {
+
+                current_ms += snapshots[i].snapshot.since_last.TotalMilliseconds;
+
+                var mms = Math2D.measure_string("pf", snapshots[i].snapshot.to_next.TotalMilliseconds.ToString());
+
+                current_percent = (float)(current_ms / total_ms);
+                current_width = (float)(snapshots[i].snapshot.to_next.TotalMilliseconds / total_ms);
+
+                if (snapshots[i].snapshot.to_next.TotalMilliseconds == 0) {
+                    current_width = (float)((total_ms - current_ms) / total_ms);
+                }
+
+                Draw2D.fill_square(X + border + (int)(raw_w * current_percent), Y + border + ms.Y + 7, (int)(raw_w * current_width), (int)(ms.Y * 2) - (border *2), Draw2D.ColorRandomFromString(snapshots[i].name));
+
+                if (snapshots[i].snapshot.to_next.TotalMilliseconds != 0 && snapshots[i].snapshot.since_last.TotalMilliseconds != 0) {
+                    Draw2D.text_shadow("pf", snapshots[i-1].snapshot.to_next.TotalMilliseconds.ToString(), new Vector2(X + border + (int)(raw_w * current_percent) + (int)(raw_w * current_width) - mms.X, Y + border + ms.Y + 9));
+                }
+            }
+
+
+            EngineState.spritebatch.End();
+        }
+
+    }
     public class frame_probe {
         volatile List<(string name, probe probe)> probes = new List<(string name, probe probe)>();
 
@@ -393,3 +487,4 @@ namespace Magpie.Engine {
         }
     }
 }
+

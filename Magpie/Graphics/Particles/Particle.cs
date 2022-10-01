@@ -20,12 +20,6 @@ namespace Magpie.Graphics.Particles {
         public Vector4 r2;
         public Vector4 r3;
         public Vector4 r4;
-
-        public Vector4 r1_IT;
-        public Vector4 r2_IT;
-        public Vector4 r3_IT;
-        public Vector4 r4_IT;
-
         public Vector3 normal;
 
         VertexDeclaration IVertexType.VertexDeclaration {
@@ -40,11 +34,6 @@ namespace Magpie.Graphics.Particles {
                     new VertexElement(sizeof(float) * 8, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 3),
                     new VertexElement(sizeof(float) * 12, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 4),
 
-                    new VertexElement(sizeof(float) * 16, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 5),
-                    new VertexElement(sizeof(float) * 20, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 6),
-                    new VertexElement(sizeof(float) * 24, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 7),
-                    new VertexElement(sizeof(float) * 28, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 8),
-
                     new VertexElement(sizeof(float) * 32, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 9),
 
                 };
@@ -58,11 +47,6 @@ namespace Magpie.Graphics.Particles {
         [FieldOffset(sizeof(float) * 4)] public Vector4 r2;
         [FieldOffset(sizeof(float) * 8)] public Vector4 r3;
         [FieldOffset(sizeof(float) * 12)] public Vector4 r4;
-
-        [FieldOffset(sizeof(float) * 16)] public Vector4  r1_IT;
-        [FieldOffset(sizeof(float) * 20)] public Vector4  r2_IT;
-        [FieldOffset(sizeof(float) * 24)] public Vector4  r3_IT;
-        [FieldOffset(sizeof(float) * 28)] public Vector4  r4_IT;
 
         [FieldOffset(sizeof(float) * 32)] public Vector3  normal;
     }
