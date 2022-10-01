@@ -11,6 +11,16 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DefineConstants>$(DefineConstants)TRACE;DEBUG;NET;NET6_0;NETCOREAPP</DefineConstants>
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DefineConstants>$(DefineConstants)TRACE;DEBUG;NET;NET6_0;NETCOREAPP</DefineConstants>
+    <Optimize>False</Optimize>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Engine\Controls\ControlBindings.cs" />
   </ItemGroup>

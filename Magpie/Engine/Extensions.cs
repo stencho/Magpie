@@ -1,5 +1,6 @@
 ﻿using Magpie.Graphics;
 using Magpie.Graphics.UI;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -277,5 +278,48 @@ namespace Magpie.Engine {
                 }
             }
         }
+
+
+        #region MATRIX ROWS AND COLUMNS
+        public static Vector4 row1(this Matrix m) {
+          return new Vector4(m.M11, m.M21, m.M31, m.M41);
+        }
+        public static Vector4 row2(this Matrix m) {
+          return new Vector4(m.M12, m.M22, m.M32, m.M42);
+        }
+        public static Vector4 row3(this Matrix m) {
+          return new Vector4(m.M13, m.M23, m.M33, m.M43);
+        }
+        public static Vector4 row4(this Matrix m) {
+          return new Vector4(m.M14, m.M24, m.M34, m.M44);
+        }
+
+        public static void r1(this Matrix m, out float m11, out float m21, out float m31, out float m41) {
+            m11 = m.M11;
+            m21 = m.M21;
+            m31 = m.M31;
+            m41 = m.M41;
+        }
+        public static void r2(this Matrix m, out float m12, out float m22, out float m32, out float m42) {
+            m12 = m.M12;
+            m22 = m.M22;
+            m32 = m.M32;
+            m42 = m.M42;
+        }
+        public static void r3(this Matrix m, out float m13, out float m23, out float m33, out float m43) {
+            m13 = m.M13;
+            m23 = m.M23;
+            m33 = m.M33;
+            m43 = m.M43;
+        }
+        public static void r4(this Matrix m, out float m14, out float m24, out float m34, out float m44) {
+            m14 = m.M14;
+            m24 = m.M24;
+            m34 = m.M34;
+            m44 = m.M44;
+        }
+
+        #endregion
+
     }
 }

@@ -175,6 +175,8 @@ namespace Magpie.Graphics {
                 ContentHandler.resources["fill_gbuffer"].value_fx.CurrentTechnique.Passes[i].Apply();
                 EngineState.graphics_device.DrawUserPrimitives(PrimitiveType.LineStrip, verts, 0, verts.Length - 1);
             }
+
+            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["tint"].SetValue(Color.White.ToVector3());
         }
         
         public static void sphere(Vector3 P, float radius, Color color) {
@@ -403,7 +405,7 @@ namespace Magpie.Graphics {
                 new VertexPositionNormalTexture(new Vector3(-1, -1, 0), -Vector3.UnitZ, new Vector2(0, 1))
             };
 
-        static ushort[] q_indices = { 0, 1, 2, 2, 3, 0 };
+        public static ushort[] q_indices = { 0, 1, 2, 2, 3, 0 };
 
         public static VertexPositionNormalTexture[] tri = new VertexPositionNormalTexture[3] {
                 new VertexPositionNormalTexture(new Vector3(0, 1, 0), -Vector3.UnitZ, new Vector2(0, 0)),

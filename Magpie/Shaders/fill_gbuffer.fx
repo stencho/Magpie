@@ -49,7 +49,7 @@ struct VertexShaderOutput
     float4 Position : POSITION;
     float2 TexCoord : TEXCOORD0;
     float4 Depth : TEXCOORD1;
-	float3 wp : TEXCOORD2;
+	float3 WorldPos : TEXCOORD2;
     float3x3 TBN : TEXCOORD3;
 };
 struct PSO
@@ -105,7 +105,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	output.Depth.y = output.Position.w;
 	output.Depth.z = mul(mul(input.Position, World),View).z;
 
-	output.wp = input.Position.xyz;
+	output.WorldPos = input.Position.xyz;
 
 	output.TBN[0] = normalize(mul(input.Tangent, (float3x3)WVIT));
 	output.TBN[1] = normalize(mul(input.BiTangent, (float3x3)WVIT));
@@ -153,10 +153,10 @@ PSO MainPS(VertexShaderOutput input)
 	//										    0xAA,      0xBB,      0xCC,      0xDD
 
 	float d = 1;
-	float dist = (distance(camera_pos, input.wp)) / (FarClip);
+	float dist = (distance(camera_pos, input.WorldPos)) / (FarClip);
 	float fog_start = 0.85;
 	float fog_end = 1;
-	float3 atmos = color_lerp(atmosphere_color.rgb, sky_color.rgb, clamp(input.wp.y*0.3, 0.0, 1));
+	float3 atmos = color_lerp(atmosphere_color.rgb, sky_color.rgb, clamp(input.WorldPos.y*0.3, 0.0, 1));
 
 	output.Lighting = float4(0,0,0,1);
 

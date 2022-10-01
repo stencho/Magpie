@@ -92,10 +92,9 @@ namespace Magpie.Engine.WorldElements.Brushes {
 
             for (int y = offset.Y; y < offset.Y + size.Y + 1; y++) {
                 for (int x = offset.X; x < offset.X + size.X + 1; x++) {
-                    var data = parent.data[x, y];
-                    if (data > highest_point)
-                        highest_point = data;
-                    if (data < lowest_point)
+                    if (parent.data[x, y] > highest_point)
+                        highest_point = parent.data[x, y];
+                    if (parent.data[x, y] < lowest_point)
                         lowest_point = 0;
                 }
             }
@@ -219,13 +218,11 @@ namespace Magpie.Engine.WorldElements.Brushes {
                     var t = tex_data[x + (y * size.X)].ToVector3();
                     data[x, y] = ((t.X + t.Y + t.Z) / 3f) * (max_height);
 
-                    var h = data[x, y];
+                    if (data[x, y] > highest_point)
+                        highest_point = data[x, y];
 
-                    if (h > highest_point)
-                        highest_point = h;
-
-                    if (h < lowest_point)
-                        lowest_point = h;
+                    if (data[x, y] < lowest_point)
+                        lowest_point = data[x, y];
                 }
             }
         }
@@ -238,13 +235,11 @@ namespace Magpie.Engine.WorldElements.Brushes {
                 for (int x = 0; x < size.X + 1; x++) {
                     data[x, y] = RNG.rng_float * max_height;
 
-                    var h = data[x, y];
+                    if (data[x, y] > highest_point)
+                        highest_point = data[x, y];
 
-                    if (h > highest_point)
-                        highest_point = h;
-
-                    if (h < lowest_point)
-                        lowest_point = h;
+                    if (data[x, y] < lowest_point)
+                        lowest_point = data[x, y];
                 }
             }
         }

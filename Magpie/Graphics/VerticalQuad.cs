@@ -11,10 +11,10 @@ namespace Magpie.Graphics {
         public VertexPositionNormalTexture[] quad => _quad;
 
         public static VertexPositionNormalTexture[] _quad = new VertexPositionNormalTexture[4] {
-                new VertexPositionNormalTexture(new Vector3(-1, 1, 0), -Vector3.UnitZ, new Vector2(0, 0)),
-                new VertexPositionNormalTexture(new Vector3(1, 1, 0), -Vector3.UnitZ, new Vector2(1, 0)),
-                new VertexPositionNormalTexture(new Vector3(1, -1, 0), -Vector3.UnitZ, new Vector2(1, 1)),
-                new VertexPositionNormalTexture(new Vector3(-1, -1, 0), -Vector3.UnitZ, new Vector2(0, 1))
+                new VertexPositionNormalTexture(new Vector3(-1, 1, 0), Vector3.UnitZ,  new Vector2(0, 0)),
+                new VertexPositionNormalTexture(new Vector3(1, 1, 0), Vector3.UnitZ,   new Vector2(1, 0)),
+                new VertexPositionNormalTexture(new Vector3(1, -1, 0), Vector3.UnitZ,  new Vector2(1, 1)),
+                new VertexPositionNormalTexture(new Vector3(-1, -1, 0), Vector3.UnitZ, new Vector2(0, 1))
             };
 
         static ushort[] indices = { 0, 1, 2, 2, 3, 0 };

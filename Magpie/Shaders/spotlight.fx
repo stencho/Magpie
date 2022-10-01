@@ -91,7 +91,7 @@ float4 Phong(float3 Position, float3 N, float radialAttenuation,float SpecularIn
 	float SL = dot(L, LightDirection);
 
 	float4 Shading = 0;
-	if (SL > LightAngleCos && distance(Position.xyz, LightPosition.xyz) <= LightClip) {
+	if (SL >= LightAngleCos && (distance(Position.xyz, LightPosition.xyz)) <= LightClip) {
 		float NL = dot(-N, L);
 		float3 Diffuse = NL * LightColor.xyz;
 		Shading = float4(Diffuse.rgb, 1) * Attenuation;
@@ -113,12 +113,12 @@ float RGBADecode(float4 value) {
 float4 PS(VSO input) : COLOR0 {
 	input.ScreenPosition.xy /= input.ScreenPosition.w;
 
-	float2 UV = 0.5f * (float2(input.ScreenPosition.x, -input.ScreenPosition.y) + 1.0f) - float2(1.0f / GBufferTextureSize.xy);
+	float2 UV = 0.5f * (float2(input.ScreenPosition.x, -input.ScreenPosition.y) + 1.0f);
 	
 	float4 encodedNormal = tex2D(NORMAL,UV);
 	float3 Normal = mul(decode(encodedNormal.xyz), InverseView);
 		
-	float Depth = manualSample(DEPTH,UV, GBufferTextureSize).r;
+	float Depth = tex2D(DEPTH,UV).r;
 
 	float4 Position = 1.0f;
 	Position.xy = input.ScreenPosition.xy;
@@ -135,15 +135,15 @@ float4 PS(VSO input) : COLOR0 {
 	LightScreenPos /= Ll;
 	
 	float2 LUV = 0.5 * (float2(LightScreenPos.x, -LightScreenPos.y) + 1);
-	float2 LUVcookie = 0.5 * (float2(LSPcookie.x, -LSPcookie.y) + 1);
+	float2 LUVcookie =  (0.5 * (float2(LSPcookie.x, -LSPcookie.y) + 1));
 
-	float lZ = manualSample(SHADOW, LUV, shadowMapSize);
+	float lZ = tex2D(SHADOW, LUV);
 
 	float Attenuation = tex2D(COOKIE, LUVcookie.xy).r;
 
 	float ShadowFactor = 1;
 	if(Shadows) {
-		float len = max(0.01f, length(LightPosition - Position)) / LightClip;
+		float len = max(0.001f, distance(LightPosition, Position)) / LightClip;
 		ShadowFactor = (lZ * exp(-(LightClip * 0.5f) * (len - DepthBias)));
 	}
 

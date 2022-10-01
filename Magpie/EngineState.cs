@@ -18,7 +18,18 @@ namespace Magpie {
         public static GBuffer buffer;
         public static Camera camera;
         
-        public static XYPair resolution => gvars.get_xypair("resolution");
+        //rename resolution to internal_resolution
+        //split resolution changes into external and internal
+        //make output_resolution's gvar's change_action point at the external one
+        //make internal_resolution's gvar's change action point at the internal
+
+        //should just work? I think everything accounts for this basically
+        //well maybe not EVERYTHING
+
+        public static XYPair resolution => gvars.get_xypair("internal_resolution");
+        public static XYPair output_resolution => gvars.get_xypair("output_resolution");
+        public static Vector2 aspect_ratios => new Vector2((float)resolution.X / (float)resolution.Y, (float)resolution.Y / (float)resolution.X);
+
         public static GameWindow window;
         public static GraphicsDeviceManager graphics;
         public static GraphicsDevice graphics_device;
@@ -45,8 +56,8 @@ namespace Magpie {
 
             Draw2D.init();
 
-            gvars.add_gvar("resolution", gvar_data_type.XYPAIR, game_resolution);
-            gvars.add_change_action("resolution", change_resolution);
+            gvars.add_gvar("internal_resolution", gvar_data_type.XYPAIR, game_resolution);
+            gvars.add_change_action("internal_resolution", apply_resolution);
 
             gvars.add_gvar("test_gvar", gvar_data_type.FLOAT, 5f);
             
@@ -69,7 +80,7 @@ namespace Magpie {
             //gvars.add_gvar("")
         }
 
-        static void change_resolution() {
+        static void apply_resolution() {
             graphics.PreferredBackBufferWidth = resolution.X;
             graphics.PreferredBackBufferHeight = resolution.Y;
 
@@ -86,7 +97,7 @@ namespace Magpie {
             graphics.ApplyChanges();
 
             //resolution = new XYPair(X, Y);
-            gvars.set("resolution", new XYPair(X, Y));
+            gvars.set("internal_resolution", new XYPair(X, Y));
             buffer.change_resolution(graphics_device, X, Y);            
         }
 

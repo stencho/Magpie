@@ -326,7 +326,8 @@ namespace Magpie.Engine {
                         px = x / 255f;
                         py = i / 255f;
 
-                        float t = 0.4f - Vector2.Distance(Vector2.One * 0.5f, new Vector2(px, py));
+                        float t = 0.5f - Vector2.Distance(Vector2.One * 0.5f, new Vector2(px, py));
+                        t *= 0.45f;
 
                         int o = (int)((t*6) * 255);
                         glowData[(i * 256) + x] = Color.FromNonPremultiplied(o,o,o, 255);

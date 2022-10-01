@@ -84,8 +84,8 @@ namespace Magpie.Graphics {
             shader_size_scale = Vector2.One;
 
             rt_diffuse = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
-            rt_normal = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Vector4, DepthFormat.None);
-            rt_depth = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
+            rt_normal = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
+            rt_depth = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.PlatformContents);
             //TODO IMPLEMENT ALPHA TEST PASS
             //THIS COULD BE USED ALONGSIDE LIGHT SHADERS TO GET FREE SHADOWS EVEN WITH POINT LIGHTS
             //rt_alpha = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Vector4, DepthFormat.Depth24Stencil8);
@@ -142,14 +142,14 @@ namespace Magpie.Graphics {
             gbuffer.shader_size_scale = Vector2.One;
             
             gbuffer.rt_diffuse = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
-            gbuffer.rt_normal = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None);
-            gbuffer.rt_depth = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
+            gbuffer.rt_normal = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
+            gbuffer.rt_depth = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.PlatformContents);
             gbuffer.rt_lighting = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
 
             gbuffer.rt_final = new RenderTarget2D(gd, (int)(width), (int)(height), false, SurfaceFormat.Color, DepthFormat.None);
             gbuffer.rt_final_half = new RenderTarget2D(gd, (int)(width / 2), (int)(height / 2), false, SurfaceFormat.Color, DepthFormat.None);
 
-            gbuffer.rt_2D = new RenderTarget2D(gd, (int)(width), (int)(height), false, SurfaceFormat.Color, DepthFormat.None);
+            gbuffer.rt_2D = new RenderTarget2D(gd, (int)(width), (int)(height), false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
 
             gbuffer.buffer_targets[0] = gbuffer.rt_diffuse;
             gbuffer.buffer_targets[1] = gbuffer.rt_normal;

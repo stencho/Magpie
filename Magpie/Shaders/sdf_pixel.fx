@@ -17,7 +17,14 @@ float4 inside_color;
 float4 outside_color;
 float4 outline_color; 
 
-sampler2D SDFTEX : register(s0);
+sampler2D SDFs : register(s0) {	
+	texture = <SDFTEX>;
+	MINFILTER = POINT;
+	MAGFILTER = POINT;
+	MIPFILTER = POINT;
+	ADDRESSU = WRAP;
+	ADDRESSV = WRAP;
+};
 
 bool enable_outside_overlay = false;
 bool enable_inside_overlay = false;
@@ -54,18 +61,42 @@ float4x4 World;
 float4x4 View;
 float4x4 Projection;
 
-//vestigial vs
-float4 VS(float4 Position : POSITION0) : POSITION0
-{
-	float4x4 wvp = mul(World, mul(View, Projection));
 
-	return mul(Position, wvp);
+struct VertexShaderInput
+{
+	float4 Position : POSITION0;
+    float2 TexCoord : TEXCOORD0;
+};
+
+struct VertexShaderOutput
+{
+    float4 Position : POSITION;
+    float2 TexCoord : TEXCOORD0;
+};
+struct PSO
+{
+    float4 Color : COLOR0;
+	float Depth : SV_Depth;
+};
+
+
+//vestigial vs
+VertexShaderOutput VS(VertexShaderInput input) {
+	VertexShaderOutput output = (VertexShaderOutput)0;
+
+	float4x4 wvp = mul(World, mul(View, Projection));
+	output.Position = mul(input.Position, wvp);
+    output.TexCoord = input.TexCoord;
+
+	return output;
 }
 
 //Pixel Shader
-float4 PS(float4 position : SV_Position, float4 color : COLOR0, float2 TexCoords : TEXCOORD0) : COLOR0
+PSO PS(float4 position : SV_Position, float4 color : COLOR0, float2 TexCoords : TEXCOORD0)
 {
-	float a = (tex2D(SDFTEX, TexCoords).r);	
+	PSO output = (PSO)0;
+
+	float a = (tex2D(SDFs, TexCoords).r);	
 
 	float4 rgba_inside_overlay = tex2D(OVERLAY_INSIDE, TexCoords * inside_tile_count).rgba; 
 	float4 rgba_outside_overlay = tex2D(OVERLAY_OUTSIDE, TexCoords * outside_tile_count).rgba; 		
@@ -101,8 +132,11 @@ float4 PS(float4 position : SV_Position, float4 color : COLOR0, float2 TexCoords
 	if (a > clamp(alpha_scissor, 0.001, 1)) {
 		rgba = inside_color * rgba_inside_overlay; 
 	}
+	
+	output.Color = rgba * float4(1,1,1, opacity);
+	output.Depth = 0;
 
-	return rgba * float4(1,1,1, opacity);
+	return output;
 }
 
 

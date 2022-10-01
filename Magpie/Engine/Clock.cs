@@ -127,6 +127,7 @@ namespace Magpie.Engine {
 
 
         public void draw(int x, int y, int graph_width, out int total_width, out int total_height) {
+
             total_width = 0;
             total_height = 0;
             if (probes.Count <= 0) return;
@@ -143,6 +144,7 @@ namespace Magpie.Engine {
             lock (probes) {
                 foreach ((string name, probe) v in probes) {
                     var ms = Math2D.measure_string("pf", v.name);
+
                     if (graph_width + ms.X + (ms1.X * 3) > xx)
                         xx = graph_width + ms.X + (ms1.X * 3);
                     y_tot += ms.Y + 2;
@@ -151,15 +153,18 @@ namespace Magpie.Engine {
 
             y_tot += ms1.Y + 2;
 
-            Draw2D.fill_square(x - border, y - border, xx + (border * 2), y_tot + (border * 2), Color.FromNonPremultiplied(0, 0, 0, 128));
+            EngineState.spritebatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap);
+
+            Draw2D.fill_square(x - border, y - border, xx + (border * 2), y_tot + (border * 2), 
+                Color.FromNonPremultiplied(0, 0, 0, 128), 1);
 
             total_width = xx + (border * 2);
             total_height = y_tot + (border * 2);
 
             Draw2D.line(x + (ms1.X * 2), y + y_tot - (ms1.Y), x + graph_width, y + y_tot - (ms1.Y), 1, Color.DeepPink);
 
-            Draw2D.fill_square(x + (ms1.X * 2)-2, y + y_tot - (int)(ms1.Y) - 1, 2, (int)(ms1.Y) + 2, Color.White);
-            Draw2D.fill_square(x + graph_width - 1, y + y_tot - (int)(ms1.Y) - 1, 2, (int)(ms1.Y) + 2, Color.White);
+            Draw2D.fill_square(x + (ms1.X * 2)-2, y + y_tot - (int)(ms1.Y) - 1, 2, (int)(ms1.Y) + 2, Color.White, 0);
+            Draw2D.fill_square(x + graph_width - 1, y + y_tot - (int)(ms1.Y) - 1, 2, (int)(ms1.Y) + 2, Color.White , 0);
 
             Draw2D.text_shadow("pf", "0", new Vector2(x, y + y_tot - (ms1.Y)), Color.White);
             Draw2D.text_shadow("pf", string.Format("{0:F2}", since_start_of_frame), new Vector2(x + ms1.X + graph_width, y + y_tot - (ms1.Y)), Color.White);
@@ -175,12 +180,14 @@ namespace Magpie.Engine {
                     c = Draw2D.ColorRandomFromString(v.name);
                     var ms = Math2D.measure_string("pf", v.name);
 
-                    Draw2D.fill_circle(
-                        new Vector2(graph_width + x + (ms1.X * 0.5f) + (ms1.X * 1), y + (ms1.Y * 0.5f) + yy + 1),
-                        ms1.X / 2, c);
-
+                    //Draw2D.SDFCircle(new Vector2(graph_width + x + (ms1.X * 0.5f) + (ms1.X * 1), y + (ms1.Y * 0.5f) + yy + 1), ms1.X, c);
+                    
+                   // Draw2D.fill_circle(
+                   //     new Vector2(graph_width + x + (ms1.X * 0.5f) + (ms1.X * 1), y + (ms1.Y * 0.5f) + yy + 1),
+                   //     ms1.X / 2, c);
+                    
                     Draw2D.text_shadow("pf", v.name,
-                        new Vector2(graph_width + x + (ms1.X * 3), y + yy + 1),
+                        new Vector2(graph_width + x + (ms1.X * 2.5f), y + yy),
                         Color.White);
 
                     var f = (v.probe.frame_pos / since_start_of_frame);
@@ -203,36 +210,36 @@ namespace Magpie.Engine {
                             (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
                             (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2))),
                             (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
-                            1, c);
+                            2, c);
 
                         Draw2D.line(
                             (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
-                            (int)(y + (ms1.Y * 0.5f) + yy + 1),
+                            (int)(y + (ms1.Y * 0.5f) + yy),
                             (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
                             (int)(y + (ms1.Y * 0.5f) + y_tot - border - 2),
-                            1, c);
+                            2, c);
 
                         Draw2D.line(
                             (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2))),
                             (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
                             (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2)) + ms1.X),
                             (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
-                            1, c);
+                            2, c);
                     } else {
                         Draw2D.line(
                             (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2))),
                             (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
                             (int)(x + (ms1.X * 2) + (graph_width - (ms1.X * 2)) + ms1.X),
                             (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
-                            1, c);
+                            2, c);
 
 
                         Draw2D.line(
                             (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
-                            (int)Math.Round(y + (ms1.Y * 0.5f) + yy + 1),
+                            (int)Math.Round(y + (ms1.Y * 0.5f) + yy),
                             (int)(x + (ms1.X * 2) + ((graph_width - (ms1.X * 2)) * f)),
                             (int)Math.Round(y + (ms1.Y * 0.5f) + y_tot - border - 1),
-                            1, c);
+                            2, c);
                     }
 
                     last_c = c;
@@ -240,7 +247,23 @@ namespace Magpie.Engine {
                     yy += ms1.Y + 2;
                     count++;
                 }
-            }            
+            }
+
+            yy = 0;
+            lock (probes) {
+                foreach ((string name, probe) v in probes) {
+                    var ms = Math2D.measure_string("pf", v.name);
+                    Draw2D.SDFCircle(new Vector2(graph_width + x + (ms1.X * 0.5f) + (ms1.X * 1), y + (ms1.Y * 0.5f) + yy + 1), 
+                        ms1.X/2,
+                    Draw2D.ColorRandomFromString(v.name));
+
+                    if (graph_width + ms.X + (ms1.X * 3) > xx)
+                        xx = graph_width + ms.X + (ms1.X * 3);
+                    yy += ms.Y + 2;
+                }
+            }
+
+            EngineState.spritebatch.End();
         }
     }
 

@@ -72,7 +72,8 @@ namespace Magpie.Graphics {
 
         public Color sky_color = Color.Lerp(Color.Purple, Color.LightSkyBlue, 0.2f);
 
-        public Vector3 sun_direction => sun_orientation.Forward;
+        public Vector3 sun_direction => Vector3.Down + Vector3.Right + Vector3.Forward;
+
         private Matrix sun_orientation = Matrix.Identity * Matrix.CreateRotationX(MathHelper.ToRadians(-75f)) * Matrix.CreateRotationZ(MathHelper.ToRadians(-15f));
         public Color current_color = Color.White;
 
@@ -153,21 +154,25 @@ namespace Magpie.Graphics {
 
         public void configure_dlight_shader(Effect e_directionallight) {
 
-            e_directionallight.Parameters["fog"].SetValue(true);
+            //e_directionallight.Parameters["fog"].SetValue(true);
             //e_directionallight.Parameters["fog_start"].SetValue(0.5f);
 
             //e_directionallight.Parameters["camera_pos"].SetValue(EngineState.camera.position);
             //e_directionallight.Parameters["FarClip"].SetValue(EngineState.camera.far_clip);
 
             e_directionallight.Parameters["NORMAL"].SetValue(EngineState.buffer.rt_normal);
-            e_directionallight.Parameters["DEPTH"].SetValue(EngineState.buffer.rt_depth);
+            //e_directionallight.Parameters["DEPTH"].SetValue(EngineState.buffer.rt_depth);
 
             e_directionallight.Parameters["InverseView"].SetValue(Matrix.Invert(EngineState.camera.view));
+
+            e_directionallight.Parameters["AtmosphereColor"].SetValue(lerps.get_color_at((float)Scene.sun_moon.current_day_value).ToVector3());
+            e_directionallight.Parameters["AtmosphereIntensity"].SetValue(0.8f);
 
             e_directionallight.Parameters["LightColor"].SetValue(lerps.get_color_at((float)Scene.sun_moon.current_day_value).ToVector3());
             e_directionallight.Parameters["LightIntensity"].SetValue(1f);
 
             e_directionallight.Parameters["LightDirection"].SetValue(sun_direction);
+            e_directionallight.Parameters["camera_pos"].SetValue(EngineState.camera.position);
 
             e_directionallight.CurrentTechnique.Passes[0].Apply();
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Scene.quad.vertex_buffer.VertexCount);           
@@ -421,6 +426,8 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
             e_gbuffer.Parameters["fog"].SetValue(false);
+
+            render_after_world();
         }
 
         public static void draw_lighting(IEnumerable<DynamicLight> lights) {
@@ -470,12 +477,12 @@ namespace Magpie.Graphics {
                         e_spotlight.Parameters["LightDirection"].SetValue(((SpotLight)light).orientation.Forward);
                         e_spotlight.Parameters["LightAngleCos"].SetValue(((SpotLight)light).angle_cos);
                         e_spotlight.Parameters["LightClip"].SetValue(((SpotLight)light).far_clip);
-                        e_spotlight.Parameters["DepthBias"].SetValue(0.0002f);
-                        e_spotlight.Parameters["shadowMapSize"].SetValue((float)((SpotLight)light).depth_map_resolution);
+                        e_spotlight.Parameters["DepthBias"].SetValue(0.01f);
+                        //e_spotlight.Parameters["shadowMapSize"].SetValue((float)((SpotLight)light).depth_map_resolution);
 
                         e_spotlight.Parameters["Shadows"].SetValue(true);
 
-                        e_spotlight.Parameters["GBufferTextureSize"].SetValue(EngineState.resolution.ToVector2());
+                        //e_spotlight.Parameters["GBufferTextureSize"].SetValue(EngineState.resolution.ToVector2());
 
                         EngineState.graphics_device.SetVertexBuffer(ContentHandler.resources["cone"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer);
                         EngineState.graphics_device.Indices = ContentHandler.resources["cone"].value_gfx.Meshes[0].MeshParts[0].IndexBuffer;
@@ -511,8 +518,7 @@ namespace Magpie.Graphics {
                         e_pointlight.Parameters["Shadows"].SetValue(false);
                         e_pointlight.Parameters["quantized"].SetValue(quantized_shading);
 
-                        e_pointlight.Parameters["GBufferTextureSize"].SetValue(EngineState.resolution.ToVector2());
-
+                        //e_pointlight.Parameters["GBufferTextureSize"].SetValue(EngineState.resolution.ToVector2());
 
                         EngineState.graphics_device.SetVertexBuffer(ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer);
                         EngineState.graphics_device.Indices = ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].IndexBuffer;
@@ -632,7 +638,7 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
 
             EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
-            EngineState.graphics_device.BlendState = BlendState.Opaque;
+            EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
 
             e_skybox.Parameters["atmosphere_color"].SetValue(sun_moon.atmosphere_color.ToVector4());
             e_skybox.Parameters["sky_color"].SetValue(sun_moon.sky_color.ToVector4());
@@ -668,7 +674,10 @@ namespace Magpie.Graphics {
         static float SL;
         static Vector3 sdiff;
         static float skyCameraToLight;
-        public static void draw_world_immediate(World world) {
+
+        public static Action render_after_world;
+
+        public static async void draw_world_immediate(World world) {
             Clock.frame_probe.set("draw_world_immediate");
             total_draw_objects = 0;
             //STILL NEED:
@@ -822,6 +831,8 @@ namespace Magpie.Graphics {
 
             e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
             e_gbuffer.Parameters["fog"].SetValue(false);
+
+            render_after_world();
 
             Clock.frame_probe.set("draw_lights");
             //draw lighting

@@ -449,6 +449,10 @@ namespace Magpie.Graphics {
             sq_f = new Rectangle(tlx, tly, sizex, sizey);
             EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, sq_f, color);
         }
+        public static void fill_square(int tlx, int tly, int sizex, int sizey, Color color, float depth) {
+            sq_f = new Rectangle(tlx, tly, sizex, sizey);
+            EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, sq_f, null, color, 0f, Vector2.Zero, SpriteEffects.None, depth);
+        }
         public static void fill_square(XYPair top_left, XYPair size, Color color) {
             sq_f = new Rectangle(top_left.X, top_left.Y, size.X, size.Y);
             EngineState.spritebatch.Draw(ContentHandler.resources["OnePXWhite"].value_tx, sq_f, color);
@@ -576,30 +580,39 @@ namespace Magpie.Graphics {
             var p = (position - (Vector2.One * radius)).ToXYPair();
             var s = ((Vector2.One * radius) * 2).ToXYPair();
 
-
-            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["alpha_scissor"].SetValue(0.5f);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["alpha_scissor"].SetValue(0f);
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["invert_map"].SetValue(false);
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["opacity"].SetValue(1f);
 
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["enable_outline"].SetValue(false);
-            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["inside_color"].SetValue(color.ToVector3());
-            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outside_color"].SetValue(Color.Transparent.ToVector3());
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outline_width"].SetValue(0f);
+
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["inside_color"].SetValue(color.ToVector4());
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outside_color"].SetValue(Color.Transparent.ToVector4());
 
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["inside_tile_count"].SetValue(Vector2.One);
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outside_tile_count"].SetValue(Vector2.One);
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["outline_tile_count"].SetValue(Vector2.One);
 
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["enable_inside_overlay"].SetValue(false);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["enable_outside_overlay"].SetValue(false);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["enable_outline_overlay"].SetValue(false);
+
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["OVERLAY_INSIDE"].SetValue(ContentHandler.resources["OnePXWhite"].value_tx);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["OVERLAY_OUTSIDE"].SetValue(ContentHandler.resources["OnePXWhite"].value_tx);
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["OVERLAY_OUTLINE"].SetValue(ContentHandler.resources["OnePXWhite"].value_tx);
+
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["SDFTEX"].SetValue(
+                ContentHandler.resources["sdf_circle"].value_tx);
+
             EngineState.graphics_device.SetVertexBuffer(Scene.quad.vertex_buffer);
             EngineState.graphics_device.Indices = Scene.quad.index_buffer;
 
-            EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
+            var v3pos = (position / EngineState.resolution.ToVector2()) * (Vector2.UnitX + (-Vector2.UnitY));
+            var v3size = new Vector3((Vector2.One * radius * 2) / EngineState.resolution.ToVector2(), 0);
 
-            var v3pos = new Vector3((position / EngineState.resolution.ToVector2()) * (Vector2.UnitX + (-Vector2.UnitY)), 1);
-            var v3size = new Vector3((Vector2.One * radius * 2) / EngineState.resolution.ToVector2(), 1);
-            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["SDFTEX"].SetValue(ContentHandler.resources["sdf_circle"].value_tx);
-            
-            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["World"].SetValue(
-                Matrix.CreateTranslation(v3pos - (v3size / 2)) * Matrix.CreateScale(v3size));
+            ContentHandler.resources["sdf_pixel"].value_fx.Parameters["World"].SetValue(Matrix.CreateScale(v3size) * 
+                Matrix.CreateTranslation(new Vector3(new Vector2(-1f,1f) + v3pos * 2, 0)));
 
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["View"].SetValue(Matrix.Identity);
             ContentHandler.resources["sdf_pixel"].value_fx.Parameters["Projection"].SetValue(Matrix.Identity);

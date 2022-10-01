@@ -21,8 +21,8 @@ sampler GBuffer1 = sampler_state {
 	MINFILTER = POINT;
 	MAGFILTER = POINT;
 	MIPFILTER = POINT;
-	ADDRESSU = WRAP;
-	ADDRESSV = WRAP;
+	ADDRESSU = CLAMP;
+	ADDRESSV = CLAMP;
 };
 sampler GBuffer2 = sampler_state {
 	texture = <DEPTH>;
@@ -72,6 +72,7 @@ float4 manualSample(sampler Sampler, float2 UV, float2 textureSize)
 	float2 lerps = frac(texelpos);
 	float texelSize = 1.0 / textureSize;
 	float4 sourcevals[4];
+
 	sourcevals[0] = tex2D(Sampler, UV);
 	sourcevals[1] = tex2D(Sampler, UV + float2(texelSize, 0));
 	sourcevals[2] = tex2D(Sampler, UV + float2(0, texelSize));
@@ -80,6 +81,7 @@ float4 manualSample(sampler Sampler, float2 UV, float2 textureSize)
 	float4 interpolated = lerp(lerp(sourcevals[0], sourcevals[1], lerps.x),
 		lerp(sourcevals[2], sourcevals[3], lerps.x),
 		lerps.y);
+
 	return interpolated;
 }
 
@@ -184,11 +186,10 @@ float4 PS(VSO input) : COLOR0
 {
 	input.ScreenPosition.xy /= input.ScreenPosition.w;
 
-	float2 UV = 0.5f * (float2(input.ScreenPosition.x, -input.ScreenPosition.y) + 1.0f) - float2(1.0f / GBufferTextureSize.xy);
+	float2 UV = 0.5f * (float2(input.ScreenPosition.x, -input.ScreenPosition.y) + 1.0f);// - (float2(1.0f / GBufferTextureSize.xy) * 0.5);
 
-	float4 encodedNormal = manualSample(GBuffer1, UV, GBufferTextureSize);
+	float4 encodedNormal = tex2D(GBuffer1, UV); //(GBuffer1, UV, GBufferTextureSize);
 	float3 Normal = mul(decode(encodedNormal.xyz), InverseView);
-
 
 	float Depth = tex2D(GBuffer2, UV).x;
 

@@ -31,9 +31,9 @@ namespace Magpie {
             test_hf = new SegmentedTerrain(Vector3.Zero, 1000, 5);
 
             test_light = new SpotLight();
-            test_light2 = new SpotLight();
-            test_light2.position += Vector3.Left * 14f;
-            test_light2.light_color = Color.LightPink;
+            //test_light2 = new SpotLight();
+            //test_light2.position += Vector3.Left * 14f;
+            //test_light2.light_color = Color.LightPink;
             
             for (int i = 0; i < 20; i++) {
                  current_map.lights.Add(new PointLight(
@@ -212,7 +212,7 @@ namespace Magpie {
                     last_fps[last_fps.Length - 1] = 1000.0 / last_ticks[last_ticks.Length - 1];
                 }
 
-                internal_frame_probe.set("frame_sleep");
+                internal_frame_probe.set("sleep");
                 while (running) {
                     ts = (DateTime.Now - dt);
 
@@ -253,9 +253,18 @@ namespace Magpie {
                 EngineState.game.Exit();
             }
 
-            current_map.lights[current_map.lights.Count-1].position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.6f) + (EngineState.camera.orientation.Down * 0.2f);
-            ((SpotLight)current_map.lights[current_map.lights.Count-1]).orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
+            
+            current_map.lights[current_map.lights.Count-1].position 
+                = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.8f) + (EngineState.camera.orientation.Down * 0.2f);
+            ((SpotLight)current_map.lights[current_map.lights.Count-1]).orientation 
+                = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
 
+            /*
+            current_map.lights[current_map.lights.Count - 1].position
+                = EngineState.camera.position;
+            ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation
+                = EngineState.camera.orientation;
+            */
 
             //BUILD LIST OF VISIBLE OBJECTS HERE THAT SEEMS TO NOT BE A HUGE ISSUE WITH THE GC
 
@@ -286,15 +295,15 @@ namespace Magpie {
                     ((SegmentedTerrain)brush).update_visible_terrain();
             }
 
-            //current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
-            //Scene.build_lighting(current_map.lights, current_scene);
-            //Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
-            //Scene.draw(current_scene);
-            //Scene.draw_lighting(current_map.lights);
+            current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
+            Scene.build_lighting(current_map.lights, current_scene);
+            Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
+            Scene.draw(current_scene);
+            Scene.draw_lighting(current_map.lights);
 
 
 
-            Scene.draw_world_immediate(this);
+            //Scene.draw_world_immediate(this);
 
             frame_count++;
         }

@@ -202,6 +202,12 @@
 /processorParam:TextureFormat=Compressed
 /build:gfx/sphere.FBX
 
+#begin sha/particle.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:sha/particle.fx
+
 #begin snd/hchv.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
