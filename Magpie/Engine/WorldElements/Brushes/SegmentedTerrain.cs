@@ -275,8 +275,31 @@ namespace Magpie.Engine.Brushes {
                 hit_normal = Vector3.Zero,
                 point = Vector3.Zero
             };
-
-
+            /*
+            foreach ((TerrainSegment, int, int, float) xy in visible_terrain) {
+                if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, xy.Item1.aabb.Min, xy.Item1.aabb.Max, out _)) {
+                    Draw3D.cube(xy.Item1.aabb, Color.HotPink);
+                    for (int y = 0; y < 2; y++) {
+                        for (int x = 0; x < 2; x++) {
+                            if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, xy.Item1.octree[x, y].aabb.Min, xy.Item1.octree[x, y].aabb.Max, out _)) {
+                                Draw3D.cube(xy.Item1.octree[x, y].aabb, Color.Red);
+                                foreach (OctreeArea oa in xy.Item1.octree[x, y].octree) {
+                                    if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, oa.aabb.Min, oa.aabb.Max, out _)) {
+                                        Draw3D.cube(oa.aabb, Color.ForestGreen);
+                                        foreach (OctreeArea oa2 in oa.octree) {
+                                            if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction,
+                                                oa2.aabb.Min, oa2.aabb.Max, out _)) {
+                                                Draw3D.cube(oa2.aabb, Color.Blue);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            */
             foreach ((TerrainSegment, int, int, float) xy in visible_terrain) {
                 (int, int) current_index = (xy.Item2, xy.Item3);
                 raycast_result current_result = new raycast_result();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,9 +14,37 @@ using static Magpie.Graphics.Instancing;
 namespace Magpie.Graphics.Particles {
     public class PointCloud {
         public class point_in_cloud {
+            public Vector3 point_previous => _point_prev;
+            Vector3 _point_prev;
             public Vector3 point;
+
+            public bool lerp = false;
+            public Vector3 lerp_to;
+            public float lerp_speed;
+
             public Matrix orientation;
+
+            public bool alive = true;
+            public SpriteEffects flipmode = SpriteEffects.None;
+            public Color tint = Color.White;
+            public float scale = 1f;
+            //public float opacity = 1f;
+
             public point_in_cloud(Vector3 p) { point = p; orientation = Matrix.Identity; }
+
+            public Action<point_in_cloud, PointCloud> behaviour;
+
+            public void update(PointCloud parent) {
+                if (!alive) return;
+
+                _point_prev = point;
+                behaviour(this, parent);
+
+                if (lerp) {
+                    point = Vector3.LerpPrecise(point, lerp_to, lerp_speed);
+                }
+            }
+
         }
 
         public point_in_cloud[] points;
@@ -32,7 +61,28 @@ namespace Magpie.Graphics.Particles {
             _point_count = points;
 
             create_random_on_cube(Vector3.Up * 65f + (Vector3.Forward * 70), 25f);
+
             //create_uniform_on_line(Vector3.Up * 65f + (Vector3.Forward * 70), Vector3.Up * 65f);
+        }
+        public PointCloud(int points, Action<point_in_cloud, PointCloud> point_brain) {
+            this.points = new point_in_cloud[points];
+            vert_positions = new InstanceData[points];
+            distances = new float[points];
+            _point_count = points;
+
+            create_random_within_cube(Vector3.Up * 65f + (Vector3.Forward * 70), 25f);
+
+            for (int i = 0; i < this.points.Length; i++) {
+                this.points[i].scale = RNG.rng_float;
+                this.points[i].behaviour = point_brain;
+            }
+            //create_uniform_on_line(Vector3.Up * 65f + (Vector3.Forward * 70), Vector3.Up * 65f);
+        }
+
+        public void update() {
+            for (int i = 0; i < points.Length; i++) {
+                points[i].update(this);
+            }
         }
 
         public void draw_debug() {
@@ -85,8 +135,10 @@ namespace Magpie.Graphics.Particles {
                 }
 
                 points[i] = new point_in_cloud(v + center);
+
             }
         }
+
 
         void create_random_on_sphere(Vector3 center, float radius) {
             for (int i = 0; i < points.Length; i++) {
@@ -125,7 +177,7 @@ namespace Magpie.Graphics.Particles {
             //for (int i = 0; i < _point_count; i++) {
             int i = 0;
             foreach(point_in_cloud p in points.OrderByDescending(a => Vector3.Distance(EngineState.camera.position, a.point))) { 
-                p.orientation = Matrix.CreateBillboard(p.point, EngineState.camera.position, EngineState.camera.orientation.Up, EngineState.camera.orientation.Forward);
+                p.orientation = Matrix.CreateScale(p.scale) * Matrix.CreateBillboard(p.point, EngineState.camera.position, EngineState.camera.orientation.Up, EngineState.camera.orientation.Forward);
 
                 p.orientation.r1(out vert_positions[i].r1.X, out vert_positions[i].r1.Y, out vert_positions[i].r1.Z, out vert_positions[i].r1.W);
                 p.orientation.r2(out vert_positions[i].r2.X, out vert_positions[i].r2.Y, out vert_positions[i].r2.Z, out vert_positions[i].r2.W);
@@ -139,6 +191,7 @@ namespace Magpie.Graphics.Particles {
                 //mtmp.r4(out vert_positions[i].r4_IT.X, out vert_positions[i].r4_IT.Y, out vert_positions[i].r4_IT.Z, out vert_positions[i].r4_IT.W);
 
 
+                vert_positions[i].tint = Color.FromNonPremultiplied((int)p.point.X, (int)p.point.Y, (int)p.point.Z, 255);
                 vert_positions[i].normal = Vector3.Normalize(p.orientation.Forward);
 
                 i++;
@@ -146,7 +199,6 @@ namespace Magpie.Graphics.Particles {
 
             instance_buffer = new DynamicVertexBuffer(EngineState.graphics_device, InstanceDataDec.VertexDeclaration, vert_positions.Length, BufferUsage.WriteOnly);
             instance_buffer.SetData(vert_positions);
-
             
         }
 

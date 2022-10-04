@@ -148,12 +148,6 @@ namespace Magpie {
                 }
 
                 internal_frame_probe.set("lights");
-                lock (current_map.lights) {
-                    foreach (DynamicLight light in current_map.lights) {
-                        lock(light)
-                            light.update();
-                    }
-                }
 
                 internal_frame_probe.set("brushes");
                 lock (current_map.brushes.Values) {
@@ -204,10 +198,6 @@ namespace Magpie {
                     PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
                     PhysicsSolver.finalize_collisions(current_map);
                 }
-
-                EngineState.camera.update();
-                EngineState.camera.update_projection(EngineState.resolution);
-
 
                 current_map.lights[current_map.lights.Count - 1].position
                     = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.3f) + (EngineState.camera.orientation.Down * 0.4f) + (EngineState.camera.orientation.Forward * 0.3f);
@@ -262,7 +252,13 @@ namespace Magpie {
                 EngineState.game.Exit();
             }
 
-            
+
+            lock (current_map.lights) {
+                foreach (DynamicLight light in current_map.lights) {
+                    lock (light)
+                        light.update();
+                }
+            }
 
             /*
             current_map.lights[current_map.lights.Count - 1].position

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Magpie.Graphics.Particles.PointCloud;
 
 namespace Magpie.Engine {
     public static class RNG {
@@ -23,6 +24,10 @@ namespace Magpie.Engine {
         public static Vector3 rng_v3 => new Vector3(rng_float, rng_float, rng_float);
         public static Vector3 rng_v3_by_v3(Vector3 input) { return new Vector3(input.X * rng_float, input.Y * rng_float, input.Z * rng_float); }
         public static Vector3 rng_v3_neg_one_to_one => new Vector3(rng_float_neg_one_to_one, rng_float_neg_one_to_one, rng_float_neg_one_to_one);
+
+        public static Vector3 rng_v3_near_v3(Vector3 center, float radius) { return center + (Vector3.Normalize(RNG.rng_v3_neg_one_to_one) * radius); } 
+
+        
 
         public static double rng_double => _rng.NextDouble();
 

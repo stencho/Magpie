@@ -624,6 +624,13 @@ namespace Magpie.Graphics {
             EngineState.spritebatch.Draw(tex, offset, null, Color.White, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0f);
             EngineState.spritebatch.End();
         }
+        public static void spritebatch_draw_to_screen(Vector2 offset, Vector2 scale, Texture2D tex) {
+            EngineState.graphics_device.SetRenderTarget(null);
+            EngineState.spritebatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, DepthStencilState.None, null, null, null);
+            EngineState.spritebatch.Draw(tex, offset, null, Color.White, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            EngineState.spritebatch.End();
+        }
+
 
         public static void clear_all_and_draw_skybox(Camera camera, GBuffer graphics_buffer) {            
 
@@ -997,7 +1004,7 @@ namespace Magpie.Graphics {
 
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
 
-            spritebatch_draw_to_screen(Vector2.Zero, EngineState.buffer.rt_final);
+            spritebatch_draw_to_screen(Vector2.Zero, Vector2.One / gvars.get_float("super_resolution_scale"),  EngineState.buffer.rt_final);
             
             if (_screenshot) {
                 if (!Directory.Exists("scr")) Directory.CreateDirectory("scr");

@@ -61,6 +61,14 @@ namespace Magpie.Graphics {
 
             CreateInPlace(gd, W, H, 1, false);
         }
+        public void change_resolution_super(GraphicsDevice gd, int W, int H, float super_res_scale) {
+            _width = W;
+            _height = H;
+
+
+            CreateInPlace(gd, W, H, super_res_scale, false);
+        }
+
 
         public void CreateInPlace(GraphicsDevice gd, int width, int height, float res_scale = 1.0f, bool fxaa = false) {
             buffer_targets = new RenderTargetBinding[4];

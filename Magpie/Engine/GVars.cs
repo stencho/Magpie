@@ -29,18 +29,20 @@ namespace Magpie.Engine {
             input = input.Replace(")", " ) ");
 
             string[] split = input.Split(' ');
-
-
         }
     }
 
 
     public class gvar {
         public string name;
+        
         public gvar_data_type data_type;
+        
         public object data;
 
         public Action changed;
+
+
 
         public gvar(string name, gvar_data_type data_type, object data) {
             this.name = name; this.data_type = data_type; this.data = data;
@@ -78,14 +80,11 @@ namespace Magpie.Engine {
         }
     }
 
-
-
     public static class gvars {
         static Dictionary<string, gvar> _gvars = new Dictionary<string, gvar>();
 
         public static void add_gvar(string name, gvar_data_type data_type, object data) {
-            _gvars.Add(name, new gvar(name, data_type, data));
-            
+            _gvars.Add(name, new gvar(name, data_type, data));            
         }
         public static void remove_gvar(string name) { _gvars.Remove(name); }
         

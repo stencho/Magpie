@@ -23,6 +23,7 @@ using Microsoft.Xna.Framework.Audio;
 using static Magpie.Engine.ControlBinds;
 using Magpie.Graphics.UI;
 using Magpie.Graphics.Particles;
+using static Magpie.Graphics.Particles.PointCloud;
 
 namespace MagpieBuild
 {
@@ -250,7 +251,7 @@ namespace MagpieBuild
                 new Vector2(16, 16), 0.75f);
 
             parttest = new Particle2D("trump_tex");
-            pctest = new PointCloud(test_trums);
+            pctest = new PointCloud(test_trums, test_b);
 
             //test_window = new Magpie.Graphics.UI.UIWindow(new XYPair(100,100), new XYPair(500,250));
 
@@ -265,7 +266,19 @@ namespace MagpieBuild
             results = new GJK.gjk_result[world.current_map.objects.Count];
         }
 
-        int test_trums = 10000;
+        void test_b(point_in_cloud pic, PointCloud p) {
+           // pic.point -= Vector3.UnitY * 4 * Clock.frame_time_delta;
+
+            pic.lerp = true;
+            pic.lerp_speed = 4f * Clock.frame_time_delta;
+
+            if (Clock.frame_count % 20 == 0) {
+                pic.lerp_to = (RNG.rng_v3_near_v3(pic.point, 8f));
+            }
+
+        }
+
+        int test_trums = 3000;
 
         protected override void LoadContent()
         {
@@ -388,7 +401,7 @@ namespace MagpieBuild
                 }
                 
             }
-            
+            pctest.update();
 
         }
 
@@ -398,6 +411,8 @@ namespace MagpieBuild
         }
 
         frame_snapshot snap = new frame_snapshot();
+
+
 
         public void renderextra() {
 

@@ -10,8 +10,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Magpie.Graphics.Particles {
-
-
     [StructLayout(LayoutKind.Sequential)]
     public struct InstanceDataDec : IVertexType {
         public static readonly VertexDeclaration VertexDeclaration;
@@ -21,6 +19,7 @@ namespace Magpie.Graphics.Particles {
         public Vector4 r3;
         public Vector4 r4;
         public Vector3 normal;
+        public Color tint;
 
         VertexDeclaration IVertexType.VertexDeclaration {
             get { return VertexDeclaration; }
@@ -34,7 +33,10 @@ namespace Magpie.Graphics.Particles {
                     new VertexElement(sizeof(float) * 8, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 3),
                     new VertexElement(sizeof(float) * 12, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 4),
 
-                    new VertexElement(sizeof(float) * 32, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 9),
+                    new VertexElement(sizeof(float) * 16, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0),
+
+                    new VertexElement(sizeof(float) * 19, VertexElementFormat.Color, VertexElementUsage.Color, 0),
+                    //new VertexElement(sizeof(float) * 32, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 9),
 
                 };
             VertexDeclaration = new VertexDeclaration(elements);
@@ -48,7 +50,9 @@ namespace Magpie.Graphics.Particles {
         [FieldOffset(sizeof(float) * 8)] public Vector4 r3;
         [FieldOffset(sizeof(float) * 12)] public Vector4 r4;
 
-        [FieldOffset(sizeof(float) * 32)] public Vector3  normal;
+        [FieldOffset(sizeof(float) * 16)] public Vector3  normal;
+        
+        [FieldOffset(sizeof(float) * 19)] public Color tint;  
     }
 
     public class Particle {

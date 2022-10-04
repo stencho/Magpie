@@ -40,7 +40,9 @@ struct instancedVSI {
 	float4 row3 : TEXCOORD3;
 	float4 row4 : TEXCOORD4;
 
-	float3 normal : TEXCOORD9;
+	float3 normal : NORMAL0;
+
+	float4 tint : COLOR0;
 };
 
 struct VSO {
@@ -48,9 +50,8 @@ struct VSO {
 	float2 TexCoord : TEXCOORD0;
 	float3 Depth : TEXCOORD1;
 	float3x3 TBN : TEXCOORD2;
-	//float3 normal : TEXCOORD2;
-	float4 opacity : COLOR;
 	float2 screen_pos : TEXCOORD6;
+	float4 tint : COLOR0;
 };
 
 struct PSO {
@@ -107,18 +108,21 @@ VSO mVSInstanced(VSI input, instancedVSI instance) {
 	output.TexCoord = 1-input.TexCoord;
 
 	output.screen_pos.xy = output.Position.xy;
+
+	output.tint = instance.tint;
+
 	return output;
 }
 
 PSO mPS(VSO input) {
 	PSO output;
-	output.Diffuse.rgba = tex2D(particle_sampler, input.TexCoord).rgba;
-	
+	output.Diffuse.rgba = tex2D(particle_sampler, input.TexCoord).rgba ;
+	output.Diffuse.rgb *= input.tint;
 	if (output.Diffuse.a < 1) {
 		clip(-1);
 	}
 
-	//output.Diffuse.a = 1;
+	output.Diffuse.a = 1;
 	
 	output.Normals.rgb = encode(normalize(input.TBN[2])) +1;
 	//output.Normals.a = output.Diffuse.rgba.a;
@@ -143,7 +147,7 @@ PSO mPS(VSO input) {
 
 	//output.Diffuse.a = input.opacity;
 
-	return output;
+	return output ;
 }
 
 technique Instanced
