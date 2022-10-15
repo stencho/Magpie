@@ -243,6 +243,17 @@ namespace Magpie.Engine.WorldElements.Brushes {
                 }
             }
         }
+        
+        public void fill_with_zero() {
+            highest_point = 0;
+            lowest_point = 0;
+
+            for (int y = 0; y < size.Y + 1; y++) {
+                for (int x = 0; x < size.X + 1; x++) {
+                    data[x, y] = 0;
+                }
+            }
+        }
 
         public void build_quads() {
             for (int y = 0; y < size.Y; y++) {
@@ -278,7 +289,7 @@ namespace Magpie.Engine.WorldElements.Brushes {
             List<(OctreeArea, float)> octree_hits = new List<(OctreeArea, float)>();
             foreach (OctreeArea oa in octree) {
                 if (Raycasting.ray_intersects_BoundingBox(start, end, oa.aabb.Min, oa.aabb.Max, out _)) {
-                    octree_hits.Add((oa, Vector3.Distance(EngineState.camera.position, (oa.top_left + oa.bottom_right / 2))));
+                    octree_hits.Add((oa, Vector3.Distance(start, (oa.top_left + oa.bottom_right / 2))));
                 }
             }
 
@@ -298,7 +309,7 @@ namespace Magpie.Engine.WorldElements.Brushes {
                                 //success, add terrain within octree to hit test list
                                 for (int y = oa3.offset.Y; y < oa3.offset.Y + oa3.size.Y; y++) {
                                     for (int x = oa3.offset.X; x < oa3.offset.X + oa3.size.X; x++) {
-                                        hit_terrain.Add((x, y, Vector3.Distance(EngineState.camera.position, quads[x, y].center_on_line)));
+                                        hit_terrain.Add((x, y, Vector3.Distance(start, quads[x, y].center_on_line)));
                                     }
                                 }
                             }
@@ -316,7 +327,7 @@ namespace Magpie.Engine.WorldElements.Brushes {
                 raycast_result res_a, res_b;
 
                 if (q.even || q.odd) {
-                    if (Vector3.Distance((q.A + q.B + q.D) / 3f, EngineState.camera.position) < Vector3.Distance((q.C + q.D + q.B) / 3f, EngineState.camera.position)) {
+                    if (Vector3.Distance((q.A + q.B + q.D) / 3f, end) < Vector3.Distance((q.C + q.D + q.B) / 3f, end)) {
                         ray_intersects_triangle(start, end, q.A, q.B, q.D, out res_a);
                         ray_intersects_triangle(start, end, q.C, q.D, q.B, out res_b);
                     } else {
@@ -325,7 +336,7 @@ namespace Magpie.Engine.WorldElements.Brushes {
                     }
 
                 } else {
-                    if (Vector3.Distance((q.A + q.B + q.C) / 3f, EngineState.camera.position) < Vector3.Distance((q.A + q.C + q.D) / 3f, EngineState.camera.position)) {
+                    if (Vector3.Distance((q.A + q.B + q.C) / 3f, end) < Vector3.Distance((q.A + q.C + q.D) / 3f, end)) {
                         ray_intersects_triangle(start, end, q.A, q.B, q.C, out res_a);
                         ray_intersects_triangle(start, end, q.A, q.C, q.D, out res_b);
                     } else {
@@ -333,6 +344,7 @@ namespace Magpie.Engine.WorldElements.Brushes {
                         ray_intersects_triangle(start, end, q.A, q.B, q.C, out res_b);
                     }
                 }
+
                 if (res_a.hit || res_b.hit) {
                     quad_index = (xy.Item1, xy.Item2);
 
