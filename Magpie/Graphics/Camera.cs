@@ -32,8 +32,8 @@ namespace Magpie.Graphics {
         public float near_clip { get; set; } = 0.1f;
         public float far_clip { get; set; } = 1500f;
 
-        public float FOV { get; set; } = 110f;
-        public float FOV_default { get; set; } = 110f;
+        public float FOV { get; set; } = 90f;
+        public float FOV_default { get; set; } = 90f;
 
         public float aspect_ratio { get; set; }
 

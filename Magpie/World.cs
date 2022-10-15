@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Magpie { 
     public class World {
@@ -185,6 +186,7 @@ namespace Magpie {
                     }
                 }
 
+
                 internal_frame_probe.set("player_actor");
                 lock (current_map.player_actor) {
                     if (current_map.player_actor != null)
@@ -198,11 +200,6 @@ namespace Magpie {
                     PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
                     PhysicsSolver.finalize_collisions(current_map);
                 }
-
-                current_map.lights[current_map.lights.Count - 1].position
-                    = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.3f) + (EngineState.camera.orientation.Down * 0.4f) + (EngineState.camera.orientation.Forward * 0.3f);
-                ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation
-                    = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
 
                 lock (last_fps) {
                     for (int i = 0; i < last_fps.Length - 1; i++) {
@@ -252,6 +249,12 @@ namespace Magpie {
                 EngineState.game.Exit();
             }
 
+            current_map.lights[current_map.lights.Count - 1].position
+                = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.3f) + (EngineState.camera.orientation.Down * 0.4f) + (EngineState.camera.orientation.Forward * 0.3f);
+            ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation
+                = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
+
+
 
             lock (current_map.lights) {
                 foreach (DynamicLight light in current_map.lights) {
@@ -259,6 +262,7 @@ namespace Magpie {
                         light.update();
                 }
             }
+
 
             /*
             current_map.lights[current_map.lights.Count - 1].position

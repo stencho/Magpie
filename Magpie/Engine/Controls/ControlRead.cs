@@ -343,6 +343,8 @@ namespace Magpie.Engine {
 
                 mouse_lock_p = mouse_lock;
 
+                _mouse_coll_obj = new Circle2D(Controls.mouse_position_float, 1f);
+
                 control_poll_probe.set("sleep");
                 while (World.running) {
                     if (control_poll_probe.since_frame_start() >= control_thread_ms) break;
@@ -380,7 +382,8 @@ namespace Magpie.Engine {
 
             window_was_active = window_active;
 
-            _mouse_coll_obj = new Circle2D(Controls.mouse_position_float, 1f);
+            picker_raycasts.update();
+
             /*
             window_center.X = (window.ClientBounds.Width / 2);
             window_center.Y = (window.ClientBounds.Height / 2) ;

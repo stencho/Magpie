@@ -45,7 +45,15 @@ sampler COOKIE: register(s2)= sampler_state {
 	ADDRESSV = CLAMP;
 };
 
-sampler SHADOW : register(s3);
+sampler SHADOW : register(s3) = sampler_state {
+	MINFILTER = POINT;
+	MAGFILTER = POINT;
+	MIPFILTER = POINT;
+
+	ADDRESSU = CLAMP;
+	ADDRESSV = CLAMP;
+};
+
 
 struct VSI {
 	float4 Position : POSITION0;
@@ -68,13 +76,13 @@ VSO VS(VSI input) {
 float4 manualSample(sampler Sampler, float2 UV, float2 textureSize) {
 	float2 texelpos = textureSize * UV;
 	float2 lerps = frac(texelpos);
-	float texelSize = 1.0 / textureSize;
+	float2 texelSize = 1.0 / textureSize;
 	float4 sourcevals[4];
 
 	sourcevals[0] = tex2D(Sampler, UV);
-	sourcevals[1] = tex2D(Sampler, UV + float2(texelSize, 0));
-	sourcevals[2] = tex2D(Sampler, UV + float2(0, texelSize));
-	sourcevals[3] = tex2D(Sampler, UV + float2(texelSize, texelSize));
+	sourcevals[1] = tex2D(Sampler, UV + float2(texelSize.x, 0));
+	sourcevals[2] = tex2D(Sampler, UV + float2(0, texelSize.y));
+	sourcevals[3] = tex2D(Sampler, UV + float2(texelSize.x, texelSize.y));
 
 	float4 interpolated = lerp(lerp(sourcevals[0], sourcevals[1], lerps.x),
 	lerp(sourcevals[2], sourcevals[3], lerps.x ), lerps.y);
@@ -84,7 +92,7 @@ float4 manualSample(sampler Sampler, float2 UV, float2 textureSize) {
 float4 Phong(float3 Position, float3 N, float radialAttenuation,float SpecularIntensity, float SpecularPower) {
 	float3 L = Position.xyz - LightPosition.xyz;
 
-	float heightAttenuation = 1  - (length(L) / (LightClip));
+	float heightAttenuation = 1-(length(L) / LightClip);
 	float Attenuation = min(radialAttenuation, heightAttenuation);
 
 	L = normalize(L);
@@ -92,16 +100,23 @@ float4 Phong(float3 Position, float3 N, float radialAttenuation,float SpecularIn
 	float SL = dot(L, LightDirection);
 
 	float4 Shading = 0;
-	if (SL >= LightAngleCos && (distance(Position.xyz, LightPosition.xyz)) <= LightClip) {
+	if (SL >= LightAngleCos && (distance(Position.xyz, LightPosition.xyz)) < LightClip - DepthBias) {
 		float NL = dot(-N, L);
 		float3 Diffuse = NL * LightColor.xyz;
-		Shading = float4(Diffuse.rgb, 1) * Attenuation;
+		Shading = float4(Diffuse.rgb, 1) * (Attenuation);
 	}
 
 	return Shading;
 }
 
 
+float distSquared( float3 A, float3 B )
+{
+
+    float3 C = A - B;
+    return dot( C, C );
+
+}
 float3 decode(float3 enc) {
 	return (2.0f * enc.xyz- 1.0f);
 }
@@ -116,7 +131,7 @@ float4 PS(VSO input) : COLOR0 {
 	float2 UV = 0.5f * (float2(input.ScreenPosition.x, -input.ScreenPosition.y) + 1.0f);
 	
 	float4 encodedNormal = tex2D(NORMAL,UV);
-	float3 Normal = mul(decode(encodedNormal.xyz), InverseView);
+	float3 Normal = mul(decode(encodedNormal.xyz), (float3x3)InverseView).xyz;
 		
 	float Depth = tex2D(DEPTH,UV).r;
 
@@ -124,30 +139,49 @@ float4 PS(VSO input) : COLOR0 {
 	Position.xy = input.ScreenPosition.xy;
 	Position.z = Depth;
 	Position = mul(Position, InverseViewProjection);
+	
 	Position /= Position.w;
+
+	float4 LightScreenPos = mul(Position, LightViewProjection);
+
 	
 	float3 L = Position.xyz - LightPosition.xyz;
 	float Ll = length(L);
+	float ndl = dot(Normal, LightDirection);
 
-	float4 LightScreenPos = mul(Position, LightViewProjection);
 
 	float4 LSPcookie = LightScreenPos / (Ll);
 	LightScreenPos /= Ll;
 	
-	float2 LUV = 0.5 * (float2(LightScreenPos.x, -LightScreenPos.y) + 1);
-	float2 LUVcookie =  (0.5 * (float2(LSPcookie.x, -LSPcookie.y) + 1));
+	float2 LUV = 0.5 * ((float2(LightScreenPos.x, -LightScreenPos.y)* 1.0) + 1);
+	float2 LUVcookie =  (0.5 * ((float2(LSPcookie.x, -LSPcookie.y) * 1.0) + 1));
 
-	float lZ = tex2D(SHADOW, LUV);
+	float lZ = tex2D(SHADOW, LUV).r;
 
 	float Attenuation = tex2D(COOKIE, LUVcookie.xy).r;
 
-	float ShadowFactor = 1;
-	if(Shadows) {
-		float len = max(0.001f, distance(LightPosition, Position) / LightClip);
-		ShadowFactor = (lZ * exp(-(LightClip * 0.5f) * (len - DepthBias))); 
-		if (ShadowFactor == 0) 
+	float ShadowFactor = 0;
+
+		float len = log(length(LightPosition.xyz - Position.xyz) / (LightClip) + 1); //max(0.01, (distance(LightPosition, Position) / LightClip));
+		//float loglen = log(C * len + 1) / log(C * LightClip + 1) * len;
+
+		//ShadowFactor = (lZ * exp(-(LightClip) * (len - DepthBias))); 
+
+		
+		if (lZ / (len - DepthBias) == 0) {
 			ShadowFactor = 1;
-	}
+		} else {
+			ShadowFactor = pow(abs(lZ / ((len) - DepthBias)), 42);
+		}
+		
+
+		
+				
+		//if (ShadowFactor >0 && len > lZ + DepthBias) {
+		//	ShadowFactor = 0;
+		//}
+		
+	
 
 	return Phong(Position.xyz, Normal, Attenuation, 1, 1) * saturate(ShadowFactor);
 	//return float4(Position.xyz, 1) * s;

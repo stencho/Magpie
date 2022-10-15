@@ -14,8 +14,7 @@ using static Magpie.Graphics.Instancing;
 namespace Magpie.Graphics.Particles {
     public class PointCloud {
         public class point_in_cloud {
-            public Vector3 point_previous => _point_prev;
-            Vector3 _point_prev;
+            public Vector3 point_previous;
             public Vector3 point;
 
             public bool lerp = false;
@@ -30,19 +29,21 @@ namespace Magpie.Graphics.Particles {
             public float scale = 1f;
             //public float opacity = 1f;
 
-            public point_in_cloud(Vector3 p) { point = p; orientation = Matrix.Identity; }
+            public point_in_cloud(Vector3 p) { 
+                point = p;
+                point_previous = p;
+                orientation = Matrix.Identity; }
 
             public Action<point_in_cloud, PointCloud> behaviour;
 
             public void update(PointCloud parent) {
                 if (!alive) return;
-
-                _point_prev = point;
-                behaviour(this, parent);
-
+                                
                 if (lerp) {
                     point = Vector3.LerpPrecise(point, lerp_to, lerp_speed);
                 }
+
+                behaviour(this, parent);
             }
 
         }
@@ -87,8 +88,8 @@ namespace Magpie.Graphics.Particles {
 
         public void draw_debug() {
             for (int i = 0; i < points.Length; i++) {
-                //Draw3D.xyz_cross(points[i], 0.1f, Color.Red);
-                //Draw3D.line(points[i], points[i] + (vert_positions[i].normal * 3), Color.DeepPink);
+                Draw3D.xyz_cross(points[i].point, 0.1f, Color.Red);
+                Draw3D.line(points[i].point, points[i].point_previous, Color.DeepPink);
             }
         }
 
@@ -191,7 +192,7 @@ namespace Magpie.Graphics.Particles {
                 //mtmp.r4(out vert_positions[i].r4_IT.X, out vert_positions[i].r4_IT.Y, out vert_positions[i].r4_IT.Z, out vert_positions[i].r4_IT.W);
 
 
-                vert_positions[i].tint = Color.FromNonPremultiplied((int)p.point.X, (int)p.point.Y, (int)p.point.Z, 255);
+                vert_positions[i].tint = Color.White; // Color.FromNonPremultiplied((int)p.point.X, (int)p.point.Y, (int)p.point.Z, 255);
                 vert_positions[i].normal = Vector3.Normalize(p.orientation.Forward);
 
                 i++;

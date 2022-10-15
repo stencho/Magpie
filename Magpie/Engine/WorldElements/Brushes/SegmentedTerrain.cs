@@ -119,7 +119,8 @@ namespace Magpie.Engine.Brushes {
                     current_segment.data = new float[segment_size.X + 1, segment_size.Y + 1];
                     current_segment.quads = new TerrainQuad[segment_size.X, segment_size.Y];
 
-                    current_segment.fill_with_random();
+                    //current_segment.fill_with_random(20);
+                    current_segment.fill_with_zero();
                     //current_segment.build_from_texture("terrain_test");
                     current_segment.build_octrees();
 
@@ -275,21 +276,27 @@ namespace Magpie.Engine.Brushes {
                 hit_normal = Vector3.Zero,
                 point = Vector3.Zero
             };
-            /*
-            foreach ((TerrainSegment, int, int, float) xy in visible_terrain) {
-                if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, xy.Item1.aabb.Min, xy.Item1.aabb.Max, out _)) {
-                    Draw3D.cube(xy.Item1.aabb, Color.HotPink);
-                    for (int y = 0; y < 2; y++) {
-                        for (int x = 0; x < 2; x++) {
-                            if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, xy.Item1.octree[x, y].aabb.Min, xy.Item1.octree[x, y].aabb.Max, out _)) {
-                                Draw3D.cube(xy.Item1.octree[x, y].aabb, Color.Red);
-                                foreach (OctreeArea oa in xy.Item1.octree[x, y].octree) {
-                                    if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, oa.aabb.Min, oa.aabb.Max, out _)) {
-                                        Draw3D.cube(oa.aabb, Color.ForestGreen);
-                                        foreach (OctreeArea oa2 in oa.octree) {
-                                            if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction,
-                                                oa2.aabb.Min, oa2.aabb.Max, out _)) {
-                                                Draw3D.cube(oa2.aabb, Color.Blue);
+
+
+            raycast_result current_result = new raycast_result();
+
+                    /*
+                    foreach ((TerrainSegment, int, int, float) xy in visible_terrain) {
+                        if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, xy.Item1.aabb.Min, xy.Item1.aabb.Max, out _)) {
+                            Draw3D.cube(xy.Item1.aabb, Color.HotPink);
+                            for (int y = 0; y < 2; y++) {
+                                for (int x = 0; x < 2; x++) {
+                                   / if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, xy.Item1.octree[x, y].aabb.Min, xy.Item1.octree[x, y].aabb.Max, out _)) {
+                                        Draw3D.cube(xy.Item1.octree[x, y].aabb, Color.Red);
+                                        foreach (OctreeArea oa in xy.Item1.octree[x, y].octree) {
+                                            if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, oa.aabb.Min, oa.aabb.Max, out _)) {
+                                                Draw3D.cube(oa.aabb, Color.ForestGreen);
+                                                foreach (OctreeArea oa2 in oa.octree) {
+                                                    if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction,
+                                                        oa2.aabb.Min, oa2.aabb.Max, out _)) {
+                                                        Draw3D.cube(oa2.aabb, Color.Blue);
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -297,18 +304,16 @@ namespace Magpie.Engine.Brushes {
                             }
                         }
                     }
-                }
-            }
-            */
-            foreach ((TerrainSegment, int, int, float) xy in visible_terrain) {
-                (int, int) current_index = (xy.Item2, xy.Item3);
-                raycast_result current_result = new raycast_result();
+                    */
+            foreach (TerrainSegment xy in segments) {
+                (int, int) current_index = xy.index;
+                current_result = new raycast_result();
 
-                if (xy.Item1.raycast(start, end, out current_index, out current_result)) {
+                if (xy.raycast(start, end, out current_index, out current_result)) {
                     if (current_result.distance < result.distance) {
                         result = current_result;
                         quad_index = current_index;
-                        segment_index = (xy.Item2, xy.Item3);
+                        segment_index = xy.index;
                     }
                 }
             }
@@ -323,7 +328,7 @@ namespace Magpie.Engine.Brushes {
         public raycast_result cursor_hit_result = new raycast_result();
         public (int, int) cursor_quad_index = (-1, -1);
         public (int, int) cursor_segment_index = (-1, -1);
-        bool draw_hit_octrees = false;
+        bool draw_hit_octrees = true;
 
         public void debug_draw() {
             RenderTargetBinding[] rtb = EngineState.graphics_device.GetRenderTargets();

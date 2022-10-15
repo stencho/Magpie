@@ -106,7 +106,7 @@ namespace Magpie {
 
             Log.update();
 
-            Controls.update(window, game.IsActive, resolution);
+            Controls.update(EngineState.window, EngineState.game.IsActive, EngineState.resolution);
 
             StaticControlBinds.update();
 

@@ -11,6 +11,7 @@ struct VSI {
 struct VSO {
 	float4 Position : POSITION0;
 	float4 WorldPosition : TEXCOORD0;
+	float4 ViewPosition : TEXCOORD1;
 };
 
 VSO VS(VSI input) {
@@ -19,13 +20,24 @@ VSO VS(VSI input) {
 	float4 viewPosition = mul(worldPosition, View);
 	output.Position = mul(viewPosition, Projection);
 	output.WorldPosition = worldPosition;
+	output.ViewPosition = output.Position;
 	return output;
+}
+float distSquared( float3 A, float3 B )
+{
+
+    float3 C = A - B;
+    return dot( C, C );
+
 }
 
 float4 PS(VSO input) : COLOR0 {
-	input.WorldPosition /= input.WorldPosition.w;
-	float depth = max(0.01f, length(LightPosition - input.WorldPosition)) / DepthPrecision;
-	return exp((DepthPrecision * 0.5f) * depth);
+	float C = 0.00001;
+	input.WorldPosition.xy /= input.WorldPosition.w;
+	float depth = length(input.WorldPosition.xyz - LightPosition.xyz) / (DepthPrecision);
+	//float depth = (input.ViewPosition.z/ DepthPrecision);
+	//return (log(C * depth + 1) / log(C * DepthPrecision + 1) * depth);
+	return log(depth+1);
 }
 
 technique Default {

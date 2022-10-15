@@ -170,12 +170,12 @@ namespace MagpieBuild
             world.current_map.objects["test_sphere6"].model = "bigcube";
             */
 
-            for (int i = 0; i < 200; i++) {
+            for (int i = 0; i < 50; i++) {
                 world.current_map.add_object("test_sphere" + i, new TestSphere());
                 world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
             }
 
-
+            /*
             world.current_map.add_object("test_cube", new TestSphere());
             world.current_map.objects["test_cube"].model = "cube";
             world.current_map.objects["test_cube"].position = Vector3.Up * 60;
@@ -204,7 +204,7 @@ namespace MagpieBuild
             world.current_map.objects["test_cube4"].position = Vector3.Up * 50 + (Vector3.Backward * 25f);
             world.current_map.objects["test_cube4"].scale = Vector3.One + (Vector3.UnitX * 25f) + (Vector3.UnitZ * 25f);
 
-
+            
             world.current_map.add_object("butt_a", new TestSphere());
             world.current_map.objects["butt_a"].model = "smoothsphere";
             world.current_map.objects["butt_a"].position = Vector3.Up * 90 + (Vector3.Backward * 25f) + (Vector3.Left * 3f);
@@ -216,6 +216,14 @@ namespace MagpieBuild
             world.current_map.objects["butt_b"].position = Vector3.Up * 90 + (Vector3.Backward * 25f) + (Vector3.Right * 3f);
             world.current_map.objects["butt_b"].scale = Vector3.One * 8f - (Vector3.UnitX * 0.5f) - (Vector3.UnitZ * 1.5f);
             world.current_map.objects["butt_b"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(90f));
+            */
+
+            world.current_map.add_object("desk", new TestSphere());
+            world.current_map.objects["desk"].model = "desk";
+            world.current_map.objects["desk"].position = Vector3.Zero;
+            world.current_map.objects["desk"].scale = Vector3.One * 10;
+            world.current_map.objects["desk"].orientation = Matrix.Identity;
+
 
             //world.current_map.add_brush("test_floor", new FloorPlane());
             //world.current_map.floors["test_floor"].position = Vector3.Forward * 10f + Vector3.Up * 5f;
@@ -267,18 +275,31 @@ namespace MagpieBuild
         }
 
         void test_b(point_in_cloud pic, PointCloud p) {
-           // pic.point -= Vector3.UnitY * 4 * Clock.frame_time_delta;
+            pic.point -= Vector3.UnitY * 4 * Clock.frame_time_delta;
+            
+            Raycasting.raycast_result res;
 
             pic.lerp = true;
             pic.lerp_speed = 4f * Clock.frame_time_delta;
 
-            if (Clock.frame_count % 20 == 0) {
+            if (Clock.frame_count % 30 == 0) {
                 pic.lerp_to = (RNG.rng_v3_near_v3(pic.point, 8f));
+            }
+            (int,int) qi;
+            (int,int) si;
+            if (world.test_hf.raycast(pic.point_previous, pic.point, out qi, out si, out res)) {
+
+                //pic.point = pic.point_previous + (Vector3.Normalize(pic.point - pic.point_previous) * res.distance);
+                pic.point = pic.point_previous;
+                pic.alive = false;
+            } else {
+
+                pic.point_previous = pic.point;
             }
 
         }
 
-        int test_trums = 3000;
+        int test_trums = 20;
 
         protected override void LoadContent()
         {
@@ -415,12 +436,13 @@ namespace MagpieBuild
 
 
         public void renderextra() {
+            ((SegmentedTerrain)world.test_hf).debug_draw();
 
             snap.snap("tump");
             parttest.instance_onto_point_cloud(pctest);
             snap.snap("another tum");
 
-            //pctest.draw_debug();
+            pctest.draw_debug();
             snap.snap("another tump");
         }
         bool draw_debug_info = false;
@@ -437,7 +459,7 @@ namespace MagpieBuild
                 Draw3D.line(res.closest_point_A, res.closest_point_B, Color.MonoGameOrange);
             }
 
-
+            
 
 
             EngineState.window_manager.render_window_internals();
@@ -506,7 +528,7 @@ namespace MagpieBuild
             }
             crosshair_sdf.draw();
 
-            //Scene.draw_texture_to_screen(world.test_light.depth_map, Vector2.One * 20, Vector2.One * 300);
+            Scene.draw_texture_to_screen(world.test_light.depth_map, Vector2.One * 20, Vector2.One * 300);
             //Scene.draw_texture_to_screen(ContentHandler.resources["radial_glow"].value_tx, Vector2.One * 200, Vector2.One * 200);
             //Draw2D.SDFCircle(Vector2.One * 300, 200f, Color.White);
             GraphicsDevice.SetRenderTarget(null);
