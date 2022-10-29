@@ -128,7 +128,7 @@ PSO MainPS(VertexShaderOutput input)
     PSO output = (PSO)0;
 
     float4 rgba = tex2D(DiffuseSampler, input.TexCoord);
-	
+	if (rgba.a < 1) { clip(-1); }
 	/*
     output.Depth.rgb = input.Depth.z/input.Depth.w;
 	output.Depth.a = 1;

@@ -58,7 +58,7 @@ public class Script {
             } catch (Exception ex) {
                 string message = ex.Message.Remove(0, ex.Message.IndexOf(":") + 1);
                 message = message.Remove(0, message.IndexOf(":") + 1);
-                message = message.Remove(0, message.IndexOf(":") + 2);
+                message = message.Remove(0, message.IndexOf(":") + 1);
                 message = message.Replace("\n", "");
 
                 Log.log($"[script error] {message}");

@@ -3,21 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Magpie.Engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Magpie.Graphics.Lights {
     public class SpotLight : DynamicLight {
         public LightType type => LightType.SPOT;
-        public int depth_map_resolution => 2048;
+        public int depth_map_resolution => gvars.get_int("light_resolution");
 
         RenderTarget2D _depth;
         public RenderTarget2D depth_map => _depth;
 
         public string shader => "spotlight";
 
-        public float far_clip { get; set; } = 20;
-        public float near_clip { get; set; } = 1f;
+        public float far_clip => gvars.get_float("light_far");
+        public float near_clip => gvars.get_float("light_near");
 
         public float fov { get; set; } = (MathHelper.Pi / 4f) + 0.01f;
 
@@ -50,6 +51,14 @@ namespace Magpie.Graphics.Lights {
             world = actual_scale * orientation * Matrix.CreateTranslation(position);
             
             frustum = new BoundingFrustum(view * projection);
+
+            gvars.add_change_action("light_resolution", change_depth_buffer_size);
+        }
+
+        public void change_depth_buffer_size() {
+            lock (_depth) {
+                _depth = new RenderTarget2D(EngineState.graphics_device, depth_map_resolution, depth_map_resolution, false, SurfaceFormat.Single, DepthFormat.Depth24);
+            }
         }
 
         public void update() {

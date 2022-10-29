@@ -4,15 +4,29 @@ float4x4 Projection;
 float3 LightPosition;
 float LightClip;
 float3 LightDirection;
+float C;
+
+texture DiffuseMap;
+sampler DiffuseSampler = sampler_state
+{
+	texture = <DiffuseMap>;
+	MINFILTER = POINT;
+	MAGFILTER = POINT;
+	MIPFILTER = POINT;
+	ADDRESSU = WRAP;
+	ADDRESSV = WRAP;
+};
 
 struct VSI {
 	float4 Position : POSITION0;
+    float2 TexCoord : TEXCOORD0;
 };
 
 struct VSO {
 	float4 Position : POSITION0;
-	float4 WorldPosition : TEXCOORD0;
-	float4 ViewPosition : TEXCOORD1;
+	float4 WorldPosition : TEXCOORD1;
+	float4 ViewPosition : TEXCOORD2;
+    float2 TexCoord : TEXCOORD3;
 };
 
 VSO VS(VSI input) {
@@ -25,6 +39,7 @@ VSO VS(VSI input) {
 	//output.Position.z *= output.Position.w; 
 	output.WorldPosition = worldPosition;
 	output.ViewPosition = output.Position;
+	output.TexCoord = input.TexCoord;
 	return output;
 }
 float distSquared( float3 A, float3 B )
@@ -47,8 +62,10 @@ float3 pomn(float3 a, float3 p) {
 	return a + t * ab;
 }
 
+
 float4 PS(VSO input) : COLOR0 {
-	float C = 1;
+	if (tex2D(DiffuseSampler, input.TexCoord).a < 1) {clip(-1);}
+	
 	input.WorldPosition /= input.WorldPosition.w;
 	//float depth = distance(input.WorldPosition.xyz, LightPosition.xyz) / LightClip;
 	
@@ -56,8 +73,7 @@ float4 PS(VSO input) : COLOR0 {
 	float depth = (distance(LightPosition.xyz, linpos) / LightClip);
 
 	//float depth = (input.ViewPosition.z / (LightClip));
-	return (log(C * (depth * LightClip) + 1) / log(C * LightClip + 1));
-	return (depth);
+	return (log(C * (distance(LightPosition.xyz, linpos)) + 1) / log(C * LightClip + 1));
 }
 
 technique Default {

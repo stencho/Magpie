@@ -149,7 +149,7 @@ namespace Magpie.Engine {
         public static bool TryParse(string input, out XYPair result) {
             result = XYPair.Zero;
 
-            string[] split = input.Split('x');
+            string[] split = input.Split('x', ',');
 
             if (split.Length != 2) return false;
 

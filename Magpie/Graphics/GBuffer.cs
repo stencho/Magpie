@@ -18,10 +18,9 @@ namespace Magpie.Graphics {
         public RenderTarget2D rt_final;
         public RenderTarget2D rt_2D;
 
-        public RenderTarget2D rt_fxaa;
+        //public RenderTarget2D rt_fxaa;
 
-        private bool FXAA;
-        public bool FXAA_enabled => FXAA;
+        private bool FXAA => false;// gvars.get_bool("FXAA") && gvars.get_float("super_resolution_scale") == 1.0f;
 
         private int _width;
         private int _height;
@@ -59,29 +58,24 @@ namespace Magpie.Graphics {
             _height = H;
             
 
-            CreateInPlace(gd, W, H, 1, false);
+            CreateInPlace(gd, W, H, 1);
         }
         public void change_resolution_super(GraphicsDevice gd, int W, int H, float super_res_scale) {
             _width = W;
             _height = H;
 
 
-            CreateInPlace(gd, W, H, super_res_scale, false);
+            CreateInPlace(gd, W, H, super_res_scale);
         }
 
 
-        public void CreateInPlace(GraphicsDevice gd, int width, int height, float res_scale = 1.0f, bool fxaa = false) {
+        public void CreateInPlace(GraphicsDevice gd, int width, int height, float res_scale = 1.0f) {
             buffer_targets = new RenderTargetBinding[4];
             buffer_targets_dl = new RenderTargetBinding[2];
             buffer_targets_dln = new RenderTargetBinding[3];
 
-            FXAA = fxaa;
-
             position = XYPair.Zero;
-
-            if (res_scale != 1.0f)
-                FXAA = false;
-
+            
             this._width = width; this._height = height;
 
             _resolution_scale = res_scale;
@@ -117,19 +111,19 @@ namespace Magpie.Graphics {
             buffer_targets_dln[2] = rt_normal;
 
             if (FXAA) {
-                rt_fxaa = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None);
+                //rt_fxaa = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None);
             }
         }
 
         public void EnableFXAA(GraphicsDevice gd, bool enable = true) {
             if (enable && !FXAA && resolution_scale == 1.0f) {
-                rt_fxaa = new RenderTarget2D(gd, _width, _height, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
-                FXAA = true;
+                //rt_fxaa = new RenderTarget2D(gd, _width, _height, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
+                //gvars.set("FXAA", true);
             }
             else if (!enable) {
-                rt_fxaa.Dispose();
-                rt_fxaa = null;
-                FXAA = false;
+                //rt_fxaa.Dispose();
+                //rt_fxaa = null;
+                //gvars.set("FXAA", false);
             }
         }
 
@@ -138,10 +132,6 @@ namespace Magpie.Graphics {
 
             gbuffer.buffer_targets = new RenderTargetBinding[4];
 
-            gbuffer.FXAA = fxaa;
-
-            if (res_scale != 1.0f)
-                gbuffer.FXAA = false;
 
             gbuffer._width = width; gbuffer._height = height;
             gbuffer._resolution_scale = res_scale;
@@ -165,7 +155,7 @@ namespace Magpie.Graphics {
             gbuffer.buffer_targets[3] = gbuffer.rt_lighting;
 
             if (gbuffer.FXAA) {
-                gbuffer.rt_fxaa = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None);
+                //gbuffer.rt_fxaa = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None);
             }
 
             return gbuffer;

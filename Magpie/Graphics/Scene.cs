@@ -328,6 +328,8 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.Clear(sun_moon.atmosphere_color);
 
             foreach (DynamicLight light in lights) {
+                if (!gvars.get_bool("light_shadows")) continue;
+
                 if (light.type == LightType.SPOT) {
                     EngineState.graphics_device.SetRenderTarget(((SpotLight)light).depth_map);
                     EngineState.graphics_device.BlendState = BlendState.Opaque;
@@ -349,6 +351,9 @@ namespace Magpie.Graphics {
                             e_exp_light_depth.Parameters["LightPosition"].SetValue(light.position);
                             e_exp_light_depth.Parameters["LightDirection"].SetValue(((SpotLight)light).orientation.Forward);
                             e_exp_light_depth.Parameters["LightClip"].SetValue(((SpotLight)light).far_clip);
+                            e_exp_light_depth.Parameters["C"].SetValue(gvars.get_float("light_C"));
+
+                            e_exp_light_depth.Parameters["DiffuseMap"].SetValue(ContentHandler.resources[so.texture].value_tx);
 
                             EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
 
@@ -482,7 +487,8 @@ namespace Magpie.Graphics {
                         e_spotlight.Parameters["LightDirection"].SetValue(((SpotLight)light).orientation.Forward);
                         e_spotlight.Parameters["LightAngleCos"].SetValue(((SpotLight)light).angle_cos);
                         e_spotlight.Parameters["LightClip"].SetValue(((SpotLight)light).far_clip);
-                        e_spotlight.Parameters["DepthBias"].SetValue(0.0006f);
+                        e_spotlight.Parameters["DepthBias"].SetValue(gvars.get_float("light_bias"));
+                        e_spotlight.Parameters["C"].SetValue(gvars.get_float("light_C"));
 
                         e_spotlight.Parameters["Shadows"].SetValue(gvars.get_bool("light_shadows"));
                         

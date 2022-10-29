@@ -49,7 +49,7 @@ namespace MagpieTestbed.TestObjects {
         public SceneRenderInfo render_info { get; set; }
 
         public TestSphere() {
-            collision = new Cube(scale);
+            collision = new Cube(scale * 3);
             render_info = new SceneRenderInfo() {
                 model = this.model,
                 textures = this.textures,

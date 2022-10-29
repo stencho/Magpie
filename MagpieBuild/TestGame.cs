@@ -60,19 +60,22 @@ namespace MagpieBuild
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            graphics.PreferredBackBufferWidth = 1600;
-            graphics.PreferredBackBufferHeight = 900;
+            graphics.PreferredBackBufferWidth = 1280;
+            graphics.PreferredBackBufferHeight = 720;
             
             this.IsMouseVisible = true;
             this.graphics.SynchronizeWithVerticalRetrace = false;
             this.Disposed += BuildGame_Disposed;
-            this.graphics.PreferHalfPixelOffset = false;
+            this.graphics.HardwareModeSwitch = false;
+            this.graphics.IsFullScreen = false;
             IsFixedTimeStep = true;
             
         }
 
         private void BuildGame_Disposed(object sender, EventArgs e) {
             World.running = false;
+
+            gvars.write_gvars_to_disk();
         }
 
         protected override void Initialize() {
@@ -173,6 +176,7 @@ namespace MagpieBuild
             for (int i = 0; i < 50; i++) {
                 world.current_map.add_object("test_sphere" + i, new TestSphere());
                 world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
+                //world.current_map.objects["test_sphere" + i].textures = new string[1] { "trumpmap" };
             }
 
             /*
@@ -501,7 +505,9 @@ namespace MagpieBuild
                     "mouse over UI: " + EngineState.window_manager.mouse_over_UI() + "\n\n" +
                     "## gvars ##\n" +
                     gvars.list_all() + "\n\n" +
-                    EngineState.window_manager.list_windows()
+                    EngineState.window_manager.list_windows() + "\n"
+                    
+
 
 
                     , Vector2.One * 2 + (Vector2.UnitY * 20), Color.White);

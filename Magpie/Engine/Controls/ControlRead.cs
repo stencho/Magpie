@@ -339,7 +339,6 @@ namespace Magpie.Engine {
                 mouse_delta *= mouse_multi;
 
 
-                scroll_wheel_changed();
 
                 mouse_lock_p = mouse_lock;
 
@@ -358,6 +357,8 @@ namespace Magpie.Engine {
                 control_thread = new Thread(control_thread_update);
                 control_thread.Start();
             }
+
+            scroll_wheel_changed();
 
             ksp = ks;
             xsp = xs;

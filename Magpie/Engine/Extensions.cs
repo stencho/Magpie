@@ -67,6 +67,17 @@ namespace Magpie.Engine {
             Draw3D.cube(A(bb), B(bb), C(bb), D(bb), E(bb), F(bb), G(bb), H(bb), color);
         }
 
+        public static XYPair ToXYPair(this Point p) {
+            return new XYPair(p.X, p.Y);
+
+        }
+        public static XYPair ToXYPair(this System.Drawing.Point p) {
+            return new XYPair(p.X, p.Y);
+        }
+        public static XYPair ToXYPair(this System.Drawing.Size s) {
+            return new XYPair(s.Width, s.Height);
+        }
+
         public static Vector3 A (this BoundingBox bb) { return bb.center() + bb.half_size(); }
         public static Vector3 B (this BoundingBox bb) { return bb.center() + (bb.half_size() * Vector3.One - (Vector3.UnitX * 2)); }
 

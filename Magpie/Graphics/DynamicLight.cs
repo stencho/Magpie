@@ -33,8 +33,8 @@ namespace Magpie.Graphics {
 
         LightType type { get; }
         
-        float far_clip { get; set; }
-        float near_clip { get; set; }
+        float far_clip { get;  }
+        float near_clip { get; }
         
 
         void update();

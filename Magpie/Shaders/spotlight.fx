@@ -17,6 +17,7 @@ float2 GBufferTextureSize;
 bool Shadows;
 float shadowMapSize;
 float DepthBias;
+float C;
 
 sampler DEPTH : register(s0) = sampler_state {
 	MINFILTER = POINT;
@@ -28,28 +29,29 @@ sampler DEPTH : register(s0) = sampler_state {
 };
 
 sampler NORMAL : register(s1) = sampler_state {
-	MINFILTER = POINT;
-	MAGFILTER = POINT;
-	MIPFILTER = POINT;
+	MINFILTER = ANISOTROPIC;
+	MAGFILTER = ANISOTROPIC;
+	MIPFILTER = ANISOTROPIC;
+	MAXANISOTROPY=2;
 	
 	ADDRESSU = CLAMP;
 	ADDRESSV = CLAMP;
 };
 
 sampler COOKIE: register(s2)= sampler_state {
-	MINFILTER = LINEAR;
-	MAGFILTER = LINEAR;
-	MIPFILTER = LINEAR;
-	
+	MINFILTER = ANISOTROPIC;
+	MAGFILTER = ANISOTROPIC;
+	MIPFILTER = ANISOTROPIC;
+	MAXANISOTROPY=2;
 	ADDRESSU = CLAMP;
 	ADDRESSV = CLAMP;
 };
 
 sampler SHADOW : register(s3) = sampler_state {
-	MINFILTER = ANISOTROPIC;
-	MAGFILTER = ANISOTROPIC;
-	MIPFILTER = ANISOTROPIC;
-	MAXANISOTROPY = 2;
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+	MIPFILTER = LINEAR;
+	
 	ADDRESSU = CLAMP;
 	ADDRESSV = CLAMP;
 };
@@ -178,7 +180,7 @@ float4 PS(VSO input) : COLOR0 {
 	float ShadowFactor = 1;
 
 	if (Shadows) {
-		float loglinlen = (log(1 * (linlen * LightClip) + 1) / log(1 * LightClip + 1));
+		float loglinlen = (log(C * (Ll) + 1) / log(C * LightClip + 1));
 		
 		if ((loglinlen) >= lZ + DepthBias){
 			ShadowFactor = 0;
