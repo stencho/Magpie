@@ -50,11 +50,16 @@ namespace Magpie {
             gvars.add_gvar("resolution", gvar_data_type.XYPAIR, game_resolution);
             gvars.add_change_action("resolution", apply_resolution);
 
-            gvars.add_gvar("super_resolution_scale", gvar_data_type.FLOAT, 2f);
+            gvars.add_gvar("super_resolution_scale", gvar_data_type.FLOAT, 1f);
             gvars.add_change_action("super_resolution_scale", apply_internal_scale);
 
             gvars.add_gvar("test_gvar", gvar_data_type.FLOAT, 5f);
-            
+
+            gvars.add_gvar("light_enabled", gvar_data_type.BOOL, true);            
+            gvars.add_gvar("light_follow", gvar_data_type.BOOL, true);
+            gvars.add_gvar("light_shadows", gvar_data_type.BOOL, true);
+            gvars.add_gvar("light_cookie", gvar_data_type.STRING, "radial_glow");
+
             window = game_window;
             EngineState.game = game;
 

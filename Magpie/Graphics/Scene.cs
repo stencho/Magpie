@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static Magpie.Graphics.Draw2D;
 
 namespace Magpie.Graphics {
@@ -342,11 +343,12 @@ namespace Magpie.Graphics {
                     for (int i = 0; i < scene.Length; i++) {
                         so = scene[i];
 
-                        //if (((SpotLight)light).frustum.Intersects(so.mesh_bounds) && ((SpotLight)light).frustum.Intersects(EngineState.camera.frustum)) {
+                        if (((SpotLight)light).frustum.Intersects(so.mesh_bounds) && ((SpotLight)light).frustum.Intersects(EngineState.camera.frustum)) {
 
                             e_exp_light_depth.Parameters["World"].SetValue(so.world);
                             e_exp_light_depth.Parameters["LightPosition"].SetValue(light.position);
-                            e_exp_light_depth.Parameters["DepthPrecision"].SetValue(((SpotLight)light).far_clip);
+                            e_exp_light_depth.Parameters["LightDirection"].SetValue(((SpotLight)light).orientation.Forward);
+                            e_exp_light_depth.Parameters["LightClip"].SetValue(((SpotLight)light).far_clip);
 
                             EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
 
@@ -361,7 +363,7 @@ namespace Magpie.Graphics {
                             }
 
                             //so.shadow_maps.Add(((SpotLight)light).depth_map);
-                       // }
+                        }
                     }
                 } else if (light.type == LightType.POINT) {
                     //build lighting cubemap
@@ -463,15 +465,16 @@ namespace Magpie.Graphics {
             foreach (DynamicLight light in lights) {
                 switch (light.type) {
                     case LightType.SPOT:
+                        if (!gvars.get_bool("light_enabled")) continue;
 
                         e_spotlight.Parameters["World"].SetValue(((SpotLight)light).world);
 
                         e_spotlight.Parameters["NORMAL"].SetValue(EngineState.buffer.rt_normal);
                         e_spotlight.Parameters["DEPTH"].SetValue(EngineState.buffer.rt_depth);
-                        e_spotlight.Parameters["COOKIE"].SetValue(ContentHandler.resources["radial_glow"].value_tx);
+                        e_spotlight.Parameters["COOKIE"].SetValue(ContentHandler.resources[gvars.get_string("light_cookie")].value_tx);
                         e_spotlight.Parameters["SHADOW"].SetValue(((SpotLight)light).depth_map);
 
-                        e_spotlight.Parameters["LightViewProjection"].SetValue(((SpotLight)light).view * (((SpotLight)light).projection * 1.0f));
+                        e_spotlight.Parameters["LightViewProjection"].SetValue(((SpotLight)light).view * ((SpotLight)light).projection);
                         //e_spotlight.Parameters["LightProjection"].SetValue(Matrix.Invert(((SpotLight)light).projection));
                         //e_spotlight.Parameters["LightProjection"].SetValue((((SpotLight)light).projection));
                         e_spotlight.Parameters["LightColor"].SetValue(light.light_color.ToVector4());
@@ -479,7 +482,11 @@ namespace Magpie.Graphics {
                         e_spotlight.Parameters["LightDirection"].SetValue(((SpotLight)light).orientation.Forward);
                         e_spotlight.Parameters["LightAngleCos"].SetValue(((SpotLight)light).angle_cos);
                         e_spotlight.Parameters["LightClip"].SetValue(((SpotLight)light).far_clip);
-                        e_spotlight.Parameters["DepthBias"].SetValue(0.005f);
+                        e_spotlight.Parameters["DepthBias"].SetValue(0.0006f);
+
+                        e_spotlight.Parameters["Shadows"].SetValue(gvars.get_bool("light_shadows"));
+                        
+                        
                         //e_spotlight.Parameters["radial"].SetValue((float)(((SpotLight)light).radial_scale/2));
                         //e_spotlight.Parameters["shadowMapSize"].SetValue((float)((SpotLight)light).depth_map_resolution);
 
@@ -728,7 +735,7 @@ namespace Magpie.Graphics {
                     e_exp_light_depth.Parameters["View"].SetValue(((SpotLight)light).view);
                     e_exp_light_depth.Parameters["Projection"].SetValue(((SpotLight)light).projection);
                     e_exp_light_depth.Parameters["LightPosition"].SetValue(light.position);
-                    e_exp_light_depth.Parameters["DepthPrecision"].SetValue(((SpotLight)light).far_clip);
+                    e_exp_light_depth.Parameters["LightClip"].SetValue(((SpotLight)light).far_clip);
 
                     EngineState.graphics_device.BlendState = BlendState.Opaque;
 

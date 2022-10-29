@@ -221,7 +221,7 @@ namespace MagpieBuild
             world.current_map.add_object("desk", new TestSphere());
             world.current_map.objects["desk"].model = "desk";
             world.current_map.objects["desk"].position = Vector3.Zero;
-            world.current_map.objects["desk"].scale = Vector3.One * 10;
+            world.current_map.objects["desk"].scale = Vector3.One * 1;
             world.current_map.objects["desk"].orientation = Matrix.Identity;
 
 
@@ -444,8 +444,10 @@ namespace MagpieBuild
 
             pctest.draw_debug();
             snap.snap("another tump");
+
+            Draw3D.xyz_cross(world.current_map.lights[world.current_map.lights.Count - 1].position, 0.3f, Color.HotPink);
         }
-        bool draw_debug_info = false;
+        bool draw_debug_info = true;
         protected override void Draw(GameTime gameTime) {
             Scene.render_after_world = renderextra;
             Clock.frame_probe.set("draw_world");
@@ -528,7 +530,7 @@ namespace MagpieBuild
             }
             crosshair_sdf.draw();
 
-            Scene.draw_texture_to_screen(world.test_light.depth_map, Vector2.One * 20, Vector2.One * 300);
+            //Scene.draw_texture_to_screen(world.test_light.depth_map, Vector2.One * 20, Vector2.One * 300);
             //Scene.draw_texture_to_screen(ContentHandler.resources["radial_glow"].value_tx, Vector2.One * 200, Vector2.One * 200);
             //Draw2D.SDFCircle(Vector2.One * 300, 200f, Color.White);
             GraphicsDevice.SetRenderTarget(null);
@@ -549,7 +551,7 @@ namespace MagpieBuild
             lock (Controls.control_poll_probe)
                 Controls.control_poll_probe.draw(EngineState.resolution.X - 360, th + t + 80, 300, out _, out _);
 
-            snap.draw(test_trums.ToString(), EngineState.resolution.X - 360, 10, 300);
+            //snap.draw(test_trums.ToString(), EngineState.resolution.X - 360, 10, 300);
 
 
             //lock (trum_sphere_probe)

@@ -2,7 +2,8 @@
 float4x4 View;
 float4x4 Projection;
 float3 LightPosition;
-float DepthPrecision;
+float LightClip;
+float3 LightDirection;
 
 struct VSI {
 	float4 Position : POSITION0;
@@ -17,8 +18,11 @@ struct VSO {
 VSO VS(VSI input) {
 	VSO output;
 	float4 worldPosition = mul(input.Position, World);
+	
 	float4 viewPosition = mul(worldPosition, View);
 	output.Position = mul(viewPosition, Projection);
+	//output.Position.z = log((output.Position.w * 0.01) + 1)/log((LightClip*0.01) + 1);
+	//output.Position.z *= output.Position.w; 
 	output.WorldPosition = worldPosition;
 	output.ViewPosition = output.Position;
 	return output;
@@ -31,13 +35,29 @@ float distSquared( float3 A, float3 B )
 
 }
 
+float3 pomn(float3 a, float3 p) {
+	float3 b = a + (LightDirection * LightClip);
+	float3 ab = b - a;
+
+	float t = dot(p-a, ab) / dot(ab,ab);
+
+	if (t <= 0) { t = 0; }
+	if (t >= 1) { t = 1; }
+
+	return a + t * ab;
+}
+
 float4 PS(VSO input) : COLOR0 {
-	float C = 0.00001;
-	input.WorldPosition.xy /= input.WorldPosition.w;
-	float depth = length(input.WorldPosition.xyz - LightPosition.xyz) / (DepthPrecision);
-	//float depth = (input.ViewPosition.z/ DepthPrecision);
-	//return (log(C * depth + 1) / log(C * DepthPrecision + 1) * depth);
-	return log(depth+1);
+	float C = 1;
+	input.WorldPosition /= input.WorldPosition.w;
+	//float depth = distance(input.WorldPosition.xyz, LightPosition.xyz) / LightClip;
+	
+	float3 linpos = pomn(LightPosition, input.WorldPosition.xyz);
+	float depth = (distance(LightPosition.xyz, linpos) / LightClip);
+
+	//float depth = (input.ViewPosition.z / (LightClip));
+	return (log(C * (depth * LightClip) + 1) / log(C * LightClip + 1));
+	return (depth);
 }
 
 technique Default {

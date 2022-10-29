@@ -201,6 +201,7 @@ namespace Magpie {
                     PhysicsSolver.finalize_collisions(current_map);
                 }
 
+
                 lock (last_fps) {
                     for (int i = 0; i < last_fps.Length - 1; i++) {
                         last_fps[i] = last_fps[i + 1];
@@ -236,6 +237,9 @@ namespace Magpie {
             }
         }
 
+        Matrix l_current = Matrix.Identity;
+        Vector3 p_current = Vector3.Zero;
+
         public void Update() {
             if (physics_movement_thread == null) {
                 physics_movement_thread = new Thread(do_world_update);
@@ -249,13 +253,21 @@ namespace Magpie {
                 EngineState.game.Exit();
             }
 
-            current_map.lights[current_map.lights.Count - 1].position
-                = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.3f) + (EngineState.camera.orientation.Down * 0.4f) + (EngineState.camera.orientation.Forward * 0.3f);
-            ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation
-                = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
+            if (gvars.get_bool("light_follow")) {
+                p_current = Vector3.LerpPrecise(
+                    current_map.lights[current_map.lights.Count - 1].position,
+                    EngineState.camera.position + (EngineState.camera.orientation.Right * 0.5f) + (EngineState.camera.orientation.Down * 0.4f) + (Vector3.Forward * 0.5f),
+                    15f * Clock.frame_time_delta
+                    );
 
+                current_map.lights[current_map.lights.Count - 1].position = p_current;
 
+                l_current = Matrix.Lerp(l_current,
+                    EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f)),
+                    15f * Clock.frame_time_delta);
 
+                ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation = l_current;
+            }
             lock (current_map.lights) {
                 foreach (DynamicLight light in current_map.lights) {
                     lock (light)

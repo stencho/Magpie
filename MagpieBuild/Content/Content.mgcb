@@ -363,7 +363,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:tex/trumpmapclean.png
+/build:tex/trumpmapclean.png;tex/trumpmap.png
 
 #begin tex/walkable_test.png
 /importer:TextureImporter

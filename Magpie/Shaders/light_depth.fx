@@ -1,6 +1,6 @@
 ﻿float4x4 World;
 float4x4 LVP;
-float DepthPrecision;
+float LightClip;
 float FarClip;
 float3 light_pos;
 

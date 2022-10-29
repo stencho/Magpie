@@ -824,10 +824,10 @@ namespace ConsoleInput
         }
 
         /// <summary>
-        /// "confirms" the current line
-        /// Effectively adds current state to history, resets everything, and runs the input as a script
+        /// Evaluates the current line
+        /// adds current state to history, resets everything, and runs the input as a script
         /// </summary>
-        public void line_confirm() {
+        public void line_eval() {
             if (string.IsNullOrEmpty(current_input) || string.IsNullOrWhiteSpace(current_input)) return;
 
             if (history_index != 0)
@@ -1112,7 +1112,7 @@ namespace ConsoleInput
         }
         public void read_key(Keys key) {
             switch (key) {
-                case Keys.Enter: line_confirm(); break;
+                case Keys.Enter: line_eval(); break;
 
                 case Keys.Escape: escape?.Invoke(); break;
 

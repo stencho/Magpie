@@ -151,42 +151,42 @@ namespace Magpie.Engine {
         public static void set(string name, bool value) {
             if (!contains_bool(name)) throw new Exception("no such bool with name \"" + name + "\"");                
             _gvars[name].data = value;
-            _gvars[name].changed.Invoke();
+            _gvars[name].changed?.Invoke();
         }
         public static void set(string name, int value) {
             if (!contains_int(name)) throw new Exception("no such int with name \"" + name + "\"");
             _gvars[name].data = value;
-            _gvars[name].changed.Invoke();
+            _gvars[name].changed?.Invoke();
         }
         public static void set(string name, float value) {
             if (!contains_float(name)) throw new Exception("no such float with name \"" + name + "\"");
             _gvars[name].data = value;
-            _gvars[name].changed.Invoke();
+            _gvars[name].changed?.Invoke();
         }
         public static void set(string name, double value) {
             if (!contains_double(name)) throw new Exception("no such double with name \"" + name + "\"");
             _gvars[name].data = value;
-            _gvars[name].changed.Invoke();
+            _gvars[name].changed?.Invoke();
         }
         public static void set(string name, XYPair value) {
             if (!contains_xy(name)) throw new Exception("no such xypair with name \"" + name + "\"");
             _gvars[name].data = value;
-            _gvars[name].changed.Invoke();
+            _gvars[name].changed?.Invoke();
         }
         public static void set(string name, Vector2 value) {
             if (!contains_v2(name)) throw new Exception("no such vector2 with name \"" + name + "\"");
             _gvars[name].data = value;
-            _gvars[name].changed.Invoke();
+            _gvars[name].changed?.Invoke();
         }
         public static void set(string name, Vector3 value) {
             if (!contains_v3(name)) throw new Exception("no such vector3 with name \"" + name + "\"");
             _gvars[name].data = value;
-            _gvars[name].changed.Invoke();
+            _gvars[name].changed?.Invoke();
         }
         public static void set(string name, string value) {
             if (!contains_string(name)) throw new Exception("no such string with name \"" + name + "\"");
             _gvars[name].data = value;
-            _gvars[name].changed.Invoke();
+            _gvars[name].changed?.Invoke();
         }                     
 
         public static void get(string name, out bool result ) {

@@ -11,7 +11,7 @@ float4 LightColor;
 float LightIntensity;
 float2 GBufferTextureSize;
 bool Shadows;
-float DepthPrecision;
+float LightClip;
 float DepthBias;
 float shadowMapSize;
 bool FullBright;
@@ -147,8 +147,8 @@ float4 createLightmap(float3 Position, float3 N)
 
 	if (Shadows)
 	{
-		float len = min(0.01, length(LightPosition - Position)) / DepthPrecision;
-		ShadowFactor = (lZ * exp(-(DepthPrecision * 0.46f) * ((len) - DepthBias)));
+		float len = min(0.01, length(LightPosition - Position)) / LightClip;
+		ShadowFactor = (lZ * exp(-(LightClip * 0.46f) * ((len) - DepthBias)));
 		
 	}	
 

@@ -76,7 +76,7 @@ namespace Magpie.Graphics.Particles {
         string _texture;
 
         public Texture2D texture => ContentHandler.resources[_texture].value_tx;
-        bool bbset = false;
+
         public Particle2D(string texture) {
             if (Particle.e_particle == null)
                 Particle.e_particle = ContentHandler.resources["particle"].value_fx;

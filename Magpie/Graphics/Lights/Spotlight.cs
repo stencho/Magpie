@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Magpie.Graphics.Lights {
     public class SpotLight : DynamicLight {
         public LightType type => LightType.SPOT;
-        public int depth_map_resolution => 1024;
+        public int depth_map_resolution => 2048;
 
         RenderTarget2D _depth;
         public RenderTarget2D depth_map => _depth;
@@ -19,7 +19,7 @@ namespace Magpie.Graphics.Lights {
         public float far_clip { get; set; } = 20;
         public float near_clip { get; set; } = 1f;
 
-        public float fov { get; set; } = MathHelper.Pi / 5f + 0.01f;
+        public float fov { get; set; } = (MathHelper.Pi / 4f) + 0.01f;
 
         public BoundingFrustum frustum { get; set; }
         public Vector3 position { get; set; } = (Vector3.Up * 15.91909f) + (Vector3.Forward *3.921314f);
@@ -55,6 +55,7 @@ namespace Magpie.Graphics.Lights {
         public void update() {
             view = Matrix.CreateLookAt(position, position + orientation.Forward, orientation.Up);
             projection = Matrix.CreatePerspectiveFieldOfView(fov, 1f, near_clip, far_clip);
+            
             radial_scale = (float)Math.Tan((double)fov) * far_clip;
 
             actual_scale = Matrix.CreateScale(radial_scale, radial_scale, far_clip);
