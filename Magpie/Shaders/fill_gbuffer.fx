@@ -123,12 +123,13 @@ float3 camera_pos;
 float3 atmosphere_color;
 float3 sky_color;
 bool fog = false;
+bool clip_trans = false;
 PSO MainPS(VertexShaderOutput input)
 {
     PSO output = (PSO)0;
 
     float4 rgba = tex2D(DiffuseSampler, input.TexCoord);
-	if (rgba.a < 1) { clip(-1); }
+	if (rgba.a < 1 && clip_trans) { clip(-1); }
 	/*
     output.Depth.rgb = input.Depth.z/input.Depth.w;
 	output.Depth.a = 1;

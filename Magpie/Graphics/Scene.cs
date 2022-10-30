@@ -607,9 +607,12 @@ namespace Magpie.Graphics {
             e_gbuffer.Parameters["View"].SetValue(Matrix.Identity);
             e_gbuffer.Parameters["Projection"].SetValue(Matrix.Identity);
             e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
+            e_gbuffer.Parameters["clip_trans"].SetValue(false);
             e_gbuffer.Techniques["BasicColorDrawing"].Passes[0].Apply();
+            
 
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
+            e_gbuffer.Parameters["clip_trans"].SetValue(true);
         }
         public static void draw_texture_to_screen(Texture2D tex, Vector2 pos, Vector2 size) {
             EngineState.graphics_device.SetVertexBuffer(quad.vertex_buffer);
@@ -624,12 +627,15 @@ namespace Magpie.Graphics {
                 
                 );
 
+            e_gbuffer.Parameters["clip_trans"].SetValue(false);
+
             e_gbuffer.Parameters["View"].SetValue(Matrix.Identity);
             e_gbuffer.Parameters["Projection"].SetValue(Matrix.Identity);
             e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
             e_gbuffer.Techniques["BasicColorDrawing"].Passes[0].Apply();
 
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 2);
+            e_gbuffer.Parameters["clip_trans"].SetValue(true);
         }
 
         public static void spritebatch_draw_to_screen(Vector2 offset, Texture2D tex) {
