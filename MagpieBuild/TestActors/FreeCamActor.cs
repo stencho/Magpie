@@ -157,7 +157,7 @@ namespace MagpieTestbed.TestActors {
             }
 
             if (mv != Vector3.Zero)
-                wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("shift") ? 6f : 1f) * Clock.internal_frame_time_delta;
+                wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("shift") ? 6f : 1f) * Clock.internal_frame_limit_in_seconds;
 
             cam.position = position;
         }

@@ -384,7 +384,8 @@ namespace Magpie.Engine {
         public static float frame_limit => gvars.get_bool("vsync") ? 
               EngineState.display_refresh_rate
             : gvars.get_float("frame_limit");
-        public static float internal_frame_limit = 1000;
+        public static float internal_frame_limit = 10000;
+        public static float internal_frame_limit_in_seconds = 1000 / internal_frame_limit / 1000;
 
         public static double frame_limit_ms => 1000.0 / Clock.frame_limit;
         public static double internal_frame_limit_ms => 1000.0 / Clock.internal_frame_limit;
@@ -427,8 +428,8 @@ namespace Magpie.Engine {
                 game.IsFixedTimeStep = true;
                 game.TargetElapsedTime = TimeSpan.FromMilliseconds(frame_limit_ms);
             } else {
-                game.IsFixedTimeStep = false;
-                game.TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 16.0);
+                game.IsFixedTimeStep = true;
+                game.TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 99999 / 1000.0);
             }
 
             total_ms_ignore_pause += _gt.ElapsedGameTime.TotalMilliseconds;

@@ -24,6 +24,17 @@ namespace Magpie.Graphics {
     }
     
 
+
+    public struct light {
+        LightType type;
+        Vector3 position;
+        Matrix world;
+        Color color;
+        float far_clip;
+        float near_clip;
+    }
+
+
     public interface DynamicLight {
         Vector3 position { get; set; }
 

@@ -136,7 +136,7 @@ namespace Magpie.Graphics.UI {
 
             cih.has_focus = parent_form.has_focus;
 
-            cih.update(cih.has_focus);
+            cih.update(cih.has_focus, parent_form.client_top_left);
 
             //_text = Logging.last_n_messages(200);
 

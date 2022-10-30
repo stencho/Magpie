@@ -74,7 +74,7 @@ namespace MagpieBuild
         }
 
         private void BuildGame_Disposed(object sender, EventArgs e) {
-            World.running = false;
+            EngineState.running = false;
 
             gvars.write_gvars_to_disk();
         }
@@ -106,10 +106,8 @@ namespace MagpieBuild
 
                 (bind_type.digital, controller_type.keyboard, Keys.T, "test"),
                 (bind_type.digital, controller_type.keyboard, Keys.Y, "test_sweep"),
-                (bind_type.digital, controller_type.keyboard, Keys.F2, "switch_buffer"),
                 (bind_type.digital, controller_type.keyboard, Keys.P, "poopy_butt"),
 
-                (bind_type.digital, controller_type.keyboard, Keys.F5, "screenshot"),
 
                 (bind_type.digital, controller_type.keyboard, Keys.LeftShift, "shift"),
 
@@ -331,7 +329,7 @@ namespace MagpieBuild
             world.Update();
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
-                World.running = false;
+                EngineState.running = false;
                 Exit();
             }
 
@@ -494,8 +492,8 @@ namespace MagpieBuild
 
 
                 Draw2D.text_shadow("pf",
-                    $"ext {Clock.frame_rate.ToString()}/{Clock.frame_limit}FPS {(gvars.get_bool("vsync") ? "[vsync]" : "")}\n" +
-                    $"int {Clock.internal_frame_rate_immediate.ToString()}/{Clock.internal_frame_limit}FPS\n" +
+                    $"render {Clock.frame_rate.ToString()}/{Clock.frame_limit} FPS {(gvars.get_bool("vsync") ? "[vsync]" : "")}\n" +
+                    $"update {Clock.internal_frame_rate_immediate.ToString()}/{Clock.internal_frame_limit} FPS\n" +
                     "\n" +
                     string.Format("[ delta s  [int {0:F3}] [ext {1:F3}] ]\n", Clock.internal_frame_time_delta, Clock.frame_time_delta) +
                     string.Format("[ delta ms [int {0:F3}] [ext {1:F3}] ]\n", Clock.internal_frame_time_delta_ms, Clock.frame_time_delta_ms) + "\n" +

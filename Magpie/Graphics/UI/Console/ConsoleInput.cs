@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -856,7 +857,7 @@ namespace ConsoleInput
         /// 
         /// </summary>
         /// <param name="check_keys">Disables all key entry</param>
-        public void update(bool check_keys) {
+        public void update(bool check_keys, XYPair parent_top_left) {
             // setup
             var ks_k = Controls.keyboard_state.GetPressedKeys();
             var pks_k = Controls.keyboard_state_prev.GetPressedKeys();
@@ -864,8 +865,8 @@ namespace ConsoleInput
             // mouse
 
             // mouse over the text input
-            if (Math2D.AABB_test(mouse_position.X, mouse_position.Y, X, Y, width, height)) {
-                mouse_over_index = (mouse_position.X - X) / font_width;
+            if (Math2D.AABB_test(mouse_position.X, mouse_position.Y, parent_top_left.X + X, parent_top_left.Y + Y, width, height)) {
+                mouse_over_index = ((mouse_position.X - parent_top_left.X - X)) / font_width;
                 mouse_over_index += view_left;
 
             } else {

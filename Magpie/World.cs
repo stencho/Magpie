@@ -24,7 +24,6 @@ namespace Magpie {
 
         public volatile SegmentedTerrain test_hf;
 
-        public static volatile bool running = true;
 
         public World() {
             load_map();
@@ -137,7 +136,7 @@ namespace Magpie {
         public static volatile frame_probe internal_frame_probe = new frame_probe();
 
         private void do_world_update() {            
-            while (running) {
+            while (EngineState.running) {
                 internal_frame_probe.start_of_frame();
 
                 Controls.mouse_delta_int = Controls.md_int;
@@ -198,6 +197,11 @@ namespace Magpie {
                     PhysicsSolver.do_movement(current_map);
                     PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
                     PhysicsSolver.finalize_collisions(current_map);
+
+
+
+
+                    dead_objects.Clear();
                 }
 
 
@@ -209,7 +213,7 @@ namespace Magpie {
                 }
 
                 internal_frame_probe.set("sleep");
-                while (running) {
+                while (EngineState.running) {
                     ts = (DateTime.Now - dt);
 
                     if (ts.TotalMilliseconds >= (match_external_fps_below_limit ? (world_running_slow ? Clock.d_frame_time_delta_ms : Clock.internal_frame_limit_ms) : Clock.internal_frame_limit_ms)) {
@@ -248,9 +252,11 @@ namespace Magpie {
 
             Clock.frame_probe.set("update");
 
-            if (running == false) {
-                EngineState.game.Exit();
-            }
+            //NEED TO MAKE A SYSTEM LIKE THIS FOR ALL LIGHTS
+            //INSTEAD OF A LIGHT LIST IN CURRENT MAP, OBJECTS HAVE INDIVIDUAL LISTS OF A
+            //SIMPLE STRUCT CONTAINING THINGS LIKE CURRENT POSITION AND COLOR AND SUCH
+            //THEN THE NEW UPGRADED RENDERER WILL USE THIS INFO TO RENDER THEM ALL
+            //INSTEAD OF KEEPING INFO ON HOW TO RENDER IN THE INDIVIDUAL LIGHT CLASSES
 
             if (gvars.get_bool("light_follow")) {
                 p_current = Vector3.LerpPrecise(
@@ -259,14 +265,17 @@ namespace Magpie {
                     15f * Clock.frame_time_delta
                     );
 
-                current_map.lights[current_map.lights.Count - 1].position = p_current;
-
+                //current_map.lights[current_map.lights.Count - 1].position = p_current;
+                current_map.lights[current_map.lights.Count - 1].position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.5f) + (EngineState.camera.orientation.Down * 0.4f) + (Vector3.Forward * 0.5f);
+                
                 l_current = Matrix.Lerp(l_current,
                     EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f)),
                     15f * Clock.frame_time_delta);
 
-                ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation = l_current;
-            }
+                //((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation = l_current;
+                ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
+            } 
+
             lock (current_map.lights) {
                 foreach (DynamicLight light in current_map.lights) {
                     lock (light)
@@ -294,10 +303,8 @@ namespace Magpie {
             */
 
 
-            Scene.sun_moon.update();
             //test_light.update();
 
-            dead_objects.Clear();
         }
 
 

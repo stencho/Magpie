@@ -317,7 +317,7 @@ namespace Magpie.Engine {
 
 
         public static void control_thread_update() {
-            while (World.running) {
+            while (EngineState.running) {
                 control_poll_probe.start_of_frame();
 
                 control_poll_probe.set("mouse");
@@ -354,7 +354,7 @@ namespace Magpie.Engine {
                 _mouse_coll_obj = new Circle2D(Controls.mouse_position_float, 1f);
 
                 control_poll_probe.set("sleep");
-                while (World.running) {
+                while (EngineState.running) {
                     if (control_poll_probe.since_frame_start() >= control_thread_ms) break;
                 }
                 control_poll_probe.end_of_frame();

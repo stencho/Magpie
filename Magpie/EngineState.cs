@@ -13,9 +13,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Magpie.Engine.Controls;
+using Keys = Microsoft.Xna.Framework.Input.Keys;
 
 namespace Magpie {
     public static class EngineState {
+        public static volatile bool running = true;
+
         public static GBuffer buffer;
         public static Camera camera;
 
@@ -50,6 +53,12 @@ namespace Magpie {
 
         public static void initialize(XYPair game_resolution, GameWindow game_window,
             GraphicsDevice gd, GraphicsDeviceManager gdm, Game game) {
+
+            window = game_window;
+            EngineState.game = game;
+            graphics = gdm;
+            graphics_device = gd;
+            spritebatch = new SpriteBatch(graphics_device);
 
             Draw2D.init();
 
@@ -99,6 +108,9 @@ namespace Magpie {
             gvars.read_gvars_from_disk();
             gvars.write_gvars_to_disk();
 
+            game.MaxElapsedTime = TimeSpan.FromMilliseconds(1000f);
+
+            //set up resolution/screen mode/etc
             gdm.PreferredBackBufferWidth = resolution.X;
             gdm.PreferredBackBufferHeight = resolution.Y;
 
@@ -112,39 +124,41 @@ namespace Magpie {
 
             gdm.ApplyChanges();
 
-            gvars.set("window_position", game_window.Position.ToXYPair());
-            gvars.set("window_size", game_window.ClientBounds.Size.ToXYPair());
-
-            window = game_window;
-            EngineState.game = game;
-
+            //set up window gvars and recenter window
             scrn = Screen.AllScreens[gvars.get_int("display")];
             screen_bounds = scrn.Bounds.Size.ToXYPair();
             screen_pos = scrn.Bounds.Location.ToXYPair();
 
-            window.Position = ((screen_pos + (screen_bounds / 2)) - (gvars.get_xypair("window_size") / 2)).ToPoint();
+            window.Position = ((screen_pos + (screen_bounds / 2)) - (resolution / 2)).ToPoint();
 
-            graphics = gdm;
-            graphics_device = gd;
-            spritebatch = new SpriteBatch(graphics_device);
+            gvars.set("window_position", game_window.Position.ToXYPair());
+            gvars.set("window_size", game_window.ClientBounds.Size.ToXYPair());
 
+            //more graphics setup
             buffer = new GBuffer();
             buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y, gvars.get_float("super_resolution_scale"));
 
-            try {
-                Scene.configure_renderer();
-            } catch (Exception ex) { return; }
+            Scene.configure_renderer();
 
             Draw3D.init();
 
             window_manager = new UIWindowManager();
 
+            //add actions to all the gvars that need them, this comes late so that they don't get triggered during setup
             gvars.add_change_action("resolution", apply_resolution);
             gvars.add_change_action("super_resolution_scale", apply_internal_scale);
             gvars.add_change_action("fullscreen", fullscreen);
             gvars.add_change_action("vsync", vsync);
             gvars.add_change_action("display", change_display);
             gvars.add_change_action("borderless", () => { window.IsBorderless = gvars.get_bool("borderless"); });
+
+            //add controls
+            StaticControlBinds.add_bindings(
+                (bind_type.digital, controller_type.keyboard, Keys.F2, "switch_buffer"),
+                (bind_type.digital, controller_type.keyboard, Keys.F5, "screenshot")
+
+
+                );
         }
         static bool was_fullscreen = false;
         static void fullscreen() {
@@ -154,7 +168,7 @@ namespace Magpie {
             var screen_bounds = scrn.Bounds.Size.ToXYPair();
             var screen_pos = scrn.Bounds.Location.ToXYPair();
 
-            window.Position = ((screen_pos + (screen_bounds / 2)) - (gvars.get_xypair("window_size") / 2)).ToPoint();
+            window.Position = ((screen_pos + (screen_bounds / 2)) - (resolution / 2)).ToPoint();
 
             graphics.HardwareModeSwitch = true;
             graphics.IsFullScreen = gvars.get_bool("fullscreen");
@@ -164,7 +178,7 @@ namespace Magpie {
             screen_bounds = scrn.Bounds.Size.ToXYPair();
             screen_pos = scrn.Bounds.Location.ToXYPair();
 
-            window.Position = ((screen_pos + (screen_bounds / 2)) - (gvars.get_xypair("window_size") / 2)).ToPoint();
+            window.Position = ((screen_pos + (screen_bounds / 2)) - (resolution / 2)).ToPoint();
             
             was_fullscreen = graphics.IsFullScreen;
         }
@@ -174,7 +188,7 @@ namespace Magpie {
             var screen_bounds = scrn.Bounds.Size.ToXYPair();
             var screen_pos = scrn.Bounds.Location.ToXYPair();
 
-            window.Position = ((screen_pos + (screen_bounds / 2)) - (gvars.get_xypair("window_size") / 2)).ToPoint();
+            window.Position = ((screen_pos + (screen_bounds / 2)) - (resolution / 2)).ToPoint();
 
             DisplayInfo.get_display_modes((uint)gvars.get_int("display"), out display_modes, out _, out _);
 
@@ -196,14 +210,14 @@ namespace Magpie {
 
             graphics.ApplyChanges();
 
-            gvars.set("window_position", window.Position.ToXYPair());
-            gvars.set("window_size", window.ClientBounds.Size.ToXYPair());
-
             var scrn = Screen.AllScreens[gvars.get_int("display")];
             var screen_bounds = scrn.Bounds.Size.ToXYPair();
             var screen_pos = scrn.Bounds.Location.ToXYPair();
 
             window.Position = ((screen_pos + (screen_bounds / 2)) - (resolution / 2)).ToPoint();
+
+            gvars.set("window_position", window.Position.ToXYPair());
+            gvars.set("window_size", window.ClientBounds.Size.ToXYPair());
         }
 
         public static void change_resolution(int X, int Y) {
@@ -216,14 +230,14 @@ namespace Magpie {
             gvars.set("resolution", new XYPair(X, Y));
             buffer.change_resolution(graphics_device, X, Y);
 
-            gvars.set("window_position", window.Position.ToXYPair());
-            gvars.set("window_size", window.ClientBounds.Size.ToXYPair());
-
             var scrn = Screen.AllScreens[gvars.get_int("display")];
             var screen_bounds = scrn.Bounds.Size.ToXYPair();
             var screen_pos = scrn.Bounds.Location.ToXYPair();
 
             window.Position = ((screen_pos + (screen_bounds / 2)) - (resolution / 2)).ToPoint();
+
+            gvars.set("window_position", window.Position.ToXYPair());
+            gvars.set("window_size", window.ClientBounds.Size.ToXYPair());
         }
 
         public static void apply_internal_scale() {
@@ -231,6 +245,10 @@ namespace Magpie {
         }
 
         public static void Update(GameTime gt, Game game) {
+            if (running == false) {
+                game.Exit();
+            }
+
             was_active = is_active;
             gametime = gt;
             
@@ -256,6 +274,8 @@ namespace Magpie {
 
             gvars.set("window_position", window.Position.ToXYPair());
             gvars.set("window_size", window.ClientBounds.Size.ToXYPair());
+
+            Scene.sun_moon.update();
         }
 
         public static void draw2d() {

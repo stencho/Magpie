@@ -132,7 +132,6 @@ namespace Magpie.Graphics {
 
             gbuffer.buffer_targets = new RenderTargetBinding[4];
 
-
             gbuffer._width = width; gbuffer._height = height;
             gbuffer._resolution_scale = res_scale;
 
