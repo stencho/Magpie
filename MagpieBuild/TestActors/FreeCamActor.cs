@@ -115,12 +115,12 @@ namespace MagpieTestbed.TestActors {
             }
 
             if (aiming) { 
-                cam.orientation *= Matrix.CreateRotationY(mouse_delta.X / (EngineState.resolution.X * mouse_multi));
+                cam.orientation *= Matrix.CreateRotationY(mouse_delta_int.X / (EngineState.resolution.X * mouse_multi));
 
-                if (cam.orientation.Forward.Y < .98f && mouse_delta.Y > 0) {
-                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta.Y / (EngineState.resolution.Y * mouse_multi));
-                } else if (cam.orientation.Forward.Y > -.98f && mouse_delta.Y < 0) {
-                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta.Y / (EngineState.resolution.Y * mouse_multi));
+                if (cam.orientation.Forward.Y < .98f && mouse_delta_int.Y > 0) {
+                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta_int.Y / (EngineState.resolution.Y * mouse_multi));
+                } else if (cam.orientation.Forward.Y > -.98f && mouse_delta_int.Y < 0) {
+                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta_int.Y / (EngineState.resolution.Y * mouse_multi));
                 }                            
             }
 

@@ -93,6 +93,16 @@ namespace Magpie.Graphics {
             }
         }
 
+        public static int get_primary_screen() { 
+            for(int i = 0; i < Screen.AllScreens.Length; i++) {
+                if (Screen.AllScreens[i].Primary) {
+                    return i;
+                }
+            }
+
+            throw new Exception("what the fuck how do you not have a primary monitor");            
+        }
+
         public static bool get_display_modes(uint display, out List<display_mode> modes, out string name, out string device_string) {
             DEVMODE devmode = new DEVMODE();
             DISPLAY_DEVICE device = new DISPLAY_DEVICE();
@@ -178,6 +188,30 @@ namespace Magpie.Graphics {
             }
 
             return modes[index];
+        }
+
+        public static float highest_hz_supported_by_highest_res(List<display_mode> modes, out int index) {
+            int h_index = -1;
+            int h_w=-1;
+            int h_h=-1;
+            float h_hz=-1;
+            int i=0;
+
+            foreach (display_mode m in modes) {
+                if (m.resolution.X >= h_w || m.resolution.Y >= h_h) {
+                    h_w = m.resolution.X;
+                    h_h = m.resolution.Y;
+                    if (m.refresh_rate > h_hz) {
+                        h_hz = m.refresh_rate;
+
+                        h_index = i;
+                    }
+                }
+                i++;
+            }
+
+            index = h_index;
+            return h_hz;    
         }
 
 

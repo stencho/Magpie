@@ -68,6 +68,7 @@ namespace MagpieBuild
             this.Disposed += BuildGame_Disposed;
             this.graphics.HardwareModeSwitch = false;
             this.graphics.IsFullScreen = false;
+            this.graphics.PreferHalfPixelOffset = false;
             IsFixedTimeStep = true;
             
         }
@@ -176,7 +177,7 @@ namespace MagpieBuild
             for (int i = 0; i < 50; i++) {
                 world.current_map.add_object("test_sphere" + i, new TestSphere());
                 world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
-                //world.current_map.objects["test_sphere" + i].textures = new string[1] { "trumpmap" };
+                world.current_map.objects["test_sphere" + i].textures = new string[1] { "trumpmap" };
             }
 
             /*
@@ -225,7 +226,7 @@ namespace MagpieBuild
             world.current_map.add_object("desk", new TestSphere());
             world.current_map.objects["desk"].model = "desk";
             world.current_map.objects["desk"].position = Vector3.Zero;
-            world.current_map.objects["desk"].scale = Vector3.One * 1;
+            world.current_map.objects["desk"].scale = Vector3.One * 64;
             world.current_map.objects["desk"].orientation = Matrix.Identity;
 
 
@@ -493,7 +494,7 @@ namespace MagpieBuild
 
 
                 Draw2D.text_shadow("pf",
-                    $"ext {Clock.frame_rate.ToString()}/{Clock.frame_limit}FPS\n" +
+                    $"ext {Clock.frame_rate.ToString()}/{Clock.frame_limit}FPS {(gvars.get_bool("vsync") ? "[vsync]" : "")}\n" +
                     $"int {Clock.internal_frame_rate_immediate.ToString()}/{Clock.internal_frame_limit}FPS\n" +
                     "\n" +
                     string.Format("[ delta s  [int {0:F3}] [ext {1:F3}] ]\n", Clock.internal_frame_time_delta, Clock.frame_time_delta) +
@@ -516,8 +517,8 @@ namespace MagpieBuild
 
 
                 Clock.frame_probe.set("draw_bind_states");
-                StaticControlBinds.draw_state(200, 650, 100, 15, 15);
-                ((FreeCamActor)world.player_actor).binds.draw_state(6, 650, 100, 15, 15, "player");
+                StaticControlBinds.draw_state(200, EngineState.resolution.Y - 250, 100, 15, 15);
+                ((FreeCamActor)world.player_actor).binds.draw_state(6, EngineState.resolution.Y - 250, 100, 15, 15, "player");
 
 
                 EngineState.spritebatch.End();

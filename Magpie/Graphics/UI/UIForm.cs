@@ -688,7 +688,7 @@ namespace Magpie.Graphics.UI {
                 _draw_render_targets = false;
 
                 //size change is basically just mouse delta
-                var size_change = Controls.mouse_delta_actual;
+                var size_change = Controls.mouse_delta;
 
                 var sizefit = size;
                 if (size.X > EngineState.resolution.X)
@@ -745,7 +745,7 @@ namespace Magpie.Graphics.UI {
 
             //mouse down and bar grabbed, position needs to change according to mouse delta
             if (mdown && _grabbed_bar) {
-                this.position += Controls.mouse_delta_actual;
+                this.position += Controls.mouse_delta;
             }
 
             //mouse released, release bar

@@ -381,8 +381,10 @@ namespace Magpie.Engine {
 
         public static long frame_count { get; private set; } = 0;
 
-        public static float frame_limit => gvars.get_bool("vsync") ? EngineState.current_display_mode.refresh_rate : gvars.get_int("frame_limit");
-        public static float internal_frame_limit = 60;
+        public static float frame_limit => gvars.get_bool("vsync") ? 
+              EngineState.display_refresh_rate
+            : gvars.get_float("frame_limit");
+        public static float internal_frame_limit = 1000;
 
         public static double frame_limit_ms => 1000.0 / Clock.frame_limit;
         public static double internal_frame_limit_ms => 1000.0 / Clock.internal_frame_limit;

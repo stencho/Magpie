@@ -22,9 +22,14 @@ namespace Magpie.Engine {
         public static KeyboardState keyboard_state_prev => ksp;
 
         static MouseState ms;
+        static MouseState mds;
         public static MouseState mouse_state => ms;
+        public static MouseState mouse_state_thread => mds;
+
         static MouseState msp;
+        static MouseState mdsp;
         public static MouseState mouse_state_prev => msp;
+        public static MouseState mouse_state_thread_prev => mdsp;
 
         public static XYPair mouse_position => new XYPair(mouse_state.Position.X, mouse_state.Position.Y);
         public static Vector2 mouse_position_float => new Vector2(mouse_state.Position.X, mouse_state.Position.Y);
@@ -285,30 +290,40 @@ namespace Magpie.Engine {
         private static XYPair window_center = XYPair.Zero;
         public volatile static bool mouse_lock = false;
         static volatile bool mouse_lock_p = false;
-        public  static Vector2 mouse_delta;
-        public  static Vector2 mouse_delta_actual;
+        static Vector2 mouse_delta_internal;
+        public static Vector2 mouse_delta;
+        public static Vector2 mouse_delta_int;
         static XYPair mdel;
 
         static Vector2 md = Vector2.Zero;
+        public static Vector2 md_int = Vector2.Zero;
 
         static Keys[] pressed_keys;
         static Keys[] pressed_keys_previous;
         
         public static Thread control_thread;
 
-        public static volatile int control_thread_poll_hz = 120;
+        public static volatile int control_thread_poll_hz = 500;
         public static volatile float mouse_multi = 15f;
         public static double control_thread_ms => (1000.0 / control_thread_poll_hz);
         public static volatile frame_probe control_poll_probe = new frame_probe();
         
+        //to explain how this works, the control_thread_update() function/thread more or less
+        //exclusively exists just to get extremely clean mouse deltas and mouse feel in general
+        //control_thread_update accumulates mouse deltas into Vector2 md over a whole lot of frames (it runs at 1000 hz)
+        //and then update() sets mouse_delta to md and clears md
+        //this allows the main external update thread to have access to extremely accurate, framerate agnostic mouse delta information
+        //which in turn allows anything in the internal thread to also get
+
+
         public static void control_thread_update() {
             while (World.running) {
                 control_poll_probe.start_of_frame();
 
-                msp = ms;
-                ms = Mouse.GetState();
-
                 control_poll_probe.set("mouse");
+                
+                mdsp = mds;
+                mds = Mouse.GetState();
 
                 window_center.X = (EngineState.window.ClientBounds.Width / 2);
                 window_center.Y = (EngineState.window.ClientBounds.Height / 2);
@@ -319,26 +334,20 @@ namespace Magpie.Engine {
                 }
 
                 if (mouse_lock && mouse_lock_p && window_active && window_was_active) {
-                    mdel = (window_center)
-                                    - (XYPair.UnitX * ms.X)
-                                    - (XYPair.UnitY * ms.Y);
+                    mouse_delta_internal = (window_center.ToVector2())
+                                    - (Vector2.UnitX * mds.X)
+                                    - (Vector2.UnitY * mds.Y);
 
-                    mouse_delta = new Vector2(mdel.X, mdel.Y);
 
                 } else if (!mouse_lock && !mouse_lock_p) {
-                    mdel = ((XYPair.UnitX * -(msp.X - ms.X)) + (XYPair.UnitY * -(msp.Y - ms.Y)));
-                    mouse_delta = new Vector2(mdel.X, mdel.Y);
+                    mouse_delta_internal = ((Vector2.UnitX * -(mdsp.X - mds.X)) + (Vector2.UnitY * -(mdsp.Y - mds.Y)));
 
                 } else {
-                    mouse_delta = Vector2.Zero;
+                    mouse_delta_internal = Vector2.Zero;
                 }
 
-                //mouse_delta_actual = mouse_delta + Vector2.Zero;
-                md += mouse_delta;
-                mouse_delta *= (float)(1 / control_thread_ms);
-                mouse_delta *= mouse_multi;
-
-
+                md += mouse_delta_internal;
+                md_int += mouse_delta_internal;
 
                 mouse_lock_p = mouse_lock;
 
@@ -362,13 +371,15 @@ namespace Magpie.Engine {
 
             ksp = ks;
             xsp = xs;
+            msp = ms;
 
+            ms = Mouse.GetState();
             ks = Keyboard.GetState();
 
             pressed_keys_previous = pressed_keys;
             pressed_keys = ks.GetPressedKeys();
 
-            mouse_delta_actual = md;
+            mouse_delta = md;
             md = Vector2.Zero;
 
             xsp[0] = xs[0];

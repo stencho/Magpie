@@ -140,6 +140,9 @@ namespace Magpie {
             while (running) {
                 internal_frame_probe.start_of_frame();
 
+                Controls.mouse_delta_int = Controls.md_int;
+                Controls.md_int = Vector2.Zero;
+
                 update_frame_rate_avg = 0;
                 lock(last_ticks) {
                     for (int i = 0; i < last_ticks.Length - 1; i++) {
@@ -150,18 +153,16 @@ namespace Magpie {
 
                 internal_frame_probe.set("lights");
 
-                internal_frame_probe.set("brushes");
-                lock (current_map.brushes.Values) {
+                lock (current_map) {
+                    internal_frame_probe.set("brushes");
                     foreach (Brush brush in current_map.brushes.Values) {
                         lock (brush)
                             brush.Update();
                     }
-                }
 
-                internal_frame_probe.set("objects");
-                lock (current_map.objects.Values) {
+                    internal_frame_probe.set("objects");
                     foreach (GameObject go in current_map.objects.Values) {
-                        //if (go.dead) {
+                        //if (  go.dead) {
                         // dead_objects.Add(go.name);                    
                         //continue;
                         //}
@@ -170,7 +171,7 @@ namespace Magpie {
                                 go.Update();
                         }
                     }
-                }
+                
                 
                 // lock (dead_objects) {
                //    for (int i = 0; i < dead_objects.Count; i++) {
@@ -178,24 +179,22 @@ namespace Magpie {
                //     }
                // }
 
-                internal_frame_probe.set("actors");
-                lock (current_map.actors.Values) {
+                    internal_frame_probe.set("actors");
                     foreach (Actor actor in current_map.actors.Values) {
                         lock(actor)
                             actor.Update();
+                    
                     }
-                }
 
 
-                internal_frame_probe.set("player_actor");
-                lock (current_map.player_actor) {
+                    internal_frame_probe.set("player_actor");
                     if (current_map.player_actor != null)
                         lock (current_map.player_actor)
                             current_map.player_actor.Update();
-                }
+                
 
-                internal_frame_probe.set("physics");
-                lock (current_map) {
+                    internal_frame_probe.set("physics");
+
                     PhysicsSolver.do_movement(current_map);
                     PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
                     PhysicsSolver.finalize_collisions(current_map);
