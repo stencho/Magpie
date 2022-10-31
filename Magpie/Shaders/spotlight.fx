@@ -187,7 +187,7 @@ float4 PS(VSO input) : COLOR0 {
 		}
 	}
 	//phong
-	float phong = 0;
+	float4 phong = 0;
 
 	float3 L = Position.xyz - LightPosition.xyz;
 

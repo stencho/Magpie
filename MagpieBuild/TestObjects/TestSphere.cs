@@ -25,6 +25,7 @@ namespace MagpieTestbed.TestObjects {
 
         public float radius = 1f;
 
+        public light[] lights { get; set; }
         public BoundingBox bounds { get; set; }
 
         public string model { get; set; } = "sphere";

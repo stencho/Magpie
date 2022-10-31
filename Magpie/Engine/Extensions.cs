@@ -14,7 +14,9 @@ namespace Magpie.Engine {
             return new Vector2(pos.X, pos.Z);
         }
 
-
+        public static string ToXString(this Vector3 v3) {
+            return $"{v3.X}x{v3.Y}x{v3.Z}";
+        }
         public static string simple_vector3_string(this Vector3 input) {
             return string.Format("{0:F2}, {1:F2}, {2:F2}", input.X, input.Y, input.Z);
         }

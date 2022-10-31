@@ -18,7 +18,7 @@ using Keys = Microsoft.Xna.Framework.Input.Keys;
 namespace Magpie {
     public static class EngineState {
         public static volatile bool running = true;
-
+        
         public static GBuffer buffer;
         public static Camera camera;
 
@@ -61,6 +61,8 @@ namespace Magpie {
             spritebatch = new SpriteBatch(graphics_device);
 
             Draw2D.init();
+            Renderer.init();
+
 
             //set up default settings and configure some gvars
 
@@ -89,19 +91,10 @@ namespace Magpie {
             gvars.add_gvar("fullscreen", gvar_data_type.BOOL, false,                true);
             gvars.add_gvar("vsync", gvar_data_type.BOOL, true,                      true);
             gvars.add_gvar("frame_limit", gvar_data_type.FLOAT, mode.refresh_rate,  true);
+            gvars.add_gvar("light_spot_resolution", gvar_data_type.INT, 1024,       true);
             
             gvars.add_gvar("window_position", gvar_data_type.XYPAIR, game_window.Position.ToXYPair(), false);
             gvars.add_gvar("window_size", gvar_data_type.XYPAIR, game_window.ClientBounds.Size.ToXYPair(), false);
-
-            gvars.add_gvar("light_enabled", gvar_data_type.BOOL, true,              false);
-            gvars.add_gvar("light_follow", gvar_data_type.BOOL, true,               false);
-            gvars.add_gvar("light_shadows", gvar_data_type.BOOL, true,              false);
-            gvars.add_gvar("light_cookie", gvar_data_type.STRING, "radial_glow",    false);
-            gvars.add_gvar("light_resolution", gvar_data_type.INT, 2048,            false);
-            gvars.add_gvar("light_far", gvar_data_type.FLOAT, 30f,                  false);
-            gvars.add_gvar("light_near", gvar_data_type.FLOAT, 1f,                  false);
-            gvars.add_gvar("light_C", gvar_data_type.FLOAT, 5f,                     false);
-            gvars.add_gvar("light_bias", gvar_data_type.FLOAT, 0.0008f,             false);
 
 
             //after we set up, read gvar file, then write it out again so that if there aren't any contents, there is now a file and it will have the defaults from above written to it
@@ -155,10 +148,7 @@ namespace Magpie {
             //add controls
             StaticControlBinds.add_bindings(
                 (bind_type.digital, controller_type.keyboard, Keys.F2, "switch_buffer"),
-                (bind_type.digital, controller_type.keyboard, Keys.F5, "screenshot")
-
-
-                );
+                (bind_type.digital, controller_type.keyboard, Keys.F5, "screenshot"));
         }
         static bool was_fullscreen = false;
         static void fullscreen() {

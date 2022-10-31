@@ -38,7 +38,7 @@ namespace Magpie.Engine {
         SceneRenderInfo render_info { get; set; }
         float distance_to_camera { get; }
         Map parent_map { get; set; }
-        
+        light[] lights { get; set; }
         string model { get; set; }
         string[] textures { get; set; }
         

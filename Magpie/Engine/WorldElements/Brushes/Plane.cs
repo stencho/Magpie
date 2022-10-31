@@ -51,6 +51,8 @@ namespace Magpie.Engine.Brushes {
 
         public SceneRenderInfo render_info { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+        public light[] lights { get; set; }
+
         public FloorPlane() {
 
             quad = new VertexPositionNormalTexture[4] {

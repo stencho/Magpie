@@ -41,6 +41,7 @@ namespace Magpie.Engine.WorldElements.Brushes {
         public float height_D => parent.data[x, y + 1];
 
         public BoundingBox aabb => CollisionHelper.BoundingBox_around_points(A, B, C, D);
+        public light[] lights { get; set; }
 
         public Vector3 get_actual_center() {
             if (even || odd) {

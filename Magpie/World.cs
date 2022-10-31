@@ -19,8 +19,8 @@ namespace Magpie {
         public volatile Map current_map;
         public Actor player_actor => current_map.player_actor;
 
-        public SpotLight test_light;
-        public SpotLight test_light2;
+        //public SpotLight test_light;
+        //public SpotLight test_light2;
 
         public volatile SegmentedTerrain test_hf;
 
@@ -30,11 +30,12 @@ namespace Magpie {
 
             test_hf = new SegmentedTerrain(Vector3.Zero, 1000, 5);
 
-            test_light = new SpotLight();
+            //test_light = new SpotLight();
             //test_light2 = new SpotLight();
             //test_light2.position += Vector3.Left * 14f;
             //test_light2.light_color = Color.LightPink;
             
+            /*
             for (int i = 0; i < 20; i++) {
                  current_map.lights.Add(new PointLight(
                      (Vector3.UnitX * (10f * RNG.rng_float_neg_one_to_one)) + (Vector3.UnitY * (20f * RNG.rng_float)) + (Vector3.Forward * (30f * RNG.rng_float)), 
@@ -42,9 +43,11 @@ namespace Magpie {
                      RNG.random_opaque_color()
                      ));
             }
-            current_map.brushes.Add("test_heightfield", test_hf);
+            */
 
-            current_map.lights.Add(test_light);
+            current_map.add_brush(test_hf);
+
+            //current_map.lights.Add(test_light);
 
             
             //Scene.parent_world = this;
@@ -69,7 +72,7 @@ namespace Magpie {
             float c = 0f;
             Brush f = null;
 
-            foreach (Brush floor in current_map.brushes.Values) {
+            foreach (Brush floor in current_map.brushes) {
                 if (!floor.within_vertical_bounds(pos)) continue;
 
                 c = floor.get_footing_height(pos);
@@ -92,7 +95,7 @@ namespace Magpie {
             float c = 0f;
             Brush f = null;
 
-            foreach (Brush floor in current_map.brushes.Values) {
+            foreach (Brush floor in current_map.brushes) {
                 if (!floor.within_vertical_bounds(pos)) continue;
 
                 c = floor.get_footing_height(pos);
@@ -152,57 +155,65 @@ namespace Magpie {
 
                 internal_frame_probe.set("lights");
 
-                lock (current_map) {
+                lock (current_map.brushes) {
                     internal_frame_probe.set("brushes");
-                    foreach (Brush brush in current_map.brushes.Values) {
+                    foreach (Brush brush in current_map.brushes) {
+                        if (brush == null) continue;
+
                         lock (brush)
                             brush.Update();
+                        
                     }
 
-                    internal_frame_probe.set("objects");
-                    foreach (GameObject go in current_map.objects.Values) {
-                        //if (  go.dead) {
-                        // dead_objects.Add(go.name);                    
-                        //continue;
-                        //}
+                }
+                lock (current_map.objects) {
+                        internal_frame_probe.set("objects");
+                    foreach (GameObject go in current_map.objects) {
+                        if (go == null) continue;
+                            //if (  go.dead) {
+                            // dead_objects.Add(go.name);                    
+                            //continue;
+                            //}
                         if (!go.dead) {
                             lock (go)
                                 go.Update();
+                            
                         }
                     }
-                
-                
-                // lock (dead_objects) {
-               //    for (int i = 0; i < dead_objects.Count; i++) {
-               //        current_map.objects.Remove(dead_objects[i]);
-               //     }
-               // }
 
+                }
+
+                    // lock (dead_objects) {
+                    //    for (int i = 0; i < dead_objects.Count; i++) {
+                    //        current_map.objects.Remove(dead_objects[i]);
+                    //     }
+                    // }
+
+                lock (current_map.actors) {
                     internal_frame_probe.set("actors");
-                    foreach (Actor actor in current_map.actors.Values) {
-                        lock(actor)
-                            actor.Update();
-                    
+                    foreach (Actor actor in current_map.actors) {
+                        if (actor == null) continue;
+                        lock (actor)
+                            actor.Update();                        
                     }
-
-
+                }
+                lock (current_map.player_actor) {
                     internal_frame_probe.set("player_actor");
                     if (current_map.player_actor != null)
                         lock (current_map.player_actor)
                             current_map.player_actor.Update();
-                
-
-                    internal_frame_probe.set("physics");
-
-                    PhysicsSolver.do_movement(current_map);
-                    PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
-                    PhysicsSolver.finalize_collisions(current_map);
-
-
-
-
-                    dead_objects.Clear();
                 }
+
+                internal_frame_probe.set("physics");
+
+                PhysicsSolver.do_movement(current_map);
+                PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
+                PhysicsSolver.finalize_collisions(current_map);
+
+
+
+
+                dead_objects.Clear();
 
 
                 lock (last_fps) {
@@ -258,32 +269,6 @@ namespace Magpie {
             //THEN THE NEW UPGRADED RENDERER WILL USE THIS INFO TO RENDER THEM ALL
             //INSTEAD OF KEEPING INFO ON HOW TO RENDER IN THE INDIVIDUAL LIGHT CLASSES
 
-            if (gvars.get_bool("light_follow")) {
-                p_current = Vector3.LerpPrecise(
-                    current_map.lights[current_map.lights.Count - 1].position,
-                    EngineState.camera.position + (EngineState.camera.orientation.Right * 0.5f) + (EngineState.camera.orientation.Down * 0.4f) + (Vector3.Forward * 0.5f),
-                    15f * Clock.frame_time_delta
-                    );
-
-                //current_map.lights[current_map.lights.Count - 1].position = p_current;
-                current_map.lights[current_map.lights.Count - 1].position = EngineState.camera.position + (EngineState.camera.orientation.Right * 0.5f) + (EngineState.camera.orientation.Down * 0.4f) + (Vector3.Forward * 0.5f);
-                
-                l_current = Matrix.Lerp(l_current,
-                    EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f)),
-                    15f * Clock.frame_time_delta);
-
-                //((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation = l_current;
-                ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
-            } 
-
-            lock (current_map.lights) {
-                foreach (DynamicLight light in current_map.lights) {
-                    lock (light)
-                        light.update();
-                }
-            }
-
-
             /*
             current_map.lights[current_map.lights.Count - 1].position
                 = EngineState.camera.position;
@@ -311,19 +296,14 @@ namespace Magpie {
 
         int frame_count = 0;
         SceneObject[] current_scene;
+        public bool use_new_renderer = true;
+
+        //EngineState.world.use_new_renderer=true;
+
         public void Draw(GraphicsDevice gd, Camera camera) {
 
-            foreach (Brush brush in current_map.brushes.Values) {
-                if (brush.type == BrushType.SEGMENTED_TERRAIN)
-                    ((SegmentedTerrain)brush).update_visible_terrain();
-            }
-
-            current_scene = Scene.create_scene_from_lists(current_map.brushes, current_map.objects, current_map.actors, current_map.lights, EngineState.camera.frustum);
-            Scene.build_lighting(current_map.lights, current_scene);
-            Scene.clear_all_and_draw_skybox(EngineState.camera, EngineState.buffer);
-            Scene.draw(current_scene);
-            Scene.draw_lighting(current_map.lights);
-
+            Renderer.render(current_map, EngineState.camera, EngineState.buffer);
+            
 
 
             //Scene.draw_world_immediate(this);

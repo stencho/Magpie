@@ -26,7 +26,7 @@ namespace Magpie.Engine.Brushes {
         public BrushType type => BrushType.SEGMENTED_TERRAIN;        
         
         public TerrainSegment[,] segments;
-        public List<(TerrainSegment, int, int, float)> visible_terrain = new List<(TerrainSegment, int, int, float)>();
+        public List<(TerrainSegment, int, int)> visible_terrain = new List<(TerrainSegment, int, int)>();
 
         public XYPair size = XYPair.One * 128;
         public XYPair size_over_2 => size / 2;
@@ -69,12 +69,11 @@ namespace Magpie.Engine.Brushes {
         public Vector3 movement_vector { get; set; } = Vector3.Zero;
         public Vector3 final_position { get; set; }
 
-        public float distance_to_camera => visible_terrain.Count > 0 ? visible_terrain[0].Item4 : float.MaxValue;
-
         public SceneRenderInfo render_info { get; set; }
 
         public BoundingBox bounds => new BoundingBox(top_left, bottom_right + (Vector3.Up * highest_segment.Item3));
 
+        public light[] lights { get; set; }
         public SegmentedTerrain(Vector3 position, XYPair size, XYPair segment_size) {
             this.position = position;
 
@@ -229,15 +228,47 @@ namespace Magpie.Engine.Brushes {
                 for (int sx = 0; sx < segment_count.X; sx++) {
                     var bb = segments[sx, sy].aabb;
                     if (bb.Intersects(EngineState.camera.frustum)) {
-                        visible_terrain.Add((segments[sx, sy], sx, sy, Vector3.Distance(EngineState.camera.position, CollisionHelper.closest_point_on_AABB(EngineState.camera.position, bb.Min, bb.Max))));
+                        visible_terrain.Add((segments[sx, sy], sx, sy));
                     }
                 }
             }
 
-            visible_terrain.Sort((a, b) => a.Item4.CompareTo(b.Item4));
+            //visible_terrain.Sort((a, b) => a.Item4.CompareTo(b.Item4));
+        }
+        public void update_visible_terrain(Camera camera) {
+            visible_terrain.Clear();
+
+            //we do a little culling            
+            for (int sy = 0; sy < segment_count.Y; sy++) {
+                for (int sx = 0; sx < segment_count.X; sx++) {
+                    var bb = segments[sx, sy].aabb;
+                    if (bb.Intersects(camera.frustum)) {
+                        visible_terrain.Add((segments[sx, sy], sx, sy));
+                    }
+                }
+            }
+
+            //visible_terrain.Sort((a, b) => a.Item4.CompareTo(b.Item4));
+        }
+        public void update_visible_terrain(BoundingFrustum frustum) {
+            visible_terrain.Clear();
+
+            //we do a little culling            
+            for (int sy = 0; sy < segment_count.Y; sy++) {
+                for (int sx = 0; sx < segment_count.X; sx++) {
+                    var bb = segments[sx, sy].aabb;
+                    if (bb.Intersects(frustum)) {
+                        visible_terrain.Add((segments[sx, sy], sx, sy));
+                    }
+                }
+            }
+
+            //visible_terrain.Sort((a, b) => a.Item4.CompareTo(b.Item4));
         }
 
+
         public void Update() {
+
             
             /*
             for (int sy = 0; sy < segment_count.Y; sy++) {
@@ -368,7 +399,7 @@ namespace Magpie.Engine.Brushes {
 
                 //draw octree AABBs which collide with the same ray as above
                 if (draw_hit_octrees)
-                    foreach ((TerrainSegment, int, int, float) xy in visible_terrain) {
+                    foreach ((TerrainSegment, int, int) xy in visible_terrain) {
                         if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.crosshair_ray.start, picker_raycasts.crosshair_ray.direction, xy.Item1.aabb.Min, xy.Item1.aabb.Max, out _)) {
                             Draw3D.cube(xy.Item1.aabb, Color.HotPink);
                             for (int y = 0; y < 2; y++) {
@@ -398,7 +429,7 @@ namespace Magpie.Engine.Brushes {
 
                 //draw octree AABBs which collide with the same ray as above
                 if (draw_hit_octrees)
-                foreach ((TerrainSegment, int, int, float) xy in visible_terrain) {
+                foreach ((TerrainSegment, int, int) xy in visible_terrain) {
                     if (Raycasting.ray_intersects_BoundingBox(picker_raycasts.mouse_pick_ray.start, picker_raycasts.mouse_pick_ray.direction, xy.Item1.aabb.Min, xy.Item1.aabb.Max, out _)) {
                         Draw3D.cube(xy.Item1.aabb, Color.HotPink);
                         for (int y = 0; y < 2; y++) {

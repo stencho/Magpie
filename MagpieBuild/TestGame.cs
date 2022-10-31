@@ -173,9 +173,9 @@ namespace MagpieBuild
             */
 
             for (int i = 0; i < 50; i++) {
-                world.current_map.add_object("test_sphere" + i, new TestSphere());
-                world.current_map.objects["test_sphere" + i].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
-                world.current_map.objects["test_sphere" + i].textures = new string[1] { "trumpmap" };
+                var ind = world.current_map.add_object("test_sphere" + i, new TestSphere());
+                world.current_map.objects[ind].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
+                world.current_map.objects[ind].textures = new string[1] { "trumpmap" };
             }
 
             /*
@@ -221,11 +221,11 @@ namespace MagpieBuild
             world.current_map.objects["butt_b"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(90f));
             */
 
-            world.current_map.add_object("desk", new TestSphere());
-            world.current_map.objects["desk"].model = "desk";
-            world.current_map.objects["desk"].position = Vector3.Zero;
-            world.current_map.objects["desk"].scale = Vector3.One * 64;
-            world.current_map.objects["desk"].orientation = Matrix.Identity;
+            var index = world.current_map.add_object("desk", new TestSphere());
+            world.current_map.objects[index].model = "desk";
+            world.current_map.objects[index].position = Vector3.Zero;
+            world.current_map.objects[index].scale = Vector3.One * 64;
+            world.current_map.objects[index].orientation = Matrix.Identity;
 
 
             //world.current_map.add_brush("test_floor", new FloorPlane());
@@ -243,7 +243,7 @@ namespace MagpieBuild
 
             //((Quad)test_b).position += Vector3.Forward * 40f;
 
-            world.current_map.add_actor("test_actor", new MoveTestActor());
+            world.current_map.add_actor(new MoveTestActor());
 
 
             /*
@@ -274,7 +274,7 @@ namespace MagpieBuild
             Clock.frame_probe.set("overhead");
             Clock.frame_probe.false_set("overhead");
 
-            results = new GJK.gjk_result[world.current_map.objects.Count];
+            results = new GJK.gjk_result[world.current_map.objects.Length];
         }
 
         void test_b(point_in_cloud pic, PointCloud p) {
@@ -448,11 +448,24 @@ namespace MagpieBuild
             pctest.draw_debug();
             snap.snap("another tump");
 
-            Draw3D.xyz_cross(world.current_map.lights[world.current_map.lights.Count - 1].position, 0.3f, Color.HotPink);
+            //Draw3D.xyz_cross(world.current_map.lights[world.current_map.lights.Count - 1].position, 0.3f, Color.HotPink);
         }
         bool draw_debug_info = true;
         protected override void Draw(GameTime gameTime) {
-            Scene.render_after_world = renderextra;
+
+
+
+
+
+
+            //Scene.render_after_world = renderextra;
+            
+            
+            
+            
+            
+            
+            
             Clock.frame_probe.set("draw_world");
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
 
@@ -474,7 +487,8 @@ namespace MagpieBuild
 
             if (draw_debug_info) {
                 EngineState.spritebatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap);
-
+                double fps = 1000f * (1 / World.last_ticks[World.last_ticks.Length - 1]);
+                /*
 
                 Draw2D.graph_line(50, EngineState.resolution.Y - 80, 200, 50,
                     "FPS", 60, true, true, true, Color.HotPink,
@@ -482,14 +496,13 @@ namespace MagpieBuild
                     (World.last_fps, string.Format("world fps [{0} ticks]", World.last_fps.Length), Color.LimeGreen)
                     );
 
-                double fps = 1000f * (1 / World.last_ticks[World.last_ticks.Length - 1]);
 
                 Draw2D.graph_line(350, EngineState.resolution.Y - 80, 200, 50,
                     "deltas", 20, true, true, true, Color.HotPink,
                     (Clock.delta_buffer, "clock delta ms", Color.Red),
                     (World.last_ticks, "world update thread", Color.LimeGreen)
                     );
-
+                */
 
                 Draw2D.text_shadow("pf",
                     $"render {Clock.frame_rate.ToString()}/{Clock.frame_limit} FPS {(gvars.get_bool("vsync") ? "[vsync]" : "")}\n" +
@@ -504,7 +517,7 @@ namespace MagpieBuild
                     "mouse over UI: " + EngineState.window_manager.mouse_over_UI() + "\n\n" +
                     "## gvars ##\n" +
                     gvars.list_all() + "\n\n" +
-                    EngineState.window_manager.list_windows() + "\n"
+                    EngineState.window_manager.list_windows() + "\n\n"
                     
 
 
@@ -513,11 +526,11 @@ namespace MagpieBuild
 
 
 
-
+                /*
                 Clock.frame_probe.set("draw_bind_states");
                 StaticControlBinds.draw_state(200, EngineState.resolution.Y - 250, 100, 15, 15);
                 ((FreeCamActor)world.player_actor).binds.draw_state(6, EngineState.resolution.Y - 250, 100, 15, 15, "player");
-
+                */
 
                 EngineState.spritebatch.End();
             }
@@ -546,7 +559,7 @@ namespace MagpieBuild
 
             Clock.frame_probe.end_of_frame();
             Clock.frame_probe.set("overhead");
-
+            /*
             Clock.frame_probe.draw(EngineState.resolution.X - 450, 60, 300, out _, out th);
             int t = th;
 
@@ -555,7 +568,7 @@ namespace MagpieBuild
 
             lock (Controls.control_poll_probe)
                 Controls.control_poll_probe.draw(EngineState.resolution.X - 360, th + t + 80, 300, out _, out _);
-
+            */
             //snap.draw(test_trums.ToString(), EngineState.resolution.X - 360, 10, 300);
 
 

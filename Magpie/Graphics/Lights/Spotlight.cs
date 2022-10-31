@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Magpie.Graphics.Lights {
     public class SpotLight : DynamicLight {
         public LightType type => LightType.SPOT;
-        public int depth_map_resolution => gvars.get_int("light_resolution");
+        public int depth_map_resolution => gvars.get_int("light_spot_resolution");
 
         RenderTarget2D _depth;
         public RenderTarget2D depth_map => _depth;
@@ -52,7 +52,7 @@ namespace Magpie.Graphics.Lights {
             
             frustum = new BoundingFrustum(view * projection);
 
-            gvars.add_change_action("light_resolution", change_depth_buffer_size);
+            gvars.add_change_action("light_spot_resolution", change_depth_buffer_size);
         }
 
         public void change_depth_buffer_size() {

@@ -303,7 +303,7 @@ namespace Magpie.Engine {
         
         public static Thread control_thread;
 
-        public static volatile int control_thread_poll_hz = 500;
+        public static volatile int control_thread_poll_hz = 400;
         public static volatile float mouse_multi = 15f;
         public static double control_thread_ms => (1000.0 / control_thread_poll_hz);
         public static volatile frame_probe control_poll_probe = new frame_probe();

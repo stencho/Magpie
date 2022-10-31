@@ -31,7 +31,7 @@ namespace MagpieTestbed.TestActors {
 
         public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
 
-
+        public light[] lights { get; set; }
 
         public MoveTestActor() {
             //collision = new Capsule(1.85f, 1f);

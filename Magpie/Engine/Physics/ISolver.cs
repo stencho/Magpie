@@ -130,11 +130,13 @@ namespace Magpie.Engine.Physics {
         //find final movement for each of the map's elements
         //first brushes, then actors, then objects
         public static void do_movement(Map map) {
-            foreach (Brush brush in map.brushes.Values) {
-                //do brush movement
+            foreach (Brush brush in map.brushes) {
+                if (brush == null) continue;
+                    //do brush movement
                 if (!brush.movement_vector.contains_nan()) {
                     brush.final_position = brush.position + brush.movement_vector;
                 }
+                
 
             }
 
@@ -148,11 +150,14 @@ namespace Magpie.Engine.Physics {
                 map.player_actor.wants_movement = Vector3.Zero;
             }
 
-            foreach (Actor actor in map.actors.Values) {
+            foreach (Actor actor in map.actors) {
+                if (actor == null) continue;
                 //actor.final_position = 
+                
             }
 
-            foreach(GameObject gobject in map.objects.Values) {
+            foreach(GameObject gobject in map.objects) {
+                if (gobject == null) continue;
 
             }
 
@@ -170,7 +175,9 @@ namespace Magpie.Engine.Physics {
         static bool abs = false;
         public static void do_base_physics_and_ground_interaction(Map map) {
 
-            foreach (Actor actor in map.actors.Values) {
+            foreach (Actor actor in map.actors) {
+                if (actor == null) continue;
+
                 intersections.Clear();
                 intersection_ids.Clear();
 
@@ -262,7 +269,9 @@ namespace Magpie.Engine.Physics {
 
                     skip_sweep:
 
-                    foreach (Brush brush in map.brushes.Values) {
+                    foreach (Brush brush in map.brushes) {
+                        if (brush == null) continue;
+
                         if (brush.collision.shape != shape_type.dummy) {
                             var intersection = new Intersection(actor.sweep_collision, brush.collision, Vector3.Zero, intersection_level.NONE, actor, brush, "actor", "brush");
 
@@ -303,7 +312,7 @@ namespace Magpie.Engine.Physics {
 
             }
 
-            foreach (GameObject gobject in map.objects.Values) {
+            foreach (GameObject gobject in map.objects) {
 
             }
 
@@ -313,7 +322,8 @@ namespace Magpie.Engine.Physics {
 
         public static void finalize_collisions(Map map) {
 
-            foreach (Actor actor in map.actors.Values) {
+            foreach (Actor actor in map.actors) {
+                if (actor == null) continue;
 
                 if (actor.wants_movement != Vector3.Zero) {
                     actor.position += actor.wants_movement;
