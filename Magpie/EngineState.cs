@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
@@ -19,7 +20,8 @@ using Keys = Microsoft.Xna.Framework.Input.Keys;
 namespace Magpie {
     public static class EngineState {
         public static volatile bool running = true;
-        
+        public static volatile bool started = false;
+
         public static GBuffer buffer;
         public static Camera camera;
 
@@ -52,114 +54,171 @@ namespace Magpie {
 
         public static World world;
 
+        public static StringBuilder startup_log;
+
         public static void initialize(XYPair game_resolution, GameWindow game_window,
             GraphicsDevice gd, GraphicsDeviceManager gdm, Game game) {
 
-            window = game_window;
-            EngineState.game = game;
-            graphics = gdm;
-            graphics_device = gd;
-            spritebatch = new SpriteBatch(graphics_device);
+            startup_log = new StringBuilder();
+            startup_log.AppendLine("starting Magpie");
 
-            Draw2D.init();
-            Renderer.init();
+#if DEBUG
+           try {
+#endif
+                window = game_window;
+                EngineState.game = game;
+                graphics = gdm;
+                graphics_device = gd;
+                spritebatch = new SpriteBatch(graphics_device);
+                startup_log.Append("initializing 2D... ");
+                Draw2D.init();
+
+                startup_log.AppendLine("renderer... ");
+                Renderer.init();
+
+                //set up default settings and configure some gvars
+                startup_log.AppendLine("finding primary display and resolution");
+
+                //on first run we need the primary screen to be the main display, so set display to get_primary_screen()
+                gvars.add_gvar("display", gvar_data_type.INT, DisplayInfo.get_primary_screen(), true);
+
+                //get screen info
+                var scrn = Screen.AllScreens[gvars.get_int("display")];
+                var screen_bounds = scrn.Bounds.Size.ToXYPair();
+                var screen_pos = scrn.Bounds.Location.ToXYPair();
+
+                startup_log.AppendLine($"monitor {gvars.get_int("display").ToString()} is primary: res [{screen_bounds.ToXString()}] pos [{screen_pos.ToXString()}]");
+
+                Debug.WriteLine("fart" + DisplayInfo.list_display_modes(gvars.get_int("display")));
+                Debug.WriteLine(DisplayInfo.get_primary_screen());
+                Debug.WriteLine(((uint)DisplayInfo.get_primary_screen() - 1));
+
+                startup_log.Append("attempting to find matching display mode... ");
+
+                DisplayInfo.get_display_modes(gvars.get_int("display"), out display_modes, out _, out _);
+
+                startup_log.AppendLine($"{display_modes.Count.ToString()} modes found");
+
+                //find the highest refresh rate for the current game resolution
+                var mode = DisplayInfo.find_display_mode_highest_hz_at_res(screen_bounds.X, screen_bounds.Y, display_modes, out current_display_mode_index);
+
+                //if one isn't found, use the highest refresh rate supported by the highest resolution
+                //(reasoning behind this being that the highest resolution is likely to not have the highest refresh rates, and its refresh rate should be valid for all other resolutions (we hope (though this only matters for fullscreen)))
+                if (current_display_mode_index == -1) {
+                    display_refresh_rate = DisplayInfo.highest_hz_supported_by_highest_res(display_modes, out current_display_mode_index);
+                }
+
+                startup_log.AppendLine($"using mode #{current_display_mode_index}: {screen_bounds.ToXString()}@{mode.refresh_rate}");
+
+                startup_log.Append($"configuring gvar defaults... ");
+
+                gvars.add_gvar("resolution", gvar_data_type.XYPAIR, screen_bounds, true);
+                gvars.add_gvar("super_resolution_scale", gvar_data_type.FLOAT, 1f, true);
+                gvars.add_gvar("borderless", gvar_data_type.BOOL, true, true);
+                gvars.add_gvar("fullscreen", gvar_data_type.BOOL, false, true);
+                gvars.add_gvar("vsync", gvar_data_type.BOOL, true, true);
+                gvars.add_gvar("frame_limit", gvar_data_type.FLOAT, mode.refresh_rate, true);
+                gvars.add_gvar("light_spot_resolution", gvar_data_type.INT, 1024, true);
+
+                gvars.add_gvar("window_position", gvar_data_type.XYPAIR, game_window.Position.ToXYPair(), false);
+                gvars.add_gvar("window_size", gvar_data_type.XYPAIR, game_window.ClientBounds.Size.ToXYPair(), false);
+
+                startup_log.AppendLine($"done");
 
 
-            //set up default settings and configure some gvars
+                //after we set up, read gvar file, then write it out again so that if there aren't any contents, there is now a file and it will have the defaults from above written to it
+                startup_log.Append("reading gvars from disk... ");
+                bool gvars_file_found = gvars.read_gvars_from_disk();
+                if (gvars_file_found) {
+                    startup_log.AppendLine("loaded from file");
+                } else {
+                    startup_log.AppendLine("gvars file not found or had errors");
+                }
 
-            //on first run we need the primary screen to be the main display, so set display to get_primary_screen()
-            gvars.add_gvar("display", gvar_data_type.INT, DisplayInfo.get_primary_screen(), true);
+                startup_log.Append("writing gvars back to disk... ");
+                gvars.write_gvars_to_disk();
+                startup_log.AppendLine("done");
 
-            //get screen info
-            var scrn = Screen.AllScreens[gvars.get_int("display")];
-            var screen_bounds = scrn.Bounds.Size.ToXYPair();
-            var screen_pos = scrn.Bounds.Location.ToXYPair();
-            
-            Debug.WriteLine("fart" + DisplayInfo.list_display_modes(gvars.get_int("display")));
-            Debug.WriteLine(DisplayInfo.get_primary_screen());
-            Debug.WriteLine(((uint)DisplayInfo.get_primary_screen() - 1));
+                startup_log.AppendLine("configuring graphics");
 
-            DisplayInfo.get_display_modes(gvars.get_int("display"), out display_modes, out _, out _);
+                game.MaxElapsedTime = TimeSpan.FromMilliseconds(1000f);
 
-            //find the highest refresh rate for the current game resolution
-            var mode = DisplayInfo.find_display_mode_highest_hz_at_res(screen_bounds.X, screen_bounds.Y, display_modes, out current_display_mode_index);
+                //set up resolution/screen mode/etc
+                gdm.PreferredBackBufferWidth = resolution.X;
+                gdm.PreferredBackBufferHeight = resolution.Y;
 
-            //if one isn't found, use the highest refresh rate supported by the highest resolution
-            //(reasoning behind this being that the highest resolution is likely to not have the highest refresh rates, and its refresh rate should be valid for all other resolutions (we hope (though this only matters for fullscreen)))
-            if (current_display_mode_index == -1) {
-                display_refresh_rate = DisplayInfo.highest_hz_supported_by_highest_res(display_modes, out current_display_mode_index);
+                game_window.IsBorderless = gvars.get_bool("borderless");
+
+                gdm.HardwareModeSwitch = true;
+                gdm.IsFullScreen = gvars.get_bool("fullscreen");
+                was_fullscreen = gdm.IsFullScreen;
+
+                gdm.SynchronizeWithVerticalRetrace = gvars.get_bool("vsync");
+
+                gdm.ApplyChanges();
+
+                //set up window gvars and recenter window
+
+                startup_log.AppendLine("moving window to correct display");
+
+                var d = gvars.get_int("display");
+                if (d > Screen.AllScreens.Length - 1 || d < 0) {
+                    d = DisplayInfo.get_primary_screen();
+                    gvars.set("display", d);
+                }
+
+                scrn = Screen.AllScreens[d];
+                screen_bounds = scrn.Bounds.Size.ToXYPair();
+                screen_pos = scrn.Bounds.Location.ToXYPair();
+
+                window.Position = ((screen_pos + (screen_bounds / 2)) - (resolution / 2)).ToPoint();
+
+                gvars.set("window_position", game_window.Position.ToXYPair());
+                gvars.set("window_size", game_window.ClientBounds.Size.ToXYPair());
+
+                startup_log.AppendLine("setting up the graphics buffer");
+                //more graphics setup
+                buffer = new GBuffer();
+                buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y, gvars.get_float("super_resolution_scale"));
+
+                startup_log.AppendLine("configuring renderer");
+                Scene.configure_renderer();
+
+                startup_log.AppendLine("initializing 3D");
+                Draw3D.init();
+
+                startup_log.AppendLine("initializing window manager");
+                window_manager = new UIWindowManager();
+
+                startup_log.AppendLine("setting up gvar actions");
+                //add actions to all the gvars that need them, this comes late so that they don't get triggered during setup
+                gvars.add_change_action("resolution", apply_resolution);
+                gvars.add_change_action("super_resolution_scale", apply_internal_scale);
+                gvars.add_change_action("fullscreen", fullscreen);
+                gvars.add_change_action("vsync", vsync);
+                gvars.add_change_action("display", change_display);
+                gvars.add_change_action("borderless", () => { window.IsBorderless = gvars.get_bool("borderless"); });
+
+                
+                //add controls
+                StaticControlBinds.add_bindings(
+                    (bind_type.digital, controller_type.keyboard, Keys.F2, "switch_buffer"),
+                    (bind_type.digital, controller_type.keyboard, Keys.F5, "screenshot"));
+
+                File.WriteAllText("log_startup", startup_log.ToString());
+#if DEBUG
+            } catch (Exception ex){
+
+                startup_log.AppendLine("");
+                startup_log.AppendLine(ex.ToString());
+
+                File.WriteAllText("log_startup", startup_log.ToString());
+
+                throw new Exception("Startup failed, see log_startup for information");
             }
+#endif
 
-            gvars.add_gvar("resolution", gvar_data_type.XYPAIR, screen_bounds,      true);
-            gvars.add_gvar("super_resolution_scale", gvar_data_type.FLOAT, 1f,      true);
-            gvars.add_gvar("borderless", gvar_data_type.BOOL, true,                 true);
-            gvars.add_gvar("fullscreen", gvar_data_type.BOOL, false,                true);
-            gvars.add_gvar("vsync", gvar_data_type.BOOL, true,                      true);
-            gvars.add_gvar("frame_limit", gvar_data_type.FLOAT, mode.refresh_rate,  true);
-            gvars.add_gvar("light_spot_resolution", gvar_data_type.INT, 1024,       true);
-            
-            gvars.add_gvar("window_position", gvar_data_type.XYPAIR, game_window.Position.ToXYPair(), false);
-            gvars.add_gvar("window_size", gvar_data_type.XYPAIR, game_window.ClientBounds.Size.ToXYPair(), false);
-
-
-            //after we set up, read gvar file, then write it out again so that if there aren't any contents, there is now a file and it will have the defaults from above written to it
-            gvars.read_gvars_from_disk();
-            gvars.write_gvars_to_disk();
-
-            game.MaxElapsedTime = TimeSpan.FromMilliseconds(1000f);
-
-            //set up resolution/screen mode/etc
-            gdm.PreferredBackBufferWidth = resolution.X;
-            gdm.PreferredBackBufferHeight = resolution.Y;
-
-            game_window.IsBorderless = gvars.get_bool("borderless");
-
-            gdm.HardwareModeSwitch = true;
-            gdm.IsFullScreen = gvars.get_bool("fullscreen");
-            was_fullscreen = gdm.IsFullScreen;
-
-            gdm.SynchronizeWithVerticalRetrace = gvars.get_bool("vsync");
-
-            gdm.ApplyChanges();
-
-            //set up window gvars and recenter window
-
-            var d = gvars.get_int("display");
-            if (d > Screen.AllScreens.Length-1 || d < 0) {
-                d = DisplayInfo.get_primary_screen();
-            }
-
-            scrn = Screen.AllScreens[d];
-            screen_bounds = scrn.Bounds.Size.ToXYPair();
-            screen_pos = scrn.Bounds.Location.ToXYPair();
-
-            window.Position = ((screen_pos + (screen_bounds / 2)) - (resolution / 2)).ToPoint();
-
-            gvars.set("window_position", game_window.Position.ToXYPair());
-            gvars.set("window_size", game_window.ClientBounds.Size.ToXYPair());
-
-            //more graphics setup
-            buffer = new GBuffer();
-            buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y, gvars.get_float("super_resolution_scale"));
-
-            Scene.configure_renderer();
-
-            Draw3D.init();
-
-            window_manager = new UIWindowManager();
-
-            //add actions to all the gvars that need them, this comes late so that they don't get triggered during setup
-            gvars.add_change_action("resolution", apply_resolution);
-            gvars.add_change_action("super_resolution_scale", apply_internal_scale);
-            gvars.add_change_action("fullscreen", fullscreen);
-            gvars.add_change_action("vsync", vsync);
-            gvars.add_change_action("display", change_display);
-            gvars.add_change_action("borderless", () => { window.IsBorderless = gvars.get_bool("borderless"); });
-
-            //add controls
-            StaticControlBinds.add_bindings(
-                (bind_type.digital, controller_type.keyboard, Keys.F2, "switch_buffer"),
-                (bind_type.digital, controller_type.keyboard, Keys.F5, "screenshot"));
+            started = true;
         }
         static bool was_fullscreen = false;
         static void fullscreen() {

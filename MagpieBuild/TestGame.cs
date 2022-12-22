@@ -24,6 +24,7 @@ using static Magpie.Engine.ControlBinds;
 using Magpie.Graphics.UI;
 using Magpie.Graphics.Particles;
 using static Magpie.Graphics.Particles.PointCloud;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace MagpieBuild
 {
@@ -84,9 +85,12 @@ namespace MagpieBuild
 
             EngineState.initialize(new XYPair(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), Window, GraphicsDevice, graphics, this);
 
+            while (!EngineState.started) {  }
 
             world = new World();
             EngineState.world = world;
+
+            while (EngineState.world == null) { }
 
             world.current_map.player_actor = new FreeCamActor();
             EngineState.camera = ((FreeCamActor)world.current_map.player_actor).cam;
@@ -317,6 +321,8 @@ namespace MagpieBuild
         }
 
         protected override void Update(GameTime gameTime) {
+            while (!EngineState.started) { }
+
             Clock.frame_probe.false_set("overhead");
             Clock.frame_probe.start_of_frame();
             Clock.frame_probe.false_set("overhead");

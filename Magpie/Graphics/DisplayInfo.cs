@@ -195,7 +195,9 @@ namespace Magpie.Graphics {
                 }
                 i++;
             }
-
+            if (index == -1) {
+                throw new Exception("display mode not found, something is wrong"); 
+            }
             return modes[index];
         }
 

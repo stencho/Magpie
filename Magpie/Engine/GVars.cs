@@ -475,7 +475,7 @@ namespace Magpie.Engine {
 
             _gvars[name].changed?.Invoke();
         }
-        public static void read_gvars_from_disk() {
+        public static bool read_gvars_from_disk() {
             try {
                 using (FileStream filestream = new FileStream("gvars", FileMode.Open)) {
                     byte[] buffer = new byte[filestream.Length];
@@ -497,9 +497,11 @@ namespace Magpie.Engine {
                             }
                         }
                     }
+
+                    return true;
                 }
-            } catch (FileNotFoundException) {}
-                
+            } catch (FileNotFoundException) { return false; }
+
         }
 
         #endregion
