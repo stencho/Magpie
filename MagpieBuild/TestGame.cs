@@ -221,10 +221,11 @@ namespace MagpieBuild
             world.current_map.objects["butt_b"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(90f));
             */
 
-            var index = world.current_map.add_object("desk", new TestSphere());
-            world.current_map.objects[index].model = "desk";
+            var index = world.current_map.add_object("skull", new TestSphere());
+            world.current_map.objects[index].model = "skull";
+            world.current_map.objects[index].textures[0] = "texture_1001";
             world.current_map.objects[index].position = Vector3.Zero;
-            world.current_map.objects[index].scale = Vector3.One * 64;
+            world.current_map.objects[index].scale = Vector3.One * 16;
             world.current_map.objects[index].orientation = Matrix.Identity;
 
 

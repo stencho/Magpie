@@ -845,10 +845,30 @@ namespace Magpie.Graphics {
         public static void square(Vector2 top_left, Vector2 bottom_right, float line_width, Color col) {
             var w = Vector2.UnitX * (bottom_right.X - top_left.X);
             var h = Vector2.UnitY * (bottom_right.Y - top_left.Y);
-            line(top_left - (Vector2.UnitX * (line_width / 2)), (top_left + w) + (Vector2.UnitX * (line_width / 2)), line_width, col); //Top
-            line((top_left + h) - (Vector2.UnitX * (line_width / 2)), bottom_right + (Vector2.UnitX * (line_width / 2)), line_width, col); //Bottom
-            line(top_left, top_left + h, line_width, col); //Left
-            line((top_left + w), bottom_right, line_width, col); //Right
+
+            //Top
+            line(
+                top_left - (Vector2.UnitX * (line_width / 2)), 
+                (top_left + w) + (Vector2.UnitX * (line_width / 2)), 
+                line_width, col); 
+            
+            //Bottom
+            line(
+                (top_left + h) - (Vector2.UnitX * (line_width / 2)),
+                bottom_right + (Vector2.UnitX * (line_width / 2)), 
+                line_width, col);
+            
+            //Left
+            line(
+                top_left, 
+                top_left + h, 
+                line_width, col);
+            
+            //Right
+            line(
+                (top_left + w), 
+                bottom_right, 
+                line_width, col); 
         }
 
         public static void square(XYPair top_left, XYPair bottom_right, float line_width, Color col) {

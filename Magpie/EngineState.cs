@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
@@ -74,7 +75,11 @@ namespace Magpie {
             var screen_bounds = scrn.Bounds.Size.ToXYPair();
             var screen_pos = scrn.Bounds.Location.ToXYPair();
             
-            DisplayInfo.get_display_modes((uint)gvars.get_int("display"), out display_modes, out _, out _);
+            Debug.WriteLine("fart" + DisplayInfo.list_display_modes(gvars.get_int("display")));
+            Debug.WriteLine(DisplayInfo.get_primary_screen());
+            Debug.WriteLine(((uint)DisplayInfo.get_primary_screen() - 1));
+
+            DisplayInfo.get_display_modes(gvars.get_int("display"), out display_modes, out _, out _);
 
             //find the highest refresh rate for the current game resolution
             var mode = DisplayInfo.find_display_mode_highest_hz_at_res(screen_bounds.X, screen_bounds.Y, display_modes, out current_display_mode_index);
@@ -180,7 +185,7 @@ namespace Magpie {
 
             window.Position = ((screen_pos + (screen_bounds / 2)) - (resolution / 2)).ToPoint();
 
-            DisplayInfo.get_display_modes((uint)gvars.get_int("display"), out display_modes, out _, out _);
+            DisplayInfo.get_display_modes(gvars.get_int("display"), out display_modes, out _, out _);
 
             var mode = DisplayInfo.find_display_mode_highest_hz_at_res(screen_bounds.X, screen_bounds.Y, display_modes, out current_display_mode_index);
             if (current_display_mode_index == -1) {
