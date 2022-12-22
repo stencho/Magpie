@@ -368,14 +368,17 @@ namespace Magpie.Graphics {
             }
             */
 
-            draw_texture_to_screen(EngineState.buffer.rt_2D);
 
             //e_compositor.Parameters["fog"].SetValue(false);
 
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
 
             spritebatch_draw_to_screen(Vector2.Zero, Vector2.One / gvars.get_float("super_resolution_scale"),  EngineState.buffer.rt_final);
-            
+
+            EngineState.graphics_device.SetRenderTarget(null);
+            draw_texture_to_screen(EngineState.buffer.rt_2D);
+
+
             if (_screenshot) {
                 if (!Directory.Exists("scr")) Directory.CreateDirectory("scr");
 

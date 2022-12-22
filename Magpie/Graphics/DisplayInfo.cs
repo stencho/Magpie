@@ -70,7 +70,7 @@ namespace Magpie.Graphics {
         }
 
         [DllImport("user32.dll", CharSet = CharSet.Ansi)]
-        static extern bool EnumDisplayDevices(string lpDevice, uint iDevNum, ref DISPLAY_DEVICE lpDisplayDevice, uint dwFlags);
+        static extern bool EnumDisplayDevices(string lpDevice, int iDevNum, ref DISPLAY_DEVICE lpDisplayDevice, uint dwFlags);
 
         [DllImport("user32.dll", CharSet = CharSet.Ansi)]
         private static extern bool EnumDisplaySettings(
@@ -93,8 +93,14 @@ namespace Magpie.Graphics {
             }
         }
 
-        public static int get_primary_screen() { 
-            for(int i = 0; i < Screen.AllScreens.Length; i++) {
+        public static int get_primary_screen() {
+            if (Screen.AllScreens.Length == 1) {
+                return 0;
+            } else if (Screen.AllScreens.Length == 0){
+                throw new Exception("no screen plugged in??");
+            }
+
+            for (int i = 0; i < Screen.AllScreens.Length; i++) {
                 if (Screen.AllScreens[i].Primary) {
                     return i;
                 }
@@ -103,7 +109,7 @@ namespace Magpie.Graphics {
             throw new Exception("what the fuck how do you not have a primary monitor");            
         }
 
-        public static bool get_display_modes(uint display, out List<display_mode> modes, out string name, out string device_string) {
+        public static bool get_display_modes(int display, out List<display_mode> modes, out string name, out string device_string) {
             DEVMODE devmode = new DEVMODE();
             DISPLAY_DEVICE device = new DISPLAY_DEVICE();
             device.cb = Marshal.SizeOf(device);
@@ -112,7 +118,7 @@ namespace Magpie.Graphics {
             name = "";
             device_string = "";
 
-            EnumDisplayDevices(null, display, ref device, 0);
+            EnumDisplayDevices(null, display-1, ref device, 0);
             
             if (string.IsNullOrEmpty(device.DeviceName)) return false;
 
@@ -123,12 +129,12 @@ namespace Magpie.Graphics {
             name = device.DeviceName;
             device_string = device.DeviceString;
             
-            modes = modes.OrderBy(a => a.resolution.X * a.resolution.Y).OrderBy(a => a.refresh_rate).ToList();
+            modes = modes.OrderBy(a => a.resolution.X).ToList();
             GC.Collect();
             return true;
         }
 
-        public static string list_display_modes(uint display) {
+        public static string list_display_modes(int display) {
             string s = "";
             string s2;
             List<display_mode> modes;
@@ -223,7 +229,7 @@ namespace Magpie.Graphics {
             DISPLAY_DEVICE device = new DISPLAY_DEVICE();
             device.cb = Marshal.SizeOf(device);
 
-            for (uint i = 0; EnumDisplayDevices(null, i, ref device, 0); i++) {
+            for (int i = 0; EnumDisplayDevices(null, i, ref device, 0); i++) {
                 s += $"{i}: {device.DeviceName} :: {device.DeviceString}\n";
 
                 for (int id = 0; EnumDisplaySettings(device.DeviceName, id, ref devmode); id++) {
