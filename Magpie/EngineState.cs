@@ -123,7 +123,13 @@ namespace Magpie {
             gdm.ApplyChanges();
 
             //set up window gvars and recenter window
-            scrn = Screen.AllScreens[gvars.get_int("display")];
+
+            var d = gvars.get_int("display");
+            if (d > Screen.AllScreens.Length-1 || d < 0) {
+                d = DisplayInfo.get_primary_screen();
+            }
+
+            scrn = Screen.AllScreens[d];
             screen_bounds = scrn.Bounds.Size.ToXYPair();
             screen_pos = scrn.Bounds.Location.ToXYPair();
 

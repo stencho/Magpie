@@ -118,8 +118,11 @@ namespace Magpie.Graphics {
             name = "";
             device_string = "";
 
-            EnumDisplayDevices(null, display-1, ref device, 0);
-            
+            if (Screen.AllScreens.Length > 1) {
+                EnumDisplayDevices(null, display - 1, ref device, 0);
+            } else {
+                EnumDisplayDevices(null, display, ref device, 0);
+            }
             if (string.IsNullOrEmpty(device.DeviceName)) return false;
 
             for (int id = 0; EnumDisplaySettings(device.DeviceName, id, ref devmode); id++) {
