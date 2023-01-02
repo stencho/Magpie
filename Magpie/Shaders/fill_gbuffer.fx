@@ -46,11 +46,12 @@ struct VertexShaderInput
 
 struct VertexShaderOutput
 {
-    float4 Position : POSITION;
+    float4 Position : POSITION;    
     float2 TexCoord : TEXCOORD0;
     float4 Depth : TEXCOORD1;
 	float3 WorldPos : TEXCOORD2;
     float3x3 TBN : TEXCOORD3;
+	float4 ViewPosition : TEXCOORD6;
 };
 struct PSO
 {
@@ -95,6 +96,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	float4x4 wvp = mul(World, mul(View, Projection));
 		
 	output.Position = mul(input.Position, wvp);
+	output.ViewPosition = output.Position;
     output.TexCoord = input.TexCoord;
 		
     //output.Depth = 1-((output.Position.z / FarClip));
@@ -124,9 +126,12 @@ float3 atmosphere_color;
 float3 sky_color;
 bool fog = false;
 bool clip_trans = false;
+bool fullbright = false;
 PSO MainPS(VertexShaderOutput input)
 {
     PSO output = (PSO)0;
+	float D = tex2D(DEPTH, input.ViewPosition.xy).r;
+
 
     float4 rgba = tex2D(DiffuseSampler, input.TexCoord);
 	if (rgba.a < 1 && clip_trans) { clip(-1); }
@@ -137,6 +142,11 @@ PSO MainPS(VertexShaderOutput input)
 	
 	output.Depth.r = input.Depth.x / input.Depth.y;
 	output.Depth.gba = 1;
+	
+	if (input.Depth.x > D) { 
+		//clip(-1);
+	}
+
 
     output.Normals.rgb = encode(normalize(input.TBN[2]));
 	output.Normals.a = 1;
@@ -160,6 +170,9 @@ PSO MainPS(VertexShaderOutput input)
 	float3 atmos = color_lerp(atmosphere_color.rgb, sky_color.rgb, clamp(input.WorldPos.y*0.3, 0.0, 1));
 
 	output.Lighting = float4(0,0,0,1);
+	if (fullbright){
+		output.Lighting = float4(1,1,1,1);
+	}
 
 	if (fog && dist > fog_start) {
 		d = 1 - ((dist - fog_start) * (1/(1-fog_start)));

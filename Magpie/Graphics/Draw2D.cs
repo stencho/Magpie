@@ -122,15 +122,7 @@ namespace Magpie.Graphics {
             return "";
         }
 
-        public static void init() {
-            var test = (typeof(Color).GetProperties());
-            foreach (PropertyInfo mi in test) {
-
-                if (mi.Name != "A" && mi.Name != "R" && mi.Name != "G" && mi.Name != "B" && mi.Name != "PackedValue") {
-                    string_colors.Add(mi.Name, (Color)typeof(Color).GetProperty(mi.Name).GetValue(Color.White));
-                }
-            }
-        }
+        public static void init() {}
 
         public static Color ColorRandomFromString(string s) {
             int seed = 0;

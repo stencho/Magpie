@@ -50,7 +50,7 @@ namespace MagpieTestbed.TestObjects {
         public SceneRenderInfo render_info { get; set; }
 
         public TestSphere() {
-            collision = new Cube(scale * 3);
+            collision = new Sphere(1f);
             render_info = new SceneRenderInfo() {
                 model = this.model,
                 textures = this.textures,
@@ -62,7 +62,7 @@ namespace MagpieTestbed.TestObjects {
         public void Update() {
             render_info.model = this.model;
             textures = this.textures;
-            bounds = CollisionHelper.BoundingBox_around_OBB((Cube)collision, world);
+            bounds = CollisionHelper.BoundingBox_around_sphere((Sphere)collision, Matrix.Identity);
         }
     }
 }

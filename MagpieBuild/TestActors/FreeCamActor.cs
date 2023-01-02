@@ -16,6 +16,7 @@ using static Magpie.Engine.Controls;
 //using static Magpie.Engine.DigitalControlBindings;
 
 using static Magpie.Engine.ControlBinds;
+using Magpie.Graphics.Lights;
 
 namespace MagpieTestbed.TestActors {
     [Serializable]
@@ -43,9 +44,9 @@ namespace MagpieTestbed.TestActors {
         public light[] lights { get; set; } = new light[2]{ 
             new light {
                 type = LightType.POINT, 
-                color = Color.Red, 
+                color = Color.Blue, 
                 point_info = new point_info() {
-                    radius = 10f
+                    radius = 2f
                 }
             },
 
@@ -87,10 +88,6 @@ namespace MagpieTestbed.TestActors {
         bool was_aiming = false;
 
         public void Update() {
-            lights[0].position = position + (cam.orientation.Right * 0.5f) + (cam.orientation.Down * 0.4f) + (Vector3.Forward * 0.5f);
-            lights[1].position = position + (cam.orientation.Right * 0.5f) + (cam.orientation.Down * 0.4f) + (Vector3.Forward * 0.5f);
-
-            lights[1].spot_info.orientation = cam.orientation * Matrix.CreateFromAxisAngle(cam.orientation.Up, MathHelper.ToRadians(5f));
             lock (binds)
                 binds.update();
             /*
@@ -181,6 +178,16 @@ namespace MagpieTestbed.TestActors {
 
             cam.position = position;
         }
+
+        public void after_movement_update() {
+
+            lights[0].position = position + (cam.orientation.Right * 0.5f) + (cam.orientation.Down * 0.4f) + (cam.orientation.Forward * 0.6f);
+            lights[1].position = position + (cam.orientation.Right * 0.5f) + (cam.orientation.Down * 0.4f) + (cam.orientation.Forward * 0.5f);
+
+            lights[1].spot_info.orientation = cam.orientation * Matrix.CreateFromAxisAngle(cam.orientation.Up, MathHelper.ToRadians(5f));
+
+        }
+
         public void debug_draw() { }
     }
 }

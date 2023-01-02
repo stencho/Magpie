@@ -70,6 +70,7 @@ namespace Magpie {
                 graphics = gdm;
                 graphics_device = gd;
                 spritebatch = new SpriteBatch(graphics_device);
+
                 startup_log.Append("initializing 2D... ");
                 Draw2D.init();
 
@@ -89,27 +90,6 @@ namespace Magpie {
 
                 startup_log.AppendLine($"monitor {gvars.get_int("display").ToString()} is primary: res [{screen_bounds.ToXString()}] pos [{screen_pos.ToXString()}]");
 
-                Debug.WriteLine("fart" + DisplayInfo.list_display_modes(gvars.get_int("display")));
-                Debug.WriteLine(DisplayInfo.get_primary_screen());
-                Debug.WriteLine(((uint)DisplayInfo.get_primary_screen() - 1));
-
-                startup_log.Append("attempting to find matching display mode... ");
-
-                DisplayInfo.get_display_modes(gvars.get_int("display"), out display_modes, out _, out _);
-
-                startup_log.AppendLine($"{display_modes.Count.ToString()} modes found");
-
-                //find the highest refresh rate for the current game resolution
-                var mode = DisplayInfo.find_display_mode_highest_hz_at_res(screen_bounds.X, screen_bounds.Y, display_modes, out current_display_mode_index);
-
-                //if one isn't found, use the highest refresh rate supported by the highest resolution
-                //(reasoning behind this being that the highest resolution is likely to not have the highest refresh rates, and its refresh rate should be valid for all other resolutions (we hope (though this only matters for fullscreen)))
-                if (current_display_mode_index == -1) {
-                    display_refresh_rate = DisplayInfo.highest_hz_supported_by_highest_res(display_modes, out current_display_mode_index);
-                }
-
-                startup_log.AppendLine($"using mode #{current_display_mode_index}: {screen_bounds.ToXString()}@{mode.refresh_rate}");
-
                 startup_log.Append($"configuring gvar defaults... ");
 
                 gvars.add_gvar("resolution", gvar_data_type.XYPAIR, screen_bounds, true);
@@ -117,7 +97,7 @@ namespace Magpie {
                 gvars.add_gvar("borderless", gvar_data_type.BOOL, true, true);
                 gvars.add_gvar("fullscreen", gvar_data_type.BOOL, false, true);
                 gvars.add_gvar("vsync", gvar_data_type.BOOL, true, true);
-                gvars.add_gvar("frame_limit", gvar_data_type.FLOAT, mode.refresh_rate, true);
+                gvars.add_gvar("frame_limit", gvar_data_type.FLOAT, 60.0f, true);
                 gvars.add_gvar("light_spot_resolution", gvar_data_type.INT, 1024, true);
 
                 gvars.add_gvar("window_position", gvar_data_type.XYPAIR, game_window.Position.ToXYPair(), false);
@@ -177,6 +157,7 @@ namespace Magpie {
                 gvars.set("window_size", game_window.ClientBounds.Size.ToXYPair());
 
                 startup_log.AppendLine("setting up the graphics buffer");
+
                 //more graphics setup
                 buffer = new GBuffer();
                 buffer.CreateInPlace(graphics_device, resolution.X, resolution.Y, gvars.get_float("super_resolution_scale"));

@@ -1,5 +1,6 @@
 ﻿using Magpie.Engine;
 using Magpie.Engine.Brushes;
+using Magpie.Engine.Collision;
 using Magpie.Engine.Stages;
 using Magpie.Engine.WorldElements.Brushes;
 using Magpie.Graphics.Lights;
@@ -327,7 +328,6 @@ namespace Magpie.Graphics {
                 if (buffer < buffer_count) buffer++; else buffer = -1;
             }
 
-
             EngineState.graphics_device.SetVertexBuffer(quad.vertex_buffer);
             EngineState.graphics_device.Indices = quad.index_buffer;
 
@@ -374,6 +374,7 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
 
             spritebatch_draw_to_screen(Vector2.Zero, Vector2.One / gvars.get_float("super_resolution_scale"),  EngineState.buffer.rt_final);
+
 
             EngineState.graphics_device.SetRenderTarget(null);
             draw_texture_to_screen(EngineState.buffer.rt_2D);

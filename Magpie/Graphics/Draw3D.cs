@@ -1,4 +1,5 @@
 ﻿using Magpie.Engine;
+using Magpie.Engine.Collision;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -185,6 +186,33 @@ namespace Magpie.Graphics {
             Draw3D.circle(P, radius, Vector3.Forward, 32, color);
         }
 
+        public static void line(Vector3 a, Vector3 b, float line_width, Color color) {
+            var pomn = CollisionHelper.point_of_minimum_norm(a,b,EngineState.camera.position);
+
+            var t = b-a;
+            var scale = new Vector3(line_width, t.Length(), 1);
+
+            var p = Vector3.Normalize(t);
+            var p2 = Vector3.Normalize(pomn-EngineState.camera.position);
+            var c = Vector3.Normalize(Vector3.Cross(p, Vector3.Cross(p, p2)));
+
+
+            Matrix billboard = Matrix.Identity;
+
+
+                billboard = Matrix.CreateConstrainedBillboard(a + (t / 2),
+                (a + (t / 2)) + c, Vector3.Normalize(t),
+                c, null
+                );
+            
+            fill_quad(Matrix.CreateScale(scale) * billboard,
+                (Vector3.Up * 0.5f) + (Vector3.Left * 0.5f),
+                (Vector3.Up * 0.5f) + (Vector3.Right * 0.5f),
+                (Vector3.Down * 0.5f) + (Vector3.Right * 0.5f),
+                (Vector3.Down * 0.5f) + (Vector3.Left * 0.5f)
+                , color) ;
+        }
+
         public static void capsule(Vector3 A, Vector3 B, float radius, Color color) {
             //line_effect.Parameters["World"].SetValue(Matrix.Identity);
 
@@ -348,18 +376,22 @@ namespace Magpie.Graphics {
             e_diffuse.Parameters["Projection"].SetValue(EngineState.camera.projection);
             e_diffuse.Parameters["DiffuseMap"].SetValue(texture);
             e_diffuse.Parameters["tint"].SetValue(color.ToVector3());
+
+            e_diffuse.Parameters["fullbright"].SetValue(true);
             //e_diffuse.Parameters["FarClip"].SetValue(2000f);
             //e_diffuse.Parameters["opacity"].SetValue(-1f);
 
-            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+            EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
-            EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.DepthRead;
+
             EngineState.graphics_device.SetVertexBuffer(vb);
             EngineState.graphics_device.Indices = ib;
 
             e_diffuse.Techniques["BasicColorDrawing"].Passes[0].Apply();
 
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount));
+            e_diffuse.Parameters["fullbright"].SetValue(false);
         }
 
 
@@ -467,10 +499,13 @@ namespace Magpie.Graphics {
                 new VertexPositionNormalTexture(C, -Vector3.UnitZ, new Vector2(1, 1)),
                 new VertexPositionNormalTexture(D, -Vector3.UnitZ, new Vector2(0, 1))
             };
+
             EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
+
             q_vertex_buffer = new VertexBuffer(EngineState.graphics_device, VertexPositionNormalTexture.VertexDeclaration, quad.Length, BufferUsage.None);
             q_vertex_buffer.SetData<VertexPositionNormalTexture>(quad);
-            draw_buffers_diffuse_texture(q_vertex_buffer, q_index_buffer, tum, Color.White, world);
+
+            draw_buffers_diffuse_texture(q_vertex_buffer, q_index_buffer, ContentHandler.resources["OnePXWhite"].value_tx, color, world);
             //draw_buffers(gd, q_vertex_buffer, q_index_buffer, world, color, EngineState.camera.view, EngineState.camera.projection);
         }
 

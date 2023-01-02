@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Magpie.Engine;
 using Magpie.Engine.Brushes;
+using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Engine.Stages;
 using Magpie.Engine.WorldElements.Brushes;
@@ -32,7 +33,7 @@ namespace Magpie.Graphics {
         public static VerticalQuad quad;
 
         public enum obj_type {
-            empty,brush, gobject,actor
+            empty, brush, gobject, actor
         }
         public class render_obj {
             public obj_type type;
@@ -56,16 +57,17 @@ namespace Magpie.Graphics {
             string s = $"{visible_count} visible \n";
             int lc = 0;
             foreach (render_obj obj in visible) {
+                if (lc == visible_count) break;
                 if (obj == null) continue;
 
                 s += $"{obj.type.ToString()}:{obj.index} {obj.world.Translation.ToXString()}, ";
                 lc++; if (lc == 5) { lc = 0; s += "\n"; }
-                if (lc == visible_count) break;
             } s=s.Remove(s.Length - 2, 2);
 
             s += $"\n\n{light_count} lights \n";
             lc = 0;
             foreach (light l in visible_lights) {
+                if (lc == light_count) break;
                 if (l == null) continue;
 
                 if (l.type == LightType.SPOT) {
@@ -74,7 +76,6 @@ namespace Magpie.Graphics {
                     s += $"P[{l.point_info.radius} @ {l.point_info.position.ToXString()}], ";
                 }
                 lc++; if (lc == 5) { lc = 0; s += "\n"; }
-                if (lc == light_count) break;
             } s = s.Remove(s.Length - 2, 2);
 
             return s;
@@ -84,16 +85,18 @@ namespace Magpie.Graphics {
 
             var term = 0;
             for (int i = 0; i < visible.Length; i++) {
+                if (term == visible_count) break;
                 if (visible[i] == null) continue;
                 visible[i] = null;
-                term++; if (term == visible_count) break;
+                term++;
             }
 
             term = 0;
             for (int i = 0; i < light.max_visible_lights; i++) {
+                if (term == light_count) break;
                 if (visible_lights[i] == null) continue;
                 visible_lights[i] = null;
-                term++; if (term == light_count) break;
+                term++;
             }
 
             visible_count = 0;
@@ -137,11 +140,14 @@ namespace Magpie.Graphics {
 
 
         public static void create_spot_light_visibility_list(Map map, light l) {
-            for (int i = 0; i < l.spot_info.visible.Length; i++) { if (l.spot_info.visible[i] != null) l.spot_info.visible[i] = null; }
+            for (int i = 0; i < l.spot_info.visible.Length; i++) {  l.spot_info.visible[i] = null; }
             l.spot_info.visible_count = 0;
 
+            int u = 0;
             for (int i = 0; i < Map.max_brushes; i++) {
+                if (u >= map.brush_count) break;
                 if (map.brushes[i] == null) continue;
+
                 switch (map.brushes[i].type) {
                     case BrushType.PLANE:
                         break;
@@ -164,10 +170,15 @@ namespace Magpie.Graphics {
                     case BrushType.DUMMY:
                         break;
                 }
+
+                u++;
             }
 
+            u = 0;
             for (int i = 0; i < Map.max_objects; i++) {
+                if (u >= map.object_count) break;
                 if (map.objects[i] == null) continue;
+
                 if (map.objects[i].bounds.Intersects(l.spot_info.bounds)) {
 
                     foreach (ModelMesh mm in ContentHandler.resources[map.objects[i].model].value_gfx.Meshes) {
@@ -181,17 +192,26 @@ namespace Magpie.Graphics {
                         }
                     }
                 }
+
+                u++;
             }
 
+            u = 0;
             for (int i = 0; i < Map.max_actors; i++) {
+                if (u >= map.actor_count) break;
                 if (map.actors[i] == null) continue;
+
+                u++;
             }
         }
 
         public static void create_visibility_lists(Map map, Camera camera) {
             //BRUSHES
+            int u = 0;
             for (int i = 0; i < Map.max_brushes; i++) {
+                if (u >= map.brush_count) break;
                 if (map.brushes[i] == null) continue;
+
                 switch (map.brushes[i].type) {
                     case BrushType.PLANE:
                         break;
@@ -214,12 +234,16 @@ namespace Magpie.Graphics {
                     case BrushType.DUMMY:
                         break;
                 }
+
+                u++;
             }
 
             //OBJECTS
+            u = 0;
             for (int i = 0; i < Map.max_objects; i++) {
+                if (u >= map.object_count) break;
                 if (map.objects[i] == null) continue;
-
+                
                 var go = map.objects[i];
                 if (go.lights != null) {
                     for (int il = 0; il < go.lights.Length; il++) {
@@ -263,10 +287,14 @@ namespace Magpie.Graphics {
                             );
                     }
                 }
+
+                u++;
             }
 
             //ACTORS
+            u = 0;
             for (int i = 0; i < Map.max_actors; i++) {
+                if (u >= Map.max_actors) continue;
                 if (map.actors[i] == null) continue;
 
                 var ac = map.objects[i];
@@ -299,10 +327,18 @@ namespace Magpie.Graphics {
                         }
                     }
                 }
+
+                u++;
             }
 
             //PLAYER
             var pa = map.player_actor;
+
+            //pa.lights[0].position = pa.position + (EngineState.camera.orientation.Right * 0.5f) + (EngineState.camera.orientation.Down * 0.4f) + (Vector3.Forward * 0.5f);
+            //pa.lights[1].position = pa.position + (EngineState.camera.orientation.Right * 0.5f) + (EngineState.camera.orientation.Down * 0.4f) + (Vector3.Forward * 0.5f);
+
+            //pa.lights[1].spot_info.orientation = EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
+
             if (pa.lights != null) {
                 for (int il = 0; il < pa.lights.Length; il++) {
                     if (pa.lights[il] == null) continue;
@@ -332,9 +368,6 @@ namespace Magpie.Graphics {
                 }
             }
 
-            for (int i = 0; i < visible.Length; i++) {
-
-            }
         }
 
 
@@ -389,8 +422,10 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
 
             e_gbuffer.Parameters["fog"].SetValue(true);
+
             var term = 0;
             foreach(var v in visible) {
+                if (term >= visible_count) break;
                 if (v == null) continue;
 
                 e_gbuffer.Parameters["World"].SetValue(v.world);
@@ -405,8 +440,14 @@ namespace Magpie.Graphics {
                 e_gbuffer.CurrentTechnique.Passes[0].Apply();
                 EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, v.vertex_buffer.VertexCount);
 
-                term++; if (term == visible_count) break;
+                term++;
             }
+
+            Draw3D.line(Vector3.Up * 20, Vector3.Up * 50 + (Vector3.Right * 50), 0.1f, Color.Red);
+
+            Draw3D.line(Vector3.Up * 50, Vector3.Up * 50 + (Vector3.Right * 50), 0.1f, Color.Red);
+
+            Draw3D.line(Vector3.Up * 20, Vector3.Up * 50, 0.1f, Color.Red);
 
             EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
@@ -443,6 +484,7 @@ namespace Magpie.Graphics {
             var term = 0;
 
             foreach (light light in visible_lights) {
+                if (term >= light_count) break;
                 if (light == null) continue;
 
                 if (light.type == LightType.SPOT) {
@@ -460,6 +502,7 @@ namespace Magpie.Graphics {
 
                     var iterm = 0;
                     foreach (var so in light.spot_info.visible) {
+                        if (iterm >= light.spot_info.visible_count) break;
                         if (so == null) continue;
                         e_exp_light_depth.Parameters["World"].SetValue(so.world);
                         e_exp_light_depth.Parameters["LightPosition"].SetValue(light.position);
@@ -480,7 +523,8 @@ namespace Magpie.Graphics {
                                 EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, so.vertex_buffer.VertexCount);
                             }
                         }
-                        iterm++; if (iterm == light.spot_info.visible_count) break;
+
+                        iterm++;
 
                     }
 
@@ -489,7 +533,7 @@ namespace Magpie.Graphics {
                 
                 }
 
-                term++; if (term == light_count) break;
+                term++;
             }
         }
 
@@ -518,6 +562,7 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.DepthStencilState = DepthStencilState.DepthRead;
             int term = 0;
             foreach(light light in visible_lights) {
+                if (term >= light_count) break;
                 if (light == null) continue;
 
                 if (light.type == LightType.SPOT) {
@@ -585,7 +630,7 @@ namespace Magpie.Graphics {
                     EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, ContentHandler.resources["sphere"].value_gfx.Meshes[0].MeshParts[0].VertexBuffer.VertexCount);
                 }
 
-                term++; if (term == light_count) break;
+                term++; 
             }
 
         }

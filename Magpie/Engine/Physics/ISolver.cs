@@ -130,35 +130,43 @@ namespace Magpie.Engine.Physics {
         //find final movement for each of the map's elements
         //first brushes, then actors, then objects
         public static void do_movement(Map map) {
+            int b = 0;
             foreach (Brush brush in map.brushes) {
+                if (b >= map.brush_count) break;
                 if (brush == null) continue;
+
                     //do brush movement
                 if (!brush.movement_vector.contains_nan()) {
                     brush.final_position = brush.position + brush.movement_vector;
                 }
-                
 
+                b++;
             }
 
             //map.player_actor find movement goes here
 
             //while (map.player_actor == null) {}
-
+            
             if (map.player_actor != null && map.player_actor.wants_movement != Vector3.Zero) {
                 map.player_actor.position += map.player_actor.wants_movement;
 
                 map.player_actor.wants_movement = Vector3.Zero;
             }
 
+            b = 0;
             foreach (Actor actor in map.actors) {
+                if (b >= map.actor_count) break;
                 if (actor == null) continue;
                 //actor.final_position = 
-                
+                b++;
             }
 
+            b = 0;
             foreach(GameObject gobject in map.objects) {
+                if (b >= map.object_count) break;
                 if (gobject == null) continue;
 
+                b++;
             }
 
         }
@@ -175,145 +183,153 @@ namespace Magpie.Engine.Physics {
         static bool abs = false;
         public static void do_base_physics_and_ground_interaction(Map map) {
 
+            int actors_updated = 0;
             foreach (Actor actor in map.actors) {
+                if (actors_updated >= map.actor_count) break;
                 if (actor == null) continue;
+
+                actors_updated++;
+
+                if (actor.collision.shape == shape_type.dummy) continue;
 
                 intersections.Clear();
                 intersection_ids.Clear();
 
-                if (actor.collision.shape != shape_type.dummy) {
                     
-                    var pos_delta = Vector3.Zero;
-                    PhysicsInfo.do_base_physics(actor.phys_info, out pos_delta);
-                    actor.wants_movement += pos_delta;
+                var pos_delta = Vector3.Zero;
+                PhysicsInfo.do_base_physics(actor.phys_info, out pos_delta);
+                actor.wants_movement += pos_delta;
 
-                    if (actor.request_absolute_move) {
-                        abs = true;
+                if (actor.request_absolute_move) {
+                    abs = true;
 
-                        if (!actor.sweep_absolute_move) {
-                            actor.position = actor.wants_absolute_movement;
-                            actor.collision.position = actor.wants_absolute_movement;
-                            actor.sweep_collision = actor.collision;
-                            actor.sweep_collision.position = actor.wants_absolute_movement;
-                        } else {
-                            switch (actor.collision.shape) {
-                                case shape_type.capsule:
-                                    actor.sweep_collision = new Quad(
-                                        actor.collision.position + ((Capsule)actor.collision).A,
-                                        actor.wants_absolute_movement + ((Capsule)actor.collision).A,
-                                        actor.wants_absolute_movement + ((Capsule)actor.collision).B,
-                                        actor.collision.position + ((Capsule)actor.collision).B
-                                        );
-
-                                    break;
-
-                                default:break;
-                            }
-
-
-                            actor.sweep_collision.radius = actor.collision.radius;
-                            actor.sweep_collision.position = Vector3.Zero;
-                        }
-
-                        actor.request_absolute_move = false;
-                        actor.wants_absolute_movement = Vector3.Zero;
-
+                    if (!actor.sweep_absolute_move) {
+                        actor.position = actor.wants_absolute_movement;
+                        actor.collision.position = actor.wants_absolute_movement;
+                        actor.sweep_collision = actor.collision;
+                        actor.sweep_collision.position = actor.wants_absolute_movement;
                     } else {
-                        abs = false;
-                    }
+                        switch (actor.collision.shape) {
+                            case shape_type.capsule:
+                                actor.sweep_collision = new Quad(
+                                    actor.collision.position + ((Capsule)actor.collision).A,
+                                    actor.wants_absolute_movement + ((Capsule)actor.collision).A,
+                                    actor.wants_absolute_movement + ((Capsule)actor.collision).B,
+                                    actor.collision.position + ((Capsule)actor.collision).B
+                                    );
 
-                    if (abs) goto skip_sweep;
-                    switch (actor.collision.shape) {
-                        case shape_type.cube:
-                            break;
-                        case shape_type.polyhedron:
-                            //find most extreme points on shape in all 360 degrees, perpendicular to sweep direction, 
-                            //then remove any duplicates and add in all the points from the original shape
-                            //which are in the opposite direction of the sweep
-                            //I think
-                            //ultimately this probably won't need to be swept like ever and would be kind of slow
-                            //but might be useful for, say, boss hitboxes
-                            //if a big dude swings a big arm at you and it hits you but shouldn't have, that feels bad
-                            //so actual large fitted hitshapes are probs preferred here
-                            //regular hitshapes should be preferred for everything else tho
-                            break;
-                        case shape_type.quad:
-                            //cube
-                            break;
-                        case shape_type.tri:
-                            //will need to make a specific class for this
-                            break;
-                        case shape_type.capsule:
-                            actor.sweep_collision = new Quad(
-                                ((Capsule)actor.collision).A + actor.collision.position,
-                                actor.collision.position + actor.wants_movement + ((Capsule)actor.collision).A,
-                                actor.collision.position + actor.wants_movement + ((Capsule)actor.collision).B,
-                                ((Capsule)actor.collision).B + actor.collision.position
-                                );
+                                break;
 
-                            break;
-                        case shape_type.line:
-                            //quad w/ no radius
-                            break;
-                        case shape_type.sphere:
-                            //capsule
-                            actor.sweep_collision = new Capsule(actor.position, actor.wants_movement, actor.collision.radius);
-                            break;
-                        case shape_type.dummy:
-                            break;
-                    }
-
-
-                    actor.sweep_collision.radius = actor.collision.radius;
-                    actor.sweep_collision.position = Vector3.Zero;
-
-                    skip_sweep:
-
-                    foreach (Brush brush in map.brushes) {
-                        if (brush == null) continue;
-
-                        if (brush.collision.shape != shape_type.dummy) {
-                            var intersection = new Intersection(actor.sweep_collision, brush.collision, Vector3.Zero, intersection_level.NONE, actor, brush, "actor", "brush");
-
-                            if (actor.sweep_collision.find_bounding_box().Contains(brush.collision.find_bounding_box()) != ContainmentType.Disjoint) {
-                                intersection.level = intersection_level.AABB;
-
-                                int id = 0;
-                                id = RNG.rng_int();
-                                while (intersection_ids.Contains(id)) {
-                                    id = RNG.rng_int();
-                                }
-                                intersection.id = id;
-
-                                intersection.gjkr = GJK.gjk_intersects(actor.sweep_collision, brush.collision, Matrix.Identity, brush.world, actor.sweep_collision.radius, brush.collision.radius);
-                                
-                                if (intersection.gjkr.hit) {
-                                    intersection.level = intersection_level.COLLIDING;
-
-                                    if (actor.phys_info.stick_to_ground) {
-                                        actor.phys_info.current_ground = brush;
-                                    }
-
-                                }
-
-
-                            }
-
-                            intersections.Add(intersection);
+                            default:break;
                         }
+
+
+                        actor.sweep_collision.radius = actor.collision.radius;
+                        actor.sweep_collision.position = Vector3.Zero;
                     }
 
+                    actor.request_absolute_move = false;
+                    actor.wants_absolute_movement = Vector3.Zero;
 
+                } else {
+                    abs = false;
+                }
+
+                if (abs) goto skip_sweep;
+                switch (actor.collision.shape) {
+                    case shape_type.cube:
+                        break;
+                    case shape_type.polyhedron:
+                        //find most extreme points on shape in all 360 degrees, perpendicular to sweep direction, 
+                        //then remove any duplicates and add in all the points from the original shape
+                        //which are in the opposite direction of the sweep
+                        //I think
+                        //ultimately this probably won't need to be swept like ever and would be kind of slow
+                        //but might be useful for, say, boss hitboxes
+                        //if a big dude swings a big arm at you and it hits you but shouldn't have, that feels bad
+                        //so actual large fitted hitshapes are probs preferred here
+                        //regular hitshapes should be preferred for everything else tho
+                        break;
+                    case shape_type.quad:
+                        //cube
+                        break;
+                    case shape_type.tri:
+                        //will need to make a specific class for this
+                        break;
+                    case shape_type.capsule:
+                        actor.sweep_collision = new Quad(
+                            ((Capsule)actor.collision).A + actor.collision.position,
+                            actor.collision.position + actor.wants_movement + ((Capsule)actor.collision).A,
+                            actor.collision.position + actor.wants_movement + ((Capsule)actor.collision).B,
+                            ((Capsule)actor.collision).B + actor.collision.position
+                            );
+
+                        break;
+                    case shape_type.line:
+                        //quad w/ no radius
+                        break;
+                    case shape_type.sphere:
+                        //capsule
+                        actor.sweep_collision = new Capsule(actor.position, actor.wants_movement, actor.collision.radius);
+                        break;
+                    case shape_type.dummy:
+                        break;
                 }
 
 
+                actor.sweep_collision.radius = actor.collision.radius;
+                actor.sweep_collision.position = Vector3.Zero;
+
+                skip_sweep:
+
+                int brushes_updated = 0;
+                foreach (Brush brush in map.brushes) {
+                    if (brushes_updated >= map.brush_count) break;
+                    if (brush == null) continue;
+
+                    if (brush.collision.shape != shape_type.dummy) {
+                        var intersection = new Intersection(actor.sweep_collision, brush.collision, Vector3.Zero, intersection_level.NONE, actor, brush, "actor", "brush");
+
+                        if (actor.sweep_collision.find_bounding_box().Contains(brush.collision.find_bounding_box()) != ContainmentType.Disjoint) {
+                            intersection.level = intersection_level.AABB;
+
+                            int id = 0;
+                            id = RNG.rng_int();
+                            while (intersection_ids.Contains(id)) {
+                                id = RNG.rng_int();
+                            }
+                            intersection.id = id;
+
+                            intersection.gjkr = GJK.gjk_intersects(actor.sweep_collision, brush.collision, Matrix.Identity, brush.world, actor.sweep_collision.radius, brush.collision.radius);
+                                
+                            if (intersection.gjkr.hit) {
+                                intersection.level = intersection_level.COLLIDING;
+
+                                if (actor.phys_info.stick_to_ground) {
+                                    actor.phys_info.current_ground = brush;
+                                }
+
+                            }
 
 
+                        }
+
+                        intersections.Add(intersection);
+                    }
+
+                    brushes_updated++;
+                }               
 
             }
 
+            int objects_updated = 0;
             foreach (GameObject gobject in map.objects) {
+                if (objects_updated >= map.object_count) break;
+                if (gobject == null) continue;
 
+                gobject.collision.position = gobject.position;
+
+                objects_updated++;
             }
 
         }
@@ -321,8 +337,9 @@ namespace Magpie.Engine.Physics {
 
 
         public static void finalize_collisions(Map map) {
-
+            int actors_updated = 0;
             foreach (Actor actor in map.actors) {
+                if (actors_updated >= map.actor_count) break;
                 if (actor == null) continue;
 
                 if (actor.wants_movement != Vector3.Zero) {
@@ -331,6 +348,8 @@ namespace Magpie.Engine.Physics {
 
                     actor.wants_movement = Vector3.Zero;
                 }
+
+                actors_updated++;
             }
         }
     }

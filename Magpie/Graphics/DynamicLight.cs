@@ -45,7 +45,7 @@ namespace Magpie.Graphics {
 
         public float fov = (MathHelper.Pi / 4f) + 0.01f;
         public float far_clip = 30f;
-        public float near_clip = 1f;
+        public float near_clip = 0.1f;
         public float C = 5f;
         public float bias = 0.0008f;
         public bool shadows = true;

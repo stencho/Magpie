@@ -128,7 +128,7 @@ float4 createLightmap(float3 Position, float3 N)
 {
 	float3 L = LightPosition.xyz - Position.xyz;
 
-	float Attenuation = saturate(1.0f - max(0.01f, length(L)) / (LightRadius / 2));
+	float Attenuation = saturate(1.0f - max(0.01f, length(L)) / (LightRadius));
 	
 	L = normalize(L);
 

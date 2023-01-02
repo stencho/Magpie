@@ -70,6 +70,9 @@ namespace Magpie {
             internal Vector3 last_un_hit_A;
             internal Vector3 last_un_hit_B;
 
+            public Matrix world_A;
+            public Matrix world_B;
+
             public override string ToString() {
                 return string.Format(
 @"##{0} | {1}## 

@@ -227,10 +227,11 @@ namespace MagpieBuild
 
             var index = world.current_map.add_object("skull", new TestSphere());
             world.current_map.objects[index].model = "skull";
-            world.current_map.objects[index].textures[0] = "texture_1001";
-            world.current_map.objects[index].position = Vector3.Zero;
+            world.current_map.objects[index].textures[0] = "OnePXWhite";
+            world.current_map.objects[index].position = Vector3.Up * 5f;
             world.current_map.objects[index].scale = Vector3.One * 16;
             world.current_map.objects[index].orientation = Matrix.Identity;
+            world.current_map.objects[index].collision.radius = 5;
 
 
             //world.current_map.add_brush("test_floor", new FloorPlane());
@@ -319,7 +320,7 @@ namespace MagpieBuild
         protected override void UnloadContent() {
             ContentHandler.UnloadAll();
         }
-
+        GJK3DParallel gjkp = new GJK3DParallel();
         protected override void Update(GameTime gameTime) {
             while (!EngineState.started) { }
 
@@ -340,23 +341,24 @@ namespace MagpieBuild
                 Exit();
             }
 
-            /*
-            if (world.current_map.objects.Count != results.Length) {
-                results = new GJK.gjk_result[world.current_map.objects.Count];
+            if (world.current_map.object_count != results.Length) {
+                results = new GJK.gjk_result[world.current_map.object_count];
             }
 
 
             //test collision detection between above test actor and all the objects in the scene
 
-            Clock.frame_probe.set("300 GJK tests");
+            Clock.frame_probe.set("50 GJK tests");
             int i = 0;
-            foreach (GameObject go in world.current_map.objects.Values) {
+            foreach (GameObject go in world.current_map.objects) {
+                if (i == world.current_map.object_count) break;
+                if (go == null) continue;
                 //if (go.name.StartsWith("test_sphere")) {
-                    results[i] = GJK.gjk_intersects(world.current_map.actors["test_actor"].collision, go.collision,
-                        world.current_map.actors["test_actor"].world, go.world);
+                    results[i] = gjkp.gjk_intersects(world.current_map.actors[0].collision, go.collision, world.current_map.actors[0].world, go.world);
                     i++;
                 //}
             }
+            /*
 
             //int i = 0;
             foreach (GameObject o in world.current_map.objects.Values) {
@@ -455,6 +457,7 @@ namespace MagpieBuild
             pctest.draw_debug();
             snap.snap("another tump");
 
+
             //Draw3D.xyz_cross(world.current_map.lights[world.current_map.lights.Count - 1].position, 0.3f, Color.HotPink);
         }
         bool draw_debug_info = true;
@@ -478,13 +481,14 @@ namespace MagpieBuild
 
             world.Draw(GraphicsDevice, EngineState.camera);
 
-            // world.current_map.actors["test_actor"].debug_draw();
+            world.current_map.actors[0].debug_draw();
 
             foreach (GJK.gjk_result res in results) {
                 Draw3D.line(res.closest_point_A, res.closest_point_B, Color.MonoGameOrange);
+                res.shape_B.draw();
             }
 
-            
+
 
 
             EngineState.window_manager.render_window_internals();
@@ -566,7 +570,7 @@ namespace MagpieBuild
 
             Clock.frame_probe.end_of_frame();
             Clock.frame_probe.set("overhead");
-            /*
+            
             Clock.frame_probe.draw(EngineState.resolution.X - 450, 60, 300, out _, out th);
             int t = th;
 
@@ -575,7 +579,7 @@ namespace MagpieBuild
 
             lock (Controls.control_poll_probe)
                 Controls.control_poll_probe.draw(EngineState.resolution.X - 360, th + t + 80, 300, out _, out _);
-            */
+            
             //snap.draw(test_trums.ToString(), EngineState.resolution.X - 360, 10, 300);
 
 

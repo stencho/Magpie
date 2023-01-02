@@ -157,18 +157,24 @@ namespace Magpie {
 
                 lock (current_map.brushes) {
                     internal_frame_probe.set("brushes");
+                    int brushes_updated = 0;
+
                     foreach (Brush brush in current_map.brushes) {
+                        if (brushes_updated >= current_map.brush_count) break;
                         if (brush == null) continue;
 
                         lock (brush)
                             brush.Update();
-                        
+                        brushes_updated++;
                     }
 
                 }
                 lock (current_map.objects) {
-                        internal_frame_probe.set("objects");
+                    internal_frame_probe.set("objects");
+                    int objects_updated = 0;
+
                     foreach (GameObject go in current_map.objects) {
+                        if (objects_updated >= current_map.object_count) break;
                         if (go == null) continue;
                             //if (  go.dead) {
                             // dead_objects.Add(go.name);                    
@@ -179,6 +185,8 @@ namespace Magpie {
                                 go.Update();
                             
                         }
+
+                        objects_updated++;
                     }
 
                 }
@@ -191,11 +199,18 @@ namespace Magpie {
 
                 lock (current_map.actors) {
                     internal_frame_probe.set("actors");
+                    int actors_updated = 0;
+
                     foreach (Actor actor in current_map.actors) {
+                        if (actors_updated >= current_map.actor_count) break;
                         if (actor == null) continue;
+
                         lock (actor)
-                            actor.Update();                        
+                            actor.Update();
+                        actors_updated++;
                     }
+
+
                 }
                 lock (current_map.player_actor) {
                     internal_frame_probe.set("player_actor");
@@ -210,11 +225,7 @@ namespace Magpie {
                 PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
                 PhysicsSolver.finalize_collisions(current_map);
 
-
-
-
                 dead_objects.Clear();
-
 
                 lock (last_fps) {
                     for (int i = 0; i < last_fps.Length - 1; i++) {
@@ -301,6 +312,8 @@ namespace Magpie {
         //EngineState.world.use_new_renderer=true;
 
         public void Draw(GraphicsDevice gd, Camera camera) {
+
+            player_actor.after_movement_update();
 
             Renderer.render(current_map, EngineState.camera, EngineState.buffer);
             

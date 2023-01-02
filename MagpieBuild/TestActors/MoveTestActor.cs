@@ -94,6 +94,9 @@ namespace MagpieTestbed.TestActors {
             }
 
         }
+        public void after_movement_update() {
+
+        }
         public void debug_draw() {
             collision.draw();
             //sweep_collision.draw();
