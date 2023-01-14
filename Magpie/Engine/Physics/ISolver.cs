@@ -169,6 +169,7 @@ namespace Magpie.Engine.Physics {
                 b++;
             }
 
+
         }
         private static List<int> intersection_ids = new List<int>();
         public static List<Intersection> intersections = new List<Intersection>();

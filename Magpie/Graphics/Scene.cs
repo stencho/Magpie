@@ -223,7 +223,8 @@ namespace Magpie.Graphics {
             depth,
             lighting
         }
-        static byte buffer_count = 3;
+
+        public static byte buffer_count = 3;
         public static int buffer = -1;
 
         static bool _screenshot = false;
@@ -324,9 +325,6 @@ namespace Magpie.Graphics {
 
         public static void compose() {
             Clock.frame_probe.set("compose");
-            if (StaticControlBinds.just_released("switch_buffer") ) {
-                if (buffer < buffer_count) buffer++; else buffer = -1;
-            }
 
             EngineState.graphics_device.SetVertexBuffer(quad.vertex_buffer);
             EngineState.graphics_device.Indices = quad.index_buffer;

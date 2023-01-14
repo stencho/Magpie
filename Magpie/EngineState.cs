@@ -1,4 +1,5 @@
 ﻿using Magpie.Engine;
+using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using Magpie.Graphics.UI;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -301,10 +302,14 @@ namespace Magpie {
 
             StaticControlBinds.update();
 
-            window_manager.update();
+            if (StaticControlBinds.just_released("switch_buffer")) {
+                if (Scene.buffer < Scene.buffer_count) Scene.buffer++; 
+                else Scene.buffer = -1;
+            }
 
-            EngineState.camera.update();
-            EngineState.camera.update_projection(EngineState.resolution);
+            if (StaticControlBinds.just_pressed("screenshot")) Scene.screenshot();
+
+            window_manager.update();
 
             //if (player_binds_one != null && player_binds_one.player_index != PlayerIndex.One) {player_binds_one.change_player_index(PlayerIndex.One);}
             //if (player_binds_two != null && player_binds_two.player_index != PlayerIndex.Two) {player_binds_two.change_player_index(PlayerIndex.Two);}

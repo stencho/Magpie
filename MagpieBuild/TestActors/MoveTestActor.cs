@@ -31,7 +31,21 @@ namespace MagpieTestbed.TestActors {
 
         public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
 
-        public light[] lights { get; set; }
+        public light[] lights { get; set; } = new light[2] {
+            new light {
+                type = LightType.POINT,
+                color = Color.Blue,
+                point_info = new point_info() {
+                    radius = 2f
+                }
+            },
+
+            new light {
+                type = LightType.SPOT,
+                color = Color.Red,
+                spot_info = new spot_info()
+            }
+        };
 
         public MoveTestActor() {
             //collision = new Capsule(1.85f, 1f);
@@ -94,8 +108,9 @@ namespace MagpieTestbed.TestActors {
             }
 
         }
-        public void after_movement_update() {
-
+        public void unthreaded_update() {
+            lights[0].position = position;
+            lights[1].position = position;
         }
         public void debug_draw() {
             collision.draw();

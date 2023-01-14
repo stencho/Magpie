@@ -294,10 +294,10 @@ namespace Magpie.Graphics {
             //ACTORS
             u = 0;
             for (int i = 0; i < Map.max_actors; i++) {
-                if (u >= Map.max_actors) continue;
+                if (u >= map.actor_count) continue;
                 if (map.actors[i] == null) continue;
 
-                var ac = map.objects[i];
+                var ac = map.actors[i];
                 if (ac.lights != null) {
                     for (int il = 0; il < ac.lights.Length; il++) {
                         if (ac.lights[il] == null) continue;
@@ -443,11 +443,11 @@ namespace Magpie.Graphics {
                 term++;
             }
 
-            Draw3D.line(Vector3.Up * 20, Vector3.Up * 50 + (Vector3.Right * 50), 0.1f, Color.Red);
+            Draw3D.sprite_line(Vector3.Up * 20, Vector3.Up * 50 + (Vector3.Right * 50), 0.1f, Color.Red);
 
-            Draw3D.line(Vector3.Up * 50, Vector3.Up * 50 + (Vector3.Right * 50), 0.1f, Color.Red);
+            Draw3D.sprite_line(Vector3.Up * 50, Vector3.Up * 50 + (Vector3.Right * 50), 0.1f, Color.Red);
 
-            Draw3D.line(Vector3.Up * 20, Vector3.Up * 50, 0.1f, Color.Red);
+            Draw3D.sprite_line(Vector3.Up * 20, Vector3.Up * 50, 0.1f, Color.Red);
 
             EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             e_gbuffer.Parameters["tint"].SetValue(Color.White.ToVector3());
@@ -639,19 +639,30 @@ namespace Magpie.Graphics {
 
         }
 
+        
+
         public static void render(Map map, Camera camera, GBuffer buffer) {
-            clear_visible();
+            Clock.frame_probe.set("RENDER");
 
-            create_visibility_lists(map, camera); //
-           // update_lighting();
+            Clock.frame_probe.set("create_vis");
+            clear_visible();            
+            create_visibility_lists(map, camera);
 
+
+            Clock.frame_probe.set("build_lighting");
+            // update_lighting();
             build_lighting(map, camera, buffer);
 
-            clear_to_skybox(camera, buffer); //
-            draw_scene(camera, buffer); //
 
+            Clock.frame_probe.set("draw_scene");
+            clear_to_skybox(camera, buffer); 
+            draw_scene(camera, buffer);
+
+
+            Clock.frame_probe.set("draw_lighting");
             draw_lighting(camera, buffer);
 
+            Clock.frame_probe.set("END_RENDER");
             //compose(); //???????
         }
 

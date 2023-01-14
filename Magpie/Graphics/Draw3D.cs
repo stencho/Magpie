@@ -186,31 +186,25 @@ namespace Magpie.Graphics {
             Draw3D.circle(P, radius, Vector3.Forward, 32, color);
         }
 
-        public static void line(Vector3 a, Vector3 b, float line_width, Color color) {
-            var pomn = CollisionHelper.point_of_minimum_norm(a,b,EngineState.camera.position);
+        public static void sprite_line(Vector3 a, Vector3 b, float line_width, Color color) {
+            var pomn = CollisionHelper.point_of_minimum_norm(a, b, EngineState.camera.position);
 
             var t = b-a;
             var scale = new Vector3(line_width, t.Length(), 1);
 
             var p = Vector3.Normalize(t);
-            var p2 = Vector3.Normalize(pomn-EngineState.camera.position);
+            var p2 = Vector3.Normalize(pomn - EngineState.camera.position);
             var c = Vector3.Normalize(Vector3.Cross(p, Vector3.Cross(p, p2)));
 
-
-            Matrix billboard = Matrix.Identity;
-
-
-                billboard = Matrix.CreateConstrainedBillboard(a + (t / 2),
-                (a + (t / 2)) + c, Vector3.Normalize(t),
-                c, null
-                );
+            Matrix billboard = Matrix.CreateConstrainedBillboard(a + (t / 2),
+                (a + (t / 2)) + c, Vector3.Normalize(t), c, null);
             
             fill_quad(Matrix.CreateScale(scale) * billboard,
                 (Vector3.Up * 0.5f) + (Vector3.Left * 0.5f),
                 (Vector3.Up * 0.5f) + (Vector3.Right * 0.5f),
                 (Vector3.Down * 0.5f) + (Vector3.Right * 0.5f),
-                (Vector3.Down * 0.5f) + (Vector3.Left * 0.5f)
-                , color) ;
+                (Vector3.Down * 0.5f) + (Vector3.Left * 0.5f), 
+                color);
         }
 
         public static void capsule(Vector3 A, Vector3 B, float radius, Color color) {

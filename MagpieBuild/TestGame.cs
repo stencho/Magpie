@@ -176,7 +176,7 @@ namespace MagpieBuild
             world.current_map.objects["test_sphere6"].model = "bigcube";
             */
 
-            for (int i = 0; i < 50; i++) {
+            for (int i = 0; i < 150; i++) {
                 var ind = world.current_map.add_object("test_sphere" + i, new TestSphere());
                 world.current_map.objects[ind].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
                 world.current_map.objects[ind].textures = new string[1] { "trumpmap" };
@@ -409,7 +409,7 @@ namespace MagpieBuild
 
 
 
-            if (just_pressed("screenshot")) Scene.screenshot();
+
             bool held_test = true;
 
             if (tapped("test") && !held("test")) {
@@ -483,12 +483,20 @@ namespace MagpieBuild
 
             world.current_map.actors[0].debug_draw();
 
+            /*
             foreach (GJK.gjk_result res in results) {
-                Draw3D.line(res.closest_point_A, res.closest_point_B, Color.MonoGameOrange);
+                Draw3D.line(res.closest_point_A, res.closest_point_B, Draw2D.ColorInterpolate(Color.Green, Color.MonoGameOrange, 
+                    MathHelper.Clamp(Vector3.Distance(res.closest_point_A, res.closest_point_B) / 50f, 0f,1f)));
+
+                var p =  res.closest_point_A + ((res.closest_point_B - res.closest_point_A) / 2f);
+                Draw3D.text_3D(EngineState.spritebatch,
+                    $"d:{Vector3.Distance(res.closest_point_A, res.closest_point_B)}\nh:{res.hit}", 
+                    "pf", p, Vector3.Normalize(EngineState.camera.position - p), 1f, 
+                    res.hit ? Color.Green : Color.MonoGameOrange);
+
                 res.shape_B.draw();
             }
-
-
+            */
 
 
             EngineState.window_manager.render_window_internals();

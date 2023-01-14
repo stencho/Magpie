@@ -26,7 +26,7 @@ namespace Magpie.Engine {
         light[] lights { get; set; }
 
         void Update();
-        void after_movement_update();
+        void unthreaded_update();
         void debug_draw();
     }
 }

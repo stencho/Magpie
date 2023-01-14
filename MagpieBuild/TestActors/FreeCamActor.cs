@@ -176,10 +176,10 @@ namespace MagpieTestbed.TestActors {
             if (mv != Vector3.Zero)
                 wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("shift") ? 6f : 1f) * Clock.internal_frame_limit_in_seconds;
 
-            cam.position = position;
         }
 
-        public void after_movement_update() {
+        public void unthreaded_update() {
+            cam.position = position;
 
             lights[0].position = position + (cam.orientation.Right * 0.5f) + (cam.orientation.Down * 0.4f) + (cam.orientation.Forward * 0.6f);
             lights[1].position = position + (cam.orientation.Right * 0.5f) + (cam.orientation.Down * 0.4f) + (cam.orientation.Forward * 0.5f);
