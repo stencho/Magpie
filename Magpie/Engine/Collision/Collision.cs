@@ -82,43 +82,50 @@ namespace Magpie.Engine.Collision {
             Vector3 ac = C - A;
             Vector3 ap = point - A;
 
-            float d1 = Vector3.Dot(ab, ap);
-            float d2 = Vector3.Dot(ac, ap);
+            //past A
+            float abap = Vector3.Dot(ab, ap);
+            float acap = Vector3.Dot(ac, ap);
 
-            if (d1 <= 0f && d2 <= 0f) return A;
+            if (abap <= 0f && acap <= 0f) return A;
 
+            //past B
             Vector3 bp = point - B;
 
-            float d3 = Vector3.Dot(ab, bp);
-            float d4 = Vector3.Dot(ac, bp);
+            float abbp = Vector3.Dot(ab, bp);
+            float acbp = Vector3.Dot(ac, bp);
 
-            if (d3 >= 0f && d4 <= 0f) return B;
+            if (abbp >= 0f && acbp <= 0f) return B;
 
-            float vc = d1 * d4 - d3 * d2;
+            //between A and B
+            float vc = abap * acbp - abbp * acap;
             float v, w;
-            if (vc <= 0f && d1 >= 0f && d3 <= 0f) {
-                v = d1 / (d1 - d3);
+            if (vc <= 0f && abap >= 0f && abbp <= 0f) {
+                v = abap / (abap - abbp);
                 return A + v * ab;
             }
 
+            //past C  
             Vector3 cp = point - C;
-            float d5 = Vector3.Dot(ab, cp);
-            float d6 = Vector3.Dot(ac, cp);
+            float abcp = Vector3.Dot(ab, cp);
+            float accp = Vector3.Dot(ac, cp);
 
-            if (d6 >= 0f && d5 <= d6) return C;
+            if (accp >= 0f && abcp <= accp) return C;
 
-            float vb = d5 * d2 - d1 * d6;
-            if (vb <= 0f && d2 >= 0f && d6 <= 0f) {
-                w = d2 / (d2 - d6);
+            //between A and C
+            float vb = abcp * acap - abap * accp;
+            if (vb <= 0f && acap >= 0f && accp <= 0f) {
+                w = acap / (acap - accp);
                 return A + w * ac;
             }
 
-            float va = d3 * d6 - d5 * d4;
-            if (va <= 0f && (d4 - d3) >= 0f && (d5 - d6) >= 0f) {
-                w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+            //between B and C
+            float va = abbp * accp - abcp * acbp;
+            if (va <= 0f && (acbp - abbp) >= 0f && (abcp - accp) >= 0f) {
+                w = (acbp - abbp) / ((acbp - abbp) + (abcp - accp));
                 return B + w * (C - B);
             }
 
+            //on face
             float denom = 1.0f / (va + vb + vc);
             v = vb * denom;
             w = vc * denom;
@@ -268,12 +275,12 @@ namespace Magpie.Engine.Collision {
             Vector3 d = point - obb_origin;
             Vector3 outp = obb_origin;
 
-
             float dist = Vector3.Dot(d, obb_orientation.Right);
             if (dist > obb_half_scale.X) dist = obb_half_scale.X;
             if (dist < -obb_half_scale.X) dist = -obb_half_scale.X;
 
             outp += obb_orientation.Right * dist;
+
 
             dist = Vector3.Dot(d, obb_orientation.Up);
             if (dist > obb_half_scale.Y) dist = obb_half_scale.Y;

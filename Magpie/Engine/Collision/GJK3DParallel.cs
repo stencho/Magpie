@@ -52,7 +52,7 @@ namespace Magpie.Engine.Collision {
             Vector3 sb = Vector3.Zero;
 
             int t = 0;
-
+            
             gjk.sup.A = Vector3.Transform(shape_A.start_point, w_a);
             gjk.sup.B = Vector3.Transform(shape_B.start_point, w_b);
 

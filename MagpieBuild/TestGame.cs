@@ -451,16 +451,17 @@ namespace MagpieBuild
             ((SegmentedTerrain)world.test_hf).debug_draw();
 
             snap.snap("tump");
-            parttest.instance_onto_point_cloud(pctest);
+            //parttest.instance_onto_point_cloud(pctest);
             snap.snap("another tum");
 
-            pctest.draw_debug();
+            //pctest.draw_debug();
             snap.snap("another tump");
-
 
             //Draw3D.xyz_cross(world.current_map.lights[world.current_map.lights.Count - 1].position, 0.3f, Color.HotPink);
         }
+
         bool draw_debug_info = true;
+
         protected override void Draw(GameTime gameTime) {
 
 
@@ -481,7 +482,7 @@ namespace MagpieBuild
 
             world.Draw(GraphicsDevice, EngineState.camera);
 
-            world.current_map.actors[0].debug_draw();
+            //world.current_map.actors[0].debug_draw();
 
             /*
             foreach (GJK.gjk_result res in results) {
