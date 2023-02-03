@@ -32,7 +32,7 @@ namespace Magpie.Engine.WorldElements {
         void init(render_info[] render_info, collision_info collision_info) {
             this.render = render_info;
             this.collision = collision_info;
-            if (RNG.rng_float < 0.21f) {
+            if (RNG.rng_float < 0.21f && false) {
                 lights = new light[1] {
                     new light {
                         type = LightType.POINT,
@@ -70,7 +70,7 @@ namespace Magpie.Engine.WorldElements {
 
         public void update() {
             foreach (render_info ri in render) {               
-                ri.world = Matrix.CreateTranslation(collision.position + ri.render_offset) * ri.orientation;
+                ri.world = Matrix.CreateScale(ri.scale) * ri.orientation * Matrix.CreateTranslation(collision.position + ri.render_offset);
             }
         }
 

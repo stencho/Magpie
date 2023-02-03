@@ -17,6 +17,7 @@ namespace Magpie.Engine.WorldElements {
 
     public class render_info_model : render_info {
         public Vector3 render_offset { get; set; } = Vector3.Zero;
+        public Vector3 scale { get; set; } = Vector3.One;
         public Model model => _model; Model _model;
         public Matrix world { get; set; } = Matrix.Identity;
         public Matrix orientation { get; set; } = Matrix.Identity;
@@ -27,6 +28,10 @@ namespace Magpie.Engine.WorldElements {
         public render_info_model(string model_name) {
             _model = ContentHandler.resources[model_name].value_gfx;
             textures = new string[1] { "OnePXWhite" };
+        }
+        public render_info_model(string model_name, string texture_name) {
+            _model = ContentHandler.resources[model_name].value_gfx;
+            textures = new string[1] { texture_name };
         }
 
 
@@ -80,6 +85,7 @@ namespace Magpie.Engine.WorldElements {
     public class render_info_vertex_buffer : render_info {
         public BoundingSphere render_bounds { get; set; }
         public Vector3 render_offset { get; set; } = Vector3.Zero;
+        public Vector3 scale { get; set; } = Vector3.One;
         public VertexBuffer vertex_buffer { get; }
         public IndexBuffer index_buffer { get; }
 
@@ -100,6 +106,7 @@ namespace Magpie.Engine.WorldElements {
     public class render_info_vertex_buffers : render_info {
         public BoundingSphere render_bounds { get; set; }
         public Vector3 render_offset { get; set; } = Vector3.Zero;
+        public Vector3 scale { get; set; } = Vector3.One;
         public VertexBuffer[] vertex_buffer { get; }
         public IndexBuffer[] index_buffer { get; }
         public string[] textures { get; set; }
@@ -117,7 +124,8 @@ namespace Magpie.Engine.WorldElements {
         public BoundingSphere render_bounds { get; set; }
 
         public Vector3 render_offset { get; set; }
-                
+        public Vector3 scale { get; set; }
+
         public Matrix world { get; set; }
         public Matrix orientation { get; set; }
 

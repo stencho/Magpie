@@ -37,7 +37,6 @@ namespace Magpie.Graphics {
 
         public float aspect_ratio { get; set; }
 
-        public string render_output { get; set; } = "";
         public string name { get; set; } = "camera";
 
         //RenderTarget2D picture_in_picture;

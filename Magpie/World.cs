@@ -114,69 +114,14 @@ namespace Magpie {
                         oi.update();
                     }
                 }
-                /*
-                internal_frame_probe.set("lights");
-                lock (current_map) {
-
-                        internal_frame_probe.set("objects");
-                        int objects_updated = 0;
-
-                        foreach (GameObject go in current_map.objects) {
-                            if (objects_updated >= current_map.object_count) break;
-                            if (go == null) continue;
-                            //if (  go.dead) {
-                            // dead_objects.Add(go.name);                    
-                            //continue;
-                            //}
-                            if (!go.dead) {
-                                lock (go)
-                                    go.Update();
-
-                            }
-
-                            objects_updated++;
-                        }
-
-                        //}
-
-                        // lock (dead_objects) {
-                        //    for (int i = 0; i < dead_objects.Count; i++) {
-                        //        current_map.objects.Remove(dead_objects[i]);
-                        //     }
-                        // }
-
-                        //lock (current_map.actors) {
-                            internal_frame_probe.set("actors");
-                            int actors_updated = 0;
-
-                            foreach (Actor actor in current_map.actors) {
-                                if (actors_updated >= current_map.actor_count) break;
-                                if (actor == null) continue;
-
-                                lock (actor)
-                                    actor.Update();
-                                actors_updated++;
-                            }
 
 
-                        //}
-                        //lock (current_map.player_actor) {
-                            internal_frame_probe.set("player_actor");
-                        //}
 
-                        internal_frame_probe.set("physics");
+                // TEMPORARY NEEDS TO GO ONCE OBJECT INFO IS DONE
+                if (current_map.player_actor != null)
+                lock (current_map.player_actor)
+                    current_map.player_actor.Update();
 
-                        //PhysicsSolver.do_movement(current_map);
-                        //PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
-                        //PhysicsSolver.finalize_collisions(current_map);
-
-                        dead_objects.Clear();
-                    }
-                    */
-
-                    if (current_map.player_actor != null)
-                    lock (current_map.player_actor)
-                        current_map.player_actor.Update();
 
 
 

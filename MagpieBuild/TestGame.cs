@@ -192,6 +192,16 @@ namespace MagpieBuild
 
             }
 
+
+            var mid = EngineState.world.current_map.make_id();
+            world.current_map.game_objects.Add(mid, new object_info(
+                Vector3.Up * 5f,
+                new render_info_model("skull")));
+            world.current_map.game_objects[mid].render[0].scale *= 16f;
+
+                
+
+
             /*
             world.current_map.add_object("test_cube", new TestSphere());
             world.current_map.objects["test_cube"].model = "cube";
@@ -235,15 +245,6 @@ namespace MagpieBuild
             world.current_map.objects["butt_b"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(90f));
             */
 
-            /* ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-            var index = world.current_map.add_object("skull", new TestSphere());
-            world.current_map.objects[index].model = "skull";
-            world.current_map.objects[index].textures[0] = "OnePXWhite";
-            world.current_map.objects[index].position = Vector3.Up * 5f;
-            world.current_map.objects[index].scale = Vector3.One * 16;
-            world.current_map.objects[index].orientation = Matrix.Identity;
-            world.current_map.objects[index].collision.radius = 5;
-            */
 
             //world.current_map.add_brush("test_floor", new FloorPlane());
             //world.current_map.floors["test_floor"].position = Vector3.Forward * 10f + Vector3.Up * 5f;
