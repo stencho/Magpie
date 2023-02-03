@@ -1,4 +1,5 @@
 ﻿using Magpie.Engine.Brushes;
+using Magpie.Engine.WorldElements;
 using Magpie.Graphics;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 namespace Magpie.Engine.Stages {
     [Serializable]
     public class Map {
+
         public const int max_objects = 3000;
         public const int max_actors = 100;
 
@@ -17,6 +19,13 @@ namespace Magpie.Engine.Stages {
         
         public volatile GameObject[] objects = new GameObject[max_objects];
         public volatile Actor[] actors = new Actor[max_actors];
+
+        public volatile Dictionary<int, object_info> game_objects = new Dictionary<int, object_info>();
+        public int make_id() {
+            int id = RNG.rng_int();
+            while (game_objects.ContainsKey(id)) {id = RNG.rng_int();}
+            return id;
+        }
 
         //public volatile List<DynamicLight> lights = new List<DynamicLight>();
 

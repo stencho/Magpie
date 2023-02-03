@@ -16,7 +16,7 @@ namespace Magpie.Engine.Collision.Support3D {
 
         public float radius { get; set; } = 0f;
 
-        public void draw() {}
+        public void draw(Vector3 offset) {}
 
         public BoundingBox find_bounding_box() {
             return new BoundingBox(Vector3.Zero, Vector3.Zero);

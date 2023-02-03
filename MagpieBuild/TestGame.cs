@@ -24,6 +24,7 @@ using Magpie.Graphics.UI;
 using Magpie.Graphics.Particles;
 using static Magpie.Graphics.Particles.PointCloud;
 using Microsoft.VisualBasic.ApplicationServices;
+using Magpie.Engine.WorldElements;
 
 namespace MagpieBuild
 {
@@ -176,9 +177,19 @@ namespace MagpieBuild
             */
 
             for (int i = 0; i < 150; i++) {
-                var ind = world.current_map.add_object("test_sphere" + i, new TestSphere());
-                world.current_map.objects[ind].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
-                world.current_map.objects[ind].textures = new string[1] { "trumpmap" };
+                var id = EngineState.world.current_map.make_id();
+                world.current_map.game_objects.Add(id,
+                    new object_info(
+                        (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one * 10)) + (Vector3.Up * (RNG.rng_float * 20))));;
+                world.current_map.game_objects[id].render[0].textures[0] = "trumpmap";
+
+                //var ind = world.current_map.add_object("test_sphere" + i, new TestSphere());
+                //world.current_map.objects[ind].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
+                //world.current_map.objects[ind].textures = new string[1] { "trumpmap" };
+
+
+
+
             }
 
             /*
@@ -224,6 +235,7 @@ namespace MagpieBuild
             world.current_map.objects["butt_b"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(90f));
             */
 
+            /* ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
             var index = world.current_map.add_object("skull", new TestSphere());
             world.current_map.objects[index].model = "skull";
             world.current_map.objects[index].textures[0] = "OnePXWhite";
@@ -231,7 +243,7 @@ namespace MagpieBuild
             world.current_map.objects[index].scale = Vector3.One * 16;
             world.current_map.objects[index].orientation = Matrix.Identity;
             world.current_map.objects[index].collision.radius = 5;
-
+            */
 
             //world.current_map.add_brush("test_floor", new FloorPlane());
             //world.current_map.floors["test_floor"].position = Vector3.Forward * 10f + Vector3.Up * 5f;

@@ -86,16 +86,16 @@ namespace Magpie.Engine.Collision.Support3D {
             return pos;
         }
         
-        public void draw() {
+        public void draw(Vector3 offset) {
             Draw3D.cube(
-                Vector3.Transform(A, orientation * Matrix.CreateTranslation(position)),
-                Vector3.Transform(B, orientation * Matrix.CreateTranslation(position)),
-                Vector3.Transform(C, orientation * Matrix.CreateTranslation(position)),
-                Vector3.Transform(D, orientation * Matrix.CreateTranslation(position)),
-                Vector3.Transform(E, orientation * Matrix.CreateTranslation(position)),
-                Vector3.Transform(F, orientation * Matrix.CreateTranslation(position)),
-                Vector3.Transform(G, orientation * Matrix.CreateTranslation(position)),
-                Vector3.Transform(H, orientation * Matrix.CreateTranslation(position)),
+                Vector3.Transform(A, orientation * Matrix.CreateTranslation(offset + position)),
+                Vector3.Transform(B, orientation * Matrix.CreateTranslation(offset + position)),
+                Vector3.Transform(C, orientation * Matrix.CreateTranslation(offset + position)),
+                Vector3.Transform(D, orientation * Matrix.CreateTranslation(offset + position)),
+                Vector3.Transform(E, orientation * Matrix.CreateTranslation(offset + position)),
+                Vector3.Transform(F, orientation * Matrix.CreateTranslation(offset + position)),
+                Vector3.Transform(G, orientation * Matrix.CreateTranslation(offset + position)),
+                Vector3.Transform(H, orientation * Matrix.CreateTranslation(offset + position)),
                 Color.MonoGameOrange);
         }
 

@@ -37,6 +37,6 @@ namespace Magpie {
         //VertexBuffer debug_vertex_buffer { get; }
         //IndexBuffer debug_index_buffer { get; }
 
-        void draw();
+        void draw(Vector3 offset);
     }  
 }

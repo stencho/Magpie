@@ -1,6 +1,7 @@
 ﻿using Magpie.Engine;
 using Magpie.Engine.Brushes;
 using Magpie.Engine.Stages;
+using Magpie.Engine.WorldElements;
 using Magpie.Graphics;
 using Magpie.Graphics.Lights;
 using Microsoft.Xna.Framework;
@@ -16,6 +17,8 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 namespace Magpie { 
     public class World {
         public volatile Map current_map;
+
+
         public Actor player_actor => current_map.player_actor;
 
         //public SpotLight test_light;
@@ -105,6 +108,13 @@ namespace Magpie {
                     }
                 }
 
+                internal_frame_probe.set("update");
+                lock (current_map) {
+                    foreach (object_info oi in current_map.game_objects.Values) {
+                        oi.update();
+                    }
+                }
+                /*
                 internal_frame_probe.set("lights");
                 lock (current_map) {
 
@@ -127,44 +137,49 @@ namespace Magpie {
                             objects_updated++;
                         }
 
-                    //}
+                        //}
 
-                    // lock (dead_objects) {
-                    //    for (int i = 0; i < dead_objects.Count; i++) {
-                    //        current_map.objects.Remove(dead_objects[i]);
-                    //     }
-                    // }
+                        // lock (dead_objects) {
+                        //    for (int i = 0; i < dead_objects.Count; i++) {
+                        //        current_map.objects.Remove(dead_objects[i]);
+                        //     }
+                        // }
 
-                    //lock (current_map.actors) {
-                        internal_frame_probe.set("actors");
-                        int actors_updated = 0;
+                        //lock (current_map.actors) {
+                            internal_frame_probe.set("actors");
+                            int actors_updated = 0;
 
-                        foreach (Actor actor in current_map.actors) {
-                            if (actors_updated >= current_map.actor_count) break;
-                            if (actor == null) continue;
+                            foreach (Actor actor in current_map.actors) {
+                                if (actors_updated >= current_map.actor_count) break;
+                                if (actor == null) continue;
 
-                            lock (actor)
-                                actor.Update();
-                            actors_updated++;
-                        }
+                                lock (actor)
+                                    actor.Update();
+                                actors_updated++;
+                            }
 
 
-                    //}
-                    //lock (current_map.player_actor) {
-                        internal_frame_probe.set("player_actor");
-                        if (current_map.player_actor != null)
-                            lock (current_map.player_actor)
-                                current_map.player_actor.Update();
-                    //}
+                        //}
+                        //lock (current_map.player_actor) {
+                            internal_frame_probe.set("player_actor");
+                        //}
 
-                    internal_frame_probe.set("physics");
+                        internal_frame_probe.set("physics");
 
-                    //PhysicsSolver.do_movement(current_map);
-                    //PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
-                    //PhysicsSolver.finalize_collisions(current_map);
+                        //PhysicsSolver.do_movement(current_map);
+                        //PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
+                        //PhysicsSolver.finalize_collisions(current_map);
 
-                    dead_objects.Clear();
-                }
+                        dead_objects.Clear();
+                    }
+                    */
+
+                    if (current_map.player_actor != null)
+                    lock (current_map.player_actor)
+                        current_map.player_actor.Update();
+
+
+
                 lock (last_fps) {
                     for (int i = 0; i < last_fps.Length - 1; i++) {
                         last_fps[i] = last_fps[i + 1];
@@ -182,6 +197,8 @@ namespace Magpie {
                     }
                 }
                 
+
+
                 lock (last_ticks) {
                     last_tick_timer_val = (DateTime.Now - dt).TotalMilliseconds;
                     last_ticks[last_ticks.Length - 1] = last_tick_timer_val;

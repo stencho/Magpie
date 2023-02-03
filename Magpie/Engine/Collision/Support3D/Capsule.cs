@@ -57,15 +57,20 @@ namespace Magpie.Engine.Collision.Support3D {
             this.position = Vector3.Zero;
         }
 
-        public void draw() {
-            Matrix w = orientation * Matrix.CreateTranslation(position);
-            Draw3D.cylinder(Vector3.Transform(A, w), Vector3.Transform(B, w), radius, Color.MonoGameOrange);
+        public void draw(Vector3 offset) {
+            Matrix w = orientation * Matrix.CreateTranslation(offset + position);
+            var aw = Vector3.Transform(A, w);
+            var bw = Vector3.Transform(B, w);
+            Draw3D.cylinder(aw, bw, radius, Color.MonoGameOrange);
+
+            Draw3D.sphere(aw, radius, Color.MonoGameOrange);
+            Draw3D.sphere(bw, radius, Color.MonoGameOrange);
+
             //Draw3D.cube(find_bounding_box(), Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
             BoundingBox bb = find_bounding_box();
-            Draw3D.cube(origin + position, (bb.Max - bb.Min)/2, Color.MonoGameOrange, Matrix.Identity);
 
-            Draw3D.xyz_cross(A + position, 1f, Color.LightPink);
-            Draw3D.xyz_cross(B + position, 1f, Color.HotPink);
+            Draw3D.cube(origin + offset + position, (bb.Max - bb.Min)/2, Color.MonoGameOrange, Matrix.Identity);
+
         }
     }
 }

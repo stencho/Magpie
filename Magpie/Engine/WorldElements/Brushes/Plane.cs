@@ -105,7 +105,7 @@ namespace Magpie.Engine.Brushes {
 
         public void debug_draw() {
             //Draw3D.cube((bounds.Min + bounds.Max) / 2, (bounds.Max - bounds.Min) / 2f, Color.MediumPurple, Matrix.Identity, EngineState.camera.view, EngineState.camera.projection);
-            collision.draw();
+            collision.draw(position);
         }
     }
 }

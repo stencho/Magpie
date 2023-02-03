@@ -1,5 +1,6 @@
 ﻿using Magpie.Engine;
 using Magpie.Engine.Stages;
+using Magpie.Engine.WorldElements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -50,9 +51,7 @@ namespace Magpie.Graphics {
         public float bias = 0.0008f;
         public bool shadows = true;
 
-        public render_obj[] visible = new render_obj[Map.max_actors + Map.max_objects];
-        public int visible_count = 0;
-
+        public List<int> visible = new List<int>();
 
         public spot_info() {
             depth_map = new RenderTarget2D(

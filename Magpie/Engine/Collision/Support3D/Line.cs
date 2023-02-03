@@ -33,8 +33,8 @@ namespace Magpie.Engine.Collision.Support3D {
             B = (Vector3.Right * 0.5f);
         }
 
-        public void draw() {
-            Matrix w = orientation * Matrix.CreateTranslation(position);
+        public void draw(Vector3 offset) {
+            Matrix w = orientation * Matrix.CreateTranslation(offset+position);
 
             Draw3D.line(
                 Vector3.Transform(A, w),

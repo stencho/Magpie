@@ -102,6 +102,11 @@ namespace MagpieTestbed.TestActors {
                     wants_movement = (Vector3.Normalize(mv) * movement_speed * Clock.internal_frame_time_delta);
 
             }
+            if (wants_movement != Vector3.Zero) {
+                this.collision.position += wants_movement;
+                this.position += wants_movement;
+                wants_movement = Vector3.Zero;
+            }
 
         }
         public void unthreaded_update() {
@@ -109,7 +114,7 @@ namespace MagpieTestbed.TestActors {
             lights[1].position = position;
         }
         public void debug_draw() {
-            collision.draw();
+            collision.draw(position);
             //sweep_collision.draw();
             //if (sweep_collision.shape == shape_type.quad)
                 //Draw3D.capsule(((Capsule)collision).A+ ((Quad)sweep_collision).B, ((Capsule)collision).B + ((Quad)sweep_collision).B, collision.radius, Color.Green);

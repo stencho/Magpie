@@ -28,8 +28,8 @@ namespace Magpie.Engine.Collision.Support3D {
             this.radius = radius;
         }
 
-        public void draw() {
-            Draw3D.sphere(Vector3.Transform(Vector3.Zero, orientation * Matrix.CreateTranslation(position)), radius, Color.MonoGameOrange);
+        public void draw(Vector3 offset) {
+            Draw3D.sphere(Vector3.Transform(Vector3.Zero, orientation * Matrix.CreateTranslation(offset + position)), radius, Color.MonoGameOrange);
             Draw3D.cube(find_bounding_box(), Color.MonoGameOrange);
         }
     }

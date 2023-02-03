@@ -40,8 +40,8 @@ namespace Magpie.Engine.Collision.Support3D {
             C = (Vector3.Right * 0.5f * scale_x) + (Vector3.Down * 0.5f * scale_y);
         }
 
-        public void draw() {
-            Matrix w = orientation * Matrix.CreateTranslation(position);
+        public void draw(Vector3 offset) {
+            Matrix w = orientation * Matrix.CreateTranslation(offset + position);
 
             Draw3D.fill_tri(w, A, B, C, Color.White * 0.9f);
 

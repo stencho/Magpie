@@ -28,9 +28,9 @@ namespace Magpie.Engine.Collision.Support3D {
             verts.AddRange(points);
         }
 
-        public void draw() {
+        public void draw(Vector3 offset) {
             foreach (Vector3 point in verts) {
-                Draw3D.xyz_cross(Vector3.Transform(position + point, orientation), 0.1f, Color.Red);
+                Draw3D.xyz_cross(Vector3.Transform(position + offset + point, orientation), 0.1f, Color.Red);
             }
         }
 

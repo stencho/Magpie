@@ -83,8 +83,8 @@ namespace Magpie.Engine.Collision.Support3D {
             create_buffers();
         }
 
-        public void draw() {
-            Matrix w = Matrix.CreateTranslation(position);
+        public void draw(Vector3 offset) {
+            Matrix w = Matrix.CreateTranslation(offset + position);
 
             //Draw3D.fill_quad(w, A, B, C, D, Color.White * 0.9f, EngineState.camera.view, EngineState.camera.projection);
 

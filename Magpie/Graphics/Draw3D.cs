@@ -48,6 +48,7 @@ namespace Magpie.Graphics {
             verts[0] = new VertexPositionColor(A, color);
             verts[1] = new VertexPositionColor(B, color);
 
+            var bs = EngineState.graphics_device.BlendState;
             //line_effect.DiffuseColor = color.ToVector3();
 
             EngineState.graphics_device.BlendState = BlendState.Opaque;
@@ -59,6 +60,9 @@ namespace Magpie.Graphics {
             }
 
             line_effect.Parameters["tint"].SetValue(Color.White.ToVector3());
+
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
+            EngineState.graphics_device.BlendState = bs;
         }
         
         public static void lines(Color color, params Vector3[] points) {
