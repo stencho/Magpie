@@ -1,5 +1,4 @@
 ﻿using Magpie.Engine.Brushes;
-using Magpie.Engine.Physics;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using System;
@@ -21,8 +20,6 @@ namespace Magpie.Engine {
 
         Shape3D collision { get; set; }
         Shape3D sweep_collision{ get; set; }
-
-        PhysicsInfo phys_info { get; set; }
         light[] lights { get; set; }
 
         void Update();

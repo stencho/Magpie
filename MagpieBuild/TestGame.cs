@@ -15,7 +15,6 @@ using static Magpie.Engine.StaticControlBinds;
 using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics.Lights;
-using Magpie.Engine.Physics;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Media;

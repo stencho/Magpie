@@ -2,7 +2,6 @@
 using Magpie.Engine;
 using Magpie.Engine.Brushes;
 using Magpie.Engine.Collision.Support3D;
-using Magpie.Engine.Physics;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -35,8 +34,6 @@ namespace MagpieTestbed.TestActors {
 
         public Shape3D collision { get; set; }
         public Shape3D sweep_collision { get; set; }
-
-        public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
 
         bool camera_enabled = false;
         XYPair last_mouse_pos = XYPair.Zero;
@@ -176,6 +173,11 @@ namespace MagpieTestbed.TestActors {
             if (mv != Vector3.Zero)
                 wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("shift") ? 6f : 1f) * Clock.internal_frame_limit_in_seconds;
 
+            if (wants_movement != Vector3.Zero) {
+                this.collision.position += wants_movement;
+                this.position += wants_movement;
+                wants_movement = Vector3.Zero;
+            }
         }
 
         public void unthreaded_update() {

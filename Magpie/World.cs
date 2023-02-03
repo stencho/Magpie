@@ -1,6 +1,5 @@
 ﻿using Magpie.Engine;
 using Magpie.Engine.Brushes;
-using Magpie.Engine.Physics;
 using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using Magpie.Graphics.Lights;
@@ -45,7 +44,7 @@ namespace Magpie {
             }
             */
 
-            current_map.add_brush(test_hf);
+           // current_map.add_brush(test_hf);
 
             //current_map.lights.Add(test_light);
 
@@ -53,7 +52,6 @@ namespace Magpie {
             //Scene.parent_world = this;
             //lights.Add(test_light);
         }
-        //float3 Depth = tex2D(DEPTH, UV).rgb;
 
         public void load_map() {
             current_map = new Map();
@@ -67,52 +65,6 @@ namespace Magpie {
         }
 
         
-        public (float, Brush) highest_floor(Vector3 pos) {
-            float highest = float.MinValue;
-            float c = 0f;
-            Brush f = null;
-
-            foreach (Brush floor in current_map.brushes) {
-                if (!floor.within_vertical_bounds(pos)) continue;
-
-                c = floor.get_footing_height(pos);
-
-                if (c > highest) {
-                    highest = c;
-                    f = floor;
-                }
-            }
-
-            if (f != null)
-                return (highest, f);
-            else
-                return (float.MinValue, null);
-        }
-        
-
-        public (float, Brush) highest_floor_below(Vector3 pos) {
-            float highest = float.MinValue;
-            float c = 0f;
-            Brush f = null;
-
-            foreach (Brush floor in current_map.brushes) {
-                if (!floor.within_vertical_bounds(pos)) continue;
-
-                c = floor.get_footing_height(pos);
-
-                if (c > highest && c <= pos.Y) {
-                    highest = c;
-                    f = floor;
-                }
-            }
-
-            if (f != null)
-                return (highest, f);
-            else
-                return (float.MinValue, null);
-        }
-
-
         static List<string> dead_objects = new List<string>();
 
         public static Thread physics_movement_thread;
@@ -155,21 +107,7 @@ namespace Magpie {
 
                 internal_frame_probe.set("lights");
                 lock (current_map) {
-                    //lock (current_map.brushes) {
-                        internal_frame_probe.set("brushes");
-                        int brushes_updated = 0;
 
-                        foreach (Brush brush in current_map.brushes) {
-                            if (brushes_updated >= current_map.brush_count) break;
-                            if (brush == null) continue;
-
-                            lock (brush)
-                                brush.Update();
-                            brushes_updated++;
-                        }
-
-                    //}
-                    //lock (current_map.objects) {
                         internal_frame_probe.set("objects");
                         int objects_updated = 0;
 
@@ -221,11 +159,9 @@ namespace Magpie {
 
                     internal_frame_probe.set("physics");
 
-                    PhysicsSolver.do_movement(current_map);
-                    PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
-                    PhysicsSolver.finalize_collisions(current_map);
-
-
+                    //PhysicsSolver.do_movement(current_map);
+                    //PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
+                    //PhysicsSolver.finalize_collisions(current_map);
 
                     dead_objects.Clear();
                 }

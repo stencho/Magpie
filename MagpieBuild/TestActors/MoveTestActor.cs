@@ -1,7 +1,6 @@
 ﻿using Magpie;
 using Magpie.Engine;
 using Magpie.Engine.Collision.Support3D;
-using Magpie.Engine.Physics;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using System;
@@ -29,8 +28,6 @@ namespace MagpieTestbed.TestActors {
         public Shape3D collision { get; set; }
         public Shape3D sweep_collision { get; set; }
 
-        public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
-
         public light[] lights { get; set; } = new light[2] {
             new light {
                 type = LightType.POINT,
@@ -50,7 +47,6 @@ namespace MagpieTestbed.TestActors {
         public MoveTestActor() {
             //collision = new Capsule(1.85f, 1f);
             collision = new Sphere(1f);
-            phys_info.stick_to_ground = true;
         }
 
         Vector3 start_pos = Vector3.Zero;

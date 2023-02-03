@@ -1,5 +1,4 @@
-﻿using Magpie.Engine.Physics;
-using Magpie.Engine.Stages;
+﻿using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -32,8 +31,6 @@ namespace Magpie.Engine {
         //need to do the same for actors 
         //and maybe brushes could do the meme of having a list of brushes in them instead for easy environmental code traversal
         //instead of many many loops
-
-        PhysicsInfo phys_info { get; set; }
 
         SceneRenderInfo render_info { get; set; }
         float distance_to_camera { get; }

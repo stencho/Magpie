@@ -32,53 +32,22 @@ namespace Magpie.Graphics {
 
         public static VerticalQuad quad;
 
-        public enum obj_type {
-            empty, brush, gobject, actor
-        }
         public class render_obj {
-            public obj_type type;
-            public int index;
             public VertexBuffer vertex_buffer;
             public IndexBuffer index_buffer;
+            
             public Matrix world;
+
             public Texture2D texture;
         }
 
         static volatile int visible_count = 0;
         static volatile int light_count = 0;
 
-        static volatile render_obj[] visible = new render_obj[Map.max_brushes + Map.max_actors + Map.max_objects];
+        static volatile render_obj[] visible = new render_obj[Map.max_actors + Map.max_objects];
         static volatile light[] visible_lights = new light[light.max_visible_lights];
         public static void init() {
             clear_visible();
-        }
-
-        public static string visible_text() {
-            string s = $"{visible_count} visible \n";
-            int lc = 0;
-            foreach (render_obj obj in visible) {
-                if (lc == visible_count) break;
-                if (obj == null) continue;
-
-                s += $"{obj.type.ToString()}:{obj.index} {obj.world.Translation.ToXString()}, ";
-                lc++; if (lc == 5) { lc = 0; s += "\n"; }
-            } s=s.Remove(s.Length - 2, 2);
-
-            s += $"\n\n{light_count} lights \n";
-            lc = 0;
-            foreach (light l in visible_lights) {
-                if (lc == light_count) break;
-                if (l == null) continue;
-
-                if (l.type == LightType.SPOT) {
-                    s += $"S[{l.spot_info.near_clip} - {l.spot_info.far_clip} @ {l.spot_info.position.ToXString()} :: {l.spot_info.visible_count}], ";
-                } else {
-                    s += $"P[{l.point_info.radius} @ {l.point_info.position.ToXString()}], ";
-                }
-                lc++; if (lc == 5) { lc = 0; s += "\n"; }
-            } s = s.Remove(s.Length - 2, 2);
-
-            return s;
         }
 
         static void clear_visible() {
@@ -104,13 +73,11 @@ namespace Magpie.Graphics {
 
         }
 
-        static void add_visible(int index, obj_type type, VertexBuffer vb, IndexBuffer ib, Matrix world, Texture2D tex) {
+        static void add_visible(int index, VertexBuffer vb, IndexBuffer ib, Matrix world, Texture2D tex) {
             visible_count++;
             for (int i = 0; i < visible.Length; i++) {
                 if (visible[i] == null) {
                     visible[i] = new render_obj {
-                        type = type,
-                        index = index,
                         vertex_buffer = vb,
                         index_buffer = ib,
                         world = world,
@@ -121,13 +88,11 @@ namespace Magpie.Graphics {
             }
         }
 
-        static void add_visible_to_spot_light(light l, int index, obj_type type, VertexBuffer vb, IndexBuffer ib, Matrix world, Texture2D tex) {
+        static void add_visible_to_spot_light(light l, int index, VertexBuffer vb, IndexBuffer ib, Matrix world, Texture2D tex) {
             l.spot_info.visible_count++;
             for (int i = 0; i < l.spot_info.visible.Length; i++) {
                 if (l.spot_info.visible[i] == null) {
                     l.spot_info.visible[i] = new render_obj {
-                        type = type,
-                        index = index,
                         vertex_buffer = vb,
                         index_buffer = ib,
                         world = world,
@@ -144,46 +109,16 @@ namespace Magpie.Graphics {
             l.spot_info.visible_count = 0;
 
             int u = 0;
-            for (int i = 0; i < Map.max_brushes; i++) {
-                if (u >= map.brush_count) break;
-                if (map.brushes[i] == null) continue;
-
-                switch (map.brushes[i].type) {
-                    case BrushType.PLANE:
-                        break;
-                    case BrushType.TERRAIN:
-                        break;
-                    case BrushType.SEGMENTED_TERRAIN:
-                        ((SegmentedTerrain)map.brushes[i]).update_visible_terrain(l.spot_info.bounds);
-
-                        foreach ((TerrainSegment, int, int) ts in ((SegmentedTerrain)map.brushes[i]).visible_terrain) {
-                            add_visible_to_spot_light(l, i, obj_type.brush,
-                                ts.Item1.LOD_vertex_buffers[0],
-                                ts.Item1.LOD_index_buffers[0],
-                                map.brushes[i].world,
-                                ContentHandler.resources[map.brushes[i].texture].value_tx
-                                );
-                        }
-                        break;
-                    case BrushType.BOX:
-                        break;
-                    case BrushType.DUMMY:
-                        break;
-                }
-
-                u++;
-            }
-
-            u = 0;
+            
             for (int i = 0; i < Map.max_objects; i++) {
                 if (u >= map.object_count) break;
                 if (map.objects[i] == null) continue;
 
-                if (map.objects[i].bounds.Intersects(l.spot_info.bounds)) {
+                //if (map.objects[i].bounds.Intersects(l.spot_info.bounds)) {
 
                     foreach (ModelMesh mm in ContentHandler.resources[map.objects[i].model].value_gfx.Meshes) {
                         foreach (ModelMeshPart mmp in mm.MeshParts) {
-                            add_visible_to_spot_light(l, i, obj_type.brush,
+                            add_visible_to_spot_light(l, i,
                             mmp.VertexBuffer,
                             mmp.IndexBuffer,
                             map.objects[i].world,
@@ -191,7 +126,7 @@ namespace Magpie.Graphics {
                             );
                         }
                     }
-                }
+                //}
 
                 u++;
             }
@@ -206,40 +141,8 @@ namespace Magpie.Graphics {
         }
 
         public static void create_visibility_lists(Map map, Camera camera) {
-            //BRUSHES
-            int u = 0;
-            for (int i = 0; i < Map.max_brushes; i++) {
-                if (u >= map.brush_count) break;
-                if (map.brushes[i] == null) continue;
-
-                switch (map.brushes[i].type) {
-                    case BrushType.PLANE:
-                        break;
-                    case BrushType.TERRAIN:
-                        break;
-                    case BrushType.SEGMENTED_TERRAIN:
-                        ((SegmentedTerrain)map.brushes[i]).update_visible_terrain();
-
-                        foreach ((TerrainSegment, int, int) ts in ((SegmentedTerrain)map.brushes[i]).visible_terrain) {
-                            add_visible(i, obj_type.brush,
-                                ts.Item1.LOD_vertex_buffers[0],
-                                ts.Item1.LOD_index_buffers[0],
-                                map.brushes[i].world,
-                                ContentHandler.resources[map.brushes[i].texture].value_tx
-                                );
-                        }
-                        break;
-                    case BrushType.BOX:
-                        break;
-                    case BrushType.DUMMY:
-                        break;
-                }
-
-                u++;
-            }
-
             //OBJECTS
-            u = 0;
+            int u = 0;
             for (int i = 0; i < Map.max_objects; i++) {
                 if (u >= map.object_count) break;
                 if (map.objects[i] == null) continue;
@@ -279,7 +182,7 @@ namespace Magpie.Graphics {
 
                 foreach (ModelMesh mm in ContentHandler.resources[go.model].value_gfx.Meshes) {
                     foreach (ModelMeshPart mmp in mm.MeshParts) {
-                        add_visible(i, obj_type.gobject,
+                        add_visible(i,
                             mmp.VertexBuffer,
                             mmp.IndexBuffer,
                             go.world,

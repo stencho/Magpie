@@ -38,6 +38,10 @@
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
     <PackageReference Include="TextCopy" Version="6.1.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Engine\Physics\" />
+    <Folder Include="Engine\WorldElements\Prefabs\" />
+  </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />
     <Exec Command="dotnet tool restore" />

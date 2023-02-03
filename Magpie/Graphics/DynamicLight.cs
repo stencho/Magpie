@@ -50,7 +50,7 @@ namespace Magpie.Graphics {
         public float bias = 0.0008f;
         public bool shadows = true;
 
-        public render_obj[] visible = new render_obj[Map.max_brushes + Map.max_actors + Map.max_objects];
+        public render_obj[] visible = new render_obj[Map.max_actors + Map.max_objects];
         public int visible_count = 0;
 
 

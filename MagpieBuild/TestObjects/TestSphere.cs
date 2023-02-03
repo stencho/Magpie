@@ -2,7 +2,6 @@
 using Magpie.Engine;
 using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
-using Magpie.Engine.Physics;
 using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
@@ -33,8 +32,6 @@ namespace MagpieTestbed.TestObjects {
 
         public Shape3D collision { get; set; }
         public Shape3D sweep_collision { get; set; }
-
-        public PhysicsInfo phys_info { get; set; } = PhysicsInfo.default_static();
 
         public Map parent_map { get; set; }
         

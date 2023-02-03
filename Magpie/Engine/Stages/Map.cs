@@ -9,15 +9,12 @@ using System.Threading.Tasks;
 namespace Magpie.Engine.Stages {
     [Serializable]
     public class Map {
-        public const int max_brushes = 1000;
         public const int max_objects = 3000;
         public const int max_actors = 100;
 
-        public int brush_count = 0;
         public int object_count = 0;
         public int actor_count = 0;
         
-        public volatile Brush[] brushes = new Brush[max_brushes];
         public volatile GameObject[] objects = new GameObject[max_objects];
         public volatile Actor[] actors = new Actor[max_actors];
 
@@ -25,16 +22,6 @@ namespace Magpie.Engine.Stages {
 
         public volatile Actor player_actor;
 
-        public int add_brush(Brush floor) {
-            for (int i = 0; i < max_brushes; i++) {
-                if (brushes[i] == null) {                    
-                    brushes[i] = floor;
-                    brush_count++;
-                    return i;
-                }
-            }
-            return -1;
-        }
 
         public int add_object(string name, GameObject gameobject) {
             for (int i = 0; i < max_objects; i++) {
@@ -60,12 +47,15 @@ namespace Magpie.Engine.Stages {
             return -1;
         }    
         
+        /*
         public void remove_brush(int index) {
             if (brushes[index] != null) {
                 brushes[index] = null;
                 brush_count--;
             }
         }
+        */
+
         public void remove_object(int index) {
             if (objects[index] != null) {
                 objects[index] = null;
