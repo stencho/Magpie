@@ -25,6 +25,7 @@ using Magpie.Graphics.Particles;
 using static Magpie.Graphics.Particles.PointCloud;
 using Microsoft.VisualBasic.ApplicationServices;
 using Magpie.Engine.WorldElements;
+using System.Transactions;
 
 namespace MagpieBuild
 {
@@ -198,8 +199,19 @@ namespace MagpieBuild
                 Vector3.Up * 5f,
                 new render_info_model("skull")));
             world.current_map.game_objects[mid].render[0].scale *= 16f;
+            world.current_map.game_objects[mid].lights =
+                new light[1] {                    
+                    new light {
+                        type = LightType.SPOT,
+                        color = RNG.random_opaque_color(),
+                        spot_info = new spot_info() {
+                            position = world.current_map.game_objects[mid].collision.position,
+                            orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(RNG.rng_float_neg_one_to_one * 180f))
+                        }
+                    }
+                };
 
-                
+
 
 
             /*
@@ -279,8 +291,8 @@ namespace MagpieBuild
                 (EngineState.resolution.ToVector2() * 0.5f), 
                 new Vector2(16, 16), 0.75f);
 
-            parttest = new Particle2D("trump_tex");
-            pctest = new PointCloud(test_trums, test_b);
+            //parttest = new Particle2D("trump_tex");
+            //pctest = new PointCloud(test_trums, test_b);
 
             //test_window = new Magpie.Graphics.UI.UIWindow(new XYPair(100,100), new XYPair(500,250));
 
@@ -352,22 +364,17 @@ namespace MagpieBuild
                 EngineState.running = false;
                 Exit();
             }
-
-            if (world.current_map.object_count != results.Length) {
-                results = new GJK.gjk_result[world.current_map.object_count];
-            }
-
+            
+            results = new GJK.gjk_result[world.current_map.game_objects.Count];
 
             //test collision detection between above test actor and all the objects in the scene
-
-            Clock.frame_probe.set("50 GJK tests");
-            int i = 0;
-            foreach (GameObject go in world.current_map.objects) {
-                if (i == world.current_map.object_count) break;
+            int i=0;
+            Clock.frame_probe.set("GJK tests");
+            foreach (object_info go in world.current_map.game_objects.Values) {
                 if (go == null) continue;
                 //if (go.name.StartsWith("test_sphere")) {
-                    results[i] = gjkp.gjk_intersects(world.current_map.actors[0].collision, go.collision, world.current_map.actors[0].world, go.world);
-                    i++;
+                    //results[i] = gjkp.gjk_intersects(world.current_map.actors[0].collision, go.collision.move_shape, world.current_map.actors[0].world, go.collision.world);
+                i++;
                 //}
             }
             /*
@@ -446,7 +453,9 @@ namespace MagpieBuild
                 }
                 
             }
-            pctest.update();
+
+
+            //pctest.update();
 
         }
 
@@ -507,9 +516,9 @@ namespace MagpieBuild
                     "pf", p, Vector3.Normalize(EngineState.camera.position - p), 1f, 
                     res.hit ? Color.Green : Color.MonoGameOrange);
 
-                res.shape_B.draw();
-            }
-            */
+                //res.shape_B.draw();
+            }*/
+            
 
 
             EngineState.window_manager.render_window_internals();

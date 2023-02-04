@@ -128,6 +128,10 @@ namespace Magpie.Engine {
 
         public static List<log_data> data = new List<log_data>();
 
+        public static void screenshot() {
+            Scene.screenshot();
+        }
+
         public static void clear() {
             data = new List<log_data>();
         }

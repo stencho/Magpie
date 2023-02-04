@@ -30,7 +30,7 @@ namespace Magpie {
         public World() {
             load_map();
 
-            test_hf = new SegmentedTerrain(Vector3.Zero, 1000, 5);
+            //test_hf = new SegmentedTerrain(Vector3.Zero, 1000, 5);
 
             //test_light = new SpotLight();
             //test_light2 = new SpotLight();
@@ -115,7 +115,7 @@ namespace Magpie {
                     }
                 }
 
-
+                current_map.actors[0].Update();
 
                 // TEMPORARY NEEDS TO GO ONCE OBJECT INFO IS DONE
                 if (current_map.player_actor != null)

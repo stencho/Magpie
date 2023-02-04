@@ -34,8 +34,6 @@ namespace Magpie.Engine.WorldElements {
             textures = new string[1] { texture_name };
         }
 
-
-
         public void draw() {
             foreach (ModelMesh mm in _model.Meshes) {
                 foreach (ModelMeshPart mmp in mm.MeshParts) {

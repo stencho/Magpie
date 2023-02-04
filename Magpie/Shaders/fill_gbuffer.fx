@@ -96,7 +96,6 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	float4x4 wvp = mul(World, mul(View, Projection));
 		
 	output.Position = mul(input.Position, wvp);
-	output.ViewPosition = output.Position;
     output.TexCoord = input.TexCoord;
 		
     //output.Depth = 1-((output.Position.z / FarClip));
@@ -106,6 +105,8 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	output.Depth.x = output.Position.z;
 	output.Depth.y = output.Position.w;
 	output.Depth.z = mul(mul(input.Position, World),View).z;
+	
+	output.ViewPosition = output.Position;
 
 	output.WorldPos = input.Position.xyz;
 
@@ -125,13 +126,11 @@ float3 camera_pos;
 float3 atmosphere_color;
 float3 sky_color;
 bool fog = false;
-bool clip_trans = false;
+bool clip_trans = true;
 bool fullbright = false;
 PSO MainPS(VertexShaderOutput input)
 {
     PSO output = (PSO)0;
-	float D = tex2D(DEPTH, input.ViewPosition.xy).r;
-
 
     float4 rgba = tex2D(DiffuseSampler, input.TexCoord);
 	if (rgba.a < 1 && clip_trans) { clip(-1); }
@@ -143,9 +142,6 @@ PSO MainPS(VertexShaderOutput input)
 	output.Depth.r = input.Depth.x / input.Depth.y;
 	output.Depth.gba = 1;
 	
-	if (input.Depth.x > D) { 
-		//clip(-1);
-	}
 
 
     output.Normals.rgb = encode(normalize(input.TBN[2]));
@@ -181,8 +177,7 @@ PSO MainPS(VertexShaderOutput input)
 
     output.Diffuse = color_lerp(rgba * float4(tint, 1), float4(atmos,d), (1-(d))) ;
 	//output.Diffuse.a *= d;
-
-
+	
 	if (dist >= 0.999) { 
 		output.Lighting.a = 0;	
 		output.Diffuse.a = 0;

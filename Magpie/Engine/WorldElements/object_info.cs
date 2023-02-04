@@ -13,7 +13,7 @@ namespace Magpie.Engine.WorldElements {
         public render_info[] render;
         public collision_info collision;
         public light[] lights;
-
+        
         public object_info(Vector3 position) {
             init(new render_info[] {
                     new render_info_model("sphere")
@@ -32,26 +32,8 @@ namespace Magpie.Engine.WorldElements {
         void init(render_info[] render_info, collision_info collision_info) {
             this.render = render_info;
             this.collision = collision_info;
-            if (RNG.rng_float < 0.21f && false) {
-                lights = new light[1] {
-                    new light {
-                        type = LightType.POINT,
-                        color = RNG.random_opaque_color(),
-                        point_info = new point_info() {
-                            radius = (RNG.rng_float * 15f) + 2f,
-                            position = collision.position
-                        }
-                    }/*
-                    new light {
-                        type = LightType.SPOT,
-                        color = RNG.random_opaque_color(),
-                        spot_info = new spot_info() {
-                            position = collision.position,
-                            orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(RNG.rng_float_neg_one_to_one * 180f))
-                        }
-                    }*/
-                };
-            }
+            
+
         }
 
 
@@ -69,6 +51,7 @@ namespace Magpie.Engine.WorldElements {
         }
 
         public void update() {
+            collision.world = Matrix.CreateTranslation(collision.position) * collision.orientation;
             foreach (render_info ri in render) {               
                 ri.world = Matrix.CreateScale(ri.scale) * ri.orientation * Matrix.CreateTranslation(collision.position + ri.render_offset);
             }
