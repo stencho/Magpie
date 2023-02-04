@@ -80,7 +80,7 @@ namespace MagpieBuild
 
             gvars.write_gvars_to_disk();
         }
-
+        int mid;
         protected override void Initialize() {
             base.Initialize();
 
@@ -194,7 +194,7 @@ namespace MagpieBuild
             }
 
 
-            var mid = EngineState.world.current_map.make_id();
+            mid = EngineState.world.current_map.make_id();
             world.current_map.game_objects.Add(mid, new object_info(
                 Vector3.Up * 5f,
                 new render_info_model("skull")));
@@ -377,6 +377,14 @@ namespace MagpieBuild
                 i++;
                 //}
             }
+
+            world.current_map.game_objects[mid].lights[0].position = 
+                world.player_actor.position 
+                + (EngineState.camera.orientation.Right * 0.5f) 
+                + (EngineState.camera.orientation.Down * 0.4f) 
+                + (EngineState.camera.orientation.Forward * 0.6f);
+            world.current_map.game_objects[mid].lights[0].spot_info.orientation =
+                EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
             /*
 
             //int i = 0;

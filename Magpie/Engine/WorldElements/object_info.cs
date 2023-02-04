@@ -10,6 +10,11 @@ using Microsoft.Xna.Framework;
 
 namespace Magpie.Engine.WorldElements {
     public class object_info {
+        public Vector3 position {
+            get => collision.position;
+            set => collision.position = value;
+        }
+
         public render_info[] render;
         public collision_info collision;
         public light[] lights;
@@ -36,24 +41,20 @@ namespace Magpie.Engine.WorldElements {
 
         }
 
-
-        void fit_bound_sphere() {
-            foreach (render_info ri in render) {
-                ri.render_bounds = new BoundingSphere(collision.position + ri.render_offset, 1f);
-            }
-        }
-
         public bool in_frustum(BoundingFrustum frustum) {
             foreach (render_info ri in render) {
-
+                if (ri.in_frustum(frustum)) {
+                    return true;
+                }
             }
+
             return false;
         }
 
         public void update() {
-            collision.world = Matrix.CreateTranslation(collision.position) * collision.orientation;
+            collision.world = Matrix.CreateTranslation(position) * collision.orientation;
             foreach (render_info ri in render) {               
-                ri.world = Matrix.CreateScale(ri.scale) * ri.orientation * Matrix.CreateTranslation(collision.position + ri.render_offset);
+                ri.world = Matrix.CreateScale(ri.scale) * ri.orientation * Matrix.CreateTranslation(position + ri.render_offset);
             }
         }
 

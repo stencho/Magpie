@@ -56,9 +56,9 @@ namespace Magpie.Graphics {
 
 
             foreach (var o in map.game_objects) {
-               // if (o.Value.in_frustum(camera.frustum)) {
+                if (o.Value.in_frustum(camera.frustum)) {
                     visible.Add(o.Key);
-               // }
+                }
 
                 if (o.Value.lights != null) {
                     for (int i = 0; i < o.Value.lights.Length; i++) {
@@ -72,7 +72,7 @@ namespace Magpie.Graphics {
 
                                     l.spot_info.visible.Clear();
                                     foreach (int k in map.game_objects.Keys) {
-                                        if (l.spot_info.bounds.Intersects(camera.frustum)) {
+                                        if (map.game_objects[k].in_frustum(l.spot_info.bounds)) {
                                             l.spot_info.visible.Add(k);
                                         }
                                     }

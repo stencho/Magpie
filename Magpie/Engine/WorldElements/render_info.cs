@@ -25,6 +25,16 @@ namespace Magpie.Engine.WorldElements {
 
         public BoundingSphere render_bounds { get; set; }
 
+        public bool in_frustum(BoundingFrustum frustum) {
+            foreach (ModelMesh mm in _model.Meshes) {
+                if (frustum.Intersects(mm.BoundingSphere.Transform(world))) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public render_info_model(string model_name) {
             _model = ContentHandler.resources[model_name].value_gfx;
             textures = new string[1] { "OnePXWhite" };
@@ -100,6 +110,7 @@ namespace Magpie.Engine.WorldElements {
 
         public void draw() { }
         public void draw_to_light(light light) { }
+        public bool in_frustum(BoundingFrustum frustum) { return false; }
     }
     public class render_info_vertex_buffers : render_info {
         public BoundingSphere render_bounds { get; set; }
@@ -116,6 +127,7 @@ namespace Magpie.Engine.WorldElements {
 
         public void draw() {}
         public void draw_to_light(light light) { }
+        public bool in_frustum(BoundingFrustum frustum) { return false; }
     }
 
     public interface render_info {
@@ -131,5 +143,7 @@ namespace Magpie.Engine.WorldElements {
 
         public void draw();
         public void draw_to_light(light light);
+
+        public bool in_frustum(BoundingFrustum frustum);
     }
 }
