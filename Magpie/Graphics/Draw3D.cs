@@ -149,7 +149,7 @@ namespace Magpie.Graphics {
 
         public static void circle(Vector3 p, float radius, Vector3 normal, int subdivs, Color color) {
             if (subdivs < 6) return;
-            VertexPositionColor[] verts = new VertexPositionColor[subdivs];
+            Vector3[] verts = new Vector3[subdivs];
 
             normal = Vector3.Normalize(normal);
 
@@ -162,26 +162,10 @@ namespace Magpie.Graphics {
             }
 
             for (int i = 0; i < subdivs; i++) {
-                verts[i].Position = p + (Vector3.Transform(cross, Matrix.CreateFromAxisAngle(normal, MathHelper.ToRadians(((float)i / (subdivs - 1)) * 360f))) * (radius));
-                verts[i].Color = color;
+                verts[i] = p + (Vector3.Transform(cross, Matrix.CreateFromAxisAngle(normal, MathHelper.ToRadians(((float)i / (subdivs - 1)) * 360f))) * (radius));
             }
 
-            //ContentHandler.resources["diffuse"].value_fx. = color.ToVector3();
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["World"].SetValue(Matrix.Identity);
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["View"].SetValue(EngineState.camera.view);
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["Projection"].SetValue(EngineState.camera.projection);
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["DiffuseMap"].SetValue(onePXWhite);
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["tint"].SetValue(color.ToVector3());
-            //ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["FarClip"].SetValue(2000f);
-            //ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["opacity"].SetValue(-1f);
-
-
-            for (int i = 0; i < ContentHandler.resources["fill_gbuffer"].value_fx.CurrentTechnique.Passes.Count; i++) {
-                ContentHandler.resources["fill_gbuffer"].value_fx.CurrentTechnique.Passes[i].Apply();
-                EngineState.graphics_device.DrawUserPrimitives(PrimitiveType.LineStrip, verts, 0, verts.Length - 1);
-            }
-
-            ContentHandler.resources["fill_gbuffer"].value_fx.Parameters["tint"].SetValue(Color.White.ToVector3());
+            lines(color, verts);
         }
         
         public static void sphere(Vector3 P, float radius, Color color) {

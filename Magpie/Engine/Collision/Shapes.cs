@@ -20,6 +20,8 @@ namespace Magpie {
         cylinder,
         line,
         sphere,
+        point_sphere,
+        point_capsule,
         dummy
     }
 

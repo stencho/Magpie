@@ -44,6 +44,11 @@ namespace Magpie.Engine.WorldElements {
             textures = new string[1] { texture_name };
         }
 
+        public Action preepass_action;
+        public void prepass() {
+            if (preepass_action != null) preepass_action();
+        }
+
         public void draw() {
             foreach (ModelMesh mm in _model.Meshes) {
                 foreach (ModelMeshPart mmp in mm.MeshParts) {
@@ -107,6 +112,7 @@ namespace Magpie.Engine.WorldElements {
             vertex_buffer = vbuffer;
             index_buffer = ibuffer;
         }
+        public void prepass() { }
 
         public void draw() { }
         public void draw_to_light(light light) { }
@@ -125,6 +131,7 @@ namespace Magpie.Engine.WorldElements {
         public Matrix orientation { get; set; } = Matrix.Identity;
 
 
+        public void prepass() { }
         public void draw() {}
         public void draw_to_light(light light) { }
         public bool in_frustum(BoundingFrustum frustum) { return false; }
@@ -141,6 +148,7 @@ namespace Magpie.Engine.WorldElements {
 
         public string[] textures { get; set; }
 
+        public void prepass();
         public void draw();
         public void draw_to_light(light light);
 

@@ -40,6 +40,12 @@ namespace Magpie.Engine.Collision.Support3D {
             C = (Vector3.Right * 0.5f * scale_x) + (Vector3.Down * 0.5f * scale_y);
         }
 
+        public Triangle(Vector3 A, Vector3 B, Vector3 C) {
+            this.A = A;
+            this.B = B;
+            this.C = C;
+        }
+
         public void draw(Vector3 offset) {
             Matrix w = orientation * Matrix.CreateTranslation(offset + position);
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
@@ -18,7 +19,9 @@ namespace Magpie.Engine.WorldElements {
         public render_info[] render;
         public collision_info collision;
         public light[] lights;
-        
+
+        public ModelCollision[] testc;
+
         public object_info(Vector3 position) {
             init(new render_info[] {
                     new render_info_model("sphere")
@@ -32,12 +35,23 @@ namespace Magpie.Engine.WorldElements {
                  },
                  new collision_info(new Sphere(1f), position)
             );
+            testc = new ModelCollision[((render_info_model)render[0]).model.Meshes.Count];
+
+            int v = 0;
+            foreach(var mesh in ((render_info_model)render[0]).model.Meshes) {
+                testc[v] = new ModelCollision(
+                    mesh.MeshParts[0].VertexBuffer,
+                    mesh.MeshParts[0].IndexBuffer);
+                v++;
+
+            }
+
         }
 
         void init(render_info[] render_info, collision_info collision_info) {
             this.render = render_info;
             this.collision = collision_info;
-            
+
 
         }
 
@@ -58,12 +72,20 @@ namespace Magpie.Engine.WorldElements {
             }
         }
 
+
         public void draw() {
             foreach (render_info ri in render) {
-
+                ri.prepass();
+            }
+            foreach (render_info ri in render) {
 
                 ri.draw();
                 
+                if (testc != null) {
+                    foreach(ModelCollision mc in testc)
+                    mc.draw(render[0].world);                    
+
+                }
                 //this.collision.draw_move_shapes();
             }
         }

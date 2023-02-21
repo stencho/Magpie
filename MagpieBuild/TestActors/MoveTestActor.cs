@@ -45,8 +45,8 @@ namespace MagpieTestbed.TestActors {
         };
 
         public MoveTestActor() {
-            //collision = new Capsule(1.85f, 1f);
-            collision = new Sphere(1f);
+            collision = new Capsule(1.85f, 1f);
+            //collision = new PointSphere(1f);
         }
 
         Vector3 start_pos = Vector3.Zero;
@@ -114,7 +114,7 @@ namespace MagpieTestbed.TestActors {
             lights[1].position = position;
         }
         public void debug_draw() {
-            collision.draw(position);
+            collision.draw(Vector3.Zero);
             //sweep_collision.draw();
             //if (sweep_collision.shape == shape_type.quad)
                 //Draw3D.capsule(((Capsule)collision).A+ ((Quad)sweep_collision).B, ((Capsule)collision).B + ((Quad)sweep_collision).B, collision.radius, Color.Green);

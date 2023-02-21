@@ -218,15 +218,7 @@ namespace Magpie {
                 if (u >= current_map.actor_count) continue;
                 if (current_map.actors[i] == null) continue;
 
-                current_map.actors[i].unthreaded_update();
-            }
-
-            u = 0;
-            for (int i = 0; i < Map.max_objects; i++) {
-                if (u >= current_map.object_count) continue;
-                if (current_map.objects[i] == null) continue;
-
-
+                current_map.actors[i].unthreaded_update();            
             }
 
             player_actor.unthreaded_update();

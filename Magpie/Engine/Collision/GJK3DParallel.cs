@@ -81,11 +81,17 @@ namespace Magpie.Engine.Collision {
                     case shape_type.capsule:
                         gjk.sup.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Capsule)shape_A).A, ((Capsule)shape_A).B);
                         break;
+                    case shape_type.point_capsule:
+                        gjk.sup.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((PointCapsule)shape_A).A, ((PointCapsule)shape_A).B);
+                        break;
                     case shape_type.line:
                         gjk.sup.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Line3D)shape_A).A, ((Line3D)shape_A).B);
                         break;
                     case shape_type.sphere:
                         gjk.sup.vert_ID_A = Supports.Point(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Sphere)shape_A).P);
+                        break;
+                    case shape_type.point_sphere:
+                        gjk.sup.vert_ID_A = Supports.Point(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((PointSphere)shape_A).P);
                         break;
                     case shape_type.dummy: break;
                 }
@@ -106,11 +112,17 @@ namespace Magpie.Engine.Collision {
                     case shape_type.capsule:
                         gjk.sup.vert_ID_B = Supports.Line(ref sb, gjk.sup.DB, ((Capsule)shape_B).A, ((Capsule)shape_B).B);
                         break;
+                    case shape_type.point_capsule:
+                        gjk.sup.vert_ID_B = Supports.Line(ref sb, gjk.sup.DB, ((PointCapsule)shape_B).A, ((PointCapsule)shape_B).B);
+                        break;
                     case shape_type.line:
                         gjk.sup.vert_ID_B = Supports.Line(ref sb, gjk.sup.DB, ((Line3D)shape_B).A, ((Line3D)shape_B).B);
                         break;
                     case shape_type.sphere:
                         gjk.sup.vert_ID_B = Supports.Point(ref sb, gjk.sup.DB, ((Sphere)shape_B).P);
+                        break;
+                    case shape_type.point_sphere:
+                        gjk.sup.vert_ID_B = Supports.Point(ref sb, gjk.sup.DB, ((PointSphere)shape_B).P);
                         break;
                     case shape_type.dummy: break;
                 }
@@ -161,8 +173,12 @@ namespace Magpie.Engine.Collision {
             if (radius_b > 0f)
                 b_rad += radius_b;
 
-            if ((a_rad != 0 || b_rad != 0))
-                gjk_quadratic_distance_solve(a_rad, b_rad, ref gjk.res);
+            if (a_rad + b_rad > gjk.res.distance) {
+                gjk.res.hit = true;
+            }
+
+            //if ((a_rad != 0 || b_rad != 0))
+               // gjk_quadratic_distance_solve(a_rad, b_rad, ref gjk.res);
 
             gjk.solved = true;
 

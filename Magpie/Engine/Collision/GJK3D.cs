@@ -59,7 +59,6 @@ namespace Magpie {
             public float distance;
             public float margin_penetration_distance;
 
-            public bool margin_hit;
             public float pen_margin_A;
             public float pen_margin_B;
 
@@ -72,6 +71,8 @@ namespace Magpie {
 
             public Matrix world_A;
             public Matrix world_B;
+
+            public Vector3 AB => Vector3.Normalize(closest_point_B - closest_point_A);
 
             public override string ToString() {
                 return string.Format(

@@ -197,7 +197,8 @@ namespace MagpieBuild
             mid = EngineState.world.current_map.make_id();
             world.current_map.game_objects.Add(mid, new object_info(
                 Vector3.Up * 5f,
-                new render_info_model("skull")));
+                new render_info_model("desk")));
+
             world.current_map.game_objects[mid].render[0].scale *= 16f;
             world.current_map.game_objects[mid].lights =
                 new light[1] {                    
@@ -304,7 +305,7 @@ namespace MagpieBuild
             Clock.frame_probe.set("overhead");
             Clock.frame_probe.false_set("overhead");
 
-            results = new GJK.gjk_result[world.current_map.objects.Length];
+            //results = new GJK.gjk_result[world.current_map.objects.Length];
         }
 
         void test_b(point_in_cloud pic, PointCloud p) {
@@ -365,11 +366,10 @@ namespace MagpieBuild
                 Exit();
             }
             
-            results = new GJK.gjk_result[world.current_map.game_objects.Count];
+           // results = new GJK.gjk_result[world.current_map.game_objects.Count];
 
             //test collision detection between above test actor and all the objects in the scene
             int i=0;
-            Clock.frame_probe.set("GJK tests");
             foreach (object_info go in world.current_map.game_objects.Values) {
                 if (go == null) continue;
                 //if (go.name.StartsWith("test_sphere")) {
@@ -511,7 +511,22 @@ namespace MagpieBuild
 
             world.Draw(GraphicsDevice, EngineState.camera);
 
-            //world.current_map.actors[0].debug_draw();
+            world.current_map.actors[0].debug_draw();
+
+            Clock.frame_probe.set("GJK tests/drawing");
+            foreach (ModelCollision mc in world.current_map.game_objects[mid].testc) {
+                var r = mc.gjk(world.current_map.actors[0].collision, world.current_map.actors[0].world, world.current_map.game_objects[mid].render[0].world);
+                Draw3D.line(r.closest_point_A, r.closest_point_B, Color.MonoGameOrange);
+                var fr = ((Capsule)world.current_map.actors[0].collision).radius;
+                Draw3D.text_3D(
+                    EngineState.spritebatch, 
+                    r.distance.ToString(), 
+                    "pf", r.closest_point_B, 
+                    Vector3.Normalize(EngineState.camera.position - r.closest_point_B), 1f, 
+                    r.distance < fr ? Color.Green : Color.Red);
+
+               // Draw3D.xyz_cross(r.closest_point_A + (r.AB * (fr > r.distance ? r.distance : fr)), 0.1f, Color.MonoGameOrange);
+            }
 
             /*
             foreach (GJK.gjk_result res in results) {

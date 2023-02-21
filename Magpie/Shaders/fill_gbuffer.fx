@@ -128,6 +128,7 @@ float3 sky_color;
 bool fog = false;
 bool clip_trans = true;
 bool fullbright = false;
+bool fulldark = false;
 PSO MainPS(VertexShaderOutput input)
 {
     PSO output = (PSO)0;
@@ -169,7 +170,9 @@ PSO MainPS(VertexShaderOutput input)
 	if (fullbright){
 		output.Lighting = float4(1,1,1,1);
 	}
-
+	if (fulldark) {
+		output.Lighting.a = 0;
+	}
 	if (fog && dist > fog_start) {
 		d = 1 - ((dist - fog_start) * (1/(1-fog_start)));
 		output.Lighting.a = d;	
