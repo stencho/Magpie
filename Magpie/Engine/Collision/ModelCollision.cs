@@ -14,8 +14,15 @@ using static Magpie.GJK;
 namespace Magpie.Engine.Collision {
     public  class ModelCollision {
         Triangle[] tris;
+        Vector3[] points;
 
         GJK3DParallel gjkp = new GJK3DParallel();
+
+        BoundingBox bounds;
+
+        public BoundingBox get_bounds (Matrix world) {
+            return CollisionHelper.BoundingBox_around_transformed_points(world, points);
+        }
 
         public void draw(Matrix matrix) {
             foreach(Triangle t in tris) {
@@ -28,6 +35,8 @@ namespace Magpie.Engine.Collision {
                     Vector3.Transform(t.B,matrix),
                     Vector3.Transform(t.C,matrix),
                     Vector3.Transform(t.A,matrix));
+                //bounds = get_bounds(matrix);
+                Draw3D.cube(bounds, Color.Purple);
             }
         }
 
@@ -49,27 +58,28 @@ namespace Magpie.Engine.Collision {
 
         public ModelCollision(VertexBuffer vb, IndexBuffer ib) {
             tris = new Triangle[ib.IndexCount/3];
+
             lock (vb) {
+                points = new Vector3[vb.VertexCount];
                 
-                Vector3[] vdata = new Vector3[vb.VertexCount];
-                vb.GetData<Vector3>(0, vdata, 0, vb.VertexCount, vb.VertexDeclaration.VertexStride);
+                
+                vb.GetData<Vector3>(0, points, 0, vb.VertexCount, vb.VertexDeclaration.VertexStride);
 
                 ushort[] idata = new ushort[ib.IndexCount];
                 ib.GetData(idata);
 
                 int v = 0;
-                bool ib_working = idata[0] != 65539;
 
                 for (int i = 0; i < ib.IndexCount; i+=3) {
-                    //for (int v = 0; v < 3; v++) {
                     tris[v] = new Triangle(
-                        vdata[idata[i]], 
-                        vdata[idata[i + 1]], 
-                        vdata[idata[i + 2]]);
+                        points[idata[i]], 
+                        points[idata[i + 1]],
+                        points[idata[i + 2]]);
                 
                     v++;
-                    //}
                 }
+
+                bounds = get_bounds(Matrix.Identity);
             }
 
 

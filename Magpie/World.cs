@@ -1,5 +1,7 @@
 ﻿using Magpie.Engine;
 using Magpie.Engine.Brushes;
+using Magpie.Engine.Collision;
+using Magpie.Engine.Collision.Support3D;
 using Magpie.Engine.Stages;
 using Magpie.Engine.WorldElements;
 using Magpie.Graphics;
@@ -9,6 +11,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,8 +26,6 @@ namespace Magpie {
 
         //public SpotLight test_light;
         //public SpotLight test_light2;
-
-        public volatile SegmentedTerrain test_hf;
 
 
         public World() {
@@ -120,10 +121,22 @@ namespace Magpie {
                 // TEMPORARY NEEDS TO GO ONCE OBJECT INFO IS DONE
                 if (current_map.player_actor != null)
                 lock (current_map.player_actor)
-                    current_map.player_actor.Update();
+                        current_map.player_actor.Update();
 
+                var mid = current_map.game_objects.Last().Key;
+                lock (current_map.game_objects[mid].collision.gjk_results) {
+                    current_map.game_objects[mid].collision.doing_collisions = true;
+                    current_map.game_objects[mid].collision.gjk_results.Clear();
 
+                    foreach (ModelCollision mc in current_map.game_objects[mid].testc) {
 
+                        var r = mc.gjk(current_map.actors[0].collision, current_map.actors[0].world, current_map.game_objects[mid].render[0].world);
+                        var fr = ((Capsule)current_map.actors[0].collision).radius;
+                        current_map.game_objects[mid].collision.gjk_results.Add(r);
+
+                    }
+                    current_map.game_objects[mid].collision.doing_collisions = false;
+                }
 
                 lock (last_fps) {
                     for (int i = 0; i < last_fps.Length - 1; i++) {

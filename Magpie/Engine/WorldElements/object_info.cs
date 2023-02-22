@@ -38,7 +38,9 @@ namespace Magpie.Engine.WorldElements {
             testc = new ModelCollision[((render_info_model)render[0]).model.Meshes.Count];
 
             int v = 0;
+            
             foreach(var mesh in ((render_info_model)render[0]).model.Meshes) {
+                
                 testc[v] = new ModelCollision(
                     mesh.MeshParts[0].VertexBuffer,
                     mesh.MeshParts[0].IndexBuffer);
@@ -82,9 +84,9 @@ namespace Magpie.Engine.WorldElements {
                 ri.draw();
                 
                 if (testc != null) {
-                    foreach(ModelCollision mc in testc)
-                    mc.draw(render[0].world);                    
-
+                    foreach (ModelCollision mc in testc) {
+                        mc.draw(collision.world);
+                    }
                 }
                 //this.collision.draw_move_shapes();
             }

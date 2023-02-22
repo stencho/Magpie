@@ -4,7 +4,6 @@ using Magpie.Engine.Brushes;
 using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using MagpieTestbed.TestActors;
-using MagpieTestbed.TestObjects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -26,6 +25,7 @@ using static Magpie.Graphics.Particles.PointCloud;
 using Microsoft.VisualBasic.ApplicationServices;
 using Magpie.Engine.WorldElements;
 using System.Transactions;
+using static Magpie.GJK;
 
 namespace MagpieBuild
 {
@@ -200,6 +200,7 @@ namespace MagpieBuild
                 new render_info_model("desk")));
 
             world.current_map.game_objects[mid].render[0].scale *= 16f;
+            world.current_map.game_objects[mid].render[0].orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, 12f);
             world.current_map.game_objects[mid].lights =
                 new light[1] {                    
                     new light {
@@ -308,32 +309,6 @@ namespace MagpieBuild
             //results = new GJK.gjk_result[world.current_map.objects.Length];
         }
 
-        void test_b(point_in_cloud pic, PointCloud p) {
-            pic.point -= Vector3.UnitY * 4 * Clock.frame_time_delta;
-            
-            Raycasting.raycast_result res;
-
-            pic.lerp = true;
-            pic.lerp_speed = 4f * Clock.frame_time_delta;
-
-            if (Clock.frame_count % 30 == 0) {
-                pic.lerp_to = (RNG.rng_v3_near_v3(pic.point, 8f));
-            }
-            (int,int) qi;
-            (int,int) si;
-            if (world.test_hf.raycast(pic.point_previous, pic.point, out qi, out si, out res)) {
-
-                //pic.point = pic.point_previous + (Vector3.Normalize(pic.point - pic.point_previous) * res.distance);
-                pic.point = pic.point_previous;
-                pic.alive = false;
-            } else {
-
-                pic.point_previous = pic.point;
-            }
-
-        }
-
-        int test_trums = 20;
 
         protected override void LoadContent()
         {
@@ -477,7 +452,7 @@ namespace MagpieBuild
 
 
         public void renderextra() {
-            ((SegmentedTerrain)world.test_hf).debug_draw();
+            //((SegmentedTerrain)world.test_hf).debug_draw();
 
             snap.snap("tump");
             //parttest.instance_onto_point_cloud(pctest);
@@ -490,6 +465,9 @@ namespace MagpieBuild
         }
 
         bool draw_debug_info = true;
+
+        Octree testoctree = new Octree(Vector3.One * -50, Vector3.One * 50);
+
 
         protected override void Draw(GameTime gameTime) {
 
@@ -513,21 +491,32 @@ namespace MagpieBuild
 
             world.current_map.actors[0].debug_draw();
 
+            testoctree.draw();
+            /*
             Clock.frame_probe.set("GJK tests/drawing");
-            foreach (ModelCollision mc in world.current_map.game_objects[mid].testc) {
-                var r = mc.gjk(world.current_map.actors[0].collision, world.current_map.actors[0].world, world.current_map.game_objects[mid].render[0].world);
-                Draw3D.line(r.closest_point_A, r.closest_point_B, Color.MonoGameOrange);
-                var fr = ((Capsule)world.current_map.actors[0].collision).radius;
-                Draw3D.text_3D(
-                    EngineState.spritebatch, 
-                    r.distance.ToString(), 
-                    "pf", r.closest_point_B, 
-                    Vector3.Normalize(EngineState.camera.position - r.closest_point_B), 1f, 
-                    r.distance < fr ? Color.Green : Color.Red);
 
-               // Draw3D.xyz_cross(r.closest_point_A + (r.AB * (fr > r.distance ? r.distance : fr)), 0.1f, Color.MonoGameOrange);
+            while (true) { 
+                if (!world.current_map.game_objects[mid].collision.doing_collisions) {
+                    lock (world.current_map.game_objects[mid].collision.gjk_results) {
+                        foreach (gjk_result r in world.current_map.game_objects[mid].collision.gjk_results) {
+                            //var r = mc.gjk(world.current_map.actors[0].collision, world.current_map.actors[0].world, world.current_map.game_objects[mid].render[0].world);
+                            Draw3D.line(r.closest_point_A, r.closest_point_B, Color.MonoGameOrange);
+                            var fr = ((Capsule)world.current_map.actors[0].collision).radius;
+                            Draw3D.text_3D(
+                                EngineState.spritebatch,
+                                r.distance.ToString(),
+                                "pf", r.closest_point_B,
+                                Vector3.Normalize(EngineState.camera.position - r.closest_point_B), 1f,
+                                r.distance < fr ? Color.Green : Color.Red);
+
+                            // Draw3D.xyz_cross(r.closest_point_A + (r.AB * (fr > r.distance ? r.distance : fr)), 0.1f, Color.MonoGameOrange);
+                        }
+                    }
+                    break;
+                }
             }
-
+            */
+            
             /*
             foreach (GJK.gjk_result res in results) {
                 Draw3D.line(res.closest_point_A, res.closest_point_B, Draw2D.ColorInterpolate(Color.Green, Color.MonoGameOrange, 

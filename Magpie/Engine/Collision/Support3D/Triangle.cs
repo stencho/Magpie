@@ -18,6 +18,8 @@ namespace Magpie.Engine.Collision.Support3D {
         public Vector3 B;
         public Vector3 C;
 
+        public Vector3 normal => CollisionHelper.triangle_normal(A, B, C);
+
         public float radius { get; set; } = 0f;
 
         public BoundingBox find_bounding_box() {

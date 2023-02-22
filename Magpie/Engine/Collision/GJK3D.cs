@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Magpie {
     public class GJK {
-        public static int max_iterations = 50;
+        public static int max_iterations = 25;
         public const float epsilon = 0.0001f;
 
         public struct support {

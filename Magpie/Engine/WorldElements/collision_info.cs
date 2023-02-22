@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using static Magpie.GJK;
 
 namespace Magpie.Engine.WorldElements {
     public class collision_info {
@@ -31,7 +32,10 @@ namespace Magpie.Engine.WorldElements {
         List<(Shape3D shape, 
               int bone_index, 
               Vector3 offset)> hitboxes = new List<(Shape3D shape, int bone_index, Vector3 offset)>();
-        
+
+        public volatile List<gjk_result> gjk_results = new List<gjk_result>();
+        public volatile bool doing_collisions = false;
+
         public collision_info(Shape3D move_shape, Vector3 position) {
             this.move_shape = move_shape;
             this.position = position;

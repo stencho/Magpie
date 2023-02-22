@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-	<TargetFramework>net6.0-windows</TargetFramework>
+	<TargetFramework>net7.0-windows</TargetFramework>
 	<UseWindowsForms>true</UseWindowsForms>
     <RollForward>Major</RollForward>
     <PublishReadyToRun>false</PublishReadyToRun>
@@ -25,6 +25,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Magpie\Magpie.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TestObjects\" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

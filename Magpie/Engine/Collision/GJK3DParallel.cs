@@ -616,7 +616,7 @@ namespace Magpie.Engine.Collision {
 
                     //ABCD
                     if (!(solve.U_ABCD > 0f && solve.V_ABCD > 0f && solve.W_ABCD > 0f && solve.X_ABCD > 0f)) {
-                        throw new Exception("what the fuck man");
+                        //throw new Exception("what the fuck man");
                         //s.count =3;
                         //break;
                     }

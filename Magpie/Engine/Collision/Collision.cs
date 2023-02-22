@@ -30,6 +30,11 @@ namespace Magpie.Engine.Collision {
         public const float epsilon = 1e-6f;
         public static BasicEffect e_basic;
 
+        public static Vector3 triangle_normal(Vector3 A, Vector3 B, Vector3 C) {
+            var AB = B-A; var AC = C-A;
+            return Vector3.Normalize(Vector3.Cross(AB, AC)); //ACAB
+        }
+
         public static bool same_direction(Vector3 direction, Vector3 origin_dir) {
             var vd = Vector3.Dot(direction, origin_dir);
             return (vd >= 0f);
@@ -564,6 +569,29 @@ namespace Magpie.Engine.Collision {
                     max.Y = point.Y;
                 if (point.Z > max.Z)
                     max.Z = point.Z;
+            }
+
+            return new BoundingBox(min, max);
+        }
+        public static BoundingBox BoundingBox_around_transformed_points(Matrix world, params Vector3[] points) {
+            Vector3 min = Vector3.One * float.MaxValue, max = Vector3.One * float.MinValue;
+
+            foreach (Vector3 point in points) {
+                var p = Vector3.Transform(point, world);
+
+                if (p.X < min.X)
+                    min.X = p.X;
+                if (p.Y < min.Y)
+                    min.Y = p.Y;
+                if (p.Z < min.Z)
+                    min.Z = p.Z;
+
+                if (p.X > max.X)
+                    max.X = p.X;
+                if (p.Y > max.Y)
+                    max.Y = p.Y;
+                if (p.Z > max.Z)
+                    max.Z = p.Z;
             }
 
             return new BoundingBox(min, max);
