@@ -4,17 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Magpie.Engine.Collision;
 using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
+using static Magpie.Engine.Octree;
 
 namespace Magpie.Engine {
     public class Octree {
-        Node[,,] nodes;
-
+        public Node[,,] nodes;
 
         public BoundingBox bounds;
-
 
         public Octree(Vector3 min, Vector3 max) {
             bounds = new BoundingBox(min, max);
@@ -25,18 +25,88 @@ namespace Magpie.Engine {
                 for (int y = 0; y < 2; y++) {
                     for (int x = 0; x < 2; x++) {
                         nodes[x, y, z] = new Node(null, min, max, x, y, z);
+                        nodes[x, y, z].color = RNG.random_opaque_color();
                     }
                 }
             }
 
         }
-        
-        public void draw() {
-            Draw3D.cube(bounds, Color.Purple);
+
+        public void subdivide_all(int depth) {            
             foreach (Node node in nodes) {
-                node.draw();
+                if (!node.subdivided) node.subdivide();                
+                if (depth > 0) subdivide_all(node.nodes, depth, 1);                
             }
-            
+        }
+
+        internal void subdivide_all(Node[,,] nodes, int depth, int current_depth = 0) {
+            foreach(Node node in nodes) {
+                if (!node.subdivided) node.subdivide();                    
+                if (depth > current_depth) subdivide_all(node.nodes, depth, current_depth + 1);                
+            }
+        }
+
+        public void draw(Matrix world) {
+            Draw3D.cube(bounds, world, Color.Purple);
+            foreach (Node node in nodes) {
+                node.draw(world);
+            }            
+        }
+
+        public void add_value(int value, BoundingBox bb) {
+            foreach (Node node in nodes) {                
+                if (bb.Intersects(node.bounds)) {
+                    node.values.Add(value);
+
+                    if (node.subdivided) {
+                        add_value(node.nodes, value, bb);
+                    }
+                }
+            }
+        }
+
+        void add_value(Node[,,] nodes, int value, BoundingBox bb) {
+            foreach (Node node in nodes) {
+                if (bb.Intersects(node.bounds)) {
+                    node.values.Add(value);
+
+                    if (node.subdivided) {
+                        add_value(node.nodes, value, bb);
+                    }
+                }
+            }
+        }
+
+        public HashSet<int> get_all_values(BoundingBox bb) {
+            HashSet<int> values = new HashSet<int>();
+
+            foreach (Node node in nodes) {
+                if (bb.Intersects(node.bounds)) {
+                    if (node.subdivided) {
+                        recurse(node.nodes, bb, ref values);
+                    } else {
+                        foreach (int value in node.values) {
+                            values.Add(value);
+                        }
+                    }
+                }
+            }
+
+            return values;
+        }
+
+        void recurse(Node[,,] nodes, BoundingBox bb, ref HashSet<int> values) {
+            foreach (Node node in nodes) {
+                if (bb.Intersects(node.bounds)) {
+                    if (!node.subdivided) {
+                        foreach (int value in node.values) {
+                            values.Add(value);
+                        }
+                    } else {
+                        recurse(node.nodes, bb, ref values);
+                    }
+                }
+            }
         }
 
     }
@@ -44,12 +114,16 @@ namespace Magpie.Engine {
     public class Node {
         Node parent;
 
-        Node[,,] nodes;
+        public Node[,,] nodes;
 
-        bool subdivided = false;
+        public bool subdivided = false;
         int x,y,z;
 
+        public List<int> values = new List<int>();
+
         public BoundingBox bounds;
+
+        public Color color;
 
         public Node(Node parent, Vector3 parent_min, Vector3 parent_max, int x, int y, int z) { 
             this.parent = parent;
@@ -78,16 +152,22 @@ namespace Magpie.Engine {
 
         }
 
-        public void draw() {
-            Draw3D.cube(bounds, Color.Red);
-
-            if (subdivided)
-            foreach (Node node in nodes) {
-                Draw3D.cube(node.bounds, Color.MonoGameOrange);
+        public void draw(Matrix world) {
+            if (values.Count > 0) {
+                Draw3D.cube(bounds, world, color);
             }
+
+            if (subdivided) {
+                foreach (Node node in nodes) {
+                    //node.draw(world);
+                }
+            }
+
         }
 
         public void subdivide () {
+            if (subdivided) return;
+
             subdivided = true;
             nodes = new Node[2, 2, 2];
 
@@ -95,6 +175,7 @@ namespace Magpie.Engine {
                 for (int y = 0; y < 2; y++) {
                     for (int x = 0; x < 2; x++) {
                         nodes[x, y, z] = new Node(this, bounds.Min, bounds.Max, x, y, z);
+                        nodes[x, y, z].color = Draw2D.SimilarColor(color, 0.3f);
                     }
                 }
             }

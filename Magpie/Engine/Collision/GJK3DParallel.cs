@@ -1,14 +1,235 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Magpie.Engine.Collision.Support3D;
+using Magpie.Engine.WorldElements;
+using Magpie.Graphics;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using static Magpie.GJK;
 
 namespace Magpie.Engine.Collision {
-    public  class GJK3DParallel {
+    public class MixedCollision {
+        public struct collision_result {
+            public int id_A, id_B;
+
+            public Vector3 closest_point_A;
+            public Vector3 closest_point_B;
+
+            public float distance;
+            public float penetration;
+
+            public bool intersects;
+
+            public Vector3 AB => Vector3.Normalize(closest_point_B - closest_point_A);
+            public Vector3 BA => Vector3.Normalize(closest_point_A - closest_point_B);
+
+            public List<gjk_simplex> simplex_list = new List<gjk_simplex>();
+            public int draw_simplex;
+            
+            public collision_result() {                
+                closest_point_A = Vector3.Zero;
+                closest_point_B = Vector3.Zero;
+                
+                distance = 0;
+                penetration = 0; 
+                
+                intersects = false;
+                
+                simplex_list = new List<gjk_simplex>();
+                draw_simplex = 0;
+                
+                id_A = -1;
+                id_B = -1;
+            }
+
+            public void draw(Vector3 world_pos) {
+                Draw3D.xyz_cross(world_pos, .1f, Color.MonoGameOrange);
+                if (simplex_list == null) return;
+                
+                if (simplex_list != null && draw_simplex > -1 && draw_simplex < simplex_list.Count) {
+                    gjk_simplex simplex = simplex_list[draw_simplex];
+                    Draw3D.text_3D(EngineState.spritebatch, 
+                        $"{draw_simplex + 1}/{simplex_list.Count} {simplex.stage.ToString()} {intersects}\n" +
+                        $"zero {world_pos} \nA {simplex.support_A} \nB {simplex.support_B}" +
+                        $"\ndir {simplex_list[draw_simplex].direction.ToXString()}" +
+                        $"\nA {simplex.A.ToXString()}\nB {simplex.B.ToXString()}\nC {simplex.C.ToXString()}\nD {simplex.D.ToXString()}\n", 
+                        
+                        "pf", world_pos + Vector3.Down * 3f, EngineState.camera.direction, 1f, Color.Black);
+                    Draw3D.line(world_pos, world_pos + (simplex.direction) * 0.5f, Color.HotPink);
+
+
+                    if (simplex.stage == simplex_type.point) { 
+                        Draw3D.xyz_cross(
+                            world_pos + (simplex.A ), 
+                            0.1f, Color.Red);
+
+                    } else if (simplex.stage == simplex_type.line) {
+                        Draw3D.line(world_pos + simplex.A, world_pos + simplex.B, Color.HotPink);
+
+                        Draw3D.xyz_cross(world_pos + simplex.A, 0.1f, Color.Red);
+                        Draw3D.xyz_cross(world_pos + simplex.B, 0.1f, Color.Green);
+
+                    } else if (simplex.stage == simplex_type.triangle) {
+                        Draw3D.lines(Color.HotPink, world_pos + simplex.A, world_pos + simplex.B, world_pos + simplex.C, world_pos + simplex.A);
+
+                        Draw3D.xyz_cross(world_pos + simplex.A, 0.1f, Color.Red);
+                        Draw3D.xyz_cross(world_pos + simplex.B, 0.1f, Color.Green);
+                        Draw3D.xyz_cross(world_pos + simplex.C, 0.1f, Color.Blue);
+
+                    } else if (simplex.stage == simplex_type.tetrahedron) {
+                        Draw3D.lines(Color.HotPink, world_pos + simplex.A, world_pos + simplex.B, world_pos + simplex.C, world_pos + simplex.A);
+                        Draw3D.line(world_pos + simplex.A, world_pos + simplex.D, Color.HotPink);
+                        Draw3D.line(world_pos + simplex.B, world_pos + simplex.D, Color.HotPink);
+                        Draw3D.line(world_pos + simplex.C, world_pos + simplex.D, Color.HotPink);
+                        Draw3D.xyz_cross(world_pos + simplex.A, 0.1f, Color.Red);
+                        Draw3D.xyz_cross(world_pos + simplex.B, 0.1f, Color.Green);
+                        Draw3D.xyz_cross(world_pos + simplex.C, 0.1f, Color.Blue);
+                        Draw3D.xyz_cross(world_pos + simplex.D, 0.1f, Color.Yellow);
+                    }
+                }
+            }
+
+        }
+
+        public enum simplex_type {
+            empty=0,
+            point=1,
+            line=2,
+            triangle=3,
+            tetrahedron=4
+        }
+
+        public struct gjk_simplex {
+            public simplex_type stage;
+
+            public Vector3 A;
+            public Vector3 B;
+            public Vector3 C;
+            public Vector3 D;
+
+            public Vector3 direction;
+
+            public Vector3 support_A;
+            public Vector3 support_B;
+
+            public gjk_simplex() {
+                stage = simplex_type.empty;
+
+                A = Vector3.Zero;
+                B = Vector3.Zero;
+                C = Vector3.Zero;
+                D = Vector3.Zero;
+
+                support_A = Vector3.Zero;
+                support_B = Vector3.Zero;
+
+                direction = Vector3.Zero;
+            }
+
+            public gjk_simplex copy() {
+                return new gjk_simplex() {
+                    stage = stage,
+                    A = A,
+                    B = B,
+                    C = C,
+                    D = D,
+                    support_A= support_A,
+                    support_B= support_B,
+                    direction = direction
+                };
+            }
+        }
+
+        const int max_iterations = 20;
+        //public collision_result intersect(object_info object_A, object_info object_B) {
+            
+            //return intersects(object_A.collision.move_shape);
+        //}
+
+        public static collision_result intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b) {
+            collision_result result = new collision_result();
+
+
+
+            gjk_simplex simplex = new gjk_simplex();
+
+            simplex.direction = w_a.Translation-w_b.Translation;
+
+            int iteration = 0;
+
+            while (iteration < max_iterations) {
+                simplex.support_A = shape_A.support(Vector3.Transform((simplex.direction), Matrix.Invert(w_a)), Vector3.Zero);
+                simplex.support_B = shape_B.support(-simplex.support_A, Vector3.Zero);
+
+                if (simplex.stage == simplex_type.empty) {
+                    //find the first point
+
+                    simplex.A = simplex.support_B - simplex.support_A;
+
+                    simplex.stage = simplex_type.point;
+                    result.simplex_list.Add(simplex.copy());
+
+                    simplex.direction = -simplex.A;
+
+                    simplex.support_A = shape_A.support(Vector3.Transform((simplex.direction), Matrix.Invert(w_a)), Vector3.Zero);
+                    simplex.support_B = shape_B.support(Vector3.Transform((simplex.direction), Matrix.Invert(w_b)), Vector3.Zero);
+
+                } else if (simplex.stage == simplex_type.point) {
+                    //we have a point, make a line
+
+                    simplex.B = simplex.support_B - simplex.support_A;
+                    simplex.stage = simplex_type.line;
+                    result.simplex_list.Add(simplex.copy());
+
+                    var d = (simplex.B - simplex.A);
+                    var dot = Vector3.Dot(d, -simplex.A);
+
+                    if (dot < 0) {
+                        simplex.direction = simplex.B;
+                    } else {
+                        var u = Vector3.Cross(d, -simplex.A);
+                        simplex.direction = Vector3.Cross(u, d);
+                    }
+
+
+
+                    //simplex.support_A = Vector3.Transform(simplex.support_A, w_a);
+                    //simplex.support_B = Vector3.Transform(simplex.support_B, w_b);
+
+                } else if (simplex.stage == simplex_type.line) {
+
+                    simplex.C = simplex.support_B - simplex.support_A;
+
+                    simplex.stage = simplex_type.triangle;
+                    result.simplex_list.Add(simplex.copy());
+
+                    simplex.direction = Vector3.Cross((simplex.B - simplex.A), (simplex.C - simplex.A));
+
+
+                } else if (simplex.stage == simplex_type.triangle) {
+                    simplex.D = simplex.support_B - simplex.support_A;
+                    simplex.stage = simplex_type.tetrahedron;
+                    result.simplex_list.Add(simplex.copy());
+
+                    result.intersects = CollisionHelper.point_inside_tetrahedron(simplex.A, simplex.B, simplex.C, simplex.D, Vector3.Zero);
+                    break;
+                }
+
+
+
+                iteration++;
+            }
+
+
+            return result;
+        }
+    }
+
+    public class GJK3DParallel {
 
         public struct gjk_solve {
             public Vector3
@@ -43,17 +264,70 @@ namespace Magpie.Engine.Collision {
         }
 
 
-        public gjk_result gjk_intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b, float radius_a = 0f, float radius_b = 0f) {
-            if (shape_A == null || shape_B == null) throw new Exception(); 
-            
+        float find_closest(Vector3 closest_to_this, params Vector3[] points) {
+            float closest = float.MaxValue;
+            Vector3 closest_point = Vector3.Zero;
+
+            foreach (Vector3 v in points) {
+                var d = Vector3.Distance(v, closest_to_this);
+
+                if (d < closest) {
+                    closest = d;
+                    closest_point = v;
+                }
+            }
+
+            return closest;
+        }
+
+        Vector3 choose_better_start_capsule(Capsule capsule, Shape3D other_shape, Matrix w_a, Matrix w_b) {
+            switch (other_shape.shape) {
+                case shape_type.tri:
+                    Triangle t = ((Triangle)other_shape);
+
+                    var c_A = find_closest(Vector3.Transform(capsule.A, w_a * Matrix.Invert(w_b)), t.A, t.B, t.C);
+                    var c_B = find_closest(Vector3.Transform(capsule.B, w_a * Matrix.Invert(w_b)), t.A, t.B, t.C);
+                    var c_c = find_closest(Vector3.Transform(capsule.A + ((capsule.B - capsule.A) / 2), w_a * Matrix.Invert(w_b)), t.A, t.B, t.C);
+
+                    if (c_c < c_A && c_c < c_B) {
+                        return capsule.A + ((capsule.B - capsule.A) / 2);
+                    }
+                    if (c_A < c_B) {
+                        return capsule.A;
+                    } else {
+                        return capsule.B;
+                    }
+
+                default:
+                    return Vector3.Zero;
+            }
+        }
+        public gjk_result gjk_intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b) {
+            return gjk_intersects(shape_A, shape_B, w_a, w_b, Vector3.Zero, Vector3.Zero);
+        }
+        public gjk_result gjk_intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b, Vector3 sweep_A, Vector3 sweep_B) {
+            if (shape_A == null || shape_B == null) throw new Exception();
+
             gjk_solve gjk = new gjk_solve();
 
-            Vector3 sa = Vector3.Zero;
-            Vector3 sb = Vector3.Zero;
+            Vector3 sa = Vector3.Right;
+            Vector3 sb = Vector3.Right;
 
             int t = 0;
-            
-            gjk.sup.A = Vector3.Transform(shape_A.start_point, w_a);
+
+            bool a_swept = (sweep_A != Vector3.Zero);
+            bool b_swept = (sweep_B != Vector3.Zero);
+
+            switch (shape_A.shape) {
+                case shape_type.capsule:
+                    gjk.sup.A = Vector3.Transform(choose_better_start_capsule((Capsule)shape_A, shape_B, w_a, w_b), w_a);                    
+                    break;
+
+                default:
+                    gjk.sup.A = Vector3.Transform(shape_A.start_point, w_a);
+                    break;
+            }
+
             gjk.sup.B = Vector3.Transform(shape_B.start_point, w_b);
 
             gjk.res.shape_A = shape_A;
@@ -62,68 +336,80 @@ namespace Magpie.Engine.Collision {
             gjk.res.world_A = w_a;
             gjk.res.world_B = w_b;
 
+
             do {                 
                 t = GJK(ref gjk);
 
                 switch (shape_A.shape) {
                     case shape_type.cube:
-                        gjk.sup.vert_ID_A = Supports.Cube(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Cube)shape_A));
+                        sa = Supports.Cube(Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Cube)shape_A));
                         break;
                     case shape_type.polyhedron:
-                        gjk.sup.vert_ID_A = Supports.Polyhedron(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Polyhedron)shape_A).verts.ToArray());
+                        sa = Supports.Polyhedron(Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Polyhedron)shape_A).verts.ToArray());
                         break;
                     case shape_type.quad:
-                        gjk.sup.vert_ID_A = Supports.Quad(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Quad)shape_A).A, ((Quad)shape_A).B, ((Quad)shape_A).C, ((Quad)shape_A).D, (Quad)shape_A);
+                        sa = Supports.Quad(Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Quad)shape_A).A, ((Quad)shape_A).B, ((Quad)shape_A).C, ((Quad)shape_A).D);
                         break;
                     case shape_type.tri:
-                        gjk.sup.vert_ID_A = Supports.Tri(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Triangle)shape_A).A, ((Triangle)shape_A).B, ((Triangle)shape_A).C);
+                        sa = Supports.Tri(Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Triangle)shape_A).A, ((Triangle)shape_A).B, ((Triangle)shape_A).C);                        
                         break;
                     case shape_type.capsule:
-                        gjk.sup.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Capsule)shape_A).A, ((Capsule)shape_A).B);
+                        if (a_swept) {
+                            sa = Supports.Quad(
+                                Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)),
+                                ((Capsule)shape_A).A, ((Capsule)shape_A).B,
+                                ((Capsule)shape_A).A + sweep_A, ((Capsule)shape_A).B + sweep_A);
+                        } else {
+                            sa = Supports.Line(Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Capsule)shape_A).A, ((Capsule)shape_A).B);
+                        }
                         break;
-                    case shape_type.point_capsule:
-                        gjk.sup.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((PointCapsule)shape_A).A, ((PointCapsule)shape_A).B);
-                        break;
+                    //case shape_type.point_capsule:
+                    //    gjk.sup.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((PointCapsule)shape_A).A, ((PointCapsule)shape_A).B);
+                    //    break;
                     case shape_type.line:
-                        gjk.sup.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Line3D)shape_A).A, ((Line3D)shape_A).B);
+                        sa = Supports.Line(Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Line3D)shape_A).A, ((Line3D)shape_A).B);
                         break;
                     case shape_type.sphere:
-                        gjk.sup.vert_ID_A = Supports.Point(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Sphere)shape_A).P);
+                        if (a_swept) {
+                            sa = Supports.Line(Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Sphere)shape_A).P, ((Sphere)shape_A).P + sweep_A);
+                        } else {
+                            sa = Supports.Point(Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((Sphere)shape_A).P);
+                        }
                         break;
-                    case shape_type.point_sphere:
-                        gjk.sup.vert_ID_A = Supports.Point(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((PointSphere)shape_A).P);
-                        break;
+                    //case shape_type.point_sphere:
+                    //    gjk.sup.vert_ID_A = Supports.Point(ref sa, Vector3.Transform(gjk.sup.DA, Matrix.Invert(w_a)), ((PointSphere)shape_A).P);
+                    //    break;
                     case shape_type.dummy: break;
                 }
 
                 switch (shape_B.shape) {
                     case shape_type.cube:
-                        gjk.sup.vert_ID_B = Supports.Cube(ref sb, Vector3.Transform(gjk.sup.DB, Matrix.Invert(w_b)), ((Cube)shape_B));
+                        sb = Supports.Cube(Vector3.Transform(gjk.sup.DB, Matrix.Invert(w_b)), ((Cube)shape_B));
                         break;
                     case shape_type.polyhedron:
-                        gjk.sup.vert_ID_B = Supports.Polyhedron(ref sb, gjk.sup.DB, ((Polyhedron)shape_B).verts.ToArray());
+                        sb = Supports.Polyhedron(Vector3.Transform(gjk.sup.DB, Matrix.Invert(w_b)), ((Polyhedron)shape_B).verts.ToArray());
                         break;
                     case shape_type.quad:
-                        gjk.sup.vert_ID_B = Supports.Quad(ref sb, gjk.sup.DB, ((Quad)shape_B).A, ((Quad)shape_B).B, ((Quad)shape_B).C, ((Quad)shape_B).D, (Quad)shape_B);
+                        sb = Supports.Quad(Vector3.Transform(gjk.sup.DB, Matrix.Invert(w_b)), ((Quad)shape_B).A, ((Quad)shape_B).B, ((Quad)shape_B).C, ((Quad)shape_B).D);
                         break;
                     case shape_type.tri:
-                        gjk.sup.vert_ID_B = Supports.Tri(ref sb, gjk.sup.DB, ((Triangle)shape_B).A, ((Triangle)shape_B).B, ((Triangle)shape_B).C);
+                        sb = Supports.Tri(Vector3.Transform(gjk.sup.DB, Matrix.Invert(w_b)), ((Triangle)shape_B).A, ((Triangle)shape_B).B, ((Triangle)shape_B).C);
                         break;
                     case shape_type.capsule:
-                        gjk.sup.vert_ID_B = Supports.Line(ref sb, gjk.sup.DB, ((Capsule)shape_B).A, ((Capsule)shape_B).B);
+                        sb = Supports.Line(Vector3.Transform(gjk.sup.DB, Matrix.Invert(w_b)), ((Capsule)shape_B).A, ((Capsule)shape_B).B);
                         break;
-                    case shape_type.point_capsule:
-                        gjk.sup.vert_ID_B = Supports.Line(ref sb, gjk.sup.DB, ((PointCapsule)shape_B).A, ((PointCapsule)shape_B).B);
-                        break;
+                    //case shape_type.point_capsule:
+                    //    gjk.sup.vert_ID_B = Supports.Line(ref sb, gjk.sup.DB, ((PointCapsule)shape_B).A, ((PointCapsule)shape_B).B);
+                    //    break;
                     case shape_type.line:
-                        gjk.sup.vert_ID_B = Supports.Line(ref sb, gjk.sup.DB, ((Line3D)shape_B).A, ((Line3D)shape_B).B);
+                        sb = Supports.Line(Vector3.Transform(gjk.sup.DB, Matrix.Invert(w_b)), ((Line3D)shape_B).A, ((Line3D)shape_B).B);
                         break;
                     case shape_type.sphere:
-                        gjk.sup.vert_ID_B = Supports.Point(ref sb, gjk.sup.DB, ((Sphere)shape_B).P);
+                        sb = Supports.Point(Vector3.Transform(gjk.sup.DB, Matrix.Invert(w_b)), ((Sphere)shape_B).P);
                         break;
-                    case shape_type.point_sphere:
-                        gjk.sup.vert_ID_B = Supports.Point(ref sb, gjk.sup.DB, ((PointSphere)shape_B).P);
-                        break;
+                    //case shape_type.point_sphere:
+                    //    gjk.sup.vert_ID_B = Supports.Point(ref sb, gjk.sup.DB, ((PointSphere)shape_B).P);
+                    //    break;
                     case shape_type.dummy: break;
                 }
 
@@ -168,23 +454,54 @@ namespace Magpie.Engine.Collision {
                     break;
             }
 
-            if (radius_a > 0f)
-                a_rad += radius_a;
-            if (radius_b > 0f)
-                b_rad += radius_b;
-
             if (a_rad + b_rad > gjk.res.distance) {
-                gjk.res.hit = true;
+               // gjk_quadratic_distance_solve((a_rad>0?1:0)*epsilon, (b_rad > 0 ? 1 : 0) * epsilon, gjk, ref gjk.res);
+                //gjk.res.hit = true;
+            } else {
+
+
             }
 
-            //if ((a_rad != 0 || b_rad != 0))
-               // gjk_quadratic_distance_solve(a_rad, b_rad, ref gjk.res);
 
+            //if ((a_rad != 0 || b_rad != 0))
+                //gjk_quadratic_distance_solve(a_rad, b_rad, gjk, ref gjk.res);
             gjk.solved = true;
 
             return gjk.res;
         }
+        public void gjk_quadratic_distance_solve(float a_radius, float b_radius, gjk_solve gjk, ref gjk_result res) {
+            float radius = a_radius + b_radius;
+            float radius2 = radius * radius;
 
+            if (res.distance_squared > epsilon && res.distance_squared > radius2) {
+
+                res.distance_squared -= radius2;
+
+                gjk.N = res.closest_point_B - res.closest_point_A;
+
+                float L2 = Vector3.Dot(gjk.N, gjk.N);
+                if (L2 != 0f) {
+                    gjk.N *= InvSqrt(L2);
+                }
+
+                gjk.DA = gjk.N * a_radius;
+                gjk.DB = gjk.N * b_radius;
+
+                res.closest_point_A += gjk.DA;
+                res.closest_point_B -= gjk.DB;
+
+            } else {
+
+                Vector3 P = res.closest_point_A + res.closest_point_B;
+
+                res.closest_point_A = P * 0.5f;
+                res.closest_point_B = res.closest_point_A;
+
+                res.distance_squared = 0;
+
+                res.hit = true;
+            }
+        }
 
         public void gjk_check(ref gjk_solve solve) {
             //res = new result();
@@ -277,18 +594,9 @@ namespace Magpie.Engine.Collision {
                 };
             }
 
-            for (int i = 0; i < solve.sim.count; ++i) {
-                if (solve.sup.vert_ID_A != solve.sim.verts[i].A_ID) continue;
-                if (solve.sup.vert_ID_B != solve.sim.verts[i].B_ID) continue;
-                return 0;
-            }
-
             solve.sim.verts[solve.sim.count].A = solve.sup.A;
             solve.sim.verts[solve.sim.count].B = solve.sup.B;
             solve.sim.verts[solve.sim.count].P = solve.sup.B - solve.sup.A;
-
-            solve.sim.verts[solve.sim.count].A_ID = solve.sup.vert_ID_A;
-            solve.sim.verts[solve.sim.count].B_ID = solve.sup.vert_ID_B;
 
             solve.sim.bc[solve.sim.count] = 1f;
 
@@ -303,10 +611,10 @@ namespace Magpie.Engine.Collision {
                     solve.A = solve.sim.verts[0].P;
                     solve.B = solve.sim.verts[1].P;
 
-                    solve.AB = solve.A - solve.B; solve.BA = solve.B - solve.A;
+                    solve.AB = solve.B - solve.A; solve.BA = solve.A - solve.B;
 
-                    solve.U = Vector3.Dot(solve.B, solve.BA);
-                    solve.V = Vector3.Dot(solve.A, solve.AB);
+                    solve.U = Vector3.Dot(solve.B, solve.AB);
+                    solve.V = Vector3.Dot(solve.A, solve.BA);
 
                     //voronoi region A
                     if (solve.V <= 0f) {
@@ -398,9 +706,9 @@ namespace Magpie.Engine.Collision {
                     //region ABC
                     if (!(solve.U_ABC > 0f && solve.V_ABC > 0f && solve.W_ABC > 0f)) {
 
-                        throw new Exception("what the fuck man");
-                        //s.count = 2;
-                        //break;
+                        //throw new Exception("what the fuck man");
+                        solve.sim.count = 2;
+                        break;
                     }
 
                     solve.sim.bc[0] = solve.U_ABC;
@@ -552,25 +860,25 @@ namespace Magpie.Engine.Collision {
                     solve.W_ABCD = box(solve.D, solve.A, solve.B) * solve.volume;
                     solve.X_ABCD = box(solve.B, solve.A, solve.C) * solve.volume;
 
-                    /*
+                    ////////
                     Vector3 PA, PB, PC, PD;
-                    PA = s.verts[0].P * (denom * U_ABCD);
-                    PB = s.verts[1].P * (denom * V_ABCD);
-                    PC = s.verts[2].P * (denom * W_ABCD);
-                    PD = s.verts[3].P * (denom * X_ABCD);
+                    PA = solve.sim.verts[0].P * (solve.denom * solve.U_ABCD);
+                    PB = solve.sim.verts[1].P * (solve.denom * solve.V_ABCD);
+                    PC = solve.sim.verts[2].P * (solve.denom * solve.W_ABCD);
+                    PD = solve.sim.verts[3].P * (solve.denom * solve.X_ABCD);
                     
                     Vector3 point = PA + PB + PC + PD;
 
                     if (Vector3.Dot(point, point) >= epsilon * epsilon) {
-                        s.bc[0] = U_ABCD;
-                        s.bc[1] = V_ABCD;
-                        s.bc[2] = W_ABCD;
-                        s.bc[3] = X_ABCD;
-                        s.count = 4;
+                        solve.sim.bc[0] = solve.U_ABCD;
+                        solve.sim.bc[1] = solve.V_ABCD;
+                        solve.sim.bc[2] = solve.W_ABCD;
+                        solve.sim.bc[3] = solve.X_ABCD;
+                        solve.sim.count = 4;
                         break;
                         //return 1;
                     }
-                    */
+                    ////////////////
 
                     //ABC
                     if (solve.X_ABCD <= 0f && solve.U_ABC > 0f && solve.V_ABC > 0f && solve.W_ABC > 0f) {
@@ -617,8 +925,8 @@ namespace Magpie.Engine.Collision {
                     //ABCD
                     if (!(solve.U_ABCD > 0f && solve.V_ABCD > 0f && solve.W_ABCD > 0f && solve.X_ABCD > 0f)) {
                         //throw new Exception("what the fuck man");
-                        //s.count =3;
-                        //break;
+                        solve.sim.count = 3;
+                        break;
                     }
 
                     solve.sim.bc[0] = solve.U_ABCD;

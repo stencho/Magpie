@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 
 namespace Magpie {
     public class GJK {
-        public static int max_iterations = 25;
-        public const float epsilon = 0.0001f;
+        public static int max_iterations = 20;
+        public const float epsilon = 0.00001f;
 
         public struct support {
-            public int vert_ID_A, vert_ID_B;
+            //public int vert_ID_A, vert_ID_B;
 
             public Vector3 A;
             public Vector3 B;
@@ -57,17 +57,11 @@ namespace Magpie {
 
             public float distance_squared;
             public float distance;
-            public float margin_penetration_distance;
-
-            public float pen_margin_A;
-            public float pen_margin_B;
 
             public simplex last_simplex;
 
             public Shape3D shape_A;
             public Shape3D shape_B;
-            internal Vector3 last_un_hit_A;
-            internal Vector3 last_un_hit_B;
 
             public Matrix world_A;
             public Matrix world_B;
@@ -136,17 +130,17 @@ A: {2} B: {3}
             }
 
             for (int i = 0; i < s.count; ++i) {
-                if (sup.vert_ID_A != s.verts[i].A_ID) continue;
-                if (sup.vert_ID_B != s.verts[i].B_ID) continue;
-                return 0;
+                //if (sup.vert_ID_A != s.verts[i].A_ID) continue;
+               // if (sup.vert_ID_B != s.verts[i].B_ID) continue;
+               // return 0;
             }
             
             s.verts[s.count].A = sup.A;
             s.verts[s.count].B = sup.B;
             s.verts[s.count].P = sup.B - sup.A;
 
-            s.verts[s.count].A_ID = sup.vert_ID_A;
-            s.verts[s.count].B_ID = sup.vert_ID_B;
+            //s.verts[s.count].A_ID = sup.vert_ID_A;
+            //s.verts[s.count].B_ID = sup.vert_ID_B;
 
             s.bc[s.count] = 1f;
             
@@ -690,196 +684,6 @@ A: {2} B: {3}
         static List<gjk_result> results = new List<gjk_result>();
         public static Vector3 cda = Vector3.Zero; public static Vector3 cdb = Vector3.Zero;
 
-        public static gjk_result gjk_intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b, float radius_a = 0f, float radius_b = 0f) {
-            if (shape_A == null || shape_B == null) throw new Exception();
-            support s = new support();
-            simplex si = new simplex();
-            gjk_result res = new gjk_result();
-            Vector3 sa = Vector3.Zero;
-            Vector3 sb = Vector3.Zero;
-            results.Clear();
 
-            int t = 0;
-
-            //world matrices
-            //Matrix w_a = shape_A.orientation * Matrix.CreateTranslation(shape_A.position);
-            //Matrix w_b = shape_B.orientation * Matrix.CreateTranslation(shape_B.position);
-
-
-            s.A = Vector3.Transform(shape_A.start_point, w_a);
-            s.B = Vector3.Transform(shape_B.start_point, w_b);
-
-            res.shape_A = shape_A;
-            res.shape_B = shape_B;
-
-            do {
-                t = GJK.gjk(ref s, ref si);
-
-                switch (shape_A.shape) {
-                    case shape_type.cube:
-                        s.vert_ID_A = Supports.Cube(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Cube)shape_A));
-                        break;
-                    case shape_type.polyhedron:
-                        s.vert_ID_A = Supports.Polyhedron(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Polyhedron)shape_A).verts.ToArray());
-                        break;
-                    case shape_type.quad:
-                        s.vert_ID_A = Supports.Quad(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Quad)shape_A).A, ((Quad)shape_A).B, ((Quad)shape_A).C, ((Quad)shape_A).D, (Quad)shape_A);
-                        break;
-                    case shape_type.tri:
-                        s.vert_ID_A = Supports.Tri(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Triangle)shape_A).A, ((Triangle)shape_A).B, ((Triangle)shape_A).C);
-                        break;
-                    case shape_type.capsule:
-                        s.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Capsule)shape_A).A, ((Capsule)shape_A).B);
-                        break;
-                    case shape_type.line:
-                        s.vert_ID_A = Supports.Line(ref sa, Vector3.Transform(s.DA, Matrix.Invert(w_a)), ((Line3D)shape_A).A, ((Line3D)shape_A).B);
-                        break;
-                    case shape_type.sphere:
-                        s.vert_ID_A = Supports.Point(ref sa, s.DA, ((Sphere)shape_A).P);
-                        break;                    
-                }
-
-                switch (shape_B.shape) {
-                    case shape_type.cube:
-                        s.vert_ID_B = Supports.Cube(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w_b)), ((Cube)shape_B) );
-                        break;
-                    case shape_type.polyhedron:
-                        s.vert_ID_B = Supports.Polyhedron(ref sb, s.DB, ((Polyhedron)shape_B).verts.ToArray());
-                        break;
-                    case shape_type.quad:
-                        s.vert_ID_B = Supports.Quad(ref sb, s.DB, ((Quad)shape_B).A, ((Quad)shape_B).B, ((Quad)shape_B).C, ((Quad)shape_B).D, (Quad)shape_B);
-                        break;
-                    case shape_type.tri:
-                        s.vert_ID_B = Supports.Tri(ref sb, s.DB, ((Triangle)shape_B).A, ((Triangle)shape_B).B, ((Triangle)shape_B).C);
-                        break;
-                    case shape_type.capsule:
-                        s.vert_ID_B = Supports.Line(ref sb, s.DB, ((Capsule)shape_B).A, ((Capsule)shape_B).B);
-                        break;
-                    case shape_type.line:
-                        s.vert_ID_B = Supports.Line(ref sb, s.DB, ((Line3D)shape_B).A, ((Line3D)shape_B).B);
-                        break;
-                    case shape_type.sphere:
-                        s.vert_ID_B = Supports.Point(ref sb, s.DB, ((Sphere)shape_B).P);
-                        break;
-                }
-                
-
-                s.A = Vector3.Transform(sa, w_a);
-                s.B = Vector3.Transform(sb, w_b);
-
-            } while (t == 1);
-
-
-            GJK.gjk_check(ref si, ref res);
-            
-            float a_rad = 0, b_rad = 0;
-            switch (shape_A.shape) {
-                case shape_type.polyhedron:
-                case shape_type.quad:
-                case shape_type.tri:
-                case shape_type.line:
-                    //I sleep
-                    break;
-
-                // REAL SHIT?
-                case shape_type.capsule:
-                    a_rad = ((Capsule)shape_A).radius;
-                    break;
-                case shape_type.sphere:
-                    a_rad = ((Sphere)shape_A).radius;
-                    break;
-            }
-
-            switch (shape_B.shape) {
-                case shape_type.polyhedron:
-                case shape_type.quad:
-                case shape_type.tri:
-                case shape_type.line:
-                    break;
-
-                case shape_type.capsule:
-                    b_rad = ((Capsule)shape_B).radius;
-                    break;
-                case shape_type.sphere:
-                    b_rad = ((Sphere)shape_B).radius;
-                    break;
-            }
-
-            if (radius_a > 0f)
-                a_rad += radius_a;
-            if (radius_b > 0f)
-                b_rad += radius_b;
-
-            if ((a_rad != 0 || b_rad != 0))
-                GJK.gjk_quadratic_distance_solve(a_rad, b_rad, ref res);
-
-            return res;
-        }
-
-
-        public static bool gjk_raycast(Vector3 start, Vector3 end, Shape3D shape, out gjk_result res) {
-            if (shape == null) throw new Exception();
-
-            support s = new support();
-            simplex si = new simplex();
-
-            Vector3 sa = Vector3.Zero;
-            Vector3 sb = Vector3.Zero;
-
-            results.Clear();
-            int t = 0;
-
-            Matrix w = shape.orientation * Matrix.CreateTranslation(shape.position);
-
-            s.A = Vector3.Transform(start, Matrix.Identity);
-            s.B = Vector3.Transform(shape.start_point, w);
-
-            float rad = 0;
-
-            do {
-                t = GJK.gjk(ref s, ref si);
-
-                s.vert_ID_A = Supports.Line(ref sa, s.DA, start, end);
-
-                switch (shape.shape) {
-                    case shape_type.cube:
-                        s.vert_ID_B = Supports.Cube(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w)), ((Cube) shape));
-                        break;
-                    case shape_type.polyhedron:
-                        s.vert_ID_B = Supports.Polyhedron(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w)), ((Polyhedron) shape).verts.ToArray());
-                        break;
-                    case shape_type.quad:
-                        s.vert_ID_B = Supports.Quad(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w)), ((Quad) shape).A, ((Quad) shape).B, ((Quad) shape).C, ((Quad) shape).D, (Quad)shape);
-                        break;
-                    case shape_type.tri:
-                        s.vert_ID_B = Supports.Tri(ref sb, s.DB, ((Triangle) shape).A, ((Triangle) shape).B, ((Triangle) shape).C);
-                        break;
-                    case shape_type.capsule:
-                        s.vert_ID_B = Supports.Line(ref sb, Vector3.Transform(s.DB, Matrix.Invert(w)), ((Capsule) shape).A, ((Capsule) shape).B);
-                        rad = ((Capsule)shape).radius;
-                        break;
-                    case shape_type.line:
-                        s.vert_ID_B = Supports.Line(ref sb, s.DB, ((Line3D) shape).A, ((Line3D) shape).B);
-                        break;
-                    case shape_type.sphere:
-                        s.vert_ID_B = Supports.Point(ref sb, s.DB, ((Sphere) shape).P);
-                        rad = ((Sphere)shape).radius;
-                        break;
-                }
-
-
-                s.A = Vector3.Transform(sa, w);
-                s.B = Vector3.Transform(sb, w);
-
-            } while (t == 1);
-
-            res = new gjk_result();
-            GJK.gjk_check(ref si, ref res);
-
-            if (rad != 0)
-              GJK.gjk_quadratic_distance_solve(0, rad, ref res);
-
-            return res.hit;
-        }
     }
 }

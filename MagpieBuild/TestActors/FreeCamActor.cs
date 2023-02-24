@@ -174,9 +174,8 @@ namespace MagpieTestbed.TestActors {
                 wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("shift") ? 6f : 1f) * Clock.internal_frame_limit_in_seconds;
 
             if (wants_movement != Vector3.Zero) {
-                this.collision.position += wants_movement;
-                this.position += wants_movement;
-                wants_movement = Vector3.Zero;
+                //this.position += wants_movement;
+               //wants_movement = Vector3.Zero;
             }
         }
 

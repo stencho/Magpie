@@ -20,25 +20,20 @@ namespace Magpie {
         cylinder,
         line,
         sphere,
-        point_sphere,
-        point_capsule,
         dummy
     }
 
     public interface Shape3D {
-        Matrix orientation { get; set; }
-        Vector3 position { get; set; }
         Vector3 start_point { get; }
+        Vector3 center { get; }
 
-        BoundingBox find_bounding_box();
+        BoundingBox find_bounding_box(Matrix world);
+        BoundingBox sweep_bounding_box(Matrix world, Vector3 sweep);
 
         shape_type shape { get; }
 
-        float radius { get; set; }
+        Vector3 support(Vector3 direction, Vector3 sweep);
 
-        //VertexBuffer debug_vertex_buffer { get; }
-        //IndexBuffer debug_index_buffer { get; }
-
-        void draw(Vector3 offset);
+        void draw(Matrix world);
     }  
 }

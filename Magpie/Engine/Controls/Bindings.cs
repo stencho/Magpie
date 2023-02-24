@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using static Magpie.Engine.Controls;
 using Magpie.Graphics;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
+using System.Security.Cryptography.Pkcs;
 
 namespace Magpie.Engine {
     public enum controller_type {
@@ -352,6 +353,8 @@ namespace Magpie.Engine {
         }
 
         public void update() {
+
+
             analog_binds.update(player_index);
             digital_binds.update(player_index);
 
@@ -658,6 +661,9 @@ namespace Magpie.Engine {
 
         double _hold_time = 300;
 
+        KeyboardState ks;
+        KeyboardState pks;
+
         public KeyboardBind(Keys button, string[] binds) {
             this.binds.AddRange(binds);
             _button = button;
@@ -665,10 +671,15 @@ namespace Magpie.Engine {
         }
 
         public void update_state(PlayerIndex player_index) {
-            if (Controls.is_pressed(button)) {
+                ks = Keyboard.GetState();
+            
+            bool just_pressed = (ks.IsKeyDown(button) && !pks.IsKeyDown(button));
+            bool was_pressed = (!ks.IsKeyDown(button) && pks.IsKeyDown(button));
+
+            if (ks.IsKeyDown(button)) {
                 _bind_state = digital_bind_state.pressed;
 
-                if (!Controls.was_pressed(button)) {
+                if (just_pressed) {
                     _bind_state |= digital_bind_state.just_pressed;
 
                     _pressed_at = DateTime.Now;
@@ -686,7 +697,7 @@ namespace Magpie.Engine {
             } else {
                 _bind_state = digital_bind_state.released;
 
-                if (Controls.was_pressed(button)) {
+                if (was_pressed) {
                     _bind_state |= digital_bind_state.just_released;
                 }
 
@@ -708,6 +719,8 @@ namespace Magpie.Engine {
                 _recent_state[i] = _recent_state[i + 1];
             }
             _recent_state[_recent_state.Length - 1] = is_pressed;
+
+            pks = ks;
         }
 
     }

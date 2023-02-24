@@ -45,29 +45,6 @@ namespace Magpie.Engine.Collision {
             new Vector3(0, 0, 1)
         };
 
-        static Vector3 barycentric(Vector3 p, Vector3 A, Vector3 B, Vector3 C) {
-            Vector3 v0 = B - A;
-            Vector3 v1 = C - A;
-            Vector3 v2 = p - A;
-
-            float f0 = Vector3.Dot(v0, v0);
-            float f1 = Vector3.Dot(v0, v1);
-            float f2 = Vector3.Dot(v1, v1);
-            float f3 = Vector3.Dot(v2, v0);
-            float f4 = Vector3.Dot(v2, v1);
-
-            float denom = f0 * f2 - f1 * f1;
-            if (compare(denom, 0.0f)) {
-                return Vector3.Zero;
-            }
-
-            Vector3 res;
-            res.Y = (f2 * f3 - f1 * f4) / denom;
-            res.Z = (f0 * f4 - f1 * f3) / denom;
-            res.X = 1.0f - res.Y - res.Z;
-
-            return res;
-        }
 
         public static bool ray_intersects_plane(raycast ray, Plane plane, out raycast_result result) {
             return ray_intersects_plane(ray.start, ray.direction, plane, out result);

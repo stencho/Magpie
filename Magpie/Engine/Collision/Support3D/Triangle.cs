@@ -1,4 +1,5 @@
 ﻿using Magpie.Graphics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -8,10 +9,9 @@ using System.Threading.Tasks;
 
 namespace Magpie.Engine.Collision.Support3D {
     public class Triangle : Shape3D {
-        public Matrix orientation { get; set; } = Matrix.Identity;
-        public Vector3 position { get; set; } = Vector3.Zero;
-        public Vector3 start_point => A;
 
+        public Vector3 start_point => A;
+        public Vector3 center => (A + B+C) / 8f;
         public shape_type shape { get; } = shape_type.tri;
 
         public Vector3 A;
@@ -20,10 +20,25 @@ namespace Magpie.Engine.Collision.Support3D {
 
         public Vector3 normal => CollisionHelper.triangle_normal(A, B, C);
 
-        public float radius { get; set; } = 0f;
 
-        public BoundingBox find_bounding_box() {
-            return new BoundingBox();
+        public BoundingBox sweep_bounding_box(Matrix world, Vector3 sweep) {
+
+            if (sweep != Vector3.Zero) {
+                return CollisionHelper.BoundingBox_around_points(
+                    Vector3.Transform(A, world),
+                    Vector3.Transform(B, world),
+                    Vector3.Transform(C, world),
+                    Vector3.Transform(A + sweep, world),
+                    Vector3.Transform(B + sweep, world),
+                    Vector3.Transform(C + sweep, world));
+            } else return find_bounding_box(world);
+        }
+
+        public BoundingBox find_bounding_box(Matrix world) {
+            return CollisionHelper.BoundingBox_around_points(
+                Vector3.Transform(A, world), 
+                Vector3.Transform(B, world), 
+                Vector3.Transform(C, world));
         }
 
         public Triangle() {
@@ -48,18 +63,22 @@ namespace Magpie.Engine.Collision.Support3D {
             this.C = C;
         }
 
-        public void draw(Vector3 offset) {
-            Matrix w = orientation * Matrix.CreateTranslation(offset + position);
-
-            Draw3D.fill_tri(w, A, B, C, Color.White * 0.9f);
+        public void draw(Matrix world) {
+            Draw3D.fill_tri(world, A, B, C, Color.White * 0.9f);
 
             Draw3D.lines(Color.MonoGameOrange,
-                Vector3.Transform(A, w),
-                Vector3.Transform(B, w),
-                Vector3.Transform(C, w),
-                Vector3.Transform(A, w));
+                Vector3.Transform(A, world),
+                Vector3.Transform(B, world),
+                Vector3.Transform(C, world),
+                Vector3.Transform(A, world));
         }
 
+        public Vector3 support(Vector3 direction, Vector3 sweep) {
+            if (sweep != Vector3.Zero) {
+                return Supports.Polyhedron(direction, A,B,C,A+sweep,B+sweep,C+sweep);
+            }
+            return Supports.Tri(direction, A,B,C);
+        }
     }
 
 }

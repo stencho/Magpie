@@ -13,7 +13,7 @@ using static Magpie.Engine.Controls;
 
 namespace MagpieTestbed.TestActors {
     class MoveTestActor : Actor {
-        public Vector3 position { get; set; } = Vector3.Zero;
+        public Vector3 position { get; set; } = new Vector3(4.5738883f, 14.473223f, 2.298569f);
         public Vector3 wants_movement { get; set; } = Vector3.Zero;
         public Vector3 wants_absolute_movement { get; set; } = Vector3.Zero;
         public bool request_absolute_move { get; set; } = false;
@@ -74,6 +74,7 @@ namespace MagpieTestbed.TestActors {
                 mv += Vector3.Down;
             }
 
+
             if (StaticControlBinds.just_pressed("test_sweep")) {
                 start_pos = position;
             }
@@ -99,13 +100,12 @@ namespace MagpieTestbed.TestActors {
             } else {
 
                 if (mv != Vector3.Zero)
-                    wants_movement = (Vector3.Normalize(mv) * movement_speed * Clock.internal_frame_time_delta);
+                    wants_movement = (Vector3.Normalize(mv) * (movement_speed * (StaticControlBinds.pressed("shift") ? 0.2f:1f)) * Clock.internal_frame_time_delta);
 
             }
             if (wants_movement != Vector3.Zero) {
-                this.collision.position += wants_movement;
-                this.position += wants_movement;
-                wants_movement = Vector3.Zero;
+                //this.position += wants_movement;
+                //wants_movement = Vector3.Zero;
             }
 
         }
@@ -114,7 +114,7 @@ namespace MagpieTestbed.TestActors {
             lights[1].position = position;
         }
         public void debug_draw() {
-            collision.draw(Vector3.Zero);
+            collision.draw(Matrix.CreateTranslation(position));
             //sweep_collision.draw();
             //if (sweep_collision.shape == shape_type.quad)
                 //Draw3D.capsule(((Capsule)collision).A+ ((Quad)sweep_collision).B, ((Capsule)collision).B + ((Quad)sweep_collision).B, collision.radius, Color.Green);

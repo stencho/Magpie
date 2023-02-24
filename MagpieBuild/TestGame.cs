@@ -26,6 +26,10 @@ using Microsoft.VisualBasic.ApplicationServices;
 using Magpie.Engine.WorldElements;
 using System.Transactions;
 using static Magpie.GJK;
+using System.Drawing.Drawing2D;
+using Matrix = Microsoft.Xna.Framework.Matrix;
+using static Magpie.Engine.Collision.MixedCollision;
+using MagpieBuild.TestActors;
 
 namespace MagpieBuild
 {
@@ -111,7 +115,9 @@ namespace MagpieBuild
 
                 (bind_type.digital, controller_type.keyboard, Keys.T, "test"),
                 (bind_type.digital, controller_type.keyboard, Keys.Y, "test_sweep"),
-                (bind_type.digital, controller_type.keyboard, Keys.P, "poopy_butt"),
+                (bind_type.digital, controller_type.keyboard, Keys.Q, "t_L"),
+                (bind_type.digital, controller_type.keyboard, Keys.E, "t_R"),
+                (bind_type.digital, controller_type.keyboard, Keys.R, "t_S"),
 
 
                 (bind_type.digital, controller_type.keyboard, Keys.LeftShift, "shift"),
@@ -126,63 +132,14 @@ namespace MagpieBuild
             add_bindings((bind_type.digital, controller_type.keyboard, Keys.T, new string[] { "fart", "cum", "shit" } ));
 
             force_enable("screenshot");
-            /*
-            add_bind(new KeyBind(Keys.Up, "t_forward"));
-            add_bind(new KeyBind(Keys.Left, "t_left"));
-            add_bind(new KeyBind(Keys.Right, "t_right"));
-            add_bind(new KeyBind(Keys.Down, "t_backward"));
-
-            add_bind(new KeyBind(Keys.PageUp, "t_up"));
-            add_bind(new KeyBind(Keys.PageDown, "t_down"));
-
-            add_bind(new KeyBind(Keys.Space, "up"));
-            add_bind(new KeyBind(Keys.C, "down"));
-
-            add_bind(new KeyBind(Keys.T, "test"));
-            add_bind(new KeyBind(Keys.Y, "test_sweep"));
-            add_bind(new KeyBind(Keys.F2, "switch_buffer"));
-            add_bind(new KeyBind(Keys.F3, "test", "switch_buffer"));
-            add_bind(new KeyBind(Keys.P, "poopy_butt"));
-
-            add_bind(new KeyBind(Keys.F5, "screenshot"));
-
-            add_bind(new KeyBind(Keys.LeftShift, "shift"));
-
-            //add_bind(new KeyBind(Keys.LeftAlt, "ui_alt"));
-
-            add_bind(new MouseButtonBind(MouseButtons.Left, "ui_select"));
-            add_bind(new MouseButtonBind(MouseButtons.Right, "click_right"));
-            add_bind(new MouseButtonBind(MouseButtons.Middle, "click_middle"));
-            add_bind(new MouseButtonBind(MouseButtons.ScrollUp, "scroll_up"));
-            add_bind(new MouseButtonBind(MouseButtons.ScrollDown, "scroll_down"));
-            */
-            
-
-            /*world.current_map.add_object("test_sphere2", new TestSphere());
-            world.current_map.add_object("test_sphere3", new TestSphere());
-            world.current_map.add_object("test_sphere4", new TestSphere());
-            world.current_map.add_object("test_sphere5", new TestSphere());
-            world.current_map.add_object("test_sphere6", new TestSphere());
-
-            
-
-
-            world.current_map.objects["test_sphere2"].position += Vector3.Forward * 5f;
-            world.current_map.objects["test_sphere3"].position += Vector3.Forward * 5f + Vector3.Right * 2f;
-            world.current_map.objects["test_sphere4"].position += Vector3.Forward * 5f + Vector3.Left * 2f;
-            world.current_map.objects["test_sphere5"].position += Vector3.Forward * 8f + Vector3.Up * 2f;
-            world.current_map.objects["test_sphere6"].position += Vector3.Forward * 12f + Vector3.Up * 2f;
-
-
-            world.current_map.objects["test_sphere6"].model = "bigcube";
-            */
 
             for (int i = 0; i < 150; i++) {
                 var id = EngineState.world.current_map.make_id();
                 world.current_map.game_objects.Add(id,
                     new object_info(
-                        (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one * 10)) + (Vector3.Up * (RNG.rng_float * 20))));;
-                world.current_map.game_objects[id].render[0].textures[0] = "trumpmap";
+                        (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one * 10)) + (Vector3.Up * (RNG.rng_float * 20)), 
+                        new render_info_model("sphere", "trumpmap")));
+                
 
                 //var ind = world.current_map.add_object("test_sphere" + i, new TestSphere());
                 //world.current_map.objects[ind].position = (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one* 10)) + (Vector3.Up * (RNG.rng_float * 20));
@@ -193,21 +150,24 @@ namespace MagpieBuild
 
             }
 
+            var sphereid = world.current_map.add_object(new object_info(Vector3.Up * 3 ));
 
-            mid = EngineState.world.current_map.make_id();
-            world.current_map.game_objects.Add(mid, new object_info(
+            var moveid = world.current_map.add_object(new gjkTestActor(Vector3.Right * 5f));
+            ((gjkTestActor)world.current_map.game_objects[moveid]).gjk_target_id = sphereid;
+
+            mid = world.current_map.add_object(new object_info(
                 Vector3.Up * 5f,
                 new render_info_model("desk")));
 
-            world.current_map.game_objects[mid].render[0].scale *= 16f;
-            world.current_map.game_objects[mid].render[0].orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, 12f);
+           // world.current_map.game_objects[mid].orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, 12f);
+            world.current_map.game_objects[mid].scale *= 16f;
             world.current_map.game_objects[mid].lights =
                 new light[1] {                    
                     new light {
                         type = LightType.SPOT,
                         color = RNG.random_opaque_color(),
                         spot_info = new spot_info() {
-                            position = world.current_map.game_objects[mid].collision.position,
+                            position = world.current_map.game_objects[mid].position,
                             orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(RNG.rng_float_neg_one_to_one * 180f))
                         }
                     }
@@ -215,98 +175,17 @@ namespace MagpieBuild
 
 
 
+            //world.current_map.add_actor(new MoveTestActor());
 
-            /*
-            world.current_map.add_object("test_cube", new TestSphere());
-            world.current_map.objects["test_cube"].model = "cube";
-            world.current_map.objects["test_cube"].position = Vector3.Up * 60;
-            world.current_map.objects["test_cube"].scale = Vector3.One + (Vector3.UnitX * 25f) + (Vector3.UnitY * 10f);
-
-            world.current_map.add_object("test_cube1", new TestSphere());
-            world.current_map.objects["test_cube1"].model = "cube";
-            world.current_map.objects["test_cube1"].position = Vector3.Up * 60  + (Vector3.Backward * 50);
-            //world.current_map.objects["test_cube1"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(180f));
-            world.current_map.objects["test_cube1"].scale = Vector3.One + (Vector3.UnitX * 25f) + (Vector3.UnitY * 10f);
-            
-            world.current_map.add_object("test_cube2", new TestSphere());
-            world.current_map.objects["test_cube2"].model = "cube";
-            world.current_map.objects["test_cube2"].position = Vector3.Up * 60 + (Vector3.Backward * 25f) +  (Vector3.Right * 25f);
-           // world.current_map.objects["test_cube2"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(90f));
-            world.current_map.objects["test_cube2"].scale = Vector3.One + (Vector3.UnitZ * 25f) + (Vector3.UnitY * 10f);
-
-            world.current_map.add_object("test_cube3", new TestSphere());
-            world.current_map.objects["test_cube3"].model = "cube";
-            world.current_map.objects["test_cube3"].position = Vector3.Up * 60 + (Vector3.Backward * 25f) + (Vector3.Left * 25f);
-           // world.current_map.objects["test_cube3"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(90f));
-            world.current_map.objects["test_cube3"].scale = Vector3.One + (Vector3.UnitZ * 25f) + (Vector3.UnitY * 10f);
-
-            world.current_map.add_object("test_cube4", new TestSphere());
-            world.current_map.objects["test_cube4"].model = "cube";
-            world.current_map.objects["test_cube4"].position = Vector3.Up * 50 + (Vector3.Backward * 25f);
-            world.current_map.objects["test_cube4"].scale = Vector3.One + (Vector3.UnitX * 25f) + (Vector3.UnitZ * 25f);
-
-            
-            world.current_map.add_object("butt_a", new TestSphere());
-            world.current_map.objects["butt_a"].model = "smoothsphere";
-            world.current_map.objects["butt_a"].position = Vector3.Up * 90 + (Vector3.Backward * 25f) + (Vector3.Left * 3f);
-            world.current_map.objects["butt_a"].scale = Vector3.One * 8f - (Vector3.UnitX * 0.5f) - (Vector3.UnitZ * 1.5f);
-            world.current_map.objects["butt_a"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(90f));
-
-            world.current_map.add_object("butt_b", new TestSphere());
-            world.current_map.objects["butt_b"].model = "smoothsphere";
-            world.current_map.objects["butt_b"].position = Vector3.Up * 90 + (Vector3.Backward * 25f) + (Vector3.Right * 3f);
-            world.current_map.objects["butt_b"].scale = Vector3.One * 8f - (Vector3.UnitX * 0.5f) - (Vector3.UnitZ * 1.5f);
-            world.current_map.objects["butt_b"].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(90f));
-            */
-
-
-            //world.current_map.add_brush("test_floor", new FloorPlane());
-            //world.current_map.floors["test_floor"].position = Vector3.Forward * 10f + Vector3.Up * 5f;
-            //world.current_map.add_floor("test_floor2", new FloorPlane());
-            //world.current_map.add_actor("test_actor", new MoveTestActor());
-
-            //((FloorPlane)world.current_map.floors["test_floor2"]).size = new Vector2(50, 20);
-            //world.current_map.floors["test_floor2"].position = new Vector3(0,4f,0);
-            //world.current_map.floors["test_floor2"].orientation = 
-            // Matrix.CreateFromAxisAngle(Vector3.Up, MathHelper.ToRadians(36f)) * Matrix.CreateFromAxisAngle(Vector3.Right, MathHelper.ToRadians(26f));
-
-            //((Quad)test_b).B += Vector3.Forward * 40f;
-            //((Quad)test_b).C += Vector3.Forward * 40f;
-
-            //((Quad)test_b).position += Vector3.Forward * 40f;
-
-            world.current_map.add_actor(new MoveTestActor());
-
-
-            /*
-            test_sdf = new SDFSprite2D(Vector2.One * 330, Vector2.One * 350);
-            test_sdf.inside_color = Color.HotPink;
-            test_sdf.resource_name = "sdf_quiet";
-
-            test_sdf2 = new SDFSprite2D((Vector2.One * 330f) + (Vector2.UnitX * 300f), Vector2.One * 450 * (Vector2.One - (Vector2.UnitX * 0.5f)));
-            test_sdf2.inside_color = Color.Orange;
-            //test_sdf2.alpha_scissor = 0.01f;
-            test_sdf2.resource_name = "sdf_quiet_2";
-            */
 
             crosshair_sdf = new SDFSprite2D(
                 (EngineState.resolution.ToVector2() * 0.5f), 
                 new Vector2(16, 16), 0.75f);
 
-            //parttest = new Particle2D("trump_tex");
-            //pctest = new PointCloud(test_trums, test_b);
-
-            //test_window = new Magpie.Graphics.UI.UIWindow(new XYPair(100,100), new XYPair(500,250));
-
-            //EngineState.window_manager.add_window(test_window);
-            //test_window2 = new Magpie.Graphics.UI.UIWindow(new XYPair(150, 150), new XYPair(100, 100));
-
-            //EngineState.window_manager.add_window(test_window2);
 
             Clock.frame_probe.set("overhead");
             Clock.frame_probe.false_set("overhead");
 
-            //results = new GJK.gjk_result[world.current_map.objects.Length];
         }
 
 
@@ -466,7 +345,6 @@ namespace MagpieBuild
 
         bool draw_debug_info = true;
 
-        Octree testoctree = new Octree(Vector3.One * -50, Vector3.One * 50);
 
 
         protected override void Draw(GameTime gameTime) {
@@ -489,10 +367,8 @@ namespace MagpieBuild
 
             world.Draw(GraphicsDevice, EngineState.camera);
 
-            world.current_map.actors[0].debug_draw();
-
-            testoctree.draw();
-            /*
+            //world.current_map.actors[0].debug_draw();
+                        
             Clock.frame_probe.set("GJK tests/drawing");
 
             while (true) { 
@@ -501,21 +377,24 @@ namespace MagpieBuild
                         foreach (gjk_result r in world.current_map.game_objects[mid].collision.gjk_results) {
                             //var r = mc.gjk(world.current_map.actors[0].collision, world.current_map.actors[0].world, world.current_map.game_objects[mid].render[0].world);
                             Draw3D.line(r.closest_point_A, r.closest_point_B, Color.MonoGameOrange);
-                            var fr = ((Capsule)world.current_map.actors[0].collision).radius;
                             Draw3D.text_3D(
                                 EngineState.spritebatch,
-                                r.distance.ToString(),
+                                (r.distance).ToString(),
                                 "pf", r.closest_point_B,
                                 Vector3.Normalize(EngineState.camera.position - r.closest_point_B), 1f,
-                                r.distance < fr ? Color.Green : Color.Red);
+                                Color.Black);
 
                             // Draw3D.xyz_cross(r.closest_point_A + (r.AB * (fr > r.distance ? r.distance : fr)), 0.1f, Color.MonoGameOrange);
                         }
+
+                       // ((Capsule)world.current_map.actors[0].collision).draw(world.current_map.actors[0].world * Matrix.Invert(world.current_map.game_objects[mid].collision.world));
+
+                       // Draw3D.xyz_cross((world.current_map.actors[0].world * Matrix.Invert(world.current_map.game_objects[mid].collision.world)).Translation, 1f / 16f, Color.Red);
                     }
                     break;
                 }
             }
-            */
+            
             
             /*
             foreach (GJK.gjk_result res in results) {

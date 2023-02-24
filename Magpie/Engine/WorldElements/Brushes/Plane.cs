@@ -70,15 +70,12 @@ namespace Magpie.Engine.Brushes {
             }
 
             collision = new Quad(size.X, size.Y);
-            collision.radius = 0.02f;
 
         }
 
         public void Update() {
             // bounds = CollisionHelper.find_bounding_box_around_points(A, B, C, D);
             //bounds = BoundingBox.CreateFromPoints(new Vector3[] {A,B,C,D});
-            collision.position = position;
-            collision.orientation = orientation;
         }
 
         public Vector3 get_footing(float X, float Z) {
@@ -105,7 +102,7 @@ namespace Magpie.Engine.Brushes {
 
         public void debug_draw() {
             //Draw3D.cube((bounds.Min + bounds.Max) / 2, (bounds.Max - bounds.Min) / 2f, Color.MediumPurple, Matrix.Identity, EngineState.camera.view, EngineState.camera.projection);
-            collision.draw(position);
+            
         }
     }
 }

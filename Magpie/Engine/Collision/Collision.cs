@@ -176,6 +176,42 @@ namespace Magpie.Engine.Collision {
             return u * A + v * B + w * C;
         }
 
+        public static Vector3 farthest_point_on_triangle(Vector3 A, Vector3 B, Vector3 C, Vector3 dir) {
+            float dotA = Vector3.Dot(A, dir);
+            float dotB = Vector3.Dot(B, dir);
+            float dotC = Vector3.Dot(C, dir);
+            float dotAB = Vector3.Dot(B - A, dir);
+            float dotBC = Vector3.Dot(C - B, dir);
+            float dotCA = Vector3.Dot(A - C, dir);
+
+            Vector3 farthestPoint;
+            float maxDot = dotA;
+            if (dotB > maxDot) {
+                maxDot = dotB;
+                farthestPoint = B;
+            } else {
+                farthestPoint = A;
+            }
+            if (dotC > maxDot) {
+                maxDot = dotC;
+                farthestPoint = C;
+            }
+            if (dotAB > maxDot) {
+                maxDot = dotAB;
+                farthestPoint = closest_point_on_line(A, B, dir);
+            }
+            if (dotBC > maxDot) {
+                maxDot = dotBC;
+                farthestPoint = closest_point_on_line(B, C, dir);
+            }
+            if (dotCA > maxDot) {
+                maxDot = dotCA;
+                farthestPoint = closest_point_on_line(C, A, dir);
+            }
+
+            return farthestPoint;
+        }
+
         public static Vector3 closest_point_on_quad(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Vector3 point) {
             Vector3 ABD_closest = CollisionHelper.closest_point_on_triangle(A, B, D, point);
             Vector3 BCD_closest = CollisionHelper.closest_point_on_triangle(B, C, D, point);
@@ -462,9 +498,7 @@ namespace Magpie.Engine.Collision {
         }
 
         public static BoundingBox BoundingBox_around_sphere(Sphere sphere, Matrix world) {
-            Vector3 tmp_pos = Vector3.Transform(sphere.position, world);
-
-            return new BoundingBox(tmp_pos - (Vector3.One * sphere.radius), tmp_pos + (Vector3.One * sphere.radius));
+            return new BoundingBox(world.Translation - (Vector3.One * sphere.radius), world.Translation + (Vector3.One * sphere.radius));
         }
 
         public static BoundingBox BoundingBox_around_OBB(Cube obb, Matrix world) {
@@ -515,9 +549,24 @@ namespace Magpie.Engine.Collision {
             return new BoundingBox(new Vector3(Xmin, Ymin, Zmin), new Vector3(Xmax, Ymax, Zmax));
         }
 
-        public static BoundingBox BoundingBox_around_capsule(Capsule capsule) {
-            var min = capsule.position + capsule.A + -((Vector3.UnitX + Vector3.UnitZ + Vector3.UnitY) * capsule.radius);
-            var max = capsule.position + capsule.B + ((Vector3.UnitX + Vector3.UnitZ + Vector3.UnitY) * capsule.radius);
+        public static BoundingBox BoundingBox_around_capsule(Capsule capsule, Matrix world) {
+            Vector3 min = Vector3.Zero;
+            Vector3 max = Vector3.Zero;
+
+            var wA = Vector3.Transform(capsule.A, world);
+            var wB = Vector3.Transform(capsule.B, world);
+
+            if (wA.X >= wB.X) max.X = wA.X;
+            else max.X = wB.X;
+            
+            if (wA.Y >= wB.Y) max.Y = wA.Y;
+            else max.Y = wB.Y;
+
+            if (wA.Z >= wB.Z) max.Z = wA.Z;
+            else max.Z = wB.Z;
+
+            min += Vector3.One * -capsule.radius;
+            max += Vector3.One * capsule.radius;
 
             return new BoundingBox(min, max);
         }
@@ -529,6 +578,15 @@ namespace Magpie.Engine.Collision {
             return new BoundingBox(min, max);
         }
 
+        public static BoundingBox BoundingBox_around_capsule(Vector3 A, Vector3 B, float radius, Matrix world) {
+            Vector3 scale;
+            world.Decompose(out scale, out _, out _);
+
+            var min = A + -((Vector3.UnitX + Vector3.UnitZ + Vector3.UnitY) * radius) * scale;
+            var max = B + ((Vector3.UnitX + Vector3.UnitZ + Vector3.UnitY) * radius) * scale;
+
+            return new BoundingBox(min, max);
+        }
 
         public static BoundingBox BoundingBox_around_BoundingBoxes(params BoundingBox[] boxes) {
             Vector3 min = Vector3.One * float.MaxValue, max = Vector3.One * float.MinValue;
@@ -551,7 +609,74 @@ namespace Magpie.Engine.Collision {
 
             return new BoundingBox(min, max);
         }
+        public static BoundingBox BoundingBox_around_ModelCollisions(Matrix world, params ModelCollision[] collisions) {
+            Vector3 min = Vector3.One * float.MaxValue, max = Vector3.One * float.MinValue;
 
+            foreach (ModelCollision coll in collisions) {
+                var box = coll.get_bounds(world);
+
+                if (box.Min.X < min.X)
+                    min.X = box.Min.X;
+                if (box.Min.Y < min.Y)
+                    min.Y = box.Min.Y;
+                if (box.Min.Z < min.Z)
+                    min.Z = box.Min.Z;
+
+                if (box.Max.X > max.X)
+                    max.X = box.Max.X;
+                if (box.Max.Y > max.Y)
+                    max.Y = box.Max.Y;
+                if (box.Max.Z > max.Z)
+                    max.Z = box.Max.Z;
+            }
+
+            return new BoundingBox(min, max);
+        }
+        public static BoundingBox BoundingBox_around_Shapes(Matrix world, params Shape3D[] collisions) {
+            Vector3 min = Vector3.One * float.MaxValue, max = Vector3.One * float.MinValue;
+
+            foreach (Shape3D coll in collisions) {
+                var box = coll.find_bounding_box(world);
+
+                if (box.Min.X < min.X)
+                    min.X = box.Min.X;
+                if (box.Min.Y < min.Y)
+                    min.Y = box.Min.Y;
+                if (box.Min.Z < min.Z)
+                    min.Z = box.Min.Z;
+
+                if (box.Max.X > max.X)
+                    max.X = box.Max.X;
+                if (box.Max.Y > max.Y)
+                    max.Y = box.Max.Y;
+                if (box.Max.Z > max.Z)
+                    max.Z = box.Max.Z;
+            }
+
+            return new BoundingBox(min, max);
+        }
+
+        public static BoundingBox BoundingBox_around_points(List<Vector3> points) {
+            Vector3 min = Vector3.One * float.MaxValue, max = Vector3.One * float.MinValue;
+
+            foreach (Vector3 point in points) {
+                if (point.X < min.X)
+                    min.X = point.X;
+                if (point.Y < min.Y)
+                    min.Y = point.Y;
+                if (point.Z < min.Z)
+                    min.Z = point.Z;
+
+                if (point.X > max.X)
+                    max.X = point.X;
+                if (point.Y > max.Y)
+                    max.Y = point.Y;
+                if (point.Z > max.Z)
+                    max.Z = point.Z;
+            }
+
+            return new BoundingBox(min, max);
+        }
         public static BoundingBox BoundingBox_around_points(params Vector3[] points) {
             Vector3 min = Vector3.One * float.MaxValue, max = Vector3.One * float.MinValue;
 
@@ -595,6 +720,56 @@ namespace Magpie.Engine.Collision {
             }
 
             return new BoundingBox(min, max);
+        }
+        public static BoundingBox BoundingBox_around_transformed_points(Matrix world, List<Vector3> points) {
+            Vector3 min = Vector3.One * float.MaxValue, max = Vector3.One * float.MinValue;
+
+            foreach (Vector3 point in points) {
+                var p = Vector3.Transform(point, world);
+
+                if (p.X < min.X)
+                    min.X = p.X;
+                if (p.Y < min.Y)
+                    min.Y = p.Y;
+                if (p.Z < min.Z)
+                    min.Z = p.Z;
+
+                if (p.X > max.X)
+                    max.X = p.X;
+                if (p.Y > max.Y)
+                    max.Y = p.Y;
+                if (p.Z > max.Z)
+                    max.Z = p.Z;
+            }
+
+            return new BoundingBox(min, max);
+        }
+
+        public static Vector3 barycentric(Vector3 p, Vector3 A, Vector3 B, Vector3 C) {
+            Vector3 v0 = B - A;
+            Vector3 v1 = C - A;
+            Vector3 v2 = p - A;
+
+            float f0 = Vector3.Dot(v0, v0);
+            float f1 = Vector3.Dot(v0, v1);
+            float f2 = Vector3.Dot(v1, v1);
+            float f3 = Vector3.Dot(v2, v0);
+            float f4 = Vector3.Dot(v2, v1);
+
+            float denom = f0 * f2 - f1 * f1;
+            if (compare(denom, 0.0f)) {
+                return Vector3.Zero;
+            }
+
+            Vector3 res;
+            res.Y = (f2 * f3 - f1 * f4) / denom;
+            res.Z = (f0 * f4 - f1 * f3) / denom;
+            res.X = 1.0f - res.Y - res.Z;
+
+            return res;
+        }
+        private static bool compare(float x, float y) {
+            return Math.Abs(x - y) <= epsilon * Math.Max(1.0f, Math.Max(Math.Abs(x), Math.Abs(y)));
         }
         ///
         ///  DYNAMIC      :  STAGE

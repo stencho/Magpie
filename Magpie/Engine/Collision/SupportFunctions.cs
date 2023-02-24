@@ -1,4 +1,5 @@
-﻿using Magpie.Engine.Collision.Support3D;
+﻿using Magpie.Engine.Collision;
+using Magpie.Engine.Collision.Support3D;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -8,15 +9,14 @@ using System.Threading.Tasks;
 
 namespace Magpie {
     public class Supports {
-        public static Vector3 highest_dot(Vector3[] verts, Vector3 direction, out int index, out float dot) {
-            dot = float.MinValue; index = -1;
+        public static Vector3 highest_dot(Vector3[] verts, Vector3 direction, out float dot) {
+            dot = float.MinValue; 
             Vector3 v = Vector3.Zero;
 
             for (int i = 0; i < verts.Length; i++) {
                 float d = Vector3.Dot(verts[i], direction);
 
                 if (d > dot) {
-                    index = i;
                     dot = d;
                     v = verts[i];
                 }
@@ -25,57 +25,59 @@ namespace Magpie {
             return v;
         }
         
-        public static int Polyhedron(ref Vector3 support, Vector3 direction, params Vector3[] verts) {
-            int i = 0;
-            support = highest_dot(verts, direction, out i, out _);
-            return i;
+        public static Vector3 Polyhedron(Vector3 direction, params Vector3[] verts) {
+            return highest_dot(verts, direction, out _);
         }
 
-        public static int Line(ref Vector3 support,  Vector3 direction, Vector3 A, Vector3 B) {
-            int i = 0;
-
+        public static Vector3 Line(Vector3 direction, Vector3 A, Vector3 B) {
             if (Vector3.Dot(A, direction) > Vector3.Dot(B, direction)) {
-                support = A;
+                return A;
             } else {
-                support = B;
-                i = 1;
-            }
-
-            return i;
+                return B;                
+            }            
         }
         
-        public static int Point(ref Vector3 support, Vector3 direction, Vector3 P) {
-            support = P;
-            return 0;
+        public static Vector3 Point(Vector3 direction, Vector3 P) {
+            return P;
         }
 
-        public static int Tri(ref Vector3 support,  Vector3 direction, Vector3 A, Vector3 B, Vector3 C) {
-            int i = 0; 
-            support = highest_dot(new Vector3[3] { A, B, C }, direction, out i, out _);
-            return i;
+        public static Vector3 Tri(Vector3 direction, Vector3 A, Vector3 B, Vector3 C) {
+
+            //support = highest_dot(new Vector3[3] { A, B, C }, direction, out _, out _);
+           
+            return CollisionHelper.farthest_point_on_triangle(A, B, C, direction);  
+
+            /*
+            var AB = B-A;
+            var AC = C-A;
+            var N = Vector3.Cross(AB, AC);
+
+            float dot = Vector3.Dot(N, A);
+            float inv = 1f / Vector3.Dot(N, direction);
+
+            float u = Vector3.Dot(Vector3.Cross(direction, AC),A- C) * inv;
+            float v = Vector3.Dot(Vector3.Cross(AB, direction),A- B) * inv;
+            float w = 1f - u - v;
+
+            support = w * A + v * B + u * C;
+            */
         }
 
-        public static int Quad(ref Vector3 support, Vector3 direction, Vector3 A, Vector3 B, Vector3 C, Vector3 D, Quad data) {
-            int i = 0;
-            support = highest_dot(new Vector3[4] { A,B,C,D }, direction, out i, out _);
-            return i;
+        public static Vector3 Quad(Vector3 direction, Vector3 A, Vector3 B, Vector3 C, Vector3 D) { 
+            return highest_dot(new Vector3[4] { A,B,C,D }, direction, out _);
         }
 
-        public static int Cube(ref Vector3 support, Vector3 direction, Cube cube) {
-            int i = 0;
-
-            support = highest_dot(new Vector3[8] {
-                Vector3.Transform(cube.A, Matrix.Invert(cube.orientation)),
-                Vector3.Transform(cube.B, Matrix.Invert(cube.orientation)),
-                Vector3.Transform(cube.C, Matrix.Invert(cube.orientation)),
-                Vector3.Transform(cube.D, Matrix.Invert(cube.orientation)),
-                Vector3.Transform(cube.E, Matrix.Invert(cube.orientation)),
-                Vector3.Transform(cube.F, Matrix.Invert(cube.orientation)),
-                Vector3.Transform(cube.G, Matrix.Invert(cube.orientation)),
-                Vector3.Transform(cube.H, Matrix.Invert(cube.orientation)) }, 
-                direction, out i, out _);
-            
-            return i;
+        public static Vector3 Cube(Vector3 direction, Cube cube) {
+            return highest_dot(new Vector3[8] {
+                cube.A,
+                cube.B,
+                cube.C,
+                cube.D,
+                cube.E,
+                cube.F,
+                cube.G,
+                cube.H }, 
+                direction, out _);            
         }
     }
 }

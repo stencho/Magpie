@@ -8,10 +8,8 @@ using System.Threading.Tasks;
 
 namespace Magpie.Engine.Collision.Support3D {
     public class Cube : Shape3D {
-        public Matrix orientation { get; set; } = Matrix.Identity;
-        public Vector3 position { get; set; } = Vector3.Zero;
         public Vector3 start_point => A;
-                
+        public Vector3 center => (A+B+C+D+E+F+G+H) / 8f;
         public shape_type shape { get; } = shape_type.cube;
 
         public Vector3 A => obb.A;
@@ -26,10 +24,19 @@ namespace Magpie.Engine.Collision.Support3D {
         OBB obb;
         public Vector3 half_scale;
 
-        public float radius { get; set; } = 0f;
+        public BoundingBox sweep_bounding_box(Matrix world, Vector3 sweep) {
+            if (sweep != Vector3.Zero) {
+                return CollisionHelper.BoundingBox_around_BoundingBoxes(
+                    find_bounding_box(world),
+                    find_bounding_box(world * Matrix.CreateTranslation(sweep))
+                );
+            } else {
+                return find_bounding_box(world);
+            }
+        }
 
-        public BoundingBox find_bounding_box() {
-            return CollisionHelper.BoundingBox_around_OBB(obb);
+        public BoundingBox find_bounding_box(Matrix world) {
+            return CollisionHelper.BoundingBox_around_OBB(obb, world);
         }
 
         public Cube() {
@@ -86,17 +93,20 @@ namespace Magpie.Engine.Collision.Support3D {
             return pos;
         }
         
-        public void draw(Vector3 offset) {
+        public void draw(Matrix world) {
             Draw3D.cube(
-                Vector3.Transform(A, orientation * Matrix.CreateTranslation(offset + position)),
-                Vector3.Transform(B, orientation * Matrix.CreateTranslation(offset + position)),
-                Vector3.Transform(C, orientation * Matrix.CreateTranslation(offset + position)),
-                Vector3.Transform(D, orientation * Matrix.CreateTranslation(offset + position)),
-                Vector3.Transform(E, orientation * Matrix.CreateTranslation(offset + position)),
-                Vector3.Transform(F, orientation * Matrix.CreateTranslation(offset + position)),
-                Vector3.Transform(G, orientation * Matrix.CreateTranslation(offset + position)),
-                Vector3.Transform(H, orientation * Matrix.CreateTranslation(offset + position)),
+                Vector3.Transform(A, world),
+                Vector3.Transform(B, world),
+                Vector3.Transform(C, world),
+                Vector3.Transform(D, world),
+                Vector3.Transform(E, world),
+                Vector3.Transform(F, world),
+                Vector3.Transform(G, world),
+                Vector3.Transform(H, world),
                 Color.MonoGameOrange);
+        }
+        public Vector3 support(Vector3 direction, Vector3 sweep) {
+            return Supports.Cube(direction, this);
         }
 
     }

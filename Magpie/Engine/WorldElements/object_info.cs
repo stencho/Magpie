@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -8,92 +9,86 @@ using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
+using static Magpie.Engine.Collision.MixedCollision;
 
 namespace Magpie.Engine.WorldElements {
-    public class object_info {
-        public Vector3 position {
-            get => collision.position;
-            set => collision.position = value;
-        }
+    public partial class object_info {
+        public int id = -1;
 
-        public render_info[] render;
-        public collision_info collision;
+        public volatile ControlBinds binds;
+
+        public Vector3 position = Vector3.Zero;
+        public Vector3 wants_movement = Vector3.Zero;
+
+        public Vector3 scale = Vector3.One;
+
+        public Matrix orientation = Matrix.Identity;
+
+        public Matrix world = Matrix.Identity;
+
+        public collision_result test_cr;
+
+        public render_info render;
+
         public light[] lights;
 
-        public ModelCollision[] testc;
+        public collision_info collision;
+
+        public Action update_action;
+        public Action draw_action;
 
         public object_info(Vector3 position) {
-            init(new render_info[] {
-                    new render_info_model("sphere")
-                 },
-                 new collision_info(new Sphere(1f), position)
-            );
+            this.position = position;
+            init(null, new collision_info(new Sphere(1f)));
         }
         public object_info(Vector3 position, render_info renderinfo) {
-            init(new render_info[] {
-                    renderinfo
-                 },
-                 new collision_info(new Sphere(1f), position)
-            );
-            testc = new ModelCollision[((render_info_model)render[0]).model.Meshes.Count];
-
-            int v = 0;
-            
-            foreach(var mesh in ((render_info_model)render[0]).model.Meshes) {
-                
-                testc[v] = new ModelCollision(
-                    mesh.MeshParts[0].VertexBuffer,
-                    mesh.MeshParts[0].IndexBuffer);
-                v++;
-
-            }
-
+            this.position = position;
+            init(renderinfo, new collision_info(new Sphere(1f)));
         }
 
-        void init(render_info[] render_info, collision_info collision_info) {
+        void init(render_info render_info, collision_info collision_info) {
             this.render = render_info;
             this.collision = collision_info;
-
-
         }
 
         public bool in_frustum(BoundingFrustum frustum) {
-            foreach (render_info ri in render) {
-                if (ri.in_frustum(frustum)) {
+            if (render != null) {
+                if (render.in_frustum(frustum)) {
+                    return true;
+                }
+            } else if (collision!= null) {
+                if (frustum.Intersects(collision.hitbox.find_bounding_box(world))) {
                     return true;
                 }
             }
-
+            
             return false;
         }
 
-        public void update() {
-            collision.world = Matrix.CreateTranslation(position) * collision.orientation;
-            foreach (render_info ri in render) {               
-                ri.world = Matrix.CreateScale(ri.scale) * ri.orientation * Matrix.CreateTranslation(position + ri.render_offset);
+
+        public virtual void update() {
+            world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
+            if (render != null)
+                render.world = world;
+
+            if (update_action != null) {
+                update_action();
             }
+
         }
 
 
-        public void draw() {
-            foreach (render_info ri in render) {
-                ri.prepass();
-            }
-            foreach (render_info ri in render) {
+        public virtual void draw() {
+            if (render != null) { 
+                render.prepass();
 
-                ri.draw();
-                
-                if (testc != null) {
-                    foreach (ModelCollision mc in testc) {
-                        mc.draw(collision.world);
-                    }
-                }
-                //this.collision.draw_move_shapes();
+                render.draw();
             }
+            if (draw_action != null) draw_action();
         }
         public void draw_to_light(light light) {
-            foreach (render_info ri in render) {
-                ri.draw_to_light(light);
+            if (render != null) {
+                render.draw_to_light(light);
             }
         }
 

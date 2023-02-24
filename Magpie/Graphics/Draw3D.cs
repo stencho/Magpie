@@ -281,6 +281,9 @@ namespace Magpie.Graphics {
         public static void cube(BoundingBox bb, Color color) {
             Draw3D.cube((bb.Min + bb.Max) / 2, (bb.Max - bb.Min) / 2, color, Matrix.Identity);
         }
+        public static void cube(BoundingBox bb, Matrix world, Color color) {
+            Draw3D.cube((bb.Min + bb.Max) / 2, (bb.Max - bb.Min) / 2, color, world );
+        }
 
         public static Texture2D tum;
         public static Effect light_depth;
