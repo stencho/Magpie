@@ -135,10 +135,10 @@ namespace MagpieBuild
 
             for (int i = 0; i < 150; i++) {
                 var id = EngineState.world.current_map.make_id();
-                world.current_map.game_objects.Add(id,
-                    new object_info(
-                        (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one * 10)) + (Vector3.Up * (RNG.rng_float * 20)), 
-                        new render_info_model("sphere", "trumpmap")));
+                //world.current_map.game_objects.Add(id,
+                  //  new object_info(
+                    //    (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one * 10)) + (Vector3.Up * (RNG.rng_float * 20)), 
+                      //  new render_info_model("sphere", "trumpmap")));
                 
 
                 //var ind = world.current_map.add_object("test_sphere" + i, new TestSphere());
@@ -150,10 +150,20 @@ namespace MagpieBuild
 
             }
 
-            var sphereid = world.current_map.add_object(new object_info(Vector3.Up * 3 ));
+            var cubeid = world.current_map.add_object(new object_info(Vector3.Left * 3, new collision_info(new Cube(0.5f))));
+            var sphereid = world.current_map.add_object(new object_info(Vector3.Right * 3, new collision_info(new Sphere(1f))));
+            var triid = world.current_map.add_object(new object_info(Vector3.Right * 6, new collision_info(new Triangle(Vector3.Right + Vector3.Forward, Vector3.Up, Vector3.Right + Vector3.Down))));
 
-            var moveid = world.current_map.add_object(new gjkTestActor(Vector3.Right * 5f));
-            ((gjkTestActor)world.current_map.game_objects[moveid]).gjk_target_id = sphereid;
+            var rcubeid = world.current_map.add_object(new object_info(Vector3.Right * 8, new collision_info(new Cube(0.5f))));
+            world.current_map.game_objects[rcubeid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
+
+            var moveid = world.current_map.add_object(new gjkTestActor(Vector3.Right * 5f, new collision_info(new Cube(0.5f))));
+                //new collision_info(new Triangle(Vector3.Right + Vector3.Forward, Vector3.Up, Vector3.Left + Vector3.Down))));
+
+            ((gjkTestActor)world.current_map.game_objects[moveid]).gjk_targets.Add(cubeid, new collision_result());
+            ((gjkTestActor)world.current_map.game_objects[moveid]).gjk_targets.Add(sphereid, new collision_result());
+            ((gjkTestActor)world.current_map.game_objects[moveid]).gjk_targets.Add(triid, new collision_result());
+            ((gjkTestActor)world.current_map.game_objects[moveid]).gjk_targets.Add(rcubeid, new collision_result());
 
             mid = world.current_map.add_object(new object_info(
                 Vector3.Up * 5f,

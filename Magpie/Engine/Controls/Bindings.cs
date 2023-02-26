@@ -915,7 +915,7 @@ namespace Magpie.Engine {
 
     public class DigitalBinds {
         public List<IDigitalBind> binds => _binds;
-        List<IDigitalBind> _binds = new List<IDigitalBind>();
+        volatile List<IDigitalBind> _binds = new List<IDigitalBind>();
         public bool enabled => (_enabled && ControlBinds.global_enable);
         bool _enabled = true;
 
@@ -1165,8 +1165,10 @@ namespace Magpie.Engine {
 
 
         public void update(PlayerIndex player_index) {
-            foreach (IDigitalBind b in _binds) {                
-                b.update_state(player_index);
+            lock (_binds) { 
+                foreach (IDigitalBind b in _binds) {
+                    b.update_state(player_index);
+                }
             }
         }
 

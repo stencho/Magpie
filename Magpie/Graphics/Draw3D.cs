@@ -285,7 +285,6 @@ namespace Magpie.Graphics {
             Draw3D.cube((bb.Min + bb.Max) / 2, (bb.Max - bb.Min) / 2, color, world );
         }
 
-        public static Texture2D tum;
         public static Effect light_depth;
 
         public static void init() {
@@ -393,7 +392,7 @@ namespace Magpie.Graphics {
 
             basic_effect.DiffuseColor = color.ToVector3();
             basic_effect.TextureEnabled = true;
-            basic_effect.Texture = tum;
+            basic_effect.Texture = onePXWhite;
 
             basic_effect.World = world;
             basic_effect.View = EngineState.camera.view;
@@ -443,6 +442,7 @@ namespace Magpie.Graphics {
         }
 
         public static void fill_tri(Matrix world, Vector3 A, Vector3 B, Vector3 C, Color color) {
+            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             if (t_index_buffer == null) {
                 t_index_buffer = new IndexBuffer(EngineState.graphics_device, IndexElementSize.SixteenBits, t_indices.Length, BufferUsage.None);
                 t_index_buffer.SetData<ushort>(t_indices);

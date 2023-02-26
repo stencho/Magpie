@@ -39,7 +39,7 @@ namespace Magpie.Engine.Collision {
             var vd = Vector3.Dot(direction, origin_dir);
             return (vd >= 0f);
         }
-        private static bool close_enough(Vector3 A, Vector3 B) { return Vector3.Distance(A, B) <= epsilon; }
+        public static bool close_enough(Vector3 A, Vector3 B) { return Vector3.Distance(A, B) <= epsilon; }
 
         public static bool point_within_square(Vector2 min, Vector2 max, Vector2 point) {
             if (point.X > min.X && point.X < max.X && point.Y > min.Y && point.Y < max.Y) return true;
@@ -337,6 +337,33 @@ namespace Magpie.Engine.Collision {
             outp += obb_orientation.Forward * dist;
 
             return outp;
+        }
+
+        public static Vector3 closest_point_to_points(Vector3 p, params Vector3[] points) {
+            float closest = float.MaxValue;
+            int closest_index = -1;
+
+            for (int i = 0; i < points.Length; i++) {
+                var d = Vector3.Distance(p, points[i]);
+                if (d < closest) {
+                    closest = d;
+                    closest_index = i;
+                }
+            }
+
+            return points[closest_index];
+        }
+        public static float shortest_distance_to_points(Vector3 p, params Vector3[] points) {
+            float closest = float.MaxValue;
+
+            for (int i = 0; i < points.Length; i++) {
+                var d = Vector3.Distance(p, points[i]);
+                if (d < closest) {
+                    closest = d;
+                }
+            }
+
+            return closest;
         }
 
         public static float closest_points_on_lines(Vector3 AA, Vector3 AB, Vector3 BA, Vector3 BB, out float s, out float t, out Vector3 P1, out Vector3 P2) {

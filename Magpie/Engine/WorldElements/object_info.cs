@@ -26,8 +26,6 @@ namespace Magpie.Engine.WorldElements {
 
         public Matrix world = Matrix.Identity;
 
-        public collision_result test_cr;
-
         public render_info render;
 
         public light[] lights;
@@ -39,11 +37,15 @@ namespace Magpie.Engine.WorldElements {
 
         public object_info(Vector3 position) {
             this.position = position;
-            init(null, new collision_info(new Sphere(1f)));
+            init(null, null);
         }
         public object_info(Vector3 position, render_info renderinfo) {
             this.position = position;
             init(renderinfo, new collision_info(new Sphere(1f)));
+        }
+        public object_info(Vector3 position, collision_info collision_info) {
+            this.position = position;
+            init(null, collision_info);
         }
 
         void init(render_info render_info, collision_info collision_info) {

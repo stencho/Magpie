@@ -1,9 +1,12 @@
-﻿using Magpie.Engine.Collision;
+﻿using Magpie.Engine;
+using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
+using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,7 +17,7 @@ namespace Magpie {
             Vector3 v = Vector3.Zero;
 
             for (int i = 0; i < verts.Length; i++) {
-                float d = Vector3.Dot(verts[i], direction);
+                float d = Vector3.Dot(direction, verts[i]);
 
                 if (d > dot) {
                     dot = d;
@@ -67,7 +70,9 @@ namespace Magpie {
             return highest_dot(new Vector3[4] { A,B,C,D }, direction, out _);
         }
 
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Cube(Vector3 direction, Cube cube) {
+
             return highest_dot(new Vector3[8] {
                 cube.A,
                 cube.B,

@@ -25,6 +25,10 @@ namespace Magpie.Engine.WorldElements {
 
         public BoundingSphere render_bounds { get; set; }
 
+        // IMPLEMENT THIS
+        // ALSO DIFFERENT TEXTURE TYPES
+        public bool partial_transparency { get; set; } = false;
+
         public bool in_frustum(BoundingFrustum frustum) {
             foreach (ModelMesh mm in _model.Meshes) {
                 if (frustum.Intersects(mm.BoundingSphere.Transform(world))) {

@@ -64,7 +64,7 @@ namespace Magpie.Engine.Collision.Support3D {
         }
 
         public void draw(Matrix world) {
-            Draw3D.fill_tri(world, A, B, C, Color.White * 0.9f);
+            //Draw3D.fill_tri(world, A, B, C, Color.White * 0.9f);
 
             Draw3D.lines(Color.MonoGameOrange,
                 Vector3.Transform(A, world),
