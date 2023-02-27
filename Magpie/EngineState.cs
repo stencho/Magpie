@@ -75,9 +75,6 @@ namespace Magpie {
                 startup_log.Append("initializing 2D... ");
                 Draw2D.init();
 
-                startup_log.AppendLine("renderer... ");
-                Renderer.init();
-
                 //set up default settings and configure some gvars
                 startup_log.AppendLine("finding primary display and resolution");
 

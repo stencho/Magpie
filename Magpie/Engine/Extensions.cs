@@ -10,8 +10,19 @@ using System.Threading.Tasks;
 
 namespace Magpie.Engine {
     public static class Extensions {
-        public static Vector2 XZ(this Vector3 pos) {
-            return new Vector2(pos.X, pos.Z);
+        
+
+        public static Vector2 XY(this Vector3 vec) => new Vector2(vec.X, vec.Y);
+        public static Vector2 XZ(this Vector3 vec) => new Vector2(vec.X, vec.Z);
+        public static Vector2 YZ(this Vector3 vec) => new Vector2(vec.Y, vec.Z);
+        public static Vector2 YX(this Vector3 vec) => new Vector2(vec.Y, vec.X);
+        public static Vector2 ZX(this Vector3 vec) => new Vector2(vec.Z, vec.X);
+        public static Vector2 ZY(this Vector3 vec) => new Vector2(vec.Z, vec.Y);
+
+        public static void forEach(this Vector3 vec, Action<float> action) {
+            action(vec.X);
+            action(vec.Y);
+            action(vec.Z);
         }
 
         public static string ToXString(this Vector3 v3) {
@@ -78,6 +89,10 @@ namespace Magpie.Engine {
         }
         public static XYPair ToXYPair(this System.Drawing.Size s) {
             return new XYPair(s.Width, s.Height);
+        }
+
+        public static XYPair ToXYPair(this Vector2 v) { 
+            return new XYPair(v); 
         }
 
         public static Vector3 A (this BoundingBox bb) { return bb.center() + bb.half_size(); }

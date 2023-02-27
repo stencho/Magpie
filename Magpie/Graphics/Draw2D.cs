@@ -152,26 +152,6 @@ namespace Magpie.Graphics {
             return Color.FromNonPremultiplied(r, g, b, 255);
         }
 
-        public static T Limit<T>(T input, T min, T max) {
-            if (Comparer<T>.Default.Compare(input, max) > 0) return max;
-            return Comparer<T>.Default.Compare(min, input) > 0 ? min : input;
-        }
-        /// <summary>
-        /// Generates a randomized color which is similar to the input color
-        /// </summary>
-        /// <param name="inputColor">the input color</param>
-        /// <param name="maxDifference">a float from 0.0-1.0 determining the maximum difference</param>
-        /// <returns></returns>
-        public static Color SimilarColor(Color inputColor, float maxDifference) {
-            var diff = (int)(maxDifference * 255);
-
-            var r = Limit((int)(inputColor.R + diff * ((RNG.rng_float * 2f) - 1.0f)), 0, 255);
-            var g = Limit((int)(inputColor.G + diff * ((RNG.rng_float * 2f) - 1.0f)), 0, 255);
-            var b = Limit((int)(inputColor.B + diff * ((RNG.rng_float * 2f) - 1.0f)), 0, 255);
-
-            return Color.FromNonPremultiplied(r, g, b, 255);
-        }
-
         /// <summary>
         /// Generates a muted version of the input color
         /// </summary>
@@ -180,21 +160,13 @@ namespace Magpie.Graphics {
         /// <returns></returns>
         public static Color MuteColor(Color input, float amount) {
             return Color.FromNonPremultiplied(
-                Limit((int)(input.R * (1.0f - amount)), 0, 255),
-                Limit((int)(input.G * (1.0f - amount)), 0, 255),
-                Limit((int)(input.B * (1.0f - amount)), 0, 255),
+                int.Clamp((int)(input.R * (1.0f - amount)), 0, 255),
+                int.Clamp((int)(input.G * (1.0f - amount)), 0, 255),
+                int.Clamp((int)(input.B * (1.0f - amount)), 0, 255),
                 input.A);
         }
 
-        /// <summary>
-        /// Generates a monochrome color between white and black
-        /// </summary>
-        /// <param name="fromWhite">The maximum amount of difference from 255/255/255, flat white</param>
-        /// <returns></returns>
-        public static Color RandomShadeOfGrey(float fromWhite) {
-            var val = 255 - ((int)(RNG.rng_float * (255 * fromWhite)));
-            return Color.FromNonPremultiplied(val, val, val, 255);
-        }
+
 
         #region Drawing functions
 

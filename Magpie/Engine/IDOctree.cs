@@ -175,7 +175,7 @@ namespace Magpie.Engine {
                 for (int y = 0; y < 2; y++) {
                     for (int x = 0; x < 2; x++) {
                         nodes[x, y, z] = new Node(this, bounds.Min, bounds.Max, x, y, z);
-                        nodes[x, y, z].color = Draw2D.SimilarColor(color, 0.3f);
+                        nodes[x, y, z].color = RNG.similar_color(color, 0.3f);
                     }
                 }
             }

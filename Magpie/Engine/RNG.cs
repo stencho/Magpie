@@ -40,5 +40,19 @@ namespace Magpie.Engine {
         public static Color random_opaque_color() {
             return Color.FromNonPremultiplied((int)(255 * rng_float), (int)(255 * rng_float), (int)(255 * rng_float), 255);
         }
+
+        public static Color similar_color(Color inputColor, float maxDifference) {
+            var diff = (int)(maxDifference * 255);
+
+            var r = int.Clamp((int)(inputColor.R + diff * ((RNG.rng_float * 2f) - 1.0f)), 0, 255);
+            var g = int.Clamp((int)(inputColor.G + diff * ((RNG.rng_float * 2f) - 1.0f)), 0, 255);
+            var b = int.Clamp((int)(inputColor.B + diff * ((RNG.rng_float * 2f) - 1.0f)), 0, 255);
+
+            return Color.FromNonPremultiplied(r, g, b, 255);
+        }
+        public static Color RandomShadeOfGrey(float fromWhite) {
+            var val = 255 - ((int)(RNG.rng_float * (255 * fromWhite)));
+            return Color.FromNonPremultiplied(val, val, val, 255);
+        }
     }
 }

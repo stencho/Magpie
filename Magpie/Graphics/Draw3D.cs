@@ -17,16 +17,14 @@ namespace Magpie.Graphics {
         public static Texture2D onePXWhite;
         public static Texture2D testing_gradient;
 
-        public static bool vector3_contains_nan(Vector3 a) { return (float.IsNaN(a.X) || float.IsNaN(a.Y) || float.IsNaN(a.Z)); }
-
         public static Vector3 find_any_line_perpendicular(Vector3 A, Vector3 B) {
             Vector3 AB = B - A;
             Vector3 dir = Vector3.Normalize(B - A);
 
             var cross = Vector3.Cross(dir, Vector3.Cross(dir, new Vector3(dir.X, dir.Z, -dir.Y)));
-            if (vector3_contains_nan(cross))
+            if (cross.contains_nan())
                 cross = Vector3.Cross(dir, Vector3.Cross(dir, new Vector3(-dir.Z, dir.Y, dir.X)));
-            if (vector3_contains_nan(cross))
+            if (cross.contains_nan())
                 cross = Vector3.Cross(dir, Vector3.Cross(dir, new Vector3(dir.Y, -dir.X, dir.Z)));
 
             return Vector3.Normalize(cross);
@@ -146,6 +144,14 @@ namespace Magpie.Graphics {
             line(P - (Vector3.UnitY * (line_distance / 2)), P + (Vector3.UnitY * (line_distance / 2)), color);
             line(P - (Vector3.UnitZ * (line_distance / 2)), P + (Vector3.UnitZ * (line_distance / 2)), color);
         }
+        public static void gizmo(Vector3 P, Matrix world, float line_distance) {
+            var dir = Vector3.Normalize(world.Right);
+            line(P - dir * line_distance, P + dir * line_distance, Color.Red);
+            dir = Vector3.Normalize(world.Up);
+            line(P - dir * line_distance, P + dir * line_distance, Color.Green);
+            dir = Vector3.Normalize(world.Backward);
+            line(P - dir * line_distance, P + dir * line_distance, Color.Blue);
+        }
 
         public static void circle(Vector3 p, float radius, Vector3 normal, int subdivs, Color color) {
             if (subdivs < 6) return;
@@ -175,7 +181,7 @@ namespace Magpie.Graphics {
         }
 
         public static void sprite_line(Vector3 a, Vector3 b, float line_width, Color color) {
-            var pomn = CollisionHelper.point_of_minimum_norm(a, b, EngineState.camera.position);
+            var pomn = CollisionHelper.line_closest_point(a, b, EngineState.camera.position);
 
             var t = b-a;
             var scale = new Vector3(line_width, t.Length(), 1);
@@ -257,10 +263,6 @@ namespace Magpie.Graphics {
                 Vector3.Transform(center + ((size.X) * Vector3.Left) + ((size.Y) * Vector3.Down) + ((size.Z) * Vector3.Backward), world),     //G
 
             color);
-        }
-
-        public static void dot() {
-
         }
 
         public static void square(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color) {

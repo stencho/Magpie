@@ -671,7 +671,7 @@ namespace Magpie.Engine {
         }
 
         public void update_state(PlayerIndex player_index) {
-                ks = Keyboard.GetState();
+            ks = Keyboard.GetState();
             
             bool just_pressed = (ks.IsKeyDown(button) && !pks.IsKeyDown(button));
             bool was_pressed = (!ks.IsKeyDown(button) && pks.IsKeyDown(button));

@@ -28,6 +28,9 @@ namespace MagpieBuild.TestActors {
         void init() {
             binds = new ControlBinds(
             (bind_type.digital, controller_type.keyboard, Keys.LeftShift, new string[] { "shift" }),
+            (bind_type.digital, controller_type.keyboard, Keys.F, new string[] { "t_supp" }),
+            (bind_type.digital, controller_type.keyboard, Keys.D1, new string[] { "speenL" }),
+            (bind_type.digital, controller_type.keyboard, Keys.D3, new string[] { "speenR" }),
             (bind_type.digital, controller_type.keyboard, Keys.R, new string[] { "t_S" }),
             (bind_type.digital, controller_type.keyboard, Keys.Q, new string[] { "t_L" }),
             (bind_type.digital, controller_type.keyboard, Keys.E, new string[] { "t_R" }));
@@ -44,17 +47,19 @@ namespace MagpieBuild.TestActors {
             lock (gjk_targets) { 
                 int i = -1;
                 foreach (int gjkid in gjk_targets.Keys) {
+                    
                     i++;
-                    var mvhb = collision.hitbox;
-                    mvhb.draw(world);
-
-                    var sphb = EngineState.world.current_map.game_objects[gjkid].collision.hitbox;
-                    sphb.draw(EngineState.world.current_map.game_objects[gjkid].world);
-                    var spp = EngineState.world.current_map.game_objects[gjkid].position;
-
-                    Draw3D.text_3D(EngineState.spritebatch, $"{selected_target.ToString()}", "pf", position + Vector3.Up, -EngineState.camera.direction, 1f, Color.Black);
-
                     if (selected_target == -1 || selected_target == i) {
+
+                        var mvhb = collision.hitbox;
+                        mvhb.draw(world);
+
+                        var sphb = EngineState.world.current_map.game_objects[gjkid].collision.hitbox;
+                        sphb.draw(EngineState.world.current_map.game_objects[gjkid].world);
+                        var spp = EngineState.world.current_map.game_objects[gjkid].position;
+
+                        Draw3D.text_3D(EngineState.spritebatch, $"{selected_target.ToString()}", "pf", position + Vector3.Up, -EngineState.camera.direction, 1f, Color.Black);
+
 
                         var c = position + ((spp - position) / 2);
 
@@ -74,6 +79,15 @@ namespace MagpieBuild.TestActors {
                     binds.update();
                 }
             }
+
+            if (binds.pressed("speenL")) {
+                this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, -1f * Clock.internal_frame_time_delta);
+
+            }
+            if (binds.pressed("speenR")) {
+                this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, 1f * Clock.internal_frame_time_delta);
+            }
+
 
             if (binds.just_pressed("t_L") && binds.pressed("shift")) {
                 if (selected_target > -1)
@@ -100,16 +114,17 @@ namespace MagpieBuild.TestActors {
                         var wa = world;
                         var wb = EngineState.world.current_map.game_objects[gjkid].world;
                         int old_draw =  gjk_targets[gjkid].draw_simplex;
+                        bool old_draw_supp = gjk_targets[gjkid].draw_all_supports;
 
                         var i = MixedCollision.intersects(me.collision, ts.collision, wa, wb);
 
 
-                        if (old_draw > gjk_targets[gjkid].simplex_list.Count - 1) {
+                        //if (old_draw > gjk_targets[gjkid].simplex_list.Count - 1 || old_draw < 0)
                             old_draw = gjk_targets[gjkid].simplex_list.Count - 1;
-                        }
+                       
 
                         i.draw_simplex = old_draw;
-
+                        i.draw_all_supports = old_draw_supp;
                         gjk_targets[gjkid] = i;
                     }
 
@@ -127,7 +142,11 @@ namespace MagpieBuild.TestActors {
                         if (t.draw_simplex < t.simplex_list.Count - 1)
                             t.draw_simplex++;
                         else if (t.draw_simplex > t.simplex_list.Count - 1)
-                            t.draw_simplex = t.simplex_list.Count - 1;                       
+                            t.draw_simplex = t.simplex_list.Count - 1;
+                    }
+
+                    if (binds.just_pressed("t_supp")) {
+                        t.draw_all_supports = !t.draw_all_supports;
                     }
 
                     gjk_targets[gjkid] = t;

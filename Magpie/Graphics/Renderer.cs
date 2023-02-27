@@ -46,14 +46,9 @@ namespace Magpie.Graphics {
             public Texture2D texture;
         }
 
-        public static void init() {
-        }
-
         public static void create_visibility_lists(Map map, Camera camera) {
             visible_lights.Clear();
             visible.Clear();
-
-
 
             foreach (var o in map.game_objects) {
                 if (o.Value.in_frustum(camera.frustum)) {

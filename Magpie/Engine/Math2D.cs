@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace Magpie.Engine {
     public static class Math2D {
-        #region Math/Conversion functions
 
         public static bool Vector2TryParse(string input, out Vector2 result) {
             result = Vector2.Zero;
@@ -213,6 +212,6 @@ namespace Magpie.Engine {
             return a + t * ab;
         }
 
-        #endregion
+
     }
 }
