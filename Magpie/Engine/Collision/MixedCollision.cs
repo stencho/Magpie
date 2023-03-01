@@ -728,7 +728,7 @@ namespace Magpie.Engine.Collision {
 
                         var ad = simplex.same_dir_as_AO(Vector3.Cross(simplex.ACD, simplex.AD));
                         var ac = simplex.same_dir_as_AO(Vector3.Cross(simplex.AC, simplex.ACD));
-                        var cd = simplex.same_dir_as_AO(Vector3.Cross(simplex.CD, simplex.ACD));
+                        var cd = !simplex.same_dir_as_AO(Vector3.Cross(simplex.CD, simplex.ACD));
 
                         if (ad && ac) {
                             //break;
