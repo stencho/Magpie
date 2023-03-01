@@ -25,6 +25,9 @@ namespace Magpie.Engine {
             action(vec.Z);
         }
 
+        public static string ToXString(this Vector2 v2) {
+            return $"{v2.X}x{v2.Y}";
+        }
         public static string ToXString(this Vector3 v3) {
             return $"{v3.X}x{v3.Y}x{v3.Z}";
         }

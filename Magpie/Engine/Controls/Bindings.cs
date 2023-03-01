@@ -47,20 +47,40 @@ namespace Magpie.Engine {
         public static AnalogBinds analog_binds = new AnalogBinds();
         public static DigitalBinds digital_binds = new DigitalBinds();
 
+        public static bool global_enable = true;
+        public static bool global_enable_prev = true;
+        static bool just_enabled => global_enable && !global_enable_prev;
+        static bool just_disabled => !global_enable && global_enable_prev;
+
+        public static bool bind_exists(string bind) {
+            return digital_binds.bind_exists(bind);
+        }
+
         public static string list_binds() {
             string s = "";
 
             for (int i = 0; i < digital_binds.binds.Count; i++) {
                 IDigitalBind b = digital_binds.binds[i];
                 if (i < digital_binds.bind_count() - 1)
-                    s += $"{b.button_string} :: {b.is_pressed}\n";
+                    s += $"{b.button_string} :: {b.is_pressed} { b.force_enable }\n";
                 else
-                    s += $"{b.button_string} :: {b.is_pressed}";
+                    s += $"{b.button_string} :: {b.is_pressed} {b.force_enable}";
             }
 
             return s;
         }
 
+        public static bool force_enabled(string bind) {
+            foreach (IDigitalBind b in digital_binds.binds) {
+                if (b.binds.Contains(bind)) {
+                    if (b.force_enable) {
+                        return true;
+                    }
+                }
+                
+            }
+            return false;
+        }
         public static void force_enable(string bind) {
             foreach (IDigitalBind b in digital_binds.binds) {
                 if (b.bind_type == controller_type.keyboard) {
@@ -83,27 +103,31 @@ namespace Magpie.Engine {
         public static PlayerIndex player_index => _player_index;
         static PlayerIndex _player_index;
 
+        static bool bind_enabled(string bind) {
+            if (!global_enable) return force_enabled(bind);
+            else return true;
+        }
+
         #region ANALOG
         public static float get_axis(string bind) => analog_binds.get_axis(bind);
         public static void add_bind_analog(XInputAxis axis, string bind) => analog_binds.add_bind(axis, bind);
         #endregion
 
         #region DIGITAL
-        public static bool pressed(string bind) => digital_binds.bind_pressed(bind);
-        public static bool released(string bind) => digital_binds.bind_released(bind);
+        public static bool pressed(string bind) => bind_enabled(bind) ? digital_binds.bind_pressed(bind) : false;
+        public static bool released(string bind) => bind_enabled(bind) ? digital_binds.bind_released(bind) : true;
 
-        public static bool just_pressed(string bind) => digital_binds.bind_just_pressed(bind);
-        public static bool just_released(string bind) =>
-            (ControlBinds.global_enable
-                ? digital_binds.bind_just_released(bind)
-                : ((ControlBinds.global_enable != ControlBinds.global_enable_prev && digital_binds.bind_pressed_ignore_enable(bind)) ? true : false));
+        public static bool just_pressed(string bind) => bind_enabled(bind) ? 
+            digital_binds.bind_just_pressed(bind) || (just_enabled && digital_binds.bind_pressed(bind)): false;
+        public static bool just_released(string bind) => bind_enabled(bind) ? 
+            digital_binds.bind_just_released(bind) || (just_disabled && digital_binds.bind_pressed(bind)) : false;
 
-        public static bool held(string bind) => digital_binds.bind_held(bind);
-        public static bool just_held(string bind) => digital_binds.bind_just_held(bind);
+        public static bool held(string bind) => bind_enabled(bind) ? digital_binds.bind_held(bind) : false;
+        public static bool just_held(string bind) => bind_enabled(bind) ? digital_binds.bind_just_held(bind) : false;
 
-        public static bool tapped(string bind) => digital_binds.bind_tapped(bind);
+        public static bool tapped(string bind) => bind_enabled(bind) ? digital_binds.bind_tapped(bind) : false;
 
-        public static int times_bind_pressed(string bind) => digital_binds.bind_buttons_pressed(bind);
+        public static int times_bind_pressed(string bind) => bind_enabled(bind) ? digital_binds.bind_buttons_pressed(bind) : 0;
 
         public static void add_bind_digital(Keys button, params string[] binds) => digital_binds.add_bind(button, binds);
         public static void add_bind_digital(MouseButtons button, params string[] binds) => digital_binds.add_bind(button, binds);
@@ -176,15 +200,14 @@ namespace Magpie.Engine {
             }
         }
 
-        public static bool bind_enabled(string bind) {
-            return digital_binds.bind_enabled(bind);
-        }
         public static bool bind_enabled(IDigitalBind bind) {
             return digital_binds.bind_enabled(bind);
         }
 
 
         public static void update() {
+            global_enable_prev = global_enable;
+
             analog_binds.update(player_index);
             digital_binds.update(player_index);
         }
@@ -271,7 +294,7 @@ namespace Magpie.Engine {
         public bool just_pressed(string bind) => digital_binds.bind_just_pressed(bind);
 
         public bool just_released(string bind) =>
-            (ControlBinds.global_enable
+            (global_enable
                 ? digital_binds.bind_just_released(bind)
                 : ((global_enable != global_enable_prev && digital_binds.bind_pressed_ignore_enable(bind)) ? true : false));
 
@@ -289,8 +312,8 @@ namespace Magpie.Engine {
 
         public void change_player_index(PlayerIndex index) { _player_index = index; }
 
-        public static bool global_enable = true;
-        public static bool global_enable_prev = true;
+        public bool global_enable = true;
+        public bool global_enable_prev = true;
 
         public void force_enable(string bind) {
             foreach (IDigitalBind b in digital_binds.binds) {
@@ -311,9 +334,6 @@ namespace Magpie.Engine {
             }
         }
 
-        public bool bind_enabled(string bind) {
-            return digital_binds.bind_enabled(bind);
-        }
         public bool bind_enabled(IDigitalBind bind) {
             return digital_binds.bind_enabled(bind);
         }
@@ -505,6 +525,8 @@ namespace Magpie.Engine {
         public List<IAnalogBind> binds = new List<IAnalogBind>();
         List<IAnalogBind> _binds = new List<IAnalogBind>();
 
+        
+
         public AnalogBinds() { }
         public AnalogBinds(params (analog_bind_type type, object axis, string bind)[] binds) {
             foreach((analog_bind_type type, object axis, string bind) param in binds) {
@@ -661,9 +683,6 @@ namespace Magpie.Engine {
 
         double _hold_time = 300;
 
-        KeyboardState ks;
-        KeyboardState pks;
-
         public KeyboardBind(Keys button, string[] binds) {
             this.binds.AddRange(binds);
             _button = button;
@@ -671,7 +690,9 @@ namespace Magpie.Engine {
         }
 
         public void update_state(PlayerIndex player_index) {
-            ks = Keyboard.GetState();
+
+            var ks = Controls.keyboard_state;
+            var pks = Controls.keyboard_state_prev;
             
             bool just_pressed = (ks.IsKeyDown(button) && !pks.IsKeyDown(button));
             bool was_pressed = (!ks.IsKeyDown(button) && pks.IsKeyDown(button));
@@ -720,7 +741,6 @@ namespace Magpie.Engine {
             }
             _recent_state[_recent_state.Length - 1] = is_pressed;
 
-            pks = ks;
         }
 
     }
@@ -916,13 +936,20 @@ namespace Magpie.Engine {
     public class DigitalBinds {
         public List<IDigitalBind> binds => _binds;
         volatile List<IDigitalBind> _binds = new List<IDigitalBind>();
-        public bool enabled => (_enabled && ControlBinds.global_enable);
+
         bool _enabled = true;
 
         public void enable() { _enabled = true; }
         public void disable() { _enabled = false; }
 
         public DigitalBinds() { }
+
+        public bool bind_exists(string bind) {            
+            foreach (var s in _binds) {
+                if (s.binds.Contains(bind)) return true;
+            }
+            return false;
+        }
 
         public DigitalBinds(params (controller_type input_type, object button, string[] binds)[] bind_data) {
             foreach ((controller_type input_type, object button, string[] binds) bd in bind_data) {
@@ -989,31 +1016,14 @@ namespace Magpie.Engine {
         }
 
         #region bind status functions
-        public bool bind_enabled(string bind) {
-            foreach (IDigitalBind b in _binds) {
-                if (b.binds.Contains(bind)) {
-                    bool en = _enabled;
-
-                    if (!ControlBinds.global_enable) en = false;
-                    if (b.force_enable) en = _enabled;
-
-                    return en;
-                }
-            }
-            return false;
-        }
         public bool bind_enabled(IDigitalBind bind) {
-                bool en = _enabled;
-
-                if (!ControlBinds.global_enable) en = false;
-                if (bind.force_enable) en = _enabled;
-
-                return en;
+            return bind.force_enable || _enabled;
         }
 
         public bool bind_pressed(string bind) {
             foreach (IDigitalBind b in _binds) {
-                if (bind_enabled(bind) && b.is_pressed && b.binds.Contains(bind))
+                if (//bind_enabled(bind) && 
+                    b.is_pressed && b.binds.Contains(bind))
                     return true;
             }
 
@@ -1029,7 +1039,8 @@ namespace Magpie.Engine {
         }
         public bool bind_released(string bind) {
             foreach (IDigitalBind b in _binds) {
-                if (bind_enabled(bind) && b.is_pressed && b.binds.Contains(bind))
+                if (//bind_enabled(bind) &&
+                    b.is_pressed && b.binds.Contains(bind))
                     return false;
             }
 
@@ -1039,14 +1050,16 @@ namespace Magpie.Engine {
 
         public bool bind_just_pressed(string bind) {
             foreach (IDigitalBind b in _binds) {
-                if (bind_enabled(bind) && b.just_pressed && b.binds.Contains(bind))
+                if (//bind_enabled(bind) &&
+                    b.just_pressed && b.binds.Contains(bind))
                     return true;
             }
             return false;
         }
         public bool bind_just_released(string bind) {
             foreach (IDigitalBind b in _binds) {
-                if (bind_enabled(bind) && b.just_released && b.binds.Contains(bind))
+                if (//bind_enabled(bind) &&
+                    b.just_released && b.binds.Contains(bind))
                     return true;
             }
 
@@ -1055,14 +1068,15 @@ namespace Magpie.Engine {
 
         public bool bind_held(string bind) {
             foreach (IDigitalBind b in _binds) {
-                if (bind_enabled(bind) && b.held && b.binds.Contains(bind))
+                if (//bind_enabled(bind) &&
+                    b.held && b.binds.Contains(bind))
                     return true;
             }
 
             return false;
         }
         public bool bind_held(IDigitalBind b) {
-            if (bind_enabled(b) && b.held)
+            if (b.held)
                 return true;            
 
             return false;
@@ -1070,7 +1084,8 @@ namespace Magpie.Engine {
         public bool bind_just_held(string bind) {
 
             foreach (IDigitalBind b in _binds) {
-                if (bind_enabled(bind) && b.just_held && b.binds.Contains(bind))
+                if (//bind_enabled(bind) &&
+                    b.just_held && b.binds.Contains(bind))
                     return true;
             }
             return false;
@@ -1080,7 +1095,8 @@ namespace Magpie.Engine {
         public bool bind_just_released_hold(string bind) { 
 
             foreach (IDigitalBind b in _binds) {
-                if (bind_enabled(bind) && b.released_hold && b.binds.Contains(bind))
+                if (//bind_enabled(bind) &&
+                    b.released_hold && b.binds.Contains(bind))
                     return true;
             }
 
@@ -1089,7 +1105,8 @@ namespace Magpie.Engine {
 
         public bool bind_tapped(string bind) {
             foreach (IDigitalBind b in _binds) {
-                if (bind_enabled(bind) && b.tapped && b.binds.Contains(bind))
+                if (//bind_enabled(bind) &&
+                    b.tapped && b.binds.Contains(bind))
                     return true;
             }
             return false;

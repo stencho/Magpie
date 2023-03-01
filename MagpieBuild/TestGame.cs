@@ -101,7 +101,12 @@ namespace MagpieBuild
             EngineState.camera = ((FreeCamActor)world.current_map.player_actor).cam;
 
 
-            add_bindings(            
+            add_bindings(
+                (bind_type.digital, controller_type.keyboard, Keys.W, "forward"),
+                (bind_type.digital, controller_type.keyboard, Keys.A, "left"),
+                (bind_type.digital, controller_type.keyboard, Keys.D, "right"),
+                (bind_type.digital, controller_type.keyboard, Keys.S, "backward"),
+
                 (bind_type.digital, controller_type.keyboard, Keys.Up, "t_forward"),
                 (bind_type.digital, controller_type.keyboard, Keys.Left, "t_left"),
                 (bind_type.digital, controller_type.keyboard, Keys.Right, "t_right"),
@@ -121,20 +126,31 @@ namespace MagpieBuild
 
 
                 (bind_type.digital, controller_type.keyboard, Keys.LeftShift, "shift"),
+                (bind_type.digital, controller_type.keyboard, Keys.LeftControl, "ctrl"),
 
                 (bind_type.digital, controller_type.mouse, MouseButtons.Left, "ui_select"), 
                 (bind_type.digital, controller_type.mouse, MouseButtons.Right, "click_right"),
                 (bind_type.digital, controller_type.mouse, MouseButtons.Middle, "click_middle"),
                 (bind_type.digital, controller_type.mouse, MouseButtons.ScrollUp, "scroll_up"),
-                (bind_type.digital, controller_type.mouse, MouseButtons.ScrollDown, "scroll_down")
+                (bind_type.digital, controller_type.mouse, MouseButtons.ScrollDown, "scroll_down"),
+
+                (bind_type.digital, controller_type.keyboard, Keys.F, "t_supp" ),
+                (bind_type.digital, controller_type.keyboard, Keys.D1, "speenL"),
+                (bind_type.digital, controller_type.keyboard, Keys.D3, "speenR" ),
+                (bind_type.digital, controller_type.keyboard, Keys.R,  "t_S"),
+                (bind_type.digital, controller_type.keyboard, Keys.Q, "t_L" ),
+                (bind_type.digital, controller_type.keyboard, Keys.E,"t_R" ),
+
+                (bind_type.digital, controller_type.keyboard, Keys.OemTilde, "toggle_console" )
                 );
 
             add_bindings((bind_type.digital, controller_type.keyboard, Keys.T, new string[] { "fart", "cum", "shit" } ));
 
+            force_enable("toggle_console");
             force_enable("screenshot");
 
-            for (int i = 0; i < 150; i++) {
-                var id = EngineState.world.current_map.make_id();
+            //for (int i = 0; i < 150; i++) {
+                //var id = EngineState.world.current_map.make_id();
                 //world.current_map.game_objects.Add(id,
                   //  new object_info(
                     //    (Vector3.Forward * (RNG.rng_float * 30)) + (Vector3.Right * (RNG.rng_float_neg_one_to_one * 10)) + (Vector3.Up * (RNG.rng_float * 20)), 
@@ -148,7 +164,7 @@ namespace MagpieBuild
 
 
 
-            }
+            //}
 
             var cubeid = world.current_map.add_object(new object_info(Vector3.Left * 6, new collision_info(new Cube(0.5f))));
             var sphereid = world.current_map.add_object(new object_info(Vector3.Right * 3, new collision_info(new Sphere(1f))));
@@ -229,7 +245,7 @@ namespace MagpieBuild
 
             world.Update();
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
+            if (Controls.is_pressed(Keys.Escape)) {
                 EngineState.running = false;
                 Exit();
             }
@@ -237,20 +253,21 @@ namespace MagpieBuild
            // results = new GJK.gjk_result[world.current_map.game_objects.Count];
 
             //test collision detection between above test actor and all the objects in the scene
-            int i=0;
-            foreach (object_info go in world.current_map.game_objects.Values) {
-                if (go == null) continue;
+            //int i=0;
+            //foreach (object_info go in world.current_map.game_objects.Values) {
+                //if (go == null) continue;
                 //if (go.name.StartsWith("test_sphere")) {
                     //results[i] = gjkp.gjk_intersects(world.current_map.actors[0].collision, go.collision.move_shape, world.current_map.actors[0].world, go.collision.world);
-                i++;
+                //i++;
                 //}
-            }
+            //}
 
             world.current_map.game_objects[mid].lights[0].position = 
                 world.player_actor.position 
                 + (EngineState.camera.orientation.Right * 0.5f) 
                 + (EngineState.camera.orientation.Down * 0.4f) 
                 + (EngineState.camera.orientation.Forward * 0.6f);
+
             world.current_map.game_objects[mid].lights[0].spot_info.orientation =
                 EngineState.camera.orientation * Matrix.CreateFromAxisAngle(EngineState.camera.orientation.Up, MathHelper.ToRadians(5f));
             /*
@@ -383,8 +400,8 @@ namespace MagpieBuild
 
             //world.current_map.actors[0].debug_draw();
                         
-            Clock.frame_probe.set("GJK tests/drawing");
-
+            //Clock.frame_probe.set("GJK tests/drawing");
+            /*
             while (true) { 
                 if (!world.current_map.game_objects[mid].collision.doing_collisions) {
                     lock (world.current_map.game_objects[mid].collision.gjk_results) {
@@ -408,7 +425,7 @@ namespace MagpieBuild
                     break;
                 }
             }
-            
+            */
             
             /*
             foreach (GJK.gjk_result res in results) {
@@ -487,7 +504,7 @@ namespace MagpieBuild
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
 
-            if (mouse_lock) {
+            if (enable_mouse_lock) {
                 crosshair_sdf.position = EngineState.resolution * 0.5f;
             } else {
                 crosshair_sdf.position = Controls.mouse_position.ToVector2();

@@ -19,19 +19,12 @@ namespace Magpie.Graphics.UI {
     }
 
     public class UIWindowManager {
-        ControlBinds wm_binds = new ControlBinds(
-            (bind_type.digital, controller_type.mouse, MouseButtons.Left, new string[] { "mouse_left", "left_mouse", "left_click", "click_left", "select" }),
-            (bind_type.digital, controller_type.mouse, MouseButtons.Right, new string[] { "mouse_right", "right_mouse", "right_click", "click_right", "menu" }),
-            (bind_type.digital, controller_type.keyboard, Keys.OemTilde, new string[] {"toggle_console"})
-            );
-
         public List<IUIForm> windows = new List<IUIForm>();
         ConsoleWindow console;
         public UIWindowManager() {
             console = new ConsoleWindow(new XYPair(200, 200), new XYPair(400, 230));
             console.hide();
             add_window((IUIForm)console);
-            wm_binds.force_enable("toggle_console");
         }
 
         public string list_windows() {
@@ -124,16 +117,15 @@ namespace Magpie.Graphics.UI {
 
         public void update() {
             Clock.frame_probe.set("wm_update");
-
-            wm_binds.update();
+                        
             highest_hit = -1;
             handled = false;
 
             top_hit_subform = -1;
             bool hit_any = false;
 
-
-            if (wm_binds.just_pressed("toggle_console")) {
+            //if (Controls.just_pressed(Keys.OemTilde)) {
+            if (StaticControlBinds.just_pressed("toggle_console")) {
                 if (console.visible && !console.has_focus) {
                     for (int o = 0; o < windows.Count; o++) {
                         windows[o].has_focus = false;
@@ -142,7 +134,7 @@ namespace Magpie.Graphics.UI {
                     windows.BringToFront(console);
                     force_focus(console);
 
-                    ControlBinds.global_enable = false;
+                    StaticControlBinds.global_enable = false;
                     return;
                 }
 
@@ -152,9 +144,9 @@ namespace Magpie.Graphics.UI {
                     windows.BringToFront(console);
                     force_focus(console);
 
-                    ControlBinds.global_enable = false;
+                    StaticControlBinds.global_enable = false;
                 } else {
-                    ControlBinds.global_enable = true;
+                    StaticControlBinds.global_enable = true;
 
                     for (int o = 0; o < windows.Count; o++) {
                         windows[o].has_focus = false;
@@ -227,9 +219,9 @@ namespace Magpie.Graphics.UI {
                             windows[i].subforms[i1].top_of_mouse_stack = false;
                         }
                     }
-                    ControlBinds.global_enable = true;
+                    StaticControlBinds.global_enable = true;
                 } else {
-                    ControlBinds.global_enable = false;
+                    StaticControlBinds.global_enable = false;
                 }
             }
 

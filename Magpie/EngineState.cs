@@ -282,7 +282,7 @@ namespace Magpie {
         public static void apply_internal_scale() {
             buffer.change_resolution_super(graphics_device, resolution.X, resolution.Y, gvars.get_float("super_resolution_scale"));
         }
-
+        public static bool updating_controls = false;
         public static void Update(GameTime gt, Game game) {
             if (running == false) {
                 game.Exit();
@@ -295,9 +295,11 @@ namespace Magpie {
 
             Log.update();
 
+            updating_controls = true;
             Controls.update(EngineState.window, EngineState.game.IsActive, EngineState.resolution);
 
             StaticControlBinds.update();
+            updating_controls = false;
 
             if (StaticControlBinds.just_released("switch_buffer")) {
                 if (Scene.buffer < Scene.buffer_count) Scene.buffer++; 

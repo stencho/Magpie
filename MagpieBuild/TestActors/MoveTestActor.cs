@@ -75,34 +75,10 @@ namespace MagpieTestbed.TestActors {
             }
 
 
-            if (StaticControlBinds.just_pressed("test_sweep")) {
-                start_pos = position;
-            }
-            if (StaticControlBinds.just_released("test_sweep")) {
-                flip = true;
+            if (mv != Vector3.Zero)
+                wants_movement = (Vector3.Normalize(mv) * (movement_speed * (StaticControlBinds.pressed("shift") ? 0.2f:1f)) * Clock.internal_frame_time_delta);
 
-                position = start_pos;
-                wants_movement = Vector3.Zero;
-
-            }
-
-            if (StaticControlBinds.pressed("test_sweep")) {
-                request_absolute_move = true;
-                sweep_absolute_move = true;
-                if (flip) {
-                    wants_absolute_movement = start_pos + (Vector3.Right * 20) + (Vector3.Forward * 20) + (Vector3.Down  * 50);
-
-                } else {
-                    wants_absolute_movement = start_pos;
-                }
-
-                flip = !flip;
-            } else {
-
-                if (mv != Vector3.Zero)
-                    wants_movement = (Vector3.Normalize(mv) * (movement_speed * (StaticControlBinds.pressed("shift") ? 0.2f:1f)) * Clock.internal_frame_time_delta);
-
-            }
+            
             if (wants_movement != Vector3.Zero) {
                 //this.position += wants_movement;
                 //wants_movement = Vector3.Zero;

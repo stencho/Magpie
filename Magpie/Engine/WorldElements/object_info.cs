@@ -15,8 +15,6 @@ namespace Magpie.Engine.WorldElements {
     public partial class object_info {
         public int id = -1;
 
-        public volatile ControlBinds binds;
-
         public Vector3 position = Vector3.Zero;
         public Vector3 wants_movement = Vector3.Zero;
 
@@ -34,6 +32,10 @@ namespace Magpie.Engine.WorldElements {
 
         public Action update_action;
         public Action draw_action;
+
+        public ThreadedBindManager binds = new ThreadedBindManager();
+
+        public bool resting = false;
 
         public object_info(Vector3 position) {
             this.position = position;
@@ -69,14 +71,16 @@ namespace Magpie.Engine.WorldElements {
 
 
         public virtual void update() {
-            world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
+            if (!resting)
+                world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
+
             if (render != null)
                 render.world = world;
-
+            /*
             if (update_action != null) {
                 update_action();
             }
-
+            */
         }
 
 

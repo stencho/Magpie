@@ -26,14 +26,6 @@ namespace MagpieBuild.TestActors {
             init();
         }
         void init() {
-            binds = new ControlBinds(
-            (bind_type.digital, controller_type.keyboard, Keys.LeftShift, new string[] { "shift" }),
-            (bind_type.digital, controller_type.keyboard, Keys.F, new string[] { "t_supp" }),
-            (bind_type.digital, controller_type.keyboard, Keys.D1, new string[] { "speenL" }),
-            (bind_type.digital, controller_type.keyboard, Keys.D3, new string[] { "speenR" }),
-            (bind_type.digital, controller_type.keyboard, Keys.R, new string[] { "t_S" }),
-            (bind_type.digital, controller_type.keyboard, Keys.Q, new string[] { "t_L" }),
-            (bind_type.digital, controller_type.keyboard, Keys.E, new string[] { "t_R" }));
         }
 
         int selected_target = 0;
@@ -44,7 +36,7 @@ namespace MagpieBuild.TestActors {
                 Vector3.Zero,
                 1f, Color.Brown);
 
-            lock (gjk_targets) { 
+            //lock (gjk_targets) { 
                 int i = -1;
                 foreach (int gjkid in gjk_targets.Keys) {
                     
@@ -68,17 +60,13 @@ namespace MagpieBuild.TestActors {
                         //Draw3D.xyz_cross(spp, 1f, Color.Green);               
                     }
                 }
-            }
+            //}
             //Draw3D.line(c, c + )
             //Draw3D.xyz_cross(position, 1f, Color.Green);
             base.draw();
         }
         public override void update() {
-            lock (binds) {
-                if (binds != null) {
-                    binds.update();
-                }
-            }
+            binds.update();
 
             if (binds.pressed("speenL")) {
                 this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, -1f * Clock.internal_frame_time_delta);
@@ -104,7 +92,7 @@ namespace MagpieBuild.TestActors {
                     selected_target = gjk_targets.Count - 1;
             }
             
-            lock (gjk_targets) {
+            //lock (gjk_targets) {
                 foreach (int gjkid in gjk_targets.Keys) {
                     //collision snapshot
                     if (binds.pressed("t_S")) {
@@ -116,10 +104,10 @@ namespace MagpieBuild.TestActors {
                         int old_draw =  gjk_targets[gjkid].draw_simplex;
                         bool old_draw_supp = gjk_targets[gjkid].draw_all_supports;
 
-                        var i = MixedCollision.intersects(me.collision, ts.collision, wa, wb);
+                        var i = MixedCollision.gjk_intersects(me.collision, ts.collision, wa, wb);
 
 
-                        //if (old_draw > gjk_targets[gjkid].simplex_list.Count - 1 || old_draw < 0)
+                        if (old_draw >= gjk_targets[gjkid].simplex_list.Count - 1 || old_draw < 0)
                             old_draw = gjk_targets[gjkid].simplex_list.Count - 1;
                        
 
@@ -150,33 +138,33 @@ namespace MagpieBuild.TestActors {
                     }
 
                     gjk_targets[gjkid] = t;
-                }
+                //}
             }
 
 
             Vector3 mv = Vector3.Zero;
 
-            if (StaticControlBinds.pressed("t_forward")) {
+            if (binds.pressed("t_forward")) {
                 mv += Vector3.Forward;
             }
-            if (StaticControlBinds.pressed("t_backward")) {
+            if (binds.pressed("t_backward")) {
                 mv += Vector3.Backward;
             }
-            if (StaticControlBinds.pressed("t_left")) {
+            if (binds.pressed("t_left")) {
                 mv += Vector3.Left;
             }
-            if (StaticControlBinds.pressed("t_right")) {
+            if (binds.pressed("t_right")) {
                 mv += Vector3.Right;
             }
-            if (StaticControlBinds.pressed("t_up")) {
+            if (binds.pressed("t_up")) {
                 mv += Vector3.Up;
             }
-            if (StaticControlBinds.pressed("t_down")) {
+            if (binds.pressed("t_down")) {
                 mv += Vector3.Down;
             }
 
             if (mv != Vector3.Zero)
-                wants_movement = (Vector3.Normalize(mv) * (5f * (StaticControlBinds.pressed("shift") ? 0.2f : 1f)) * Clock.internal_frame_time_delta);
+                wants_movement = (Vector3.Normalize(mv) * (5f * (binds.pressed("shift") ? 0.2f : 1f)) * Clock.internal_frame_time_delta);
             
             base.update();
         }

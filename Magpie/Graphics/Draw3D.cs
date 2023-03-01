@@ -313,14 +313,15 @@ namespace Magpie.Graphics {
 
         public static BasicEffect text_effect;
         public static void text_3D(SpriteBatch sb, string text, string fontname, Vector3 offset, Vector3? normal, float scale, Color color, bool always_visible = false) {
-            Vector2 origin = ContentHandler.resources[fontname].value_ft.MeasureString(text) / 2f;
+            var t = Encoding.ASCII.GetString(Encoding.UTF8.GetBytes(text));
+            Vector2 origin = ContentHandler.resources[fontname].value_ft.MeasureString(t) / 2f;
             text_effect.World = Matrix.CreateScale(scale, -scale, 0) * Matrix.CreateLookAt(Vector3.Zero, EngineState.camera.view.Forward, Vector3.Up) * Matrix.CreateTranslation(offset);
             text_effect.View = EngineState.camera.view;
             text_effect.Projection = EngineState.camera.projection;
             text_effect.DiffuseColor = color.ToVector3();
             text_effect.TextureEnabled = true;
             sb.Begin(0, null, SamplerState.PointWrap, (always_visible ? DepthStencilState.None : DepthStencilState.DepthRead), RasterizerState.CullNone, text_effect);
-            sb.DrawString(ContentHandler.resources[fontname].value_ft, text, Vector2.Zero, Color.White, 0, origin, 0.015f, SpriteEffects.None, 1);
+            sb.DrawString(ContentHandler.resources[fontname].value_ft, t, Vector2.Zero, Color.White, 0, origin, 0.015f, SpriteEffects.None, 1);
             sb.End();
         }
 

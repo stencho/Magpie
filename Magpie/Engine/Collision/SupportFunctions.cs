@@ -27,12 +27,33 @@ namespace Magpie {
         public static Vector3 Point(Vector3 direction, Vector3 P) {
             return P;
         }
+        public static Vector3 GetFarthestPointInDirection(Vector3 direction, Cube cube) {
+            Vector3 output = Vector3.Zero;
+
+            if (direction.X >= 0) 
+                output.X = cube.half_scale.X;
+            else if (direction.X < 0) 
+                output.X = -cube.half_scale.X;
+            
+            if (direction.Y >= 0)
+                output.Y = cube.half_scale.Y;
+            else if (direction.Y < 0)
+                output.Y = -cube.half_scale.Y;            
+
+            if (direction.Z >= 0) 
+                output.Z = cube.half_scale.Z;
+            else if (direction.Z < 0)
+                output.Z = -cube.half_scale.Z;
+            
+            return output;
+
+        }
 
         public static Vector3 Tri(Vector3 direction, Vector3 A, Vector3 B, Vector3 C) {
 
-            return Math3D.highest_dot(new Vector3[3] { A, B, C }, direction, out _);
+            //return Math3D.highest_dot(new Vector3[3] { A, B, C }, direction, out _);
            
-            //return CollisionHelper.triangle_farthest_point(A, B, C, direction);  
+            return CollisionHelper.triangle_farthest_point(A, B, C, direction);  
 
             /*
             var AB = B-A;
@@ -56,7 +77,7 @@ namespace Magpie {
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Cube(Vector3 direction, Cube cube) {
-
+            return GetFarthestPointInDirection(direction, cube);
             return Math3D.highest_dot(new Vector3[8] {
                 cube.A,
                 cube.B,

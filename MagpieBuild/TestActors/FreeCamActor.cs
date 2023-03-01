@@ -53,25 +53,6 @@ namespace MagpieTestbed.TestActors {
                 spot_info = new spot_info()
             }
         };
-
-        public volatile ControlBinds binds = new ControlBinds(
-            (bind_type.digital, controller_type.keyboard, Keys.W, new string[] { "forward" }),
-            (bind_type.digital, controller_type.keyboard, Keys.A, new string[] { "left" }),
-            (bind_type.digital, controller_type.keyboard, Keys.S, new string[] { "backward" }),
-            (bind_type.digital, controller_type.keyboard, Keys.D, new string[] { "right" }),
-
-            (bind_type.digital, controller_type.keyboard, Keys.Space, new string[] { "up" }),
-            (bind_type.digital, controller_type.keyboard, Keys.C, new string[] { "down" }),
-
-            (bind_type.digital, controller_type.keyboard, Keys.LeftShift, new string[] { "boost", "shift" }),
-
-            (bind_type.digital, controller_type.mouse, MouseButtons.Left, new string[] { "fire", "picker", "left_click" }),
-            (bind_type.digital, controller_type.mouse, MouseButtons.Right, new string[] { "mouse_aim", "context_menu", "right_click" })//,
-
-            //(bind_type.analog, analog_bind_type.mouse_delta_axis,   MouseAxis.X,            new string[] { "mouse_x" }),
-            //(bind_type.analog, analog_bind_type.mouse_delta_axis,   MouseAxis.Y,            new string[] { "mouse_y" })
-            );
-
         public FreeCamActor() {
             cam = new Camera();
             collision = new Sphere(1f);
@@ -83,10 +64,9 @@ namespace MagpieTestbed.TestActors {
 
         bool aiming = false;
         bool was_aiming = false;
-
+        ThreadedBindManager binds = new ThreadedBindManager();
         public void Update() {
-            lock (binds)
-                binds.update();
+            binds.update();
             /*
             if (binds.held("mouse_aim")) {
                 if (binds.just_held("mouse_aim")) {
@@ -120,31 +100,32 @@ namespace MagpieTestbed.TestActors {
                 } 
             }
             */
-            aiming = binds.pressed("mouse_aim");
+            if (binds.just_pressed("click_right") && EngineState.is_active && EngineState.was_active) {
+                EngineState.game.IsMouseVisible = false;
+                aiming = true;
+            } else if (binds.just_released("click_right") || !EngineState.is_active) {
+                aiming = false;
+            }
 
             if (aiming && !was_aiming) {
                 stored_pos = Controls.mouse_position;
-                EngineState.game.IsMouseVisible = false;
-                mouse_lock = true;
-            }
+                enable_mouse_cursor = false;
+                enable_mouse_lock = true;
+            } else if (aiming) { 
+                cam.orientation *= Matrix.CreateRotationY(mouse_delta_internal.X / (EngineState.resolution.X * mouse_multi));
 
-            if (aiming) { 
-                cam.orientation *= Matrix.CreateRotationY(mouse_delta_int.X / (EngineState.resolution.X * mouse_multi));
-
-                if (cam.orientation.Forward.Y < .98f && mouse_delta_int.Y > 0) {
-                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta_int.Y / (EngineState.resolution.Y * mouse_multi));
-                } else if (cam.orientation.Forward.Y > -.98f && mouse_delta_int.Y < 0) {
-                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta_int.Y / (EngineState.resolution.Y * mouse_multi));
+                if (cam.orientation.Forward.Y < .98f && mouse_delta_internal.Y > 0) {
+                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta_internal.Y / (EngineState.resolution.Y * mouse_multi));
+                } else if (cam.orientation.Forward.Y > -.98f && mouse_delta_internal.Y < 0) {
+                    cam.orientation *= Matrix.CreateFromAxisAngle(cam.orientation.Right, mouse_delta_internal.Y / (EngineState.resolution.Y * mouse_multi));
                 }                            
-            }
-
-            if (!aiming && was_aiming) {
+            } else if (!aiming && was_aiming) {
                 //if (was_locked == true)
                 Mouse.SetPosition(stored_pos.X, stored_pos.Y);
 
-                mouse_lock = false;
+                enable_mouse_lock = false;
+                enable_mouse_cursor = true;
                 //was_locked = false;
-                EngineState.game.IsMouseVisible = true;
             }
 
             was_aiming = aiming;
@@ -171,7 +152,7 @@ namespace MagpieTestbed.TestActors {
             }
 
             if (mv != Vector3.Zero)
-                wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("shift") ? 6f : 1f) * Clock.internal_frame_limit_in_seconds;
+                wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("ctrl") ? 0.3f : (binds.pressed("shift") ? 1f : 4f)) * Clock.internal_frame_time_delta;
 
             if (wants_movement != Vector3.Zero) {
                 //this.position += wants_movement;

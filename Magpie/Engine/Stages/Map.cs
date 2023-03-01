@@ -24,8 +24,6 @@ namespace Magpie.Engine.Stages {
 
         }
 
-
-
         public volatile Dictionary<int, object_info> game_objects = new Dictionary<int, object_info>();
 
         public int add_object(object_info object_info) {

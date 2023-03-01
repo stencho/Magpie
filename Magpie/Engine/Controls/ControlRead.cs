@@ -40,9 +40,9 @@ namespace Magpie.Engine {
         public static bool mouse_in_bounds => is_mouse_in_bounds();
 
         static bool is_mouse_in_bounds() {
-            return (mouse_position.X > 0 
+            return (mouse_position.X > 0
                  && mouse_position.Y > 0
-                 && mouse_position.X < EngineState.resolution.X 
+                 && mouse_position.X < EngineState.resolution.X
                  && mouse_position.Y < EngineState.resolution.Y);
         }
 
@@ -75,7 +75,7 @@ namespace Magpie.Engine {
                 d.Normalize();
 
                 mouse_pick_ray = new raycast(near, d);
-                
+
                 gjk_mouse_pick_ray.A = near;
                 gjk_mouse_pick_ray.B = d;
             }
@@ -106,7 +106,7 @@ namespace Magpie.Engine {
 
         public enum XInputStick {
             Left,
-            Right            
+            Right
         }
 
         public enum XInputButtons {
@@ -136,7 +136,7 @@ namespace Magpie.Engine {
 
         static int scroll_wheel_changed() {
             old_delta = wheel_delta;
-            wheel_delta = mouse_state.ScrollWheelValue - old_wheel_value;                        
+            wheel_delta = mouse_state.ScrollWheelValue - old_wheel_value;
             old_wheel_value = mouse_state.ScrollWheelValue;
             return wheel_delta;
         }
@@ -160,7 +160,7 @@ namespace Magpie.Engine {
 
                 case MouseButtons.ScrollUp:
                     return wheel_delta > 0;
-                    
+
                 case MouseButtons.ScrollDown:
                     return wheel_delta < 0;
 
@@ -283,20 +283,23 @@ namespace Magpie.Engine {
             return is_pressed(test_button, player) && !was_pressed(test_button, player);
         }
 
-#endregion
+        #endregion
 
-        public static bool window_active = true;
-        private static bool window_was_active;
-        private static XYPair window_center = XYPair.Zero;
-        public volatile static bool mouse_lock = false;
+        static XYPair window_center = XYPair.Zero;
+
+        static volatile bool mouse_lock = false;
         static volatile bool mouse_lock_p = false;
-        static Vector2 mouse_delta_internal;
-        public static Vector2 mouse_delta;
-        public static Vector2 mouse_delta_int;
-        static XYPair mdel;
 
-        static Vector2 md = Vector2.Zero;
-        public static Vector2 md_int = Vector2.Zero;
+        public static Vector2 mouse_delta;
+        static Vector2 mouse_delta_int;
+        public static Vector2 mouse_delta_internal = Vector2.Zero;
+        static Vector2 md_accumulator = Vector2.Zero;
+        public static Vector2 md_accumulator_internal = Vector2.Zero;
+
+        public static void pull_accumulated_md_internal() {
+            mouse_delta_internal = md_accumulator_internal;
+            md_accumulator_internal = Vector2.Zero;
+        }
 
         static Keys[] pressed_keys;
         static Keys[] pressed_keys_previous;
@@ -307,15 +310,16 @@ namespace Magpie.Engine {
         public static volatile float mouse_multi = 15f;
         public static double control_thread_ms => (1000.0 / control_thread_poll_hz);
         public static volatile frame_probe control_poll_probe = new frame_probe();
-        
+
         //to explain how this works, the control_thread_update() function/thread more or less
         //exclusively exists just to get extremely clean mouse deltas and mouse feel in general
-        //control_thread_update accumulates mouse deltas into Vector2 md over a whole lot of frames (it runs at 1000 hz)
-        //and then update() sets mouse_delta to md and clears md
-        //this allows the main external update thread to have access to extremely accurate, framerate agnostic mouse delta information
-        //which in turn allows anything in the internal thread to also get
+        //control_thread_update accumulates mouse deltas into Vector2 md_accumulator over a whole lot of frames
+        //and then update() sets mouse_delta to md_accumulator and clears it
+        //this gives both update threads access to extremely accurate,
+        //framerate agnostic mouse delta information
 
-
+        public static bool enable_mouse_lock { get; set; } = false;
+        public static bool enable_mouse_cursor { get; set; } = true;
         public static void control_thread_update() {
             while (EngineState.running) {
                 control_poll_probe.start_of_frame();
@@ -325,31 +329,31 @@ namespace Magpie.Engine {
                 mdsp = mds;
                 mds = Mouse.GetState();
 
+                EngineState.game.IsMouseVisible = enable_mouse_cursor;
+
                 window_center.X = (EngineState.window.ClientBounds.Width / 2);
                 window_center.Y = (EngineState.window.ClientBounds.Height / 2);
-                window_active = EngineState.game.IsActive;
 
-                if (mouse_lock && window_active) {
+                mouse_delta_int = Vector2.Zero;
+                
+                mouse_lock_p = mouse_lock;
+                mouse_lock = enable_mouse_lock;
+                
+                if (mouse_lock && !mouse_lock_p) {                    
                     Mouse.SetPosition(window_center.X, window_center.Y);
-                }
 
-                if (mouse_lock && mouse_lock_p && window_active && window_was_active) {
-                    mouse_delta_internal = (window_center.ToVector2())
+                } else if (mouse_lock) {    
+                    mouse_delta_int = (window_center.ToVector2())
                                     - (Vector2.UnitX * mds.X)
                                     - (Vector2.UnitY * mds.Y);
 
-
-                } else if (!mouse_lock && !mouse_lock_p) {
-                    mouse_delta_internal = ((Vector2.UnitX * -(mdsp.X - mds.X)) + (Vector2.UnitY * -(mdsp.Y - mds.Y)));
-
-                } else {
-                    mouse_delta_internal = Vector2.Zero;
+                    Mouse.SetPosition(window_center.X, window_center.Y);
+                } else if (!mouse_lock) {
+                    mouse_delta_int = ((Vector2.UnitX * -(mdsp.X - mds.X)) + (Vector2.UnitY * -(mdsp.Y - mds.Y)));
                 }
 
-                md += mouse_delta_internal;
-                md_int += mouse_delta_internal;
-
-                mouse_lock_p = mouse_lock;
+                md_accumulator_internal += mouse_delta_int;
+                md_accumulator += mouse_delta_int;
 
                 _mouse_coll_obj = new Circle2D(Controls.mouse_position_float, 1f);
 
@@ -357,6 +361,7 @@ namespace Magpie.Engine {
                 while (EngineState.running) {
                     if (control_poll_probe.since_frame_start() >= control_thread_ms) break;
                 }
+                mouse_lock_p = mouse_lock;
                 control_poll_probe.end_of_frame();
             }
         }
@@ -379,8 +384,8 @@ namespace Magpie.Engine {
             pressed_keys_previous = pressed_keys;
             pressed_keys = ks.GetPressedKeys();
 
-            mouse_delta = md;
-            md = Vector2.Zero;
+            mouse_delta = md_accumulator;
+            md_accumulator = Vector2.Zero;
 
             xsp[0] = xs[0];
             xsp[1] = xs[1];
@@ -392,9 +397,8 @@ namespace Magpie.Engine {
             xs[2] = GamePad.GetState(PlayerIndex.Three);
             xs[3] = GamePad.GetState(PlayerIndex.Four);
 
-            window_was_active = window_active;
 
-            picker_raycasts.update();
+            //picker_raycasts.update();
 
             /*
             window_center.X = (window.ClientBounds.Width / 2);

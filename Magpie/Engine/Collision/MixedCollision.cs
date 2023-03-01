@@ -14,7 +14,9 @@ using static Magpie.GJK;
 namespace Magpie.Engine.Collision {
     public class MixedCollision {
 
-        const int max_iterations = 30;
+        const int max_iterations = 50;
+
+        public enum spoint { A=0, B=1, C=2, D=3 }
 
         public enum simplex_stage {
             empty = -1,
@@ -23,7 +25,6 @@ namespace Magpie.Engine.Collision {
             triangle=2,
             tetrahedron=3
         }
-
 
         public struct gjk_support {
             public Vector3 A_support;
@@ -48,7 +49,6 @@ namespace Magpie.Engine.Collision {
             }
         }
 
-        public enum spoint { A=0, B=1, C=2, D=3 }
         public struct gjk_simplex {
 
             public Vector3 direction;
@@ -69,45 +69,39 @@ namespace Magpie.Engine.Collision {
 
             public string early_exit_reason;
 
+            public Vector3 A => supports[A_index].P; 
+            public Vector3 B => supports[B_index].P;
+            public Vector3 C => supports[C_index].P; 
+            public Vector3 D => supports[D_index].P;
+
             internal int A_index => (int)stage;
             internal int B_index => (int)stage - 1;
             internal int C_index => (int)stage - 2;
             internal int D_index => (int)stage - 3;
 
-            public Vector3 A => supports[A_index].P;
-            public Vector3 B => supports[B_index].P;
-            public Vector3 C => supports[C_index].P;
-            public Vector3 D => supports[D_index].P;
 
-            public float A_bary => supports[A_index].barycentric;
+            public float A_bary => supports[A_index].barycentric; 
             public float B_bary => supports[B_index].barycentric;
-            public float C_bary => supports[C_index].barycentric;
+            public float C_bary => supports[C_index].barycentric; 
             public float D_bary => supports[D_index].barycentric;
 
-            public gjk_support A_support => supports[A_index];
+            public gjk_support A_support => supports[A_index]; 
             public gjk_support B_support => supports[B_index];
-            public gjk_support C_support => supports[C_index];
+            public gjk_support C_support => supports[C_index]; 
             public gjk_support D_support => supports[D_index];
 
 
-            public Vector3 AO => -A;
-            public Vector3 BO => -B;
-            public Vector3 CO => -C;
-            public Vector3 DO => -D;
+            public Vector3 AO => -A; public Vector3 BO => -B;
+            public Vector3 CO => -C; public Vector3 DO => -D;
 
-            public Vector3 AB => B - A;
-            public Vector3 AC => C - A;
-            public Vector3 AD => D - A;
-            public Vector3 BA => A - B;
-            public Vector3 BC => C - B;
-            public Vector3 BD => D - B;
-            public Vector3 CD => D - C;
-            public Vector3 DB => B - D;
+            public Vector3 AB => B - A; public Vector3 AC => C - A; public Vector3 AD => D - A;
+            public Vector3 BA => A - B; public Vector3 BC => C - B; public Vector3 BD => D - B;
+            public Vector3 CD => D - C; public Vector3 DB => B - D;
+
             public Vector3 ABC => Vector3.Cross(AB, AC);
-            public Vector3 ABD => Vector3.Cross(AB, AD);
             public Vector3 ADB => Vector3.Cross(AD, AB);
             public Vector3 ACD => Vector3.Cross(AC, AD);
-            public Vector3 BCD => Vector3.Cross(BD, BC);
+            public Vector3 BCD => Vector3.Cross(BC, BD);
 
             public void add_new_point(Vector3 A_sup, Vector3 B_sup) {
 
@@ -123,42 +117,30 @@ namespace Magpie.Engine.Collision {
 
             int spoint_index(spoint p) {
                 switch (p) {
-                    case spoint.A:
-                        return A_index;
-                    case spoint.B:
-                        return B_index;
-                    case spoint.C:
-                        return C_index;
-                    case spoint.D:
-                        return D_index;
+                    case spoint.A: return A_index;
+                    case spoint.B: return B_index;
+                    case spoint.C: return C_index;
+                    case spoint.D: return D_index;
                 }
                 return -1;
             }
 
             Vector3 spoint_value(spoint p) {
                 switch (p) {
-                    case spoint.A:
-                        return supports[A_index].P;
-                    case spoint.B:
-                        return supports[B_index].P;
-                    case spoint.C:
-                        return supports[C_index].P;
-                    case spoint.D:
-                        return supports[D_index].P;
+                    case spoint.A: return supports[A_index].P;
+                    case spoint.B: return supports[B_index].P;
+                    case spoint.C: return supports[C_index].P;
+                    case spoint.D: return supports[D_index].P;
                 }
                 return Vector3.Zero;
             }
 
             float spoint_bary(spoint P) {
                 switch (P) {
-                    case spoint.A:
-                        return supports[A_index].barycentric;
-                    case spoint.B:
-                        return supports[B_index].barycentric;
-                    case spoint.C:
-                        return supports[C_index].barycentric;
-                    case spoint.D:
-                        return supports[D_index].barycentric;
+                    case spoint.A: return supports[A_index].barycentric;
+                    case spoint.B: return supports[B_index].barycentric;
+                    case spoint.C: return supports[C_index].barycentric;
+                    case spoint.D: return supports[D_index].barycentric;
                 }
                 return 0f;
             }
@@ -179,13 +161,53 @@ namespace Magpie.Engine.Collision {
                         break;
                 }
             }
+            public void set_bary(float U) {
+                supports[A_index].barycentric = U;
+            }
+            public void set_bary_line(float U, float V) {
+                supports[A_index].barycentric = U;
+                supports[B_index].barycentric = V;
+            }
+            public void set_bary_tri(float U, float V, float W) {
+                supports[A_index].barycentric = U;
+                supports[B_index].barycentric = V;
+                supports[C_index].barycentric = W;
+            }
+            public void set_bary_line((float U, float V) uv) {
+                supports[A_index].barycentric = uv.U;
+                supports[B_index].barycentric = uv.V;
+            }
+
+            public void set_bary_line() {
+                var bc = CollisionHelper.line_barycentric(Vector3.Zero, A, B);
+                supports[1].barycentric = bc.U;
+                supports[0].barycentric = bc.V;
+            }
+            public void set_bary_tri() {
+                var bc = CollisionHelper.triangle_barycentric(Vector3.Zero, A, B, C);
+                supports[2].barycentric = bc.X;
+                supports[1].barycentric = bc.Y;
+                supports[0].barycentric = bc.Z;
+            }
 
             public float get_denom() {
-                float d = 0f;
-                for (int i = 0; i < (int)stage; ++i) {
-                    d += supports[i].barycentric;
+                float denom = 0f;
+                switch (stage) {                    
+                    case simplex_stage.point:
+                        denom = 1f;
+                        break;
+                    case simplex_stage.line:
+                        denom = A_support.barycentric + B_support.barycentric;
+                        break;
+                    case simplex_stage.triangle:
+                        denom = A_support.barycentric + B_support.barycentric + C_support.barycentric;
+                        break;
+                    case simplex_stage.tetrahedron:
+                        denom = A_support.barycentric + B_support.barycentric + C_support.barycentric + D_support.barycentric;
+                        break;
                 }
-                return d;
+                denom = 1f / denom;
+                return denom;
             }
 
             public void move_to_stage(spoint A) {
@@ -266,14 +288,10 @@ namespace Magpie.Engine.Collision {
             public string get_info() {
                 StringBuilder sb = new StringBuilder();
 
-                if ((int)stage >= 0)
-                    sb.Append($"[A] {A.ToXString()} [b] {supports[A_index].barycentric}\n");
-                if ((int)stage >= 1)
-                    sb.Append($"[B] {B.ToXString()} [b] {supports[B_index].barycentric}\n");
-                if ((int)stage >= 2)
-                    sb.Append($"[C] {C.ToXString()} [b] {supports[C_index].barycentric}\n");
-                if ((int)stage >= 3)
-                    sb.Append($"[D] {D.ToXString()} [b] {supports[D_index].barycentric}\n");
+                if ((int)stage >= 0) sb.Append($"[A] {A.ToXString()} [b] {supports[A_index].barycentric}\n");
+                if ((int)stage >= 1) sb.Append($"[B] {B.ToXString()} [b] {supports[B_index].barycentric}\n");
+                if ((int)stage >= 2) sb.Append($"[C] {C.ToXString()} [b] {supports[C_index].barycentric}\n");
+                if ((int)stage >= 3) sb.Append($"[D] {D.ToXString()} [b] {supports[D_index].barycentric}\n");
 
                 return sb.ToString();
 
@@ -281,12 +299,9 @@ namespace Magpie.Engine.Collision {
 
             public void draw() {
                 Draw3D.xyz_cross(A, 0.2f, Color.Red);
-                if ((int)stage > 0)
-                    Draw3D.xyz_cross(B, 0.2f, Color.Green);
-                if ((int)stage > 1)
-                    Draw3D.xyz_cross(C, 0.2f, Color.Blue);
-                if ((int)stage > 2)
-                    Draw3D.xyz_cross(D, 0.2f, Color.Yellow);
+                if ((int)stage > 0) Draw3D.xyz_cross(B, 0.2f, Color.Green);
+                if ((int)stage > 1) Draw3D.xyz_cross(C, 0.2f, Color.Blue);
+                if ((int)stage > 2) Draw3D.xyz_cross(D, 0.2f, Color.Yellow);
 
                 var mid = A;
 
@@ -379,8 +394,16 @@ namespace Magpie.Engine.Collision {
         public struct collision_result {
             public int id_A, id_B;
 
+            public int closest_iteration;
+            public Vector3 closest_A;
+            public Vector3 closest_B;
+
             public float distance = float.MaxValue;
-            public float distance_lowest_dot = float.MaxValue;
+
+            public float distance_to_zero_A = float.MaxValue;
+            public float distance_to_zero_B = float.MaxValue;
+
+
             public float penetration;
 
             public bool intersects;
@@ -414,12 +437,13 @@ namespace Magpie.Engine.Collision {
                 simplex_list = new List<gjk_simplex>();
                 draw_simplex = 0;
 
+                closest_iteration = 0;
+
                 id_A = -1;
                 id_B = -1;
-            }
 
-            public void set_draw_simplex(int simplex) {
-                draw_simplex = simplex;
+                closest_A = Vector3.Zero;
+                closest_B = Vector3.Zero;
             }
 
             public void draw(Vector3 world_pos) {
@@ -442,10 +466,18 @@ namespace Magpie.Engine.Collision {
 
                     simplex.draw();
 
-                    Draw3D.xyz_cross(simplex.closest_A, 0.5f, Color.Red);
-                    Draw3D.xyz_cross(simplex.closest_B, 0.5f, Color.GreenYellow);
+                    Draw3D.xyz_cross(simplex.closest_A, 0.2f, Color.Red);
+                    Draw3D.xyz_cross(simplex.closest_B, 0.2f, Color.GreenYellow);
+
+                    Draw3D.line(simplex.closest_A, simplex.closest_B, Color.Red);
+
+                    Draw3D.xyz_cross(closest_A, 0.2f, Color.HotPink);
+                    Draw3D.xyz_cross(closest_B, 0.2f, Color.HotPink);
+
+                    Draw3D.line(closest_A, closest_B, Color.Pink);
+
                 }
-                if (draw_all_supports && simplex_list.Count > 1) {
+                if (draw_all_supports && simplex_list.Count > 1 && draw_simplex <= simplex_list.Count - 1) {
                     int pc = 0;
                     for (int ci = 0; ci < simplex_list.Count; ci++) {
                         gjk_simplex s = simplex_list[ci];
@@ -456,7 +488,7 @@ namespace Magpie.Engine.Collision {
                         }
                     }
                     float col_multi = 0f;
-                    for (int i = 0; i < simplex_list.Count; i++) {
+                    for (int i = 0; i < draw_simplex; i++) {
                         gjk_simplex s = simplex_list[i];
 
                         switch (s.stage) {
@@ -481,7 +513,7 @@ namespace Magpie.Engine.Collision {
 
 
 
-        public static collision_result intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b) {
+        public static collision_result gjk_intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b) {
             collision_result result = new collision_result();
 
             gjk_simplex simplex = new gjk_simplex();
@@ -495,17 +527,20 @@ namespace Magpie.Engine.Collision {
             simplex.A_transform = Matrix.CreateScale(scale_a) * Matrix.CreateFromQuaternion(rot_a);
             simplex.B_transform = Matrix.CreateScale(scale_b) * Matrix.CreateFromQuaternion(rot_b);
 
-            simplex.direction = w_a.Translation - w_b.Translation;
+            simplex.direction = w_b.Translation - w_a.Translation;
 
             simplex.add_new_point(
                 Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform)), Vector3.Zero), (w_a)),
                 Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform)), Vector3.Zero), (w_b)));
 
-            result.save_simplex(simplex, "Begin");
+            simplex.supports[0].barycentric = 1f;
 
-            simplex.set_bary(spoint.A, 1f);
+            closest_point_calc(ref simplex, ref result, w_a, w_b);
 
             simplex.direction = simplex.AO;
+
+            result.save_simplex(simplex, "Begin");
+
 
             int iteration = 1;
 
@@ -516,11 +551,27 @@ namespace Magpie.Engine.Collision {
 
                 simplex.iteration = iteration;
 
+
+
+                    ///////////////////////////////////////////////////////////
                 if (simplex.stage == simplex_stage.line) { // *** LINE ***
+                    var line_bary = CollisionHelper.line_barycentric(Vector3.Zero, simplex.A, simplex.B);
+
+                    simplex.set_bary_line();
+
                     result.save_simplex(simplex, "Create Line");
+                     
+                    if (Vector3.Distance(simplex.A, simplex.B) <= Math3D.epsilon) {
+                        result.intersects = true;
+                        simplex.move_to_stage(spoint.A);
+                        simplex.set_bary(spoint.A, 1f);
+                        result.save_simplex(simplex, "New line point in exact same position");
+                        break;
+                    }
 
                     if (CollisionHelper.line_closest_point(simplex.A, simplex.B, Vector3.Zero).Length() <= Math3D.epsilon) {
                         result.intersects = true;
+                        simplex.set_bary_line();
                         result.save_simplex(simplex, "Hit on Line");
                         break;
                     }
@@ -528,23 +579,25 @@ namespace Magpie.Engine.Collision {
                     //origin between A and B
                     if (simplex.same_dir_as_AO(simplex.AB)) {
                         simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+                        //simplex.direction = -(simplex.A + ((simplex.B - simplex.A) / 2));
+                        simplex.set_bary_line();
 
-                        result.save_simplex(simplex, "Origin betweeen A and B");
+                        simplex.early_exit_reason = "Origin betweeen A and B";
 
 
                     } else {
-                        //simplex.move_to_stage(spoint.A);
+                        simplex.move_to_stage(spoint.A);
                         simplex.direction = simplex.AO;
+                        simplex.set_bary(spoint.A, 1f);
 
-                        result.save_simplex(simplex, "Origin past A");
+                        simplex.early_exit_reason = "Origin past A";
                     }
 
-                    simplex.set_bary(spoint.A, Vector3.Dot(simplex.B, simplex.BA));
-                    simplex.set_bary(spoint.B, Vector3.Dot(simplex.A, simplex.AB));
+
 
                     ///////////////////////////////////////////////////////////
-
                 } else if (simplex.stage == simplex_stage.triangle) { // *** TRIANGLE ***
+
                     result.save_simplex(simplex, "Create Triangle");
 
                     //On the ABC x AC plane, so origin could be closest to either AC or A
@@ -552,22 +605,29 @@ namespace Magpie.Engine.Collision {
 
                         if (simplex.same_dir_as_AO(simplex.AC)) {
                             simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AC, simplex.AO), simplex.AC);
-                            simplex.move_to_stage(spoint.A, spoint.C);
+                            //simplex.direction = -(simplex.A + ((simplex.C - simplex.A) / 2));
 
-                            result.save_simplex(simplex, "AC ->");
+                            simplex.move_to_stage(spoint.A, spoint.C);
+                            simplex.set_bary_line();
+
+                            simplex.early_exit_reason = "AC ->";
 
                         } else {
                             if (simplex.same_dir_as_AO(simplex.AB)) {
-                                simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB); //simplex.AO;
-                                simplex.move_to_stage(spoint.A, spoint.B);
+                                simplex.direction = simplex.AO; //Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
 
-                                result.save_simplex(simplex, "AB1 ->");
+                                simplex.move_to_stage(spoint.A, spoint.B);
+                                simplex.set_bary_line();
+
+                                simplex.early_exit_reason = "AB1 ->";
 
                             } else {
                                 simplex.direction = simplex.AO;
-                                simplex.move_to_stage(spoint.A);
 
-                                result.save_simplex(simplex, "A1 ->");
+                                simplex.move_to_stage(spoint.A);
+                                simplex.set_bary(1f);
+
+                                simplex.early_exit_reason = "A1 ->";
                             }
 
                         }
@@ -575,36 +635,42 @@ namespace Magpie.Engine.Collision {
                         //On the AB x ABC plane, so we're either on AB or A
                         if (simplex.same_dir_as_AO(Vector3.Cross(simplex.AB, simplex.ABC))) {
                             if (simplex.same_dir_as_AO(simplex.AB)) {
-                                simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB); //simplex.AO;
+                                simplex.direction = simplex.AO; //Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB); 
 
                                 simplex.move_to_stage(spoint.A, spoint.B);
+                                simplex.set_bary_line();
 
-                                result.save_simplex(simplex, "AB2 ->");
+                                simplex.early_exit_reason = "AB2 ->";
 
                             } else {
-                                simplex.direction = simplex.AO;
+                                simplex.direction = simplex.AO; 
                                 simplex.move_to_stage(spoint.A);
+                                simplex.set_bary(1f);
 
-                                result.save_simplex(simplex, "A1 ->");
+                                simplex.early_exit_reason = "A1 ->";
                             }
 
 
                         } else { // within plane
+                            var bc_t = CollisionHelper.triangle_barycentric(Vector3.Zero, simplex.A, simplex.B, simplex.C);
+
                             if (CollisionHelper.triangle_closest_point_alternative(simplex.A, simplex.B, simplex.C, Vector3.Zero).Length() <= Math3D.epsilon) {
                                 result.intersects = true;
+
+                                simplex.set_bary_tri();
                                 result.save_simplex(simplex, "Hit on Triangle");
                                 break;
                             }
 
                             if (simplex.same_dir_as_AO(simplex.ABC)) {
                                 simplex.direction = simplex.ABC;
-
-                                result.save_simplex(simplex, "ABC ->");
+                                simplex.set_bary_tri();
+                                simplex.early_exit_reason = "ABC ->";
                             } else {
                                 simplex.direction = -simplex.ABC;
                                 simplex.move_to_stage(spoint.A, spoint.C, spoint.B);
-
-                                result.save_simplex(simplex, "ACB ->");
+                                simplex.set_bary_tri();
+                                simplex.early_exit_reason = "ACB ->";
                             }
                         }
                     }
@@ -613,111 +679,134 @@ namespace Magpie.Engine.Collision {
 
                     ///////////////////////////////////////////////////////////
                 } else if (simplex.stage == simplex_stage.tetrahedron) { // *** TETRAHEDRON ***
+
+                    var bary = CollisionHelper.tetrahedron_barycentric(Vector3.Zero, simplex.A, simplex.B, simplex.C, simplex.D);
+
+                    simplex.set_bary(spoint.A, bary.U);
+                    simplex.set_bary(spoint.B, bary.V);
+                    simplex.set_bary(spoint.C, bary.W);
+                    simplex.set_bary(spoint.D, bary.Z);
+
                     result.save_simplex(simplex, "Create Tetrahedron");
 
-
-                    if (simplex.same_dir_as_AO(simplex.ABC)) {
-                        var ac = simplex.same_dir_as_AO(Vector3.Cross(simplex.ABC, simplex.AC));
-                        var ab = simplex.same_dir_as_AO(Vector3.Cross(simplex.AB, simplex.ABC));
-
-                        if (ac && ab) {
-                            break;
-
-                            simplex.direction = simplex.AO;
-                            simplex.move_to_stage(spoint.A);
-
-                            result.save_simplex(simplex, "ABC -> A ->");
-
-                        } else if (ab) {
-
-                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
-                            simplex.move_to_stage(spoint.A, spoint.B);
-
-                            result.save_simplex(simplex, "ABC -> AB ->");
-                        } else if (ac) {
-
-                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AC, simplex.AO), simplex.AC);
-                            simplex.move_to_stage(spoint.A, spoint.C);
-
-                            result.save_simplex(simplex, "ABC -> AC ->");
-                        } else {
-                            simplex.direction = simplex.ABC;
-                            simplex.move_to_stage(spoint.A, spoint.B, spoint.C);
-
-                            result.save_simplex(simplex, "ABC -> ABC ->");
-                        }
-
-                    } else if (simplex.same_dir_as_AO(simplex.ADB)) {
+                    if (simplex.same_dir_as_AO(simplex.ADB)) {
                         var bd = simplex.same_dir_as_AO(Vector3.Cross(simplex.BD, simplex.ADB));
                         var ba = simplex.same_dir_as_AO(Vector3.Cross(simplex.BA, simplex.ADB));
 
                         if (bd && ba) {
 
+
                             simplex.direction = simplex.BO;
                             simplex.move_to_stage(spoint.B);
 
-                            result.save_simplex(simplex, "ADB -> B ->");
+                            simplex.early_exit_reason = "ADB -> B ->";
 
                         } else if (bd) {
+
+                            //break;
                             simplex.direction = Vector3.Cross(Vector3.Cross(simplex.BD, simplex.AO), simplex.BD);
                             simplex.move_to_stage(spoint.B, spoint.D);
 
-                            result.save_simplex(simplex, "ADB -> BD ->");
+                            simplex.early_exit_reason = "ADB -> BD ->";
 
                         } else if (ba) {
-                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.BA, simplex.AO), simplex.BA);
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.BA, simplex.BO), simplex.BA);
                             simplex.move_to_stage(spoint.B, spoint.A);
+                            simplex.set_bary_line();
 
-                            result.save_simplex(simplex, "ADB -> BA ->");
+                            simplex.early_exit_reason = "ADB -> BA ->";
                         } else {
                             simplex.direction = simplex.ADB;
                             simplex.move_to_stage(spoint.A, spoint.D, spoint.B);
+                            simplex.set_bary_tri();
 
-                            result.save_simplex(simplex, "ADB -> ADB ->");
+                            simplex.early_exit_reason = "ADB -> ADB ->";
                         }
 
                     } else if (simplex.same_dir_as_AO(simplex.ACD)) {
+
+
                         var ad = simplex.same_dir_as_AO(Vector3.Cross(simplex.ACD, simplex.AD));
                         var ac = simplex.same_dir_as_AO(Vector3.Cross(simplex.AC, simplex.ACD));
-                        var cd = !simplex.same_dir_as_AO(Vector3.Cross(simplex.CD, simplex.ACD));
+                        var cd = simplex.same_dir_as_AO(Vector3.Cross(simplex.CD, simplex.ACD));
 
                         if (ad && ac) {
+                            //break;
 
                             simplex.direction = simplex.CO;
                             simplex.move_to_stage(spoint.C);
 
-                            result.save_simplex(simplex, "ACD -> C ->");
+                            simplex.early_exit_reason = "ACD -> C ->";
                         } else if (ad && cd) {
+                            //break;
 
                             simplex.direction = simplex.DO;
                             simplex.move_to_stage(spoint.D);
 
-                            result.save_simplex(simplex, "ACD -> D ->");
-
+                            simplex.early_exit_reason = "ACD -> D ->";
 
                         } else if (ad) {
                             simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AD, simplex.AO), simplex.AD);
                             simplex.move_to_stage(spoint.A, spoint.D);
-                            result.save_simplex(simplex, "ACD -> AD ->");
+                            simplex.set_bary_line();
+
+                            simplex.early_exit_reason = "ACD -> AD ->";
 
                         } else if (ac) {
 
                             simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AC, simplex.AO), simplex.AC);
                             simplex.move_to_stage(spoint.A, spoint.C);
-                            result.save_simplex(simplex, "ACD -> AC ->");
+                            simplex.set_bary_line();
+
+                            simplex.early_exit_reason = "ACD -> AC ->";
 
                         } else if (cd) {
                             simplex.direction = Vector3.Cross(Vector3.Cross(simplex.CD, simplex.CO), simplex.CD);
                             simplex.move_to_stage(spoint.C, spoint.D);
-                            result.save_simplex(simplex, "ACD -> CD ->");
+                            simplex.set_bary_line();
+
+                            simplex.early_exit_reason = "ACD -> CD ->";
                         } else {
 
                             simplex.direction = simplex.ACD;
                             simplex.move_to_stage(spoint.A, spoint.C, spoint.D);
-                            result.save_simplex(simplex, "ACD -> ACD ->");
+                            simplex.set_bary_tri();
+
+                            simplex.early_exit_reason = "ACD -> ACD ->";
                         }
 
-                    } else {
+                    } else if (simplex.same_dir_as_AO(simplex.ABC)) {
+
+                        var ac = simplex.same_dir_as_AO(Vector3.Cross(simplex.ABC, simplex.AC));
+                        var ab = simplex.same_dir_as_AO(Vector3.Cross(simplex.AB, simplex.ABC));
+
+                        if (ac && ab) {
+                            //break;
+
+                            simplex.direction = simplex.AO;
+                            simplex.move_to_stage(spoint.A);
+
+                            simplex.early_exit_reason = "ABC -> A ->";
+
+                        } else if (ab) {
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+                            simplex.move_to_stage(spoint.A, spoint.B);
+                            simplex.set_bary_line();
+                            simplex.early_exit_reason = "ABC -> AB ->";
+                        } else if (ac) {
+
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AC, simplex.AO), simplex.AC);
+                            simplex.move_to_stage(spoint.A, spoint.C);
+                            simplex.set_bary_line();
+                            simplex.early_exit_reason = "ABC -> AC ->";
+                        } else {
+                            simplex.direction = simplex.ABC;
+                            simplex.move_to_stage(spoint.A, spoint.B, spoint.C);
+                            simplex.set_bary_tri();
+                            simplex.early_exit_reason = "ABC -> ABC ->";
+                        }
+
+                    }  else {
 
                         if (CollisionHelper.point_inside_tetrahedron(simplex.A, simplex.B, simplex.C, simplex.D, Vector3.Zero)) {
                             result.intersects = true;
@@ -728,62 +817,101 @@ namespace Magpie.Engine.Collision {
                         break;
                     }
 
+
                 }
 
-                Vector3 closest_A = Vector3.Zero;
-                Vector3 closest_B = Vector3.Zero;
-                float d = float.MaxValue;
-                float dot = float.MaxValue;
-                float denom = simplex.get_denom();
+                closest_point_calc(ref simplex, ref result, w_a, w_b);
 
-                if (simplex.stage != simplex_stage.tetrahedron) {
-                    switch (simplex.stage) {
-                        case simplex_stage.point:
-                            closest_A = simplex.A_support.A_support;
-                            closest_B = simplex.A_support.B_support;
-
-                            d = Vector3.Distance(closest_A, closest_B);
-
-                            break;
-                        case simplex_stage.line:
-
-                            var AS = denom * simplex.A_bary;
-                            var BS = denom * simplex.B_bary;
-
-                            closest_A = (simplex.A_support.A_support * AS) + (simplex.B_support.A_support * BS);
-                            closest_B = (simplex.A_support.B_support * AS) + (simplex.B_support.B_support * BS);
-
-
-                            d = Vector3.Distance(closest_A, closest_B);
-                            dot = Vector3.Dot(closest_A, closest_B);
-                            break;
-                        case simplex_stage.triangle:
-                            closest_A = CollisionHelper.triangle_closest_point(simplex.A_support.A_support, simplex.B_support.A_support, simplex.C_support.A_support, Vector3.Zero);
-                            closest_B = CollisionHelper.triangle_closest_point(simplex.A_support.B_support, simplex.B_support.B_support, simplex.C_support.B_support, Vector3.Zero);
-
-                            d = Vector3.Distance(closest_A, closest_B);
-                            dot = Vector3.Dot(closest_A, closest_B);
-                            break;
-                        case simplex_stage.tetrahedron:
-                            d = float.MaxValue;
-                            break;
-
-                    }
-
-                    simplex.closest_A = closest_A;
-                    simplex.closest_B = closest_B;
-
-                    if (d < result.distance && d > 0) {
-                        result.distance = d;
-
-                    }
-                }
+                result.save_simplex(ref simplex);
                 iteration++;
             }
 
 
 
             return result;
+        }
+
+        static void closest_point_calc(ref gjk_simplex simplex, ref collision_result result, Matrix w_a, Matrix w_b) {
+
+            Vector3 closest_A = Vector3.Zero;
+            Vector3 closest_B = Vector3.Zero;
+
+            float d = float.MaxValue;
+            float dot = float.MaxValue;
+            float denom = simplex.get_denom();
+
+            switch (simplex.stage) {
+                case simplex_stage.point:
+                    closest_A = simplex.A_support.A_support;
+                    closest_B = simplex.A_support.B_support;
+
+                    break;
+                case simplex_stage.line:
+
+                    var l_AS = denom * simplex.A_bary;
+                    var l_BS = denom * simplex.B_bary;
+
+                    closest_A = (simplex.A_support.A_support * l_AS) + (simplex.B_support.A_support * l_BS);
+                    closest_B = (simplex.A_support.B_support * l_AS) + (simplex.B_support.B_support * l_BS);
+
+
+                    dot = Vector3.Dot(closest_A, closest_B);
+                    break;
+                case simplex_stage.triangle:
+                    //closest_A = CollisionHelper.triangle_closest_point(simplex.A_support.A_support, simplex.B_support.A_support, simplex.C_support.A_support, Vector3.Zero);
+                    //closest_B = CollisionHelper.triangle_closest_point(simplex.A_support.B_support, simplex.B_support.B_support, simplex.C_support.B_support, Vector3.Zero);
+
+                    var t_AS = denom * simplex.A_bary;
+                    var t_BS = denom * simplex.B_bary;
+                    var t_CS = denom * simplex.C_bary;
+
+                    closest_A = (simplex.A_support.A_support * t_AS) + (simplex.B_support.A_support * t_BS) + (simplex.C_support.A_support * t_CS);
+                    closest_B = (simplex.A_support.B_support * t_AS) + (simplex.B_support.B_support * t_BS) + (simplex.C_support.B_support * t_CS);
+
+                    //closest_A = Vector3.Transform(closest_A, (simplex.A_transform));
+                    //closest_B = Vector3.Transform(closest_B, (simplex.B_transform));
+
+                    dot = Vector3.Dot(closest_A, closest_B);
+                    break;
+                case simplex_stage.tetrahedron:
+
+                    closest_A =
+                        (simplex.A_support.A_support * (denom * simplex.A_bary)) +
+                        (simplex.B_support.A_support * (denom * simplex.B_bary)) +
+                        (simplex.C_support.A_support * (denom * simplex.C_bary)) +
+                        (simplex.D_support.A_support * (denom * simplex.D_bary));
+
+                    //closest_A = Vector3.Transform(closest_A, (simplex.A_transform));
+
+                    closest_B = closest_A;
+                    break;
+
+            }
+
+            d = Vector3.Distance(closest_A, closest_B);
+
+            var da = closest_A.Length();
+            var db = closest_B.Length();
+
+            simplex.closest_A = closest_A;
+            simplex.closest_B = closest_B;
+
+            if (da < result.distance_to_zero_A) {
+                result.distance_to_zero_A = da; 
+            }
+            if (db < result.distance_to_zero_B) {
+                result.distance_to_zero_B = db; 
+            }
+
+            if (d < result.distance && d > 0) {
+                result.distance = d;
+
+                result.closest_A = closest_A;
+                result.closest_B = closest_B;
+
+                result.closest_iteration = simplex.iteration;
+            }
+
         }
     }
 }

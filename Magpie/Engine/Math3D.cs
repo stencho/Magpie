@@ -115,6 +115,16 @@ namespace Magpie.Engine {
 
             return Vector3.Dot(P1 - P2, P1 - P2);
         }
+
+        public static (float U, float V) line_barycentric(Vector3 P, Vector3 A, Vector3 B) {
+            Vector3 AB = B - A;
+            Vector3 AP = P - A;
+            float dotABAB = Vector3.Dot(AB, AB);
+            float dotACAB = Vector3.Dot(AP, AB);
+            float u = dotACAB / dotABAB;
+            float v = 1 - u;
+            return (u, v);
+        }
         #endregion
 
         #region TRIANGLE
@@ -279,6 +289,23 @@ namespace Magpie.Engine {
             }
 
             return farthestPoint;
+        }
+        #endregion
+
+        #region TETRAHEDRON
+        public static (float U, float V, float W, float Z) tetrahedron_barycentric(Vector3 point, Vector3 A, Vector3 B, Vector3 C, Vector3 D) {
+            Vector3 AB = B - A;
+            Vector3 AC = C - A;
+            Vector3 AD = D - A;
+            Vector3 AP = point - A;
+
+            float V = Vector3.Dot(Vector3.Cross(AB, AC), AD);
+            float va = Vector3.Dot(Vector3.Cross(AC, AD), AP) / V;
+            float vb = Vector3.Dot(Vector3.Cross(AD, AB), AP) / V;
+            float vc = Vector3.Dot(Vector3.Cross(AB, AC), AP) / V;
+            float vd = 1 - va - vb - vc;
+
+            return (va, vb, vc, vd);
         }
         #endregion
 

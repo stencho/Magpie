@@ -99,8 +99,7 @@ namespace Magpie {
             while (EngineState.running) {
                 internal_frame_probe.start_of_frame();
 
-                Controls.mouse_delta_int = Controls.md_int;
-                Controls.md_int = Vector2.Zero;
+                Controls.pull_accumulated_md_internal();
 
                 update_frame_rate_avg = 0;
                 lock(last_ticks) {
@@ -109,6 +108,7 @@ namespace Magpie {
                         update_frame_rate_avg += last_ticks[i];
                     }
                 }
+                
 
                 internal_frame_probe.set("update");
                 lock (current_map) {
@@ -119,19 +119,22 @@ namespace Magpie {
                         if (current_map.game_objects[oi].wants_movement != Vector3.Zero) {
                             current_map.game_objects[oi].position += current_map.game_objects[oi].wants_movement;
                             current_map.game_objects[oi].wants_movement = Vector3.Zero;
+                            current_map.game_objects[oi].resting = false;
+                        } else {
+                            current_map.game_objects[oi].resting = true;
                         }
                     }
                 }
 
-                //current_map.actors[0].Update();
 
+                internal_frame_probe.set("update_player");
                 // TEMPORARY NEEDS TO GO ONCE OBJECT INFO IS DONE
                 if (current_map.player_actor != null)
                 lock (current_map.player_actor)
                         current_map.player_actor.Update();
 
-                var mid = current_map.game_objects.Last().Key;
-                lock (current_map.game_objects[mid].collision.gjk_results) {
+                //var mid = current_map.game_objects.Last().Key;
+                //lock (current_map.game_objects[mid].collision.gjk_results) {
                     //current_map.game_objects[mid].collision.doing_collisions = true;
                     //current_map.game_objects[mid].collision.gjk_results.Clear();
 
@@ -204,7 +207,7 @@ namespace Magpie {
                     current_map.actors[0].wants_movement = Vector3.Zero;
                     current_map.game_objects[mid].collision.doing_collisions = false;
                     */
-                }
+                //}
 
                 lock (last_fps) {
                     for (int i = 0; i < last_fps.Length - 1; i++) {
@@ -214,6 +217,7 @@ namespace Magpie {
                 }
 
                 internal_frame_probe.set("sleep");
+
                 while (EngineState.running) {
                     ts = (DateTime.Now - dt);
 
@@ -231,15 +235,16 @@ namespace Magpie {
 
                     update_frame_rate_avg += last_ticks[last_ticks.Length - 1];
                     update_frame_rate_avg /= last_ticks.Length;
-                }                
-                 
-                Clock.internal_frame_time_delta = (float)(Clock.internal_frame_time_delta_ms / 1000.0);
+                }
+
                 Clock.internal_frame_time_delta_ms = (float)(DateTime.Now - dt).TotalMilliseconds;
+                Clock.internal_frame_time_delta = (float)(Clock.internal_frame_time_delta_ms / 1000.0);
                 world_running_slow = Clock.frame_time_delta_ms > Clock.internal_frame_time_delta_ms;
                
                 dt = DateTime.Now; 
 
                 internal_frame_probe.end_of_frame(Clock.internal_frame_limit_ms);
+
             }
         }
 
@@ -247,40 +252,13 @@ namespace Magpie {
         Vector3 p_current = Vector3.Zero;
 
         public void Update() {
+            Clock.frame_probe.set("update");
             if (physics_movement_thread == null) {
                 physics_movement_thread = new Thread(do_world_update);
                 
                 physics_movement_thread.Start();
             }
 
-            Clock.frame_probe.set("update");
-
-            //NEED TO MAKE A SYSTEM LIKE THIS FOR ALL LIGHTS
-            //INSTEAD OF A LIGHT LIST IN CURRENT MAP, OBJECTS HAVE INDIVIDUAL LISTS OF A
-            //SIMPLE STRUCT CONTAINING THINGS LIKE CURRENT POSITION AND COLOR AND SUCH
-            //THEN THE NEW UPGRADED RENDERER WILL USE THIS INFO TO RENDER THEM ALL
-            //INSTEAD OF KEEPING INFO ON HOW TO RENDER IN THE INDIVIDUAL LIGHT CLASSES
-
-            /*
-            current_map.lights[current_map.lights.Count - 1].position
-                = EngineState.camera.position;
-            ((SpotLight)current_map.lights[current_map.lights.Count - 1]).orientation
-                = EngineState.camera.orientation;
-            */
-
-            //BUILD LIST OF VISIBLE OBJECTS HERE THAT SEEMS TO NOT BE A HUGE ISSUE WITH THE GC
-
-
-            /*
-            PhysicsSolver.do_movement(current_map);
-
-            PhysicsSolver.do_base_physics_and_ground_interaction(current_map);
-
-            PhysicsSolver.finalize_collisions(current_map);
-            */
-
-
-            //test_light.update();
 
         }
 
