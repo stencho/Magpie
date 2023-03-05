@@ -101,16 +101,7 @@ namespace Magpie.Engine.Collision {
             bool a_swept = (sweep_A != Vector3.Zero);
             bool b_swept = (sweep_B != Vector3.Zero);
 
-            switch (shape_A.shape) {
-                case shape_type.capsule:
-                    gjk.sup.A = Vector3.Transform(choose_better_start_capsule((Capsule)shape_A, shape_B, w_a, w_b), w_a);                    
-                    break;
-
-                default:
-                    gjk.sup.A = Vector3.Transform(shape_A.start_point, w_a);
-                    break;
-            }
-
+            gjk.sup.A = Vector3.Transform(shape_A.start_point, w_a);
             gjk.sup.B = Vector3.Transform(shape_B.start_point, w_b);
 
             gjk.res.shape_A = shape_A;

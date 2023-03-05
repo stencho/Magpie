@@ -24,6 +24,10 @@ namespace Magpie {
             }            
         }
         
+        public static Vector3 Sphere(Vector3 direction, Vector3 P, float radius) {
+            return P + Vector3.Normalize(direction) * radius;
+        }
+
         public static Vector3 Point(Vector3 direction, Vector3 P) {
             return P;
         }

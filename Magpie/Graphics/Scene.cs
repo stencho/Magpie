@@ -322,9 +322,19 @@ namespace Magpie.Graphics {
             EngineState.spritebatch.End();
         }
 
+        public static Action draw_to_2D;
 
         public static void compose() {
+            EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_final);
+
+           // Clock.frame_probe.set("ext 2D draw");
+            //if (draw_to_2D != null)
+                //draw_to_2D();
             Clock.frame_probe.set("compose");
+
+
+            //compose proper
+            EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_final);
 
             EngineState.graphics_device.SetVertexBuffer(quad.vertex_buffer);
             EngineState.graphics_device.Indices = quad.index_buffer;
@@ -339,8 +349,6 @@ namespace Magpie.Graphics {
             }
             */
 
-            EngineState.graphics_device.SetRenderTarget(EngineState.buffer.rt_final);
-
             clear_buffer(sun_moon.atmosphere_color);
 
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
@@ -352,7 +360,7 @@ namespace Magpie.Graphics {
             e_compositor.Parameters["LightLayer"].SetValue(EngineState.buffer.rt_lighting);
             e_compositor.Parameters["NormalLayer"].SetValue(EngineState.buffer.rt_normal);
             //e_compositor.Parameters["sky_brightness"].SetValue(sky_brightness);
-            // e_compositor.Parameters["atmosphere_color"].SetValue(atmosphere_color.ToVector3());
+            //e_compositor.Parameters["atmosphere_color"].SetValue(atmosphere_color.ToVector3());
             e_compositor.Parameters["buffer"].SetValue(buffer);
 
             e_compositor.Techniques["draw"].Passes[0].Apply();
@@ -362,10 +370,8 @@ namespace Magpie.Graphics {
             /*
             if (FXAA) {
                 draw_FXAA_to_final_buffer();
-
             }
             */
-
 
             //e_compositor.Parameters["fog"].SetValue(false);
 

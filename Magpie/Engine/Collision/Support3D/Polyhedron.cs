@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Magpie.Engine.Collision.Support3D {
     public class Polyhedron : Shape3D {
@@ -38,6 +39,13 @@ namespace Magpie.Engine.Collision.Support3D {
 
         public void draw(Matrix world) {
             foreach (Vector3 point in verts) {
+                foreach (Vector3 point2 in verts) {
+                    var a = Vector3.Transform(point, world);
+                    var b = Vector3.Transform(point2, world);
+
+                    Draw3D.line(a, b, Color.Red);
+                }
+                    
                 Draw3D.xyz_cross(Vector3.Transform(point, world), 0.1f, Color.Red);
             }
         }

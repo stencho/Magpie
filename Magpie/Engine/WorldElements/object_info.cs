@@ -71,7 +71,7 @@ namespace Magpie.Engine.WorldElements {
 
 
         public virtual void update() {
-            if (!resting)
+            //if (!resting)
                 world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
 
             if (render != null)

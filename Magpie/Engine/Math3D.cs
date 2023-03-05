@@ -12,7 +12,8 @@ namespace Magpie.Engine {
 
     public static class Math3D {
         public const float epsilon = 1e-6f;
-        public static bool close_enough(Vector3 A, Vector3 B) { return Vector3.Distance(A, B) <= epsilon; }
+        public const float big_epsilon = 0.001f;
+        public static bool close_enough(Vector3 A, Vector3 B) { return Vector3.Distance(A, B) <= big_epsilon; }
         public static bool same_dir(Vector3 direction, Vector3 origin_dir) {
             var vd = Vector3.Dot(direction, origin_dir);
             return (vd >= 0f);
@@ -133,13 +134,31 @@ namespace Magpie.Engine {
             return Vector3.Normalize(Vector3.Cross(AB, AC)); //ACAB
         }
 
-        private static bool compare(float x, float y) => Math.Abs(x - y) 
-            <= epsilon * Math.Max(1.0f, Math.Max(Math.Abs(x), Math.Abs(y)));
+        /*
+        public static (float u, float v, float w) triangle_barycentric(Vector3 P, Vector3 A, Vector3 B, Vector3 C) {
+            Vector3 AB = B - A;
+            Vector3 AC = C - A;
+            Vector3 AP = P - A;
 
-        public static Vector3 triangle_barycentric(Vector3 p, Vector3 A, Vector3 B, Vector3 C) {
+            float abab = Vector3.Dot(AB, AB);
+            float abac = Vector3.Dot(AB, AC);
+            float acac = Vector3.Dot(AC, AC);
+            float apab = Vector3.Dot(AP, AB);
+            float apac = Vector3.Dot(AP, AC);
+
+            float denom = abab * acac - (abac * abac);
+
+            (float u, float v, float w) output;
+            output.v = (acac * apab - abac * apac) / denom;
+            output.w = (abab * apac - abac * apab) / denom;
+            output.u = 1f - output.v - output.w;
+            return output;
+        }
+        */
+        public static (float u, float v, float w) triangle_barycentric(Vector3 P, Vector3 A, Vector3 B, Vector3 C) {
             Vector3 v0 = B - A;
             Vector3 v1 = C - A;
-            Vector3 v2 = p - A;
+            Vector3 v2 = P - A;
 
             float f0 = Vector3.Dot(v0, v0);
             float f1 = Vector3.Dot(v0, v1);
@@ -148,16 +167,13 @@ namespace Magpie.Engine {
             float f4 = Vector3.Dot(v2, v1);
 
             float denom = f0 * f2 - f1 * f1;
-            if (compare(denom, 0.0f)) {
-                return Vector3.Zero;
-            }
+            (float u, float v, float w) output = (0f,0f,0f);
 
-            Vector3 res;
-            res.Y = (f2 * f3 - f1 * f4) / denom;
-            res.Z = (f0 * f4 - f1 * f3) / denom;
-            res.X = 1.0f - res.Y - res.Z;
+            output.v = (f2 * f3 - f1 * f4) / denom;
+            output.w = (f0 * f4 - f1 * f3) / denom;
+            output.u = 1.0f - output.v - output.w;
 
-            return res;
+            return output;
         }
 
         public static Vector3 triangle_closest_point(Vector3 A, Vector3 B, Vector3 C, Vector3 point) {

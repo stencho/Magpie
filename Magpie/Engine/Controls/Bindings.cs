@@ -114,6 +114,7 @@ namespace Magpie.Engine {
         #endregion
 
         #region DIGITAL
+        //state
         public static bool pressed(string bind) => bind_enabled(bind) ? digital_binds.bind_pressed(bind) : false;
         public static bool released(string bind) => bind_enabled(bind) ? digital_binds.bind_released(bind) : true;
 
@@ -124,11 +125,15 @@ namespace Magpie.Engine {
 
         public static bool held(string bind) => bind_enabled(bind) ? digital_binds.bind_held(bind) : false;
         public static bool just_held(string bind) => bind_enabled(bind) ? digital_binds.bind_just_held(bind) : false;
+        public static double held_time(string bind) => bind_enabled(bind) ? digital_binds.bind_held_time(bind) : 0.0;
+        public static double pressed_time(string bind) => bind_enabled(bind) ? digital_binds.bind_pressed_time(bind) : 0.0;
 
         public static bool tapped(string bind) => bind_enabled(bind) ? digital_binds.bind_tapped(bind) : false;
 
         public static int times_bind_pressed(string bind) => bind_enabled(bind) ? digital_binds.bind_buttons_pressed(bind) : 0;
 
+
+        //add binds
         public static void add_bind_digital(Keys button, params string[] binds) => digital_binds.add_bind(button, binds);
         public static void add_bind_digital(MouseButtons button, params string[] binds) => digital_binds.add_bind(button, binds);
         public static void add_bind_digital(XInputButtons button, params string[] binds) => digital_binds.add_bind(button, binds);
@@ -1046,7 +1051,17 @@ namespace Magpie.Engine {
 
             return true;
         }
+                public double bind_pressed_time(string bind) {
+            double hi = 0f;
+            foreach (IDigitalBind b in _binds) {
+                if (//bind_enabled(bind) &&
+                    b.held && b.binds.Contains(bind))
+                    if (b.time_pressed.TotalMilliseconds > hi)
+                        hi = b.time_pressed.TotalMilliseconds;
+            }
 
+            return hi;
+        }
 
         public bool bind_just_pressed(string bind) {
             foreach (IDigitalBind b in _binds) {
@@ -1091,6 +1106,17 @@ namespace Magpie.Engine {
             return false;
         }
 
+        public double bind_held_time(string bind) {
+            double hi = 0f;
+            foreach (IDigitalBind b in _binds) {
+                if (//bind_enabled(bind) &&
+                    b.held && b.binds.Contains(bind))
+                    if (b.time_pressed.TotalMilliseconds - b.hold_time > hi)
+                        hi = b.time_pressed.TotalMilliseconds - b.hold_time;
+            }
+
+            return hi;
+        }
 
         public bool bind_just_released_hold(string bind) { 
 
@@ -1182,11 +1208,11 @@ namespace Magpie.Engine {
 
 
         public void update(PlayerIndex player_index) {
-            lock (_binds) { 
+            //lock (_binds) { 
                 foreach (IDigitalBind b in _binds) {
                     b.update_state(player_index);
                 }
-            }
+            //}
         }
 
     }
