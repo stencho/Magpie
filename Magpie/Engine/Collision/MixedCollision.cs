@@ -141,8 +141,6 @@ namespace Magpie.Engine.Collision {
 
         }
 
-
-
         #region GJK
 
         const int max_iterations = 20;
@@ -627,11 +625,11 @@ namespace Magpie.Engine.Collision {
                     //origin between A and B
                     if (simplex.same_dir_as_AO(simplex.AB)) {
                         simplex.early_exit_reason = "Origin betweeen A and B";
-                        simplex.set_dir_to_inverse_closest();
+                        simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
 
-                    } else {                        
+                    } else {
+                        simplex.direction = simplex.AO;
                         simplex.move_to_stage(spoint.A);
-                        simplex.set_dir_to_inverse_closest();
                         result.save_simplex(simplex, "origin past A");
                     }
 
