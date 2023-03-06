@@ -37,7 +37,7 @@ namespace Magpie.Graphics.UI {
         bool visible { get; }
 
         List<IUIForm> subforms { get; set; }
-        Dictionary<string, ISupport2D> collision { get; }
+        Dictionary<string, Shape2D> collision { get; }
 
         List<string> mouse_interactions { get; }
 
@@ -83,11 +83,11 @@ namespace Magpie.Graphics.UI {
 
         public List<IUIForm> subforms { get; set; } = new List<IUIForm>();
 
-        public Dictionary<string, ISupport2D> collision => _collision;
+        public Dictionary<string, Shape2D> collision => _collision;
 
         public ui_layer_state layer_state => ui_layer_state.floating;
 
-        Dictionary<string, ISupport2D> _collision = new Dictionary<string, ISupport2D>();
+        Dictionary<string, Shape2D> _collision = new Dictionary<string, Shape2D>();
 
         public float text_line_gap = 1;
         public float message_gap = 3;
@@ -349,8 +349,8 @@ namespace Magpie.Graphics.UI {
 
         public List<IUIForm> subforms { get; set; } = new List<IUIForm>();
 
-        public Dictionary<string, ISupport2D> collision => _collision;
-        Dictionary<string, ISupport2D> _collision = new Dictionary<string, ISupport2D>();
+        public Dictionary<string, Shape2D> collision => _collision;
+        Dictionary<string, Shape2D> _collision = new Dictionary<string, Shape2D>();
         
         string _text = "";
 
@@ -524,8 +524,8 @@ namespace Magpie.Graphics.UI {
 
         public List<IUIForm> subforms { get; set; } = new List<IUIForm>();
 
-        public Dictionary<string, ISupport2D> collision => _collision;
-        Dictionary<string, ISupport2D> _collision = new Dictionary<string, ISupport2D>();
+        public Dictionary<string, Shape2D> collision => _collision;
+        Dictionary<string, Shape2D> _collision = new Dictionary<string, Shape2D>();
 
         RenderTarget2D client_render_target;
         RenderTarget2D top_bar_render_target;
@@ -611,7 +611,7 @@ namespace Magpie.Graphics.UI {
         }
 
 
-        static ISupport2D _mouse_coll_obj_child;
+        static Shape2D _mouse_coll_obj_child;
         XYPair parent_pos => _parent_form.position;
 
         public virtual void update() {

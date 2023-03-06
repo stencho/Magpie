@@ -8,7 +8,6 @@ using Magpie.Engine.Collision.Support3D;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using static System.Net.Mime.MediaTypeNames;
-using static Magpie.GJK;
 
 namespace Magpie.Engine.WorldElements {
     public enum collision_type {
@@ -171,7 +170,6 @@ namespace Magpie.Engine.WorldElements {
         public Vector3 velocity_normal = Vector3.Zero;
         public float velocity = 0;
 
-        public volatile List<gjk_result> gjk_results = new List<gjk_result>();
         public volatile bool doing_collisions = false;
 
         public collision_info(Shape3D shape) {

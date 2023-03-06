@@ -9,7 +9,6 @@ using Magpie.Engine.Collision;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
-using static Magpie.Engine.Collision.MixedCollision;
 
 namespace Magpie.Engine.WorldElements {
     public partial class object_info {
@@ -69,10 +68,15 @@ namespace Magpie.Engine.WorldElements {
             return false;
         }
 
+        public virtual void pre_update() {
+            binds.update();
+        }
+
 
         public virtual void update() {
+
             //if (!resting)
-                world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
+            world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
 
             if (render != null)
                 render.world = world;
@@ -82,6 +86,8 @@ namespace Magpie.Engine.WorldElements {
             }
             */
         }
+
+        public virtual void post_solve() {}
 
 
         public virtual void draw() {

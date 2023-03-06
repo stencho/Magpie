@@ -10,15 +10,14 @@ using Magpie.Graphics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using static Magpie.GJK;
 
-namespace Magpie.Engine.Collision {
+namespace Magpie.Engine.Collision
+{
     public  class ModelCollision {
         public (int,int) mesh_meshpart_id = (-1,-1);
         Triangle[] tris;
         Vector3[] points;
 
-        GJK3DParallel gjkp = new GJK3DParallel();
 
         BoundingBox bounds;
 
@@ -50,62 +49,13 @@ namespace Magpie.Engine.Collision {
             }
 
         }
-        public gjk_result[] gjk_multi_sample(Shape3D shape, Matrix world, Matrix collision_world, int samples) { 
-            return gjk_multi_sample(shape, world, collision_world, samples, Vector3.Zero);
-        }
+        // DO NOT EXPECT THIS TO WORK WITHOUT MODIFICATION
+        // OLD GJK HAS BEEN DELETED AND THIS HAS NOT BEEN MODIFIED HEAVILY TO MATCH
 
-        public gjk_result[] gjk_multi_sample(Shape3D shape, Matrix world, Matrix collision_world, int samples, Vector3 sweep) {
-
-            BoundingBox bb;
-            if (sweep != Vector3.Zero) {
-                bb = CollisionHelper.BoundingBox_around_BoundingBoxes(
-                    shape.find_bounding_box(world * Matrix.Invert(collision_world)),
-                    shape.find_bounding_box(world * Matrix.CreateTranslation(sweep) * Matrix.Invert(collision_world)));
-            } else {
-                bb = shape.find_bounding_box(world * Matrix.Invert(collision_world));
-            }
-
-
-            var hits = octree.get_all_values(bb);
-            bool anything = false;
-
-            gjk_result[] results = new gjk_result[samples];
-            for (int i = 0; i < results.Length; i++) {
-                results[i].distance = float.MaxValue;
-            }
-
-
-            foreach (int i in hits) {
-                Triangle tri = tris[i];
-                gjk_result result_tmp = gjkp.gjk_intersects(shape, tri, world, collision_world);
-
-                for (int s = 0; s < samples; s++) {
-
-                    if ((result_tmp.distance < results[s].distance 
-                        &&  Vector3.Dot(tri.normal, result_tmp.AB) > 0)                     
-                    || results[s].distance == float.MaxValue) {
-
-                        for (int sre = samples-1; sre > s; sre--) {
-                            results[sre] = results[sre - 1];
-                        }
-
-                        results[s] = result_tmp;
-                        anything = true;
-                        break;
-                    }
-
-                }
-            }
-
-
-            return results;
-
-        }
-
-        public bool gjk(Shape3D shape, Matrix world, Matrix collision_world, out gjk_result result) {
+        public bool gjk(Shape3D shape, Matrix world, Matrix collision_world, out collision_result result) {
             return gjk(shape, world, collision_world, out result, Vector3.Zero);
         }
-        public bool gjk(Shape3D shape, Matrix world, Matrix collision_world, out gjk_result result, Vector3 sweep) {
+        public bool gjk(Shape3D shape, Matrix world, Matrix collision_world, out collision_result result, Vector3 sweep) {
             BoundingBox bb;
             if (sweep != Vector3.Zero) {
                 bb = CollisionHelper.BoundingBox_around_BoundingBoxes(
@@ -118,16 +68,16 @@ namespace Magpie.Engine.Collision {
             var hits = octree.get_all_values(bb);
             bool anything = false;
 
-            gjk_result closest_result = new gjk_result() {
+            collision_result closest_result = new collision_result() {
                 distance = float.MaxValue
             };
 
             foreach (int i in hits) {
                 var tri = tris[i];
 
-                gjk_result result_tmp = gjkp.gjk_intersects(shape, tri, world, collision_world);
+                collision_result result_tmp = GJK.gjk_intersects(shape, tri, world, collision_world);
 
-                if (result_tmp.distance < closest_result.distance || result_tmp.hit) {
+                if (result_tmp.distance < closest_result.distance || result_tmp.intersects) {
                     
                       if (Vector3.Dot(tri.normal, result_tmp.AB) > 0) {
                           closest_result = result_tmp;

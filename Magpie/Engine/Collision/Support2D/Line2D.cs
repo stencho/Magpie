@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using static Magpie.Engine.Collision.Collision2D;
 
 namespace Magpie.Engine.Collision.Support2D {
-    public class Line2D : ISupport2D {
+    public class Line2D : Shape2D {
         public Vector2 actual_pos = Vector2.Zero;
         public Vector2 actual_A;
         public Vector2 actual_B;
@@ -27,7 +27,7 @@ namespace Magpie.Engine.Collision.Support2D {
             Draw2D.line(A, B, 2, color);
         }
 
-        public Vector2 FarthestPoint(Vector2 direction_n, bool normalize = true, bool transform = true) {
+        public Vector2 support(Vector2 direction_n, bool normalize = true, bool transform = true) {
             if (Vector2.Dot(direction_n, A) < Vector2.Dot(direction_n, B))
                 return B;
             else

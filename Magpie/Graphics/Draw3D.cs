@@ -391,9 +391,11 @@ namespace Magpie.Graphics {
             }
 
             EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
+            EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
             //gd.RasterizerState = RasterizerState.CullNone;
 
             basic_effect.DiffuseColor = color.ToVector3();
+            basic_effect.Alpha = 0.2f;
             basic_effect.TextureEnabled = true;
             basic_effect.Texture = onePXWhite;
 

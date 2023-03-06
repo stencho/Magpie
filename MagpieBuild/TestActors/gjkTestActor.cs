@@ -11,7 +11,6 @@ using Microsoft.Xna.Framework;
 using Magpie;
 using Microsoft.Xna.Framework.Input;
 using Magpie.Graphics;
-using static Magpie.Engine.Collision.MixedCollision;
 
 namespace MagpieBuild.TestActors {
     internal class gjkTestActor : object_info {
@@ -70,8 +69,6 @@ namespace MagpieBuild.TestActors {
         int held_tick_count = 0;
 
         public override void update() {
-            binds.update();
-
             if (binds.pressed("speenL")) {
                 this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, -1f * Clock.internal_frame_time_delta);
 
@@ -108,17 +105,21 @@ namespace MagpieBuild.TestActors {
                     int old_draw =  gjk_targets[gjkid].draw_simplex;
                     bool old_draw_supp = gjk_targets[gjkid].draw_all_supports;
 
-                    var i = MixedCollision.gjk_intersects(me.collision, ts.collision, wa, wb);
+                    var i = GJK.gjk_intersects(me.collision, ts.collision, wa, wb);
 
+
+                    if (i.intersects)
+                        wants_movement -= i.penetration * i.penetration_normal;
 
                     //if (old_draw >= gjk_targets[gjkid].simplex_list.Count - 1 || old_draw < 0)
-                        old_draw = gjk_targets[gjkid].simplex_list.Count - 1;
-                       
+                    old_draw = gjk_targets[gjkid].simplex_list.Count - 1;
+
 
                     i.draw_simplex = old_draw;
                     i.draw_all_supports = old_draw_supp;
                     gjk_targets[gjkid] = i;
                 }
+
 
                 var t = gjk_targets[gjkid];
 
@@ -160,6 +161,7 @@ namespace MagpieBuild.TestActors {
                     }
                 }
 
+
                 if (binds.just_pressed("t_supp")) {
                     t.draw_all_supports = !t.draw_all_supports;
                 }
@@ -191,7 +193,7 @@ namespace MagpieBuild.TestActors {
             }
 
             if (mv != Vector3.Zero)
-                wants_movement = (Vector3.Normalize(mv) * (5f * (binds.pressed("shift") ? 0.2f : 1f)) * Clock.internal_frame_time_delta);
+                wants_movement += (Vector3.Normalize(mv) * (5f * (binds.pressed("shift") ? 0.2f : 1f)) * Clock.internal_frame_time_delta);
             
             base.update();
         }

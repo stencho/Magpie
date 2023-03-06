@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using static Magpie.Engine.Collision.Collision2D;
 
 namespace Magpie.Engine.Collision.Support2D {
-    public class BoundingBox2D : ISupport2D {
+    public class BoundingBox2D : Shape2D {
 
         public Vector2 top_left;
         public Vector2 bottom_right;
@@ -79,7 +79,7 @@ namespace Magpie.Engine.Collision.Support2D {
             update_mg_bb();
         }
 
-        public Vector2 FarthestPoint(Vector2 direction_n, bool normalize = true, bool transform = true) {
+        public Vector2 support(Vector2 direction_n, bool normalize = true, bool transform = true) {
             Vector2 test_point = origin + direction_n;
             Vector2 result = Vector2.Zero;
 

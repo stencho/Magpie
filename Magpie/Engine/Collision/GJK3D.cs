@@ -1,689 +1,780 @@
-﻿using Magpie.Engine;
-using Magpie.Engine.Collision.Support3D;
-using Magpie.Graphics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Magpie.Engine.Collision.Support3D;
+using Magpie.Engine.WorldElements;
+using Magpie.Graphics;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Xna.Framework;
 
-//this is based on Vurtun's implementation, found here: https://gist.github.com/vurtun/29727217c269a2fbf4c0ed9a1d11cb40
+namespace Magpie.Engine.Collision {
 
-namespace Magpie {
-    public class GJK {
-        public static int max_iterations = 20;
-        public const float epsilon = 0.00001f;
+    public enum spoint { A=0, B=1, C=2, D=3 }
 
-        public struct support {
-            //public int vert_ID_A, vert_ID_B;
+    public enum simplex_stage {
+        empty = -1,
+        point=0,
+        line=1,
+        triangle=2,
+        tetrahedron=3
+    }
 
-            public Vector3 A;
-            public Vector3 B;
+    public struct gjk_support {
+        public Vector3 A_support;
+        public Vector3 B_support;
 
-            public Vector3 DA;
-            public Vector3 DB;
-        }
-        
-        public struct simplex {
-            public int max_iterations;
-            public int iterations;
-            public int count;
-            public bool hit; 
+        public Vector3 P;
 
-            public float[] bc; //always 4 floats
-            public float distance;
+        public float barycentric;
 
-            public struct vert {
-                public Vector3 A;
-                public Vector3 B;
-
-                public Vector3 P;
-
-                public int A_ID, B_ID;
-            }
-
-            public vert[] verts; //always 4 verts
+        public gjk_support() {
+            A_support = Vector3.Zero;
+            B_support = Vector3.Zero;
+            P = Vector3.Zero;
+            barycentric = 0f;
         }
 
+        public gjk_support(Vector3 a, Vector3 b, Vector3 p) {
+            A_support = a;
+            B_support = b;
+            P = p;
+            barycentric = 0f;
+        }
+    }
 
-        public struct gjk_result {
-            public bool hit;
-            public int iterations;
+    public struct gjk_simplex {
 
-            public Vector3 closest_point_A;
-            public Vector3 closest_point_B;
+        public Vector3 direction;
 
-            public float distance_squared;
-            public float distance;
+        public Vector3 closest_A = Vector3.Zero;
+        public Vector3 closest_B = Vector3.Zero;
 
-            public simplex last_simplex;
+        public simplex_stage stage = simplex_stage.empty;
 
-            public Shape3D shape_A;
-            public Shape3D shape_B;
+        public Matrix A_transform;
+        public Matrix B_transform;
 
-            public Matrix world_A;
-            public Matrix world_B;
+        public Matrix A_transform_direction;
+        public Matrix B_transform_direction;
 
-            public Vector3 AB => Vector3.Normalize(closest_point_B - closest_point_A);
+        public gjk_support[] supports = new gjk_support[4];
 
-            public override string ToString() {
-                return string.Format(
-@"##{0} | {1}## 
-closest points:
-A: {2} B: {3}
+        public bool hit;
 
-",
-                    hit, iterations,
-                    closest_point_A.simple_vector3_string(),
-                    closest_point_B.simple_vector3_string()
-                );
-            }
+        public int iteration = 0;
+
+        public string early_exit_reason;
+
+        public Vector3 A => supports[A_index].P;
+        public Vector3 B => supports[B_index].P;
+        public Vector3 C => supports[C_index].P;
+        public Vector3 D => supports[D_index].P;
+
+        internal int A_index => (int)stage;
+        internal int B_index => (int)stage - 1;
+        internal int C_index => (int)stage - 2;
+        internal int D_index => (int)stage - 3;
+
+
+        public float A_bary => supports[A_index].barycentric;
+        public float B_bary => supports[B_index].barycentric;
+        public float C_bary => supports[C_index].barycentric;
+        public float D_bary => supports[D_index].barycentric;
+
+        public gjk_support A_support => supports[A_index];
+        public gjk_support B_support => supports[B_index];
+        public gjk_support C_support => supports[C_index];
+        public gjk_support D_support => supports[D_index];
+
+
+        public Vector3 AO => -A; public Vector3 BO => -B;
+        public Vector3 CO => -C; public Vector3 DO => -D;
+
+        public Vector3 AB => B - A; public Vector3 AC => C - A; public Vector3 AD => D - A;
+        public Vector3 BA => A - B; public Vector3 BC => C - B; public Vector3 BD => D - B;
+        public Vector3 CD => D - C; public Vector3 DB => B - D;
+
+        public Vector3 ABC => Vector3.Cross(AB, AC);
+        public Vector3 ADB => Vector3.Cross(AD, AB);
+        public Vector3 ACD => Vector3.Cross(AC, AD);
+        public Vector3 BCD => Vector3.Cross(BC, BD);
+
+        public void add_new_point(Vector3 A_sup, Vector3 B_sup) {
+
+            if ((int)stage < (int)simplex_stage.tetrahedron)
+                stage = (simplex_stage)((int)stage + 1);
+            else
+                return;
+
+            var P = A_sup - B_sup;
+            supports[(int)stage] = new gjk_support(A_sup, B_sup, P);
+
         }
 
-        static Vector3 
-            A, B, C, D, E, F, 
-            T, N;
-
-        static Vector3 
-            AB, BA, CB, BC, CA, AC,
-            DB, BD, DC, CD, DA, AD,
-            DD, B0;
-
-        static float U, V;
-        static float AS, BS, CS, PP;
-        static float 
-            U_AB, V_AB, U_BC, V_BC, U_CA, V_CA,
-            U_BD, V_BD, U_DC, V_DC, U_AD, V_AD;
-
-        static float 
-            U_ABC, V_ABC, W_ABC, U_ADB, V_ADB, W_ADB,
-            U_ACD, V_ACD, W_ACD, U_CBD, V_CBD, W_CBD;
-
-        static float U_ABCD, V_ABCD, W_ABCD, X_ABCD;
-
-        static float denom;
-        static float volume;
-
-        public static float box(Vector3 A, Vector3 B, Vector3 C) {
-            Vector3 N = Vector3.Cross(B, A);
-            return Vector3.Dot(N, C);
+        int spoint_index(spoint p) {
+            switch (p) {
+                case spoint.A: return A_index;
+                case spoint.B: return B_index;
+                case spoint.C: return C_index;
+                case spoint.D: return D_index;
+            }
+            return -1;
         }
-        
-        public static int gjk(ref support sup, ref simplex s) {
-            //drop out if we've passed the max iterations
-            if (s.max_iterations > 0 && s.iterations >= max_iterations)
-                return 0;
 
-            //just starting this test, set things up
-            if (s.count == 0) {
-                s = new simplex {
-                    iterations = 0,
-                    hit = false,
-                    count = 0,
-                    max_iterations = GJK.max_iterations,
-                    distance = float.MaxValue,
-                    bc = new float[4],
-                    verts = new simplex.vert[4]
-                };
+        Vector3 spoint_value(spoint p) {
+            switch (p) {
+                case spoint.A: return supports[A_index].P;
+                case spoint.B: return supports[B_index].P;
+                case spoint.C: return supports[C_index].P;
+                case spoint.D: return supports[D_index].P;
             }
+            return Vector3.Zero;
+        }
 
-            for (int i = 0; i < s.count; ++i) {
-                //if (sup.vert_ID_A != s.verts[i].A_ID) continue;
-               // if (sup.vert_ID_B != s.verts[i].B_ID) continue;
-               // return 0;
+        float spoint_bary(spoint P) {
+            switch (P) {
+                case spoint.A: return supports[A_index].barycentric;
+                case spoint.B: return supports[B_index].barycentric;
+                case spoint.C: return supports[C_index].barycentric;
+                case spoint.D: return supports[D_index].barycentric;
             }
-            
-            s.verts[s.count].A = sup.A;
-            s.verts[s.count].B = sup.B;
-            s.verts[s.count].P = sup.B - sup.A;
+            return 0f;
+        }
 
-            //s.verts[s.count].A_ID = sup.vert_ID_A;
-            //s.verts[s.count].B_ID = sup.vert_ID_B;
-
-            s.bc[s.count] = 1f;
-            
-            s.count++;
-
-            switch (s.count) {
-                case 1: break;
-
-                case 2:
-                    //line simplex
-
-                    A = s.verts[0].P;
-                    B = s.verts[1].P;
-
-                    AB = A - B; BA = B - A;
-
-                    U = Vector3.Dot(B, BA);
-                    V = Vector3.Dot(A, AB);
-
-                    //voronoi region A
-                    if (V <= 0f) {
-                        s.bc[0] = 1f; s.count = 1;
-                        break;
-                    }
-                    //region B
-                    if (U <= 0f) {
-                        s.verts[0] = s.verts[1];
-                        s.bc[0] = 1f; s.count = 1;
-                        break;
-                    }
-
-                    s.bc[0] = U;
-                    s.bc[1] = V;
-
-                    s.count = 2;
-
+        public void set_bary(spoint P, float bary) {
+            switch (P) {
+                case spoint.A:
+                    supports[A_index].barycentric = bary;
                     break;
-
-                case 3:
-                    A = s.verts[0].P;
-                    B = s.verts[1].P;
-                    C = s.verts[2].P;
-                    
-                    AB = A - B;  BA = B - A;
-                    BC = B - C;  CB = C - B;
-                    CA = C - A;  AC = A - C;
-
-                    U_AB = Vector3.Dot(B, BA);  V_BC = Vector3.Dot(B, BC);
-                    V_AB = Vector3.Dot(A, AB);  U_CA = Vector3.Dot(A, AC);
-                    U_BC = Vector3.Dot(C, CB);  V_CA = Vector3.Dot(C, CA);
-                    
-                    //region A
-                    if (V_AB <= 0f && U_CA <= 0f) {
-                        s.bc[0] = 1f; s.count = 1;
-                        break;
-                    }
-
-                    //region B
-                    if (U_AB <= 0f && V_BC <= 0f) {
-                        s.verts[0] = s.verts[1];
-                        s.bc[0] = 1f; s.count = 1;
-                        break;
-                    }
-
-                    //region C
-                    if (U_BC <= 0f && V_CA <= 0f) {
-                        s.verts[0] = s.verts[2];
-                        s.bc[0] = 1f; s.count = 1;
-                        break;
-                    }
-
-                    //fractional area calculation
-                    N = Vector3.Cross(BA, CA);
-                    
-                    U_ABC = Vector3.Dot(Vector3.Cross(B,C),N);
-                    V_ABC = Vector3.Dot(Vector3.Cross(C,A),N);
-                    W_ABC = Vector3.Dot(Vector3.Cross(A,B),N);
-
-                    //region AB
-                    if (U_AB > 0f && V_AB > 0f && W_ABC <= 0f) {
-                        s.bc[0] = U_AB;
-                        s.bc[1] = V_AB;
-                        s.count = 2;
-                        break;
-                    }
-
-                    //region BC
-                    if (U_BC > 0f && V_BC > 0f && U_ABC <= 0f) {
-                        s.verts[0] = s.verts[1];
-                        s.verts[1] = s.verts[2];
-                        s.bc[0] = U_BC;
-                        s.bc[1] = V_BC;
-                        s.count = 2;
-                        break;
-                    }
-
-                    //region CA
-                    if (U_CA > 0f && V_CA > 0f && V_ABC <= 0f) {
-                        s.verts[1] = s.verts[0];
-                        s.verts[0] = s.verts[2];
-                        s.bc[0] = U_CA;
-                        s.bc[1] = V_CA;
-                        s.count = 2;
-                        break;
-                    }
-
-                    //region ABC
-                    if (!(U_ABC > 0f && V_ABC > 0f && W_ABC > 0f)) {
-
-                        throw new Exception("what the fuck man");
-                        //s.count = 2;
-                        //break;
-                    } 
-
-                    s.bc[0] = U_ABC;
-                    s.bc[1] = V_ABC;
-                    s.bc[2] = W_ABC;
-
-                    s.count = 3;
+                case spoint.B:
+                    supports[B_index].barycentric = bary;
                     break;
-                    //}
-
-                case 4:
-                    //tetrahedron simplex
-                    A = s.verts[0].P;
-                    B = s.verts[1].P;
-                    C = s.verts[2].P;
-                    D = s.verts[3].P;
-
-                    AB = A - B;   BA = B - A;
-                    BC = B - C;   CB = C - B;
-                    CA = C - A;   AC = A - C;
-                    DB = D - B;   BD = B - D;
-                    DC = D - C;   CD = C - D;
-                    DA = D - A;   AD = A - D;
-
-                    U_AB = Vector3.Dot(B, BA); V_AB = Vector3.Dot(A, AB);
-                    U_BC = Vector3.Dot(C, CB); V_BC = Vector3.Dot(B, BC);   
-                    U_CA = Vector3.Dot(A, AC); V_CA = Vector3.Dot(C, CA);
-
-                    U_BD = Vector3.Dot(D, DB); V_BD = Vector3.Dot(B, BD);
-                    U_DC = Vector3.Dot(C, CD); V_DC = Vector3.Dot(D, DC);
-                    U_AD = Vector3.Dot(D, DA); V_AD = Vector3.Dot(A, AD);
-                    //region A
-                    if (V_AB <= 0f && U_CA <= 0f && V_AD <= 0f) {
-                        s.bc[0] = 1f; s.count = 1;
-                        break;
-                    }
-
-                    //region B
-                    if (U_AB <= 0f && V_BC <= 0f && V_BD <= 0f) {
-                        s.verts[0] = s.verts[1];
-                        s.bc[0] = 1f; s.count = 1;
-                        break;
-                    }
-
-                    //region C
-                    if (U_BC <= 0f && V_CA <= 0f && U_DC <= 0f) {
-                        s.verts[0] = s.verts[2];
-                        s.bc[0] = 1f; s.count = 1;
-                        break;
-                    }
-
-                    //region D
-                    if (U_BD <= 0f && V_DC <= 0f && U_AD <= 0f) {
-                        s.verts[0] = s.verts[3];
-                        s.bc[0] = 1f; s.count = 1;
-                        break;
-                    }
-
-                    //fractional area calculation
-                    N = Vector3.Cross(DA, BA);
-
-                    U_ADB = Vector3.Dot(N, Vector3.Cross(D, B));
-                    V_ADB = Vector3.Dot(N, Vector3.Cross(B, A));
-                    W_ADB = Vector3.Dot(N, Vector3.Cross(A, D));
-
-                    N = Vector3.Cross(CA, DA);
-
-                    U_ACD = Vector3.Dot(N, Vector3.Cross(C, D));
-                    V_ACD = Vector3.Dot(N, Vector3.Cross(D, A));
-                    W_ACD = Vector3.Dot(N, Vector3.Cross(A, C));
-
-                    N = Vector3.Cross(BC, DC);
-
-                    U_CBD = Vector3.Dot(N, Vector3.Cross(B, D));
-                    V_CBD = Vector3.Dot(N, Vector3.Cross(D, C));
-                    W_CBD = Vector3.Dot(N, Vector3.Cross(C, B));
-
-                    N = Vector3.Cross(BA, CA);
-
-                    U_ABC = Vector3.Dot(N, Vector3.Cross(B, C));
-                    V_ABC = Vector3.Dot(N, Vector3.Cross(C, A));
-                    W_ABC = Vector3.Dot(N, Vector3.Cross(A, B));
-
-                    //test edges
-
-                    //AB
-                    if (W_ABC <= 0f && V_ADB <= 0f && U_AB > 0f && V_AB > 0f) {
-                        s.bc[0] = U_AB;
-                        s.bc[1] = V_AB;
-                        s.count = 2;
-                        break;
-                    }
-
-                    //BC
-                    if (U_ABC <= 0f && W_CBD <= 0f && U_BC > 0f && V_BC > 0f) {
-                        s.verts[0] = s.verts[1];
-                        s.verts[1] = s.verts[2];
-                        s.bc[0] = U_BC;
-                        s.bc[1] = V_BC;
-                        s.count = 2;
-                        break;
-                    }
-
-                    //CA
-                    if (V_ABC <= 0f && W_CBD <= 0f && U_CA > 0f && V_CA > 0f) {
-                        s.verts[1] = s.verts[0];
-                        s.verts[0] = s.verts[2];
-                        s.bc[0] = U_CA;
-                        s.bc[1] = V_CA;
-                        s.count = 2;
-                        break;
-                    }
-
-                    //DC
-                    if (V_CBD <= 0f && U_ACD <= 0f && U_DC > 0f && V_DC > 0f) {
-                        s.verts[0] = s.verts[3];
-                        s.verts[1] = s.verts[2];
-                        s.bc[0] = U_DC;
-                        s.bc[1] = V_DC;
-                        s.count = 2;
-                        break;
-                    }
-
-                    //AD
-                    if (V_ACD <= 0f && W_ADB <= 0f && U_AD > 0f && V_AD > 0f) {
-                        s.verts[1] = s.verts[3];
-                        s.bc[0] = U_AD;
-                        s.bc[1] = V_AD;
-                        s.count = 2;
-                        break;
-                    }
-                    
-                    //BD
-                    if (U_CBD <= 0f && U_ADB <= 0f && U_BD > 0f && V_BD > 0f) {
-                        s.verts[0] = s.verts[1];
-                        s.verts[1] = s.verts[3];
-                        s.bc[0] = U_BD;
-                        s.bc[1] = V_BD;
-                        s.count = 2;
-                        break;
-                    }
-
-                    //fractional volume calc
-                    denom = box(CB, AB, DB);
-                    volume = (denom == 0) ? 1f : 1f / denom;
-
-                    U_ABCD = box(C, D, B) * volume;
-                    V_ABCD = box(C, A, D) * volume;
-                    W_ABCD = box(D, A, B) * volume;
-                    X_ABCD = box(B, A, C) * volume;
-
-                    /*
-                    Vector3 PA, PB, PC, PD;
-                    PA = s.verts[0].P * (denom * U_ABCD);
-                    PB = s.verts[1].P * (denom * V_ABCD);
-                    PC = s.verts[2].P * (denom * W_ABCD);
-                    PD = s.verts[3].P * (denom * X_ABCD);
-                    
-                    Vector3 point = PA + PB + PC + PD;
-
-                    if (Vector3.Dot(point, point) >= epsilon * epsilon) {
-                        s.bc[0] = U_ABCD;
-                        s.bc[1] = V_ABCD;
-                        s.bc[2] = W_ABCD;
-                        s.bc[3] = X_ABCD;
-                        s.count = 4;
-                        break;
-                        //return 1;
-                    }
-                    */
-
-                    //ABC
-                    if (X_ABCD <= 0f && U_ABC > 0f && V_ABC > 0f && W_ABC > 0f) {
-                        s.bc[0] = U_ABC;
-                        s.bc[1] = V_ABC;
-                        s.bc[2] = W_ABC;
-                        s.count = 3;
-                        break;
-                    }
-                    
-                    //CBD
-                    if (U_ABCD <= 0f && U_CBD > 0f && V_CBD > 0f && W_CBD > 0F) {
-                        s.verts[0] = s.verts[2];
-                        s.verts[2] = s.verts[3];
-                        s.bc[0] = U_CBD;
-                        s.bc[1] = V_CBD;
-                        s.bc[2] = W_CBD;
-                        s.count = 3;
-                        break;
-                    }
-
-                    //ACD
-                    if (V_ABCD <= 0f && U_ACD > 0f && V_ACD > 0f && W_ACD > 0f) {
-                        s.verts[1] = s.verts[2];
-                        s.verts[2] = s.verts[3];
-                        s.bc[0] = U_ACD;
-                        s.bc[1] = V_ACD;
-                        s.bc[2] = W_ACD;
-                        s.count = 3;
-                        break;
-                    }
-
-                    //ADB
-                    if (W_ABCD <= 0f && U_ADB > 0f && V_ADB > 0f && W_ACD > 0f) {
-                        s.verts[2] = s.verts[1];
-                        s.verts[1] = s.verts[3];
-                        s.bc[0] = U_ADB;
-                        s.bc[1] = V_ADB;
-                        s.bc[2] = W_ADB;
-                        s.count = 3;
-                        break;
-                    }
-
-                    //ABCD
-                    if (!(U_ABCD > 0f && V_ABCD > 0f && W_ABCD > 0f && X_ABCD > 0f)) {
-                        throw new Exception("what the fuck man");
-                        //s.count =3;
-                        //break;
-                    }
-
-                    s.bc[0] = U_ABCD;
-                    s.bc[1] = V_ABCD;
-                    s.bc[2] = W_ABCD;
-                    s.bc[3] = X_ABCD;
-
-                    s.count = 4;
-
+                case spoint.C:
+                    supports[C_index].barycentric = bary;
+                    break;
+                case spoint.D:
+                    supports[D_index].barycentric = bary;
                     break;
             }
+        }
+        public void set_bary(float U) {
+            supports[A_index].barycentric = U;
+        }
+        public void set_bary_line(float U, float V) {
+            supports[A_index].barycentric = U;
+            supports[B_index].barycentric = V;
+        }
+        public void set_bary_tri(float U, float V, float W) {
+            supports[A_index].barycentric = U;
+            supports[B_index].barycentric = V;
+            supports[C_index].barycentric = W;
+        }
+        public void set_bary_line((float U, float V) uv) {
+            supports[A_index].barycentric = uv.U;
+            supports[B_index].barycentric = uv.V;
+        }
 
-            //test whether origin is enclosed by tetrahedron
-            if (s.count == 4) {
-                s.hit = true;
-                return 0;
-            }
 
-            Vector3 P = Vector3.Zero;
-            denom = 0f;
+        public void set_bary_line() {
+            var bc = CollisionHelper.line_barycentric(Vector3.Zero, A, B);
+            supports[A_index].barycentric = bc.U;
+            supports[B_index].barycentric = bc.V;
+        }
+        public void set_bary_tri() {
+            var bc = CollisionHelper.triangle_barycentric(Vector3.Zero, A, B, C);
+            supports[A_index].barycentric = bc.u;
+            supports[B_index].barycentric = bc.v;
+            supports[C_index].barycentric = bc.w;
+        }
 
-            for (int i = 0; i < s.count; ++i) {
-                denom += s.bc[i];                
+        public float get_denom() {
+            float denom = 0f;
+            switch (stage) {
+                case simplex_stage.point:
+                    denom = 1f;
+                    break;
+                case simplex_stage.line:
+                    denom = A_support.barycentric + B_support.barycentric;
+                    break;
+                case simplex_stage.triangle:
+                    denom = A_support.barycentric + B_support.barycentric + C_support.barycentric;
+                    break;
+                case simplex_stage.tetrahedron:
+                    denom = A_support.barycentric + B_support.barycentric + C_support.barycentric + D_support.barycentric;
+                    break;
             }
             denom = 1f / denom;
-
-            switch(s.count) {
-                //point
-                case 1:
-                    P = s.verts[0].P;
-                    break;
-
-                //line
-                case 2:
-                    A = s.verts[0].P * (denom * s.bc[0]);
-                    B = s.verts[1].P * (denom * s.bc[1]);
-                    P = A + B;
-                    break;
-                
-                //triangle
-                case 3:
-                    A = s.verts[0].P * (denom * s.bc[0]);
-                    B = s.verts[1].P * (denom * s.bc[1]);
-                    C = s.verts[2].P * (denom * s.bc[2]);
-                    P = A + B + C;
-                    break;
-            }
-
-            PP = Vector3.Dot(P, P);
-            
-            if (PP >= s.distance) return 0;
-            s.distance = PP;
-
-            //change search direction
-            DD = Vector3.Zero;
-
-            switch (s.count) {
-                case 1:
-                    //point
-                    DD = s.verts[0].P * -1;
-                    break;
-                case 2:
-                    //line
-                    BA = s.verts[1].P - s.verts[0].P;
-                    B0 = s.verts[1].P * -1;
-                    T = Vector3.Cross(BA, B0);
-                    DD = Vector3.Cross(T, BA);
-                    break;
-                case 3:
-                    //tri
-                    AB = s.verts[1].P - s.verts[0].P;
-                    AC = s.verts[2].P - s.verts[0].P;
-                    N = Vector3.Cross(AB, AC);
-                    if (Vector3.Dot(N, s.verts[0].P) <= 0f) {
-                        DD = N;
-                    } else {
-                        DD = N * -1;
-                    }
-                    break;
-            }
-            
-            if (Vector3.Dot(DD, DD) < epsilon)
-                return 0;
-
-            sup.DA = DD * -1f;
-            sup.DB = DD;
-            
-            return 1;
+            return denom;
         }
 
-        public static void gjk_check(ref simplex s, ref gjk_result res) {
-            //res = new result();
-            res.iterations = s.iterations;
-            res.hit = s.hit;
+        public void move_to_stage(spoint A) {
+            var s = new gjk_support[4];
+            s[0] = supports[spoint_index(A)];
+            supports = s;
+            stage = simplex_stage.point;
+            s[0].barycentric = 1f;
+        }
+        public void move_to_stage(spoint A, spoint B) {
+            var s = new gjk_support[4];
+            s[1] = supports[spoint_index(A)];
+            s[0] = supports[spoint_index(B)];
 
-            denom = 0f;
-            for (int i = 0; i < s.count; ++i) {
-                denom += s.bc[i];
-            }
-            denom = 1f / denom;
+            supports = s;
+            stage = simplex_stage.line;
 
-            switch (s.count) {
-                default: throw new Exception(); 
+        }
+        public void move_to_stage(spoint A, spoint B, spoint C) {
+            var s = new gjk_support[4];
+            s[2] = supports[spoint_index(A)];
+            s[1] = supports[spoint_index(B)];
+            s[0] = supports[spoint_index(C)];
 
-                //you know the drill by now, point, line, tri, tet
-                case 1:
-                    res.closest_point_A = s.verts[0].A;
-                    res.closest_point_B = s.verts[0].B;
-                    break;
-
-                case 2:
-                    AS = denom * s.bc[0];
-                    BS = denom * s.bc[1];
-
-                    A = s.verts[0].A * AS;
-                    B = s.verts[1].A * BS;
-                    C = s.verts[0].B * AS;
-                    D = s.verts[1].B * BS;
-
-                    res.closest_point_A = A + B;
-                    res.closest_point_B = C + D;
-                    break;
-
-                case 3:
-                    AS = denom * s.bc[0];
-                    BS = denom * s.bc[1];
-                    CS = denom * s.bc[2];
-
-                    A = s.verts[0].A * AS;
-                    B = s.verts[1].A * BS;
-                    C = s.verts[2].A * CS;
-
-                    D = s.verts[0].B * AS;
-                    E = s.verts[1].B * BS;
-                    F = s.verts[2].B * CS;
-
-                    res.closest_point_A = A + B + C;
-                    res.closest_point_B = D + E + F;
-                    break;
-
-                case 4:
-                    A = s.verts[0].A * (denom * s.bc[0]);
-                    B = s.verts[1].A * (denom * s.bc[1]);
-                    C = s.verts[2].A * (denom * s.bc[2]);
-                    D = s.verts[3].A * (denom * s.bc[3]);
-
-                    res.closest_point_A = A + B + C + D;
-                    res.closest_point_B = res.closest_point_A;
-                    break;
-            }
-
-            if (!res.hit) {
-                res.distance_squared = Vector3.DistanceSquared(res.closest_point_A, res.closest_point_B);
-                res.distance = Vector3.Distance(res.closest_point_A, res.closest_point_B);
-            } else {
-                res.distance_squared = 0;
-                res.distance = 0;
-            }
-                       
-            res.last_simplex = s;
+            supports = s;
+            stage = simplex_stage.triangle;
         }
 
-        // you have been visited by the Fast Inverse Square Root of Greg Walsh
-        // may all your game dev be happy and may your math be approximate and fast
-       public  static float InvSqrt(float x) {
-            float xhalf = 0.5f * x;
-            int i = BitConverter.ToInt32(BitConverter.GetBytes(x), 0);
-            i = 0x5f3759df - (i >> 1);
-            x = BitConverter.ToSingle(BitConverter.GetBytes(i), 0);
-            x = x * (1.5f - xhalf * x * x);
-            return x;
+        public bool same_dir_as_AO(Vector3 P) {
+            return Math3D.same_dir(P, AO);
         }
-               
-        //this is purely for things like spheres and capsules, 
-        //it allows you to treat the closest point which is output by the support function as though it has a radius around it,
-        //so a sphere is simply a point that has this applied to it, and a capsule is a line        
-        public static void gjk_quadratic_distance_solve(float a_radius, float b_radius, ref gjk_result res) {
-            float radius = a_radius + b_radius;
-            float radius2 = radius * radius;
 
-            if (res.distance_squared > epsilon && res.distance_squared > radius2) {
-                
-                res.distance_squared -= radius2;
+        public void set_dir_to_inverse_closest() {
+            switch (stage) {
+                case simplex_stage.point:
+                    direction = AO;
+                    break;
+                case simplex_stage.line:
+                    if (Vector3.Distance(Vector3.Zero, A) < Vector3.Distance(Vector3.Zero, B))
+                        direction = AO;
+                    else
+                        direction = BO;
+                    break;
+                case simplex_stage.triangle:
+                    if (Vector3.Distance(Vector3.Zero, A) < Vector3.Distance(Vector3.Zero, B))
+                        if (Vector3.Distance(Vector3.Zero, A) < Vector3.Distance(Vector3.Zero, C))
+                            direction = AO;
+                        else
+                            direction = CO;
+                    else
+                        direction = BO;
+                    break;
+                case simplex_stage.tetrahedron:
+                    var a = Vector3.Distance(Vector3.Zero, A);
 
-                N = res.closest_point_B - res.closest_point_A;
+                    if (a < Vector3.Distance(Vector3.Zero, B))
+                        if (a < Vector3.Distance(Vector3.Zero, C))
+                            if (a < Vector3.Distance(Vector3.Zero, D))
+                                direction = AO;
+                            else
+                                direction = DO;
+                        else
+                            direction = CO;
+                    else
+                        direction = BO;
+                    break;
+            }
+        }
 
-                float L2 = Vector3.Dot(N, N);
-                if (L2 != 0f) {
-                    N *= InvSqrt(L2);
+
+        public gjk_simplex() {
+            A_transform_direction = Matrix.Identity;
+            B_transform_direction = Matrix.Identity;
+
+            direction = Vector3.Zero;
+
+            early_exit_reason = "";
+            hit = false;
+        }
+
+        public gjk_simplex copy() {
+            return new gjk_simplex() {
+                stage = stage,
+
+                A_transform = A_transform,
+                B_transform = B_transform,
+
+                A_transform_direction = A_transform_direction,
+                B_transform_direction = B_transform_direction,
+
+                closest_A = closest_A,
+                closest_B = closest_B,
+
+                direction = direction,
+
+                early_exit_reason = early_exit_reason,
+                hit = hit,
+                iteration = iteration,
+                supports = supports
+            };
+        }
+
+        public bool farthest_tet(spoint P) {
+            if (stage != simplex_stage.tetrahedron) return false;
+            var pos = spoint_value(P);
+
+            for (int i = 0; i < 4; i++) {
+                if (i == spoint_index(P))
+                    continue;
+
+                if (!Math3D.same_dir(pos - supports[i].P, pos)) {
+                    return false;
                 }
 
-                DA = N * a_radius;
-                DB = N * b_radius;
-
-                res.closest_point_A += DA;
-                res.closest_point_B -= DB;
-                
-            } else {
-                
-                Vector3 P = res.closest_point_A + res.closest_point_B;
-
-                res.closest_point_A = P * 0.5f;
-                res.closest_point_B = res.closest_point_A;
-
-                res.distance_squared = 0;
-                
-                res.hit = true;
             }
+
+            return true;
         }
 
-        static List<gjk_result> results = new List<gjk_result>();
-        public static Vector3 cda = Vector3.Zero; public static Vector3 cdb = Vector3.Zero;
+        public string get_info() {
+            StringBuilder sb = new StringBuilder();
+
+            if ((int)stage >= 0) sb.Append($"[A] {A.ToXString()} [b] {supports[A_index].barycentric}\n");
+            if ((int)stage >= 1) sb.Append($"[B] {B.ToXString()} [b] {supports[B_index].barycentric}\n");
+            if ((int)stage >= 2) sb.Append($"[C] {C.ToXString()} [b] {supports[C_index].barycentric}\n");
+            if ((int)stage >= 3) sb.Append($"[D] {D.ToXString()} [b] {supports[D_index].barycentric}\n");
+
+            return sb.ToString();
+
+        }
+
+        public void draw() {
+            if (supports == null)
+                return;
+
+            Draw3D.xyz_cross(A, 0.2f, Color.Red);
+            if ((int)stage > 0) Draw3D.xyz_cross(B, 0.2f, Color.Green);
+            if ((int)stage > 1) Draw3D.xyz_cross(C, 0.2f, Color.Blue);
+            if ((int)stage > 2) Draw3D.xyz_cross(D, 0.2f, Color.Yellow);
+
+            var mid = A;
+
+            switch (stage) {
+                case simplex_stage.point: break;
+
+                case simplex_stage.line:
+                    mid = (A + B) / 2f;
+
+                    Draw3D.line(A, B, Color.HotPink);
+
+                    Draw3D.line(
+                        supports[(int)spoint.A].A_support,
+                        supports[(int)spoint.B].A_support,
+                        Color.HotPink);
+                    Draw3D.line(
+                        supports[(int)spoint.A].B_support,
+                        supports[(int)spoint.B].B_support,
+                        Color.HotPink);
+
+                    break;
+
+                case simplex_stage.triangle:
+                    mid = (A + B + C) / 3f;
+
+                    Draw3D.lines(Color.HotPink, A, B, C, A);
+
+                    Draw3D.lines(Color.HotPink,
+                        supports[(int)spoint.A].A_support,
+                        supports[(int)spoint.B].A_support,
+                        supports[(int)spoint.C].A_support,
+                        supports[(int)spoint.A].A_support);
+
+                    Draw3D.lines(Color.HotPink,
+                        supports[(int)spoint.A].B_support,
+                        supports[(int)spoint.B].B_support,
+                        supports[(int)spoint.C].B_support,
+                        supports[(int)spoint.A].B_support);
+                    break;
+                case simplex_stage.tetrahedron:
+                    mid = (B + C + D) / 3f;
+
+                    Draw3D.lines(Color.HotPink, C, B, D, C);
+
+                    Draw3D.line(B, A, Color.Purple);
+                    Draw3D.line(C, A, Color.Purple);
+                    Draw3D.line(D, A, Color.Purple);
 
 
+                    Draw3D.lines(Color.HotPink,
+                        supports[(int)spoint.C].A_support,
+                        supports[(int)spoint.B].A_support,
+                        supports[(int)spoint.D].A_support,
+                        supports[(int)spoint.C].A_support);
+
+                    Draw3D.lines(Color.HotPink,
+                        supports[(int)spoint.C].B_support,
+                        supports[(int)spoint.B].B_support,
+                        supports[(int)spoint.D].B_support,
+                        supports[(int)spoint.C].B_support);
+
+
+                    Draw3D.line(supports[(int)spoint.B].A_support, supports[(int)spoint.A].A_support, Color.Purple);
+                    Draw3D.line(supports[(int)spoint.C].A_support, supports[(int)spoint.A].A_support, Color.Purple);
+                    Draw3D.line(supports[(int)spoint.D].A_support, supports[(int)spoint.A].A_support, Color.Purple);
+
+                    Draw3D.line(supports[(int)spoint.B].B_support, supports[(int)spoint.A].B_support, Color.Purple);
+                    Draw3D.line(supports[(int)spoint.C].B_support, supports[(int)spoint.A].B_support, Color.Purple);
+                    Draw3D.line(supports[(int)spoint.D].B_support, supports[(int)spoint.A].B_support, Color.Purple);
+
+
+                    var m = (A + B + C) / 3f;
+                    Draw3D.line(m, m + Vector3.Normalize(ABC), Color.Red);
+
+                    m = (A + D + B) / 3f;
+                    Draw3D.line(m, m + Vector3.Normalize(ADB), Color.Green);
+
+                    m = (A + C + D) / 3f;
+                    Draw3D.line(m, m + Vector3.Normalize(ACD), Color.Blue);
+
+
+                    break;
+            }
+
+            Draw3D.arrow(mid, mid + direction, 0.2f, Color.HotPink);
+
+        }
+    }
+    public class GJK {
+        const int max_iterations = 20;
+
+        public static collision_result gjk_intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b) {
+            collision_result result = new collision_result();
+
+            gjk_simplex simplex = new gjk_simplex();
+
+            Vector3 scale_a; Quaternion rot_a;
+            Vector3 scale_b; Quaternion rot_b;
+
+            w_a.Decompose(out scale_a, out rot_a, out _);
+            w_b.Decompose(out scale_b, out rot_b, out _);
+
+            simplex.A_transform = w_a;
+            simplex.B_transform = w_b;
+
+            simplex.A_transform_direction = Matrix.CreateFromQuaternion(rot_a);
+            simplex.B_transform_direction = Matrix.CreateFromQuaternion(rot_b);
+
+            //simplex.direction = w_b.Translation - w_a.Translation;
+            simplex.direction = Vector3.One;
+
+            simplex.add_new_point(
+                Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)),  Vector3.Zero), (w_a)),
+                Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), Vector3.Zero), (w_b)));
+
+            simplex.supports[0].barycentric = 1f;
+
+            gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);
+
+            simplex.direction = simplex.AO;
+
+
+            int iteration = 1;
+
+            while (iteration < max_iterations) {
+                simplex.add_new_point(
+                    Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), Vector3.Zero), (w_a)),
+                    Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), Vector3.Zero), (w_b))
+                    );
+
+                simplex.iteration = iteration;
+
+
+                ///////////////////////////////////////////////////////////
+                if (simplex.stage == simplex_stage.line) { // *** LINE ***
+
+                    result.save_simplex(ref simplex);
+
+                    //gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);
+
+                    if (Vector3.Distance(simplex.A, simplex.B) <= Math3D.big_epsilon) {
+                        simplex.move_to_stage(spoint.B);
+                        gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);
+                        break;
+                    }
+
+                    if (CollisionHelper.line_closest_point(simplex.A, simplex.B, Vector3.Zero).Length() <= Math3D.big_epsilon) {
+                        result.intersects = true;
+                        simplex.set_bary_line();
+                        break;
+                    }
+
+                    //origin between A and B
+                    if (simplex.same_dir_as_AO(simplex.AB)) {
+                        simplex.early_exit_reason = "Origin betweeen A and B";
+                        simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+
+                    } else {
+                        simplex.direction = simplex.AO;
+                        simplex.move_to_stage(spoint.A);
+                    }
+
+                    ///////////////////////////////////////////////////////////
+                } else if (simplex.stage == simplex_stage.triangle) { // *** TRIANGLE ***
+
+                    result.save_simplex(ref simplex);
+
+                    if (Vector3.Distance(simplex.A, simplex.B) <= Math3D.big_epsilon 
+                        || Vector3.Distance(simplex.A, simplex.C) <= Math3D.big_epsilon) {
+                        simplex.move_to_stage(spoint.B, spoint.C);
+                        gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);
+                        break;
+                    }
+
+
+                    //On the ABC x AC plane, so origin could be closest to either AC or A
+                    if (simplex.same_dir_as_AO(Vector3.Cross(simplex.ABC, simplex.AC))) {
+
+                        if (simplex.same_dir_as_AO(simplex.AC)) {
+                            simplex.early_exit_reason = "Tri -> AC";
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AC, simplex.AO), simplex.AC);
+
+                            simplex.move_to_stage(spoint.A, spoint.C);
+
+                        } else {
+                            if (simplex.same_dir_as_AO(simplex.AB)) {
+                                simplex.early_exit_reason = "Tri -> AB1";
+                                simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+
+                                simplex.move_to_stage(spoint.A, spoint.B);
+
+
+                            } else {
+                                simplex.early_exit_reason = "Tri -> A1";
+                                simplex.direction = simplex.AO;
+
+                                simplex.move_to_stage(spoint.A);
+                            }
+
+                        }
+                    } else {
+                        //On the AB x ABC plane, so we're either on AB or A
+                        if (simplex.same_dir_as_AO(Vector3.Cross(simplex.AB, simplex.ABC))) {
+                            if (simplex.same_dir_as_AO(simplex.AB)) {
+                                simplex.early_exit_reason = "Tri -> AB2";
+                                simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+
+                                simplex.move_to_stage(spoint.A, spoint.B);
+
+
+                            } else {
+                                simplex.early_exit_reason = "Tri -> A1";
+
+                                simplex.direction = simplex.AO;
+                                simplex.move_to_stage(spoint.A);
+                            }
+
+
+                        } else { // within plane
+                            if (CollisionHelper.triangle_closest_point(simplex.A, simplex.B, simplex.C, Vector3.Zero).Length() <= Math3D.big_epsilon) {
+                                result.intersects = true;
+                                gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);                               
+                                break;
+                            }
+
+                            if (simplex.same_dir_as_AO(simplex.ABC)) {
+                                simplex.early_exit_reason = "Tri -> ABC";
+                                simplex.direction = simplex.ABC;
+                            } else {
+                                simplex.early_exit_reason = "Tri -> ACB";
+                                simplex.direction = -simplex.ABC;
+                                simplex.move_to_stage(spoint.A, spoint.C, spoint.B);
+                            }
+                        }
+                    }
+
+
+                    ///////////////////////////////////////////////////////////
+                } else if (simplex.stage == simplex_stage.tetrahedron) { // *** TETRAHEDRON ***
+
+                    result.save_simplex(ref simplex);
+
+                    if (Vector3.Distance(simplex.A, simplex.B) <= Math3D.big_epsilon 
+                        || Vector3.Distance(simplex.A, simplex.C) <= Math3D.big_epsilon 
+                        || Vector3.Distance(simplex.A, simplex.D) <= Math3D.big_epsilon) {
+                        simplex.move_to_stage(spoint.B, spoint.C, spoint.D);
+                        gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);
+                        break;
+                    }
+
+                    bool ABC = simplex.same_dir_as_AO(simplex.ABC);
+                    bool ACD = simplex.same_dir_as_AO(simplex.ACD);
+                    bool ADB = simplex.same_dir_as_AO(simplex.ADB);
+                    bool BCD = simplex.same_dir_as_AO(simplex.BCD);
+
+                    if (ABC && ADB && ACD) {
+                        simplex.early_exit_reason = "Tetra -> A";
+                        simplex.direction = simplex.AO;
+                        simplex.move_to_stage(spoint.A);
+
+                    } else {
+                        if (ABC && ADB) {
+                            simplex.early_exit_reason = "Tetra -> AB";
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+                            simplex.move_to_stage(spoint.A, spoint.B);
+
+                        } else if (ABC && ACD) {
+                            simplex.early_exit_reason = "Tetra -> AC";
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AC, simplex.AO), simplex.AC);
+
+                            simplex.move_to_stage(spoint.A, spoint.C);
+
+                        } else if (ACD && ADB) {
+                            simplex.early_exit_reason = "Tetra -> AD";
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AD, simplex.AO), simplex.AD);
+
+                            simplex.move_to_stage(spoint.A, spoint.D);
+
+                        } else {
+                            //face
+                            if (ABC) {
+                                simplex.early_exit_reason = "Tetra -> ABC";
+                                simplex.direction = simplex.ABC;
+
+                                simplex.move_to_stage(spoint.A, spoint.B, spoint.C);
+
+                            } else if (ACD) {
+                                simplex.early_exit_reason = "Tetra -> ACD";
+                                simplex.direction = simplex.ACD;
+
+                                simplex.move_to_stage(spoint.A, spoint.C, spoint.D);
+
+                            } else if (ADB) {
+                                simplex.early_exit_reason = "Tetra -> ADB";
+                                simplex.direction = simplex.ADB;
+
+                                simplex.move_to_stage(spoint.A, spoint.D, spoint.B);
+
+                            } else {
+
+                                if (!ABC && !ACD && !ADB && !BCD) {
+                                    result.intersects = true;
+                                    result.save_simplex(ref simplex);
+                                    break;
+                                }
+              
+                                simplex.early_exit_reason = "oh no";
+                                break;
+                            }
+                        }
+                    }
+
+                }
+
+                gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);
+
+
+                result.save_simplex(ref simplex);
+                iteration++;
+            }
+
+            result.end_simplex = simplex;
+            if (result.intersects && simplex.stage == simplex_stage.tetrahedron) {
+                result.polytope = EPA3D.expand_polytope(shape_A, shape_B, ref simplex, ref result);
+            }
+            return result;
+        }
+
+        static void gjk_closest_point_calc(ref gjk_simplex simplex, ref collision_result result, Matrix w_a, Matrix w_b) {
+
+            Vector3 closest_A = Vector3.Zero;
+            Vector3 closest_B = Vector3.Zero;
+
+            switch (simplex.stage) {
+                case simplex_stage.line:
+                    simplex.set_bary_line();
+                    break;
+                case simplex_stage.triangle:
+
+                    simplex.set_bary_tri();
+                    break;
+                case simplex_stage.tetrahedron:
+                    return;
+                    var bary = CollisionHelper.tetrahedron_barycentric(Vector3.Zero, simplex.A, simplex.B, simplex.C, simplex.D);
+
+                    simplex.set_bary(spoint.A, bary.U);
+                    simplex.set_bary(spoint.B, bary.V);
+                    simplex.set_bary(spoint.C, bary.W);
+                    simplex.set_bary(spoint.D, bary.Z);
+                    break;
+            }
+
+            float d = float.MaxValue;
+            float dot = float.MaxValue;
+            float denom = simplex.get_denom();
+
+            switch (simplex.stage) {
+                case simplex_stage.point:
+                    closest_A = simplex.A_support.A_support;
+                    closest_B = simplex.A_support.B_support;
+
+                    break;
+                case simplex_stage.line:
+
+                    var l_AS = denom * simplex.A_bary;
+                    var l_BS = denom * simplex.B_bary;
+
+                    closest_A = (simplex.A_support.A_support * l_AS) + (simplex.B_support.A_support * l_BS);
+                    closest_B = (simplex.A_support.B_support * l_AS) + (simplex.B_support.B_support * l_BS);
+
+
+                    dot = Vector3.Dot(closest_A, closest_B);
+                    break;
+                case simplex_stage.triangle:
+                    //closest_A = CollisionHelper.triangle_closest_point(simplex.A_support.A_support, simplex.B_support.A_support, simplex.C_support.A_support, Vector3.Zero);
+                    //closest_B = CollisionHelper.triangle_closest_point(simplex.A_support.B_support, simplex.B_support.B_support, simplex.C_support.B_support, Vector3.Zero);
+
+                    var t_AS = denom * simplex.A_bary;
+                    var t_BS = denom * simplex.B_bary;
+                    var t_CS = denom * simplex.C_bary;
+
+                    closest_A = (simplex.A_support.A_support * t_AS) + (simplex.B_support.A_support * t_BS) + (simplex.C_support.A_support * t_CS);
+                    closest_B = (simplex.A_support.B_support * t_AS) + (simplex.B_support.B_support * t_BS) + (simplex.C_support.B_support * t_CS);
+
+                    //closest_A = Vector3.Transform(closest_A, (simplex.A_transform));
+                    //closest_B = Vector3.Transform(closest_B, (simplex.B_transform));
+
+                    dot = Vector3.Dot(closest_A, closest_B);
+                    break;
+                case simplex_stage.tetrahedron:
+
+                    closest_A =
+                        (simplex.A_support.A_support * (denom * simplex.A_bary)) +
+                        (simplex.B_support.A_support * (denom * simplex.B_bary)) +
+                        (simplex.C_support.A_support * (denom * simplex.C_bary)) +
+                        (simplex.D_support.A_support * (denom * simplex.D_bary));
+
+                    //closest_A = Vector3.Transform(closest_A, (simplex.A_transform));
+
+                    closest_B = closest_A;
+                    break;
+
+            }
+
+            d = Vector3.Distance(closest_A, closest_B);
+
+            var da = closest_A.Length();
+            var db = closest_B.Length();
+
+            simplex.closest_A = closest_A;
+            simplex.closest_B = closest_B;
+
+            if (da < result.distance_to_zero_A) {
+                result.distance_to_zero_A = da;
+            }
+            if (db < result.distance_to_zero_B) {
+                result.distance_to_zero_B = db;
+            }
+
+            if (d < result.distance && d > 0) {
+                result.distance = d;
+
+                result.closest_A = closest_A;
+                result.closest_B = closest_B;
+
+                result.closest_iteration = simplex.iteration;
+            }
+
+        }
     }
 }

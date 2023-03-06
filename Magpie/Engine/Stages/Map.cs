@@ -12,8 +12,6 @@ using System.Windows.Forms;
 namespace Magpie.Engine.Stages {
     [Serializable]
     public class Map {
-        public volatile Actor player_actor;
-
         public struct resource_info {
             public string name;
             public List<int> objects_using;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using static Magpie.Engine.Collision.Collision2D;
 
 namespace Magpie.Engine.Collision.Support2D {
-    public class Circle2D : ISupport2D {
+    public class Circle2D : Shape2D {
         Vector2 pos;
         public Vector2 origin => pos;
         float r;
@@ -25,7 +25,7 @@ namespace Magpie.Engine.Collision.Support2D {
             Draw2D.circle(pos, (int)r, color);
         }
 
-        public Vector2 FarthestPoint(Vector2 direction_n, bool normalize = true, bool transform = true) {
+        public Vector2 support(Vector2 direction_n, bool normalize = true, bool transform = true) {
             return origin + (Vector2.Normalize(direction_n) * radius);
         }
 

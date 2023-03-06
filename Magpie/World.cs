@@ -15,15 +15,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static Magpie.GJK;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Magpie { 
     public class World {
         public volatile Map current_map;
-
-
-        public Actor player_actor => current_map.player_actor;
 
         //public SpotLight test_light;
         //public SpotLight test_light2;
@@ -110,10 +106,12 @@ namespace Magpie {
                 }
                 
 
+
                 internal_frame_probe.set("update");
                 lock (current_map) {
                     foreach (int oi in current_map.game_objects.Keys) {
 
+                        current_map.game_objects[oi].pre_update();
                         current_map.game_objects[oi].update();
 
                         if (current_map.game_objects[oi].wants_movement != Vector3.Zero) {
@@ -123,91 +121,12 @@ namespace Magpie {
                         } else {
                             current_map.game_objects[oi].resting = true;
                         }
+
+                        current_map.game_objects[oi].post_solve();
                     }
                 }
 
 
-                internal_frame_probe.set("update_player");
-                // TEMPORARY NEEDS TO GO ONCE OBJECT INFO IS DONE
-                if (current_map.player_actor != null)
-                lock (current_map.player_actor)
-                        current_map.player_actor.Update();
-
-                //var mid = current_map.game_objects.Last().Key;
-                //lock (current_map.game_objects[mid].collision.gjk_results) {
-                    //current_map.game_objects[mid].collision.doing_collisions = true;
-                    //current_map.game_objects[mid].collision.gjk_results.Clear();
-
-                    //foreach (ModelCollision mc in current_map.game_objects[mid].testc) {
-                        //gjk_result r;
-                        /*
-                        if (mc.gjk(current_map.actors[0].collision, current_map.actors[0].world, current_map.game_objects[mid].collision.world, out r, current_map.actors[0].wants_movement)) {
-                            if (r.distance != float.MaxValue) {
-                                current_map.game_objects[mid].collision.gjk_results.Add(r);
-                            }
-                            if (r.distance - ((Capsule)current_map.actors[0].collision).radius <= epsilon) {
-                                var move = (r.AB * (((Capsule)current_map.actors[0].collision).radius - r.distance));
-                                if (!Draw3D.vector3_contains_nan(move)) {
-                                    current_map.actors[0].wants_movement -= move;
-
-                                }
-                            }
-
-                        }
-
-                        if (mc.gjk(current_map.player_actor.collision, 
-                            current_map.player_actor.world, current_map.game_objects[mid].collision.world, out r, current_map.player_actor.wants_movement)) {
-                            if (r.distance != float.MaxValue) {
-                                current_map.game_objects[mid].collision.gjk_results.Add(r);
-                            }
-                            if (r.distance - ((Sphere)current_map.player_actor.collision).radius <= epsilon) {
-                                var move = (r.AB * (((Sphere)current_map.player_actor.collision).radius - r.distance));
-                                if (!Draw3D.vector3_contains_nan(move)) {
-                                    current_map.player_actor.wants_movement -= move;
-
-                                }
-                            }
-
-                        }
-
-                        
-                        foreach (gjk_result res in mc.gjk_multi_sample(current_map.actors[0].collision, current_map.actors[0].world, current_map.game_objects[mid].collision.world, 2, current_map.actors[0].wants_movement)) {
-                            if (res.distance != float.MaxValue) {
-                                current_map.game_objects[mid].collision.gjk_results.Add(res);
-                            }
-                            if (res.distance - ((Capsule)current_map.actors[0].collision).radius <= epsilon) {
-                                var move = (res.AB * (((Capsule)current_map.actors[0].collision).radius - res.distance));
-                                if (!Draw3D.vector3_contains_nan(move)) {
-                                    current_map.actors[0].wants_movement -= move;
-
-                                }
-                            }
-                        }
-
-                        foreach (gjk_result res in mc.gjk_multi_sample(current_map.player_actor.collision, current_map.player_actor.world, current_map.game_objects[mid].collision.world, 2, current_map.player_actor.wants_movement)) {
-                            if (res.distance != float.MaxValue) {
-                                current_map.game_objects[mid].collision.gjk_results.Add(res);
-                            }
-                            if (res.distance - ((Sphere)current_map.player_actor.collision).radius <= epsilon) {
-                                var move = (res.AB * (((Sphere)current_map.player_actor.collision).radius - res.distance));
-                                if (!Draw3D.vector3_contains_nan(move)) {
-                                    current_map.player_actor.wants_movement -= move;
-
-                                }
-                            }
-                        }
-                        */
-
-                    //}
-                    
-                    current_map.player_actor.position += current_map.player_actor.wants_movement;
-                    current_map.player_actor.wants_movement = Vector3.Zero;
-                    /*
-                    current_map.actors[0].position += current_map.actors[0].wants_movement;
-                    current_map.actors[0].wants_movement = Vector3.Zero;
-                    current_map.game_objects[mid].collision.doing_collisions = false;
-                    */
-                //}
 
                 lock (last_fps) {
                     for (int i = 0; i < last_fps.Length - 1; i++) {
@@ -273,8 +192,6 @@ namespace Magpie {
         public void Draw(GraphicsDevice gd, Camera camera) {
 
             int u = 0;
-
-            player_actor.unthreaded_update();
 
             EngineState.camera.update();
             EngineState.camera.update_projection(EngineState.resolution);

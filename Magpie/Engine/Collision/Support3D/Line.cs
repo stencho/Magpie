@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Magpie.GJK.simplex;
 
 namespace Magpie.Engine.Collision.Support3D {
     public class Line3D : Shape3D {

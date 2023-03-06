@@ -276,7 +276,7 @@ namespace Magpie.Graphics.UI {
             return s;
         }
 
-        public static bool test_mouse(ref Dictionary<string, ISupport2D> collision, ref List<string> mouse_interactions) {
+        public static bool test_mouse(ref Dictionary<string, Shape2D> collision, ref List<string> mouse_interactions) {
             mouse_interactions.Clear();
             bool t = false;
 

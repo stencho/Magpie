@@ -34,8 +34,8 @@ namespace Magpie.Engine {
         public static XYPair mouse_position => new XYPair(mouse_state.Position.X, mouse_state.Position.Y);
         public static Vector2 mouse_position_float => new Vector2(mouse_state.Position.X, mouse_state.Position.Y);
 
-        public static ISupport2D mouse_collision_object => _mouse_coll_obj;
-        static ISupport2D _mouse_coll_obj;
+        public static Shape2D mouse_collision_object => _mouse_coll_obj;
+        static Shape2D _mouse_coll_obj;
 
         public static bool mouse_in_bounds => is_mouse_in_bounds();
 

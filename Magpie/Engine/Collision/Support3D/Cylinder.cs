@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Magpie.GJK.simplex;
 
 namespace Magpie.Engine {
     class Cylinder : Shape3D {
