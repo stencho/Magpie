@@ -1,6 +1,8 @@
 ﻿using Magpie.Engine.Brushes;
+using Magpie.Engine.Collision;
 using Magpie.Engine.WorldElements;
 using Magpie.Graphics;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +12,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Magpie.Engine.Stages {
-    [Serializable]
     public class Map {
+        public float update_range = 1500f;
+        
+        public DynamicOctree octree = new DynamicOctree();
+
         public struct resource_info {
             public string name;
             public List<int> objects_using;
@@ -26,8 +31,11 @@ namespace Magpie.Engine.Stages {
 
         public int add_object(object_info object_info) {
             var id = make_id();
-            game_objects.Add(id, object_info);
-            game_objects[id].id = id;
+            lock (this) {
+                game_objects.Add(id, object_info);
+                game_objects[id].id = id;
+                octree.add(id);
+            }
             return id;
         }
 

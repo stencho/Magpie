@@ -17,6 +17,11 @@ namespace Magpie.Engine.WorldElements {
         public Vector3 position = Vector3.Zero;
         public Vector3 wants_movement = Vector3.Zero;
 
+
+        public Vector3 velocity_normal = Vector3.Zero;
+        public float velocity = 0;
+
+
         public Vector3 scale = Vector3.One;
 
         public Matrix orientation = Matrix.Identity;
@@ -52,6 +57,10 @@ namespace Magpie.Engine.WorldElements {
         void init(render_info render_info, collision_info collision_info) {
             this.render = render_info;
             this.collision = collision_info;
+        }
+        public object_info(Vector3 position, render_info renderinfo, collision_info collision_info) {
+            this.position = position;
+            init(renderinfo, collision_info);
         }
 
         public bool in_frustum(BoundingFrustum frustum) {

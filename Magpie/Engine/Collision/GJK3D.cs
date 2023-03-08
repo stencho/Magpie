@@ -546,7 +546,7 @@ namespace Magpie.Engine.Collision {
                                 simplex.move_to_stage(spoint.A);
                             }
 
-                        }
+                        } 
                     } else {
                         //On the AB x ABC plane, so we're either on AB or A
                         if (simplex.same_dir_as_AO(Vector3.Cross(simplex.AB, simplex.ABC))) {
@@ -670,6 +670,7 @@ namespace Magpie.Engine.Collision {
 
             result.end_simplex = simplex;
             if (result.intersects && simplex.stage == simplex_stage.tetrahedron) {
+
                 result.polytope = EPA3D.expand_polytope(shape_A, shape_B, ref simplex, ref result);
             }
             return result;
@@ -689,7 +690,6 @@ namespace Magpie.Engine.Collision {
                     simplex.set_bary_tri();
                     break;
                 case simplex_stage.tetrahedron:
-                    return;
                     var bary = CollisionHelper.tetrahedron_barycentric(Vector3.Zero, simplex.A, simplex.B, simplex.C, simplex.D);
 
                     simplex.set_bary(spoint.A, bary.U);

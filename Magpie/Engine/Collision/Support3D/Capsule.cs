@@ -83,7 +83,7 @@ namespace Magpie.Engine.Collision.Support3D {
         }
         public Vector3 support(Vector3 direction, Vector3 sweep) {
             if (sweep != Vector3.Zero) {
-                return Supports.Quad(direction, A,B,A+sweep,B+sweep);
+                return Supports.Sphere(direction, Supports.Quad(direction, A, B, A + sweep, B + sweep), radius);
             }
 
             var lp = Supports.Line(direction, A, B);

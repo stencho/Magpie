@@ -124,6 +124,8 @@ namespace Magpie {
 
                         current_map.game_objects[oi].post_solve();
                     }
+
+                    current_map.octree.update_tree_structure();
                 }
 
 
@@ -167,8 +169,14 @@ namespace Magpie {
             }
         }
 
+
+
+
+
         Matrix l_current = Matrix.Identity;
         Vector3 p_current = Vector3.Zero;
+
+
 
         public void Update() {
             Clock.frame_probe.set("update");
@@ -177,8 +185,6 @@ namespace Magpie {
                 
                 physics_movement_thread.Start();
             }
-
-
         }
 
 

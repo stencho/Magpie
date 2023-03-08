@@ -167,10 +167,9 @@ namespace Magpie.Engine.WorldElements {
         public bool enabled = true;        
         public bool gravity = true;
 
-        public Vector3 velocity_normal = Vector3.Zero;
-        public float velocity = 0;
+        public bool resting = false;
+        //public Vector3 
 
-        public volatile bool doing_collisions = false;
 
         public collision_info(Shape3D shape) {
             hitbox = new hitbox_collision(shape);

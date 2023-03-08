@@ -12,11 +12,20 @@ namespace Magpie.Engine.Collision {
 
 
     public class polytope {       
+        public struct epa_vert {
+            Vector3 P;
+            Vector3 support_A, support_B;
 
+            public epa_vert(Vector3 support_A, Vector3 support_B) {                
+                this.support_A = support_A;
+                this.support_B = support_B;
+                P = support_A - support_B;
+            }
+        }
         public struct index_tri {
             public int A;
             public int B; 
-            public int C;
+            public int C;            
             
             public index_tri(int a, int b, int c, bool remove) {
                 A = a;
@@ -26,6 +35,7 @@ namespace Magpie.Engine.Collision {
         }
         public Vector3 support_point = Vector3.Zero;
         public Vector3 closest_facet = Vector3.Zero;
+
         public List<Vector3> points = new List<Vector3>();
         public List<index_tri> triangle_indices = new List<index_tri>();
         public List<(int A, int B)> edge_indices = new List<(int A, int B)>();
@@ -204,6 +214,9 @@ namespace Magpie.Engine.Collision {
                     }
                 }
 
+                //TODO STORE SUPPORT POINTS ALONGSIDE VERTS THEN USE BARYCENTRIC COORDS
+                //TO EXTRACT LOCAL SPACE CONTACT POINTS
+
                 last_closest = closest_facet_point;
                 var A = Vector3.Transform(
                     shape_A.support(
@@ -229,6 +242,9 @@ namespace Magpie.Engine.Collision {
                 iterations++;
             }
 
+            result.penetration = Vector3.Distance(closest_facet_point, Vector3.Zero);
+            result.penetration_normal = Vector3.Normalize(closest_facet_point);
+            result.contact = closest_facet_point;
             return poly;
         }
     }

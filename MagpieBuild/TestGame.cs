@@ -158,7 +158,12 @@ namespace MagpieBuild
                 Vector3.Down))));
                 */
             var sphereid = world.current_map.add_object(new object_info(Vector3.Right * 3, new collision_info(new Sphere(1f))));
-            var triid = world.current_map.add_object(new object_info(Vector3.Right * 6, new collision_info(new Triangle(Vector3.Right + Vector3.Forward, Vector3.Up, Vector3.Right + Vector3.Down))));
+
+            var triid = world.current_map.add_object(new object_info(Vector3.Right * 116, new collision_info(
+                new ProjectedTriangle(Vector3.Right + Vector3.Forward, Vector3.Up, Vector3.Right + Vector3.Down))));
+
+            var quad = world.current_map.add_object(new object_info(Vector3.Down * 2, new collision_info(
+                new Quad(20f))));
 
             var capsuleid = world.current_map.add_object(new object_info(Vector3.Left * 3, new collision_info(new Capsule(1.85f, 0.8f))));
 
@@ -178,7 +183,15 @@ namespace MagpieBuild
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(triid, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(rcubeid, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(weirdone, new collision_result());
+            ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(quad, new collision_result());
 
+
+            for (int i = 0;i < 250; i++) {
+                world.current_map.add_object(
+                    new object_info(RNG.rng_v3_neg_one_to_one * 500,  new render_info_model("sphere", "trumpmap"),
+                    new collision_info(new Sphere(1f)))
+                    );
+            }
 
 
             //world.current_map.add_actor(new MoveTestActor());
@@ -225,11 +238,19 @@ namespace MagpieBuild
                 EngineState.running = false;
                 Exit();
             }
-
+            /*
             if (tapped("test") && !held("test")) {
                 Scene.sun_moon.time_stopped = !Scene.sun_moon.time_stopped;
             }
-            
+            */
+
+            if (tapped("test")) {
+                world.current_map.add_object(
+                    new object_info(world.current_map.game_objects[player_id].position + (RNG.rng_v3_neg_one_to_one * 25), new render_info_model("sphere", "trumpmap"),
+                    new collision_info(new Sphere(1f)))
+                    );
+            }
+
             if (pressed("test")) {
                 if (pressed("scroll_up")) {
                     Scene.sun_moon.set_time_of_day(Scene.sun_moon.current_day_value + ((Controls.wheel_delta / 240.0) * 0.05));
@@ -298,7 +319,8 @@ namespace MagpieBuild
                         "mouse over UI: " + EngineState.window_manager.mouse_over_UI() + "\n\n" +
                         "## gvars ##\n" +
                         gvars.list_all() + "\n\n" +
-                        EngineState.window_manager.list_windows() + "\n\n"
+                        EngineState.window_manager.list_windows() + "\n\n" +
+                        $"{EngineState.world.current_map.octree.object_total.ToString()}"
 
 
 

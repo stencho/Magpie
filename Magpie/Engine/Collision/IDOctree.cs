@@ -7,9 +7,8 @@ using System.Xml.Linq;
 using Magpie.Engine.Stages;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
-using static Magpie.Engine.Collision.Octree;
 
-namespace Magpie.Engine.Collision
+namespace Magpie.Engine.Collision.Octrees
 {
     public class Octree
     {

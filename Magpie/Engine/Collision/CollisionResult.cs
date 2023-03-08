@@ -35,6 +35,7 @@ namespace Magpie.Engine.Collision {
         public bool save_simplices = true;
         public int draw_simplex = 0;
         public polytope polytope;
+        public Vector3 contact;
 
         public void save_simplex(ref gjk_simplex simplex) {
             if (!save_simplices) return;
@@ -128,7 +129,7 @@ namespace Magpie.Engine.Collision {
 
             if (polytope != null)
                 polytope.draw();
-            Draw3D.sprite_line(world_pos, world_pos + (penetration_normal * penetration), 0.02f, Color.Red);
+            Draw3D.sprite_line(contact, contact + (penetration_normal * penetration), 0.02f, Color.Red);
         }
     }
 }

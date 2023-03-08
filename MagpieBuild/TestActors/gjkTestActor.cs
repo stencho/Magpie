@@ -31,6 +31,9 @@ namespace MagpieBuild.TestActors {
         public volatile Dictionary<int, collision_result> gjk_targets = new Dictionary<int, collision_result>();
 
         public override void draw() {
+
+            EngineState.world.current_map.octree.draw();
+
             Draw3D.xyz_cross(
                 Vector3.Zero,
                 1f, Color.Brown);
@@ -49,7 +52,7 @@ namespace MagpieBuild.TestActors {
                         sphb.draw(EngineState.world.current_map.game_objects[gjkid].world);
                         var spp = EngineState.world.current_map.game_objects[gjkid].position;
 
-                        Draw3D.text_3D(EngineState.spritebatch, $"{selected_target.ToString()}", "pf", position + Vector3.Up, -EngineState.camera.direction, 1f, Color.Black);
+                        //Draw3D.text_3D(EngineState.spritebatch, $"{selected_target.ToString()}", "pf", position + Vector3.Up, -EngineState.camera.direction, 1f, Color.Black);
 
 
                         var c = position + ((spp - position) / 2);
@@ -67,8 +70,36 @@ namespace MagpieBuild.TestActors {
 
         double held_tick_time = 500;
         int held_tick_count = 0;
-
+        float velocity = 0f;
         public override void update() {
+            Vector3 mv = Vector3.Zero;
+
+            if (binds.pressed("t_forward")) {
+                mv += Vector3.Forward;
+            }
+            if (binds.pressed("t_backward")) {
+                mv += Vector3.Backward;
+            }
+            if (binds.pressed("t_left")) {
+                mv += Vector3.Left;
+            }
+            if (binds.pressed("t_right")) {
+                mv += Vector3.Right;
+            }
+            if (binds.pressed("t_up")) {
+                mv += Vector3.Up;
+            }
+            if (binds.pressed("t_down")) {
+                mv += Vector3.Down;
+            }
+
+            if (mv != Vector3.Zero)
+                wants_movement += (Vector3.Normalize(mv) * (5f * (binds.pressed("shift") ? 0.2f : 1f)) * Clock.internal_frame_time_delta);
+
+                //wants_movement += Vector3.Down * 9.81f * Clock.internal_frame_time_delta;
+
+            this.position += wants_movement;
+
             if (binds.pressed("speenL")) {
                 this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, -1f * Clock.internal_frame_time_delta);
 
@@ -97,7 +128,8 @@ namespace MagpieBuild.TestActors {
             foreach (int gjkid in gjk_targets.Keys) {
                 //collision snapshot
                 if (binds.pressed("t_S")) {
-                    hitbox_collision me = (hitbox_collision)collision.hitbox;
+                }
+                hitbox_collision me = (hitbox_collision)collision.hitbox;
                     hitbox_collision ts = (hitbox_collision)EngineState.world.current_map.game_objects[gjkid].collision.hitbox;
 
                     var wa = world;
@@ -109,16 +141,16 @@ namespace MagpieBuild.TestActors {
 
 
                     if (i.intersects)
-                        wants_movement -= i.penetration * i.penetration_normal;
+                        position -= i.penetration * i.penetration_normal;
 
-                    //if (old_draw >= gjk_targets[gjkid].simplex_list.Count - 1 || old_draw < 0)
-                    old_draw = gjk_targets[gjkid].simplex_list.Count - 1;
+                    if (old_draw >= gjk_targets[gjkid].simplex_list.Count - 1 || old_draw < 0)
+                        old_draw = gjk_targets[gjkid].simplex_list.Count - 1;
 
 
                     i.draw_simplex = old_draw;
                     i.draw_all_supports = old_draw_supp;
                     gjk_targets[gjkid] = i;
-                }
+               
 
 
                 var t = gjk_targets[gjkid];
@@ -171,30 +203,6 @@ namespace MagpieBuild.TestActors {
             }
 
 
-            Vector3 mv = Vector3.Zero;
-
-            if (binds.pressed("t_forward")) {
-                mv += Vector3.Forward;
-            }
-            if (binds.pressed("t_backward")) {
-                mv += Vector3.Backward;
-            }
-            if (binds.pressed("t_left")) {
-                mv += Vector3.Left;
-            }
-            if (binds.pressed("t_right")) {
-                mv += Vector3.Right;
-            }
-            if (binds.pressed("t_up")) {
-                mv += Vector3.Up;
-            }
-            if (binds.pressed("t_down")) {
-                mv += Vector3.Down;
-            }
-
-            if (mv != Vector3.Zero)
-                wants_movement += (Vector3.Normalize(mv) * (5f * (binds.pressed("shift") ? 0.2f : 1f)) * Clock.internal_frame_time_delta);
-            
             base.update();
         }
     }
