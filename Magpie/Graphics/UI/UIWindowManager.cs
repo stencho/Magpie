@@ -31,7 +31,7 @@ namespace Magpie.Graphics.UI {
             var s = "## windows ##\n\n";
 
             foreach (IUIForm window in windows) {
-                s += "[window] " + window.name + " [focused] " + window.has_focus + " [visible] " + window.visible + " [mouseover] " + window.top_of_mouse_stack + " [pos] " + XYPair.simple_string(window.position) + " [size] " + XYPair.simple_string(window.size) + "\n";
+                s += "[window] " + window.name + "\n [focused] " + window.has_focus + "\n [visible] " + window.visible + "\n [mouseover] " + window.top_of_mouse_stack + "\n [pos] " + XYPair.simple_string(window.position) + "\n [size] " + XYPair.simple_string(window.size) + "\n";
                 if (window.subforms.Count > 0)
                     s += window.list_subforms();
                 // s += "[sub] " + subform.name + " :: top of mouse stack: " + subform.top_of_mouse_stack + "\n";
@@ -229,9 +229,11 @@ namespace Magpie.Graphics.UI {
         
         public void render_window_internals() {
             Clock.frame_probe.set("draw_wm_internals");
+            
             foreach (IUIForm window in windows) {
-                if (window.visible)
-                    window.render_internal();
+                lock (window)
+                    if (window.visible)
+                        window.render_internal();
             }
         }
 

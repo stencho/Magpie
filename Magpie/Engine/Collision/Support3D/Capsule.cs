@@ -86,9 +86,7 @@ namespace Magpie.Engine.Collision.Support3D {
                 return Supports.Sphere(direction, Supports.Quad(direction, A, B, A + sweep, B + sweep), radius);
             }
 
-            var lp = Supports.Line(direction, A, B);
-
-            return Supports.Sphere(direction, lp, radius);
+            return Supports.Capsule(direction, A, B, radius);
         }
     }
 

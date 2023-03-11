@@ -191,7 +191,7 @@ namespace Magpie.Graphics {
             var c = Vector3.Normalize(Vector3.Cross(p, Vector3.Cross(p, p2)));
 
             Matrix billboard = Matrix.CreateConstrainedBillboard(a + (t / 2),
-                (a + (t / 2)) + c, Vector3.Normalize(t), c, null);
+                (a + (t / 2)) - c, Vector3.Normalize(t), c, null);
             
             fill_quad(Matrix.CreateScale(scale) * billboard,
                 (Vector3.Up * 0.5f) + (Vector3.Left * 0.5f),
@@ -368,9 +368,9 @@ namespace Magpie.Graphics {
             //e_diffuse.Parameters["FarClip"].SetValue(2000f);
             //e_diffuse.Parameters["opacity"].SetValue(-1f);
 
-            EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
+            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
-            EngineState.graphics_device.DepthStencilState = DepthStencilState.DepthRead;
+            EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
 
             EngineState.graphics_device.SetVertexBuffer(vb);
             EngineState.graphics_device.Indices = ib;
@@ -393,9 +393,9 @@ namespace Magpie.Graphics {
             EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
             //gd.RasterizerState = RasterizerState.CullNone;
-
+            float a = color.A/255f;
             basic_effect.DiffuseColor = color.ToVector3();
-            basic_effect.Alpha = 0.2f;
+            basic_effect.Alpha = a;
             basic_effect.TextureEnabled = true;
             basic_effect.Texture = onePXWhite;
 
@@ -477,7 +477,7 @@ namespace Magpie.Graphics {
             draw_buffers(t_vertex_buffer, t_index_buffer, world, color);
         }
 
-        public static void fill_quad(Matrix world, Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color) {
+        public static void fill_quad(Matrix world, Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color, string texture = "OnePXWhite") {
 
             if (q_index_buffer == null) {
                 q_index_buffer = new IndexBuffer(EngineState.graphics_device, IndexElementSize.SixteenBits, q_indices.Length, BufferUsage.None);
@@ -490,12 +490,10 @@ namespace Magpie.Graphics {
                 new VertexPositionNormalTexture(D, -Vector3.UnitZ, new Vector2(0, 1))
             };
 
-            EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
-
             q_vertex_buffer = new VertexBuffer(EngineState.graphics_device, VertexPositionNormalTexture.VertexDeclaration, quad.Length, BufferUsage.None);
             q_vertex_buffer.SetData<VertexPositionNormalTexture>(quad);
 
-            draw_buffers_diffuse_texture(q_vertex_buffer, q_index_buffer, ContentHandler.resources["OnePXWhite"].value_tx, color, world);
+            draw_buffers_diffuse_texture(q_vertex_buffer, q_index_buffer, ContentHandler.resources[texture].value_tx, color, world);
             //draw_buffers(gd, q_vertex_buffer, q_index_buffer, world, color, EngineState.camera.view, EngineState.camera.projection);
         }
 

@@ -101,6 +101,8 @@ namespace Magpie {
                 gvars.add_gvar("window_position", gvar_data_type.XYPAIR, game_window.Position.ToXYPair(), false);
                 gvars.add_gvar("window_size", gvar_data_type.XYPAIR, game_window.ClientBounds.Size.ToXYPair(), false);
 
+                gvars.add_gvar("draw_probes", gvar_data_type.BOOL, false, true);
+
                 startup_log.AppendLine($"done");
 
 
@@ -245,7 +247,7 @@ namespace Magpie {
             graphics.PreferredBackBufferWidth = resolution.X;
             graphics.PreferredBackBufferHeight = resolution.Y;
 
-            buffer.change_resolution(graphics_device, resolution.X, resolution.Y);
+            buffer.change_resolution(graphics_device, resolution.X, resolution.Y, gvars.get_float("super_resolution_scale"));
 
             graphics.ApplyChanges();
 
@@ -280,7 +282,7 @@ namespace Magpie {
         }
 
         public static void apply_internal_scale() {
-            buffer.change_resolution_super(graphics_device, resolution.X, resolution.Y, gvars.get_float("super_resolution_scale"));
+            buffer.change_resolution(graphics_device, resolution.X, resolution.Y, gvars.get_float("super_resolution_scale"));
         }
         public static bool updating_controls = false;
         public static void Update(GameTime gt, Game game) {

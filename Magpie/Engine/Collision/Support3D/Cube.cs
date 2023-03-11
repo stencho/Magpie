@@ -106,6 +106,9 @@ namespace Magpie.Engine.Collision.Support3D {
                 Color.MonoGameOrange);
         }
         public Vector3 support(Vector3 direction, Vector3 sweep) {
+            if (sweep != Vector3.Zero) {
+               return Supports.CubeSweep(direction, this, sweep);
+            }
             return Supports.Cube(direction, this);
         }
 

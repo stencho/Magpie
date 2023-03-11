@@ -109,6 +109,8 @@ namespace Magpie {
 
                 internal_frame_probe.set("update");
                 lock (current_map) {
+                    current_map.do_broad_phase();
+                    /*
                     foreach (int oi in current_map.game_objects.Keys) {
 
                         current_map.game_objects[oi].pre_update();
@@ -124,7 +126,7 @@ namespace Magpie {
 
                         current_map.game_objects[oi].post_solve();
                     }
-
+                    */
                     current_map.octree.update_tree_structure();
                 }
 

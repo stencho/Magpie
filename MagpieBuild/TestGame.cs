@@ -133,8 +133,10 @@ namespace MagpieBuild
             force_enable("screenshot");
 
 
-            cube_id = world.current_map.add_object(new object_info(Vector3.Left * 6, new collision_info(new Cube(0.5f))));
-            var weirdone  = world.current_map.add_object(new object_info(Vector3.Left * 6, new collision_info(new Polyhedron(
+            cube_id = world.current_map.add_object(new object_info(Vector3.Left * 6 + (Vector3.Up * 3f), new render_info_model("cube", "zerocool_sharper"), new collision_info(new Cube(1f))));
+
+
+            var weirdone  = world.current_map.add_object(new object_info(Vector3.Left * 3, new collision_info(new Polyhedron(
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
@@ -149,49 +151,66 @@ namespace MagpieBuild
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one))));
-                /*
-                Vector3.Up,
-                Vector3.Forward,
-                Vector3.Right,
-                Vector3.Backward,
-                Vector3.Left,
-                Vector3.Down))));
-                */
-            var sphereid = world.current_map.add_object(new object_info(Vector3.Right * 3, new collision_info(new Sphere(1f))));
+            /*
+            Vector3.Up,
+            Vector3.Forward,
+            Vector3.Right,
+            Vector3.Backward,
+            Vector3.Left,
+            Vector3.Down))));
+            */
+            /*
+            for (int i = 0; i < 250; i++) {
+                world.current_map.add_object(
+                    new object_info(RNG.rng_v3_neg_one_to_one * 500, new render_info_model("sphere", "trumpmap"),
+                    new collision_info(new Sphere(1f)))
+                    );
+            }
+            */
+            var sphereid = world.current_map.add_object(new object_info(Vector3.Left * 1, new render_info_model("sphere", "trumpmap"), new collision_info(new Sphere(1f))));
 
             var triid = world.current_map.add_object(new object_info(Vector3.Right * 116, new collision_info(
                 new ProjectedTriangle(Vector3.Right + Vector3.Forward, Vector3.Up, Vector3.Right + Vector3.Down))));
 
-            var quad = world.current_map.add_object(new object_info(Vector3.Down * 2, new collision_info(
-                new Quad(20f))));
+            var quad = world.current_map.add_object(new object_info(Vector3.Down * 2, new collision_info(new Quad(250f))));
 
-            var capsuleid = world.current_map.add_object(new object_info(Vector3.Left * 3, new collision_info(new Capsule(1.85f, 0.8f))));
+            var capsuleid = world.current_map.add_object(new object_info(Vector3.Right * 3, new collision_info(new Capsule(1.85f, 0.8f))));
 
-            var rcubeid = world.current_map.add_object(new object_info(Vector3.Right * 8, new collision_info(new Cube(0.5f))));
+            var rcubeid = world.current_map.add_object(new object_info(Vector3.Right * 8, new render_info_model("cube", "zerocool_sharper"), new collision_info(new Cube(1f))));
             world.current_map.game_objects[rcubeid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
 
-            move_id = world.current_map.add_object(new gjkTestActor(Vector3.Left * 5f, new collision_info(
-                //new Cube(1f)
-                new Capsule(1.85f,1f)
-                )));
+            move_id = world.current_map.add_object(new gjkTestActor(Vector3.Left * 5f + (Vector3.Up * 5f), new render_info_model("cube", "zerocool_sharper"), new collision_info(
+                new Cube(1f)
+                //new Sphere(1f)
+                //new Capsule(1.85f,1f)
+                /*new Polyhedron(
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one,
+                RNG.rng_v3_neg_one_to_one)
+                */)));
 
             //world.current_map.game_objects[moveid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
             //new collision_info(new Triangle(Vector3.Right + Vector3.Forward, Vector3.Up, Vector3.Left + Vector3.Down))));
 
+            ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(quad, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(cube_id, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(sphereid, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(triid, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(rcubeid, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(weirdone, new collision_result());
-            ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(quad, new collision_result());
+            ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(capsuleid, new collision_result());
 
-
-            for (int i = 0;i < 250; i++) {
-                world.current_map.add_object(
-                    new object_info(RNG.rng_v3_neg_one_to_one * 500,  new render_info_model("sphere", "trumpmap"),
-                    new collision_info(new Sphere(1f)))
-                    );
-            }
 
 
             //world.current_map.add_actor(new MoveTestActor());
@@ -282,7 +301,7 @@ namespace MagpieBuild
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
 
             world.Draw(GraphicsDevice, EngineState.camera);
-
+            world.current_map.octree.draw();
             EngineState.window_manager.render_window_internals();
 
             Clock.frame_probe.set("draw_2D");
@@ -348,15 +367,16 @@ namespace MagpieBuild
 
             Clock.frame_probe.end_of_frame();
             Clock.frame_probe.set("overhead");
-            
-            Clock.frame_probe.draw(EngineState.resolution.X - 450, 60, 300, out _, out th);
-            int t = th;
+            if (gvars.get_bool("draw_probes")) {
+                Clock.frame_probe.draw(EngineState.resolution.X - 450, 60, 300, out _, out th);
+                int t = th;
 
-            lock (World.internal_frame_probe)
-                World.internal_frame_probe.draw(EngineState.resolution.X - 402, th + 70, 300, out _, out t);
+                lock (World.internal_frame_probe)
+                    World.internal_frame_probe.draw(EngineState.resolution.X - 402, th + 70, 300, out _, out t);
 
-            lock (Controls.control_poll_probe)
-                Controls.control_poll_probe.draw(EngineState.resolution.X - 360, th + t + 80, 300, out _, out _);
+                lock (Controls.control_poll_probe)
+                    Controls.control_poll_probe.draw(EngineState.resolution.X - 360, th + t + 80, 300, out _, out _);
+            }
 
         }
         int th = 0;

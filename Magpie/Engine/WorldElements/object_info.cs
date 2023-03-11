@@ -21,6 +21,7 @@ namespace Magpie.Engine.WorldElements {
         public Vector3 velocity_normal = Vector3.Zero;
         public float velocity = 0;
 
+        public List<long> octree_base_nodes = new List<long>();
 
         public Vector3 scale = Vector3.One;
 
@@ -40,6 +41,7 @@ namespace Magpie.Engine.WorldElements {
         public ThreadedBindManager binds = new ThreadedBindManager();
 
         public bool resting = false;
+        public bool updated = false;
 
         public object_info(Vector3 position) {
             this.position = position;
@@ -53,14 +55,16 @@ namespace Magpie.Engine.WorldElements {
             this.position = position;
             init(null, collision_info);
         }
+        public object_info(Vector3 position, render_info renderinfo, collision_info collision_info) {
+            this.position = position;
+            init(renderinfo, collision_info);
+        }
 
         void init(render_info render_info, collision_info collision_info) {
             this.render = render_info;
             this.collision = collision_info;
-        }
-        public object_info(Vector3 position, render_info renderinfo, collision_info collision_info) {
-            this.position = position;
-            init(renderinfo, collision_info);
+
+            world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
         }
 
         public bool in_frustum(BoundingFrustum frustum) {
@@ -69,12 +73,22 @@ namespace Magpie.Engine.WorldElements {
                     return true;
                 }
             } else if (collision!= null) {
-                if (frustum.Intersects(collision.hitbox.find_bounding_box(world))) {
+                if (frustum.Intersects(collision.movebox.find_bounding_box(world))) {
                     return true;
                 }
             }
             
             return false;
+        }
+
+        public BoundingBox bounding_box() {
+            if (collision != null) {
+                if (collision.dynamic) {
+                    return collision.movebox.find_bounding_box(world);
+                } else {
+                    return collision.movebox.find_bounding_box(world);
+                }
+            } else return new BoundingBox(Vector3.Zero, Vector3.Zero);
         }
 
         public virtual void pre_update() {
@@ -85,7 +99,6 @@ namespace Magpie.Engine.WorldElements {
         public virtual void update() {
 
             //if (!resting)
-            world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
 
             if (render != null)
                 render.world = world;
@@ -94,9 +107,14 @@ namespace Magpie.Engine.WorldElements {
                 update_action();
             }
             */
+            updated = true;
         }
 
-        public virtual void post_solve() {}
+        public virtual void post_solve() {
+            //UPDATE OCTREE POSITIONS HERE
+            world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
+            updated = false;
+        }
 
 
         public virtual void draw() {
@@ -105,6 +123,11 @@ namespace Magpie.Engine.WorldElements {
 
                 render.draw();
             }
+            if (collision != null) {
+                collision.movebox.draw(world);
+                Draw3D.cube(bounding_box(), Color.Red);
+            }
+            Draw3D.text_3D(EngineState.spritebatch, id.ToString(), "pf", bounding_box().Max, -EngineState.camera.direction, 1f, Color.Black);
             if (draw_action != null) draw_action();
         }
         public void draw_to_light(light light) {

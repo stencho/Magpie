@@ -16,6 +16,10 @@ namespace Magpie {
             return Math3D.highest_dot(verts, direction, out _);
         }
 
+        public static Vector3 Capsule(Vector3 direction, Vector3 A, Vector3 B, float radius) {
+            var lp = Supports.Line(direction, A, B);
+            return Supports.Sphere(direction, lp, radius);
+        }
         public static Vector3 Line(Vector3 direction, Vector3 A, Vector3 B) {
             if (Vector3.Dot(A, direction) > Vector3.Dot(B, direction)) {
                 return A;
@@ -53,33 +57,14 @@ namespace Magpie {
 
         }
 
-        public static Vector3 Tri(Vector3 direction, Vector3 A, Vector3 B, Vector3 C) {
-
-            //return Math3D.highest_dot(new Vector3[3] { A, B, C }, direction, out _);
-           
+        public static Vector3 Tri(Vector3 direction, Vector3 A, Vector3 B, Vector3 C) {                       
             return CollisionHelper.triangle_farthest_point(A, B, C, direction);  
-
-            /*
-            var AB = B-A;
-            var AC = C-A;
-            var N = Vector3.Cross(AB, AC);
-
-            float dot = Vector3.Dot(N, A);
-            float inv = 1f / Vector3.Dot(N, direction);
-
-            float u = Vector3.Dot(Vector3.Cross(direction, AC),A- C) * inv;
-            float v = Vector3.Dot(Vector3.Cross(AB, direction),A- B) * inv;
-            float w = 1f - u - v;
-
-            support = w * A + v * B + u * C;
-            */
         }
 
         public static Vector3 Quad(Vector3 direction, Vector3 A, Vector3 B, Vector3 C, Vector3 D) { 
             return Math3D.highest_dot(new Vector3[4] { A,B,C,D }, direction, out _);
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Cube(Vector3 direction, Cube cube) {
             return GetFarthestPointInDirection(direction, cube);
             return Math3D.highest_dot(new Vector3[8] {
@@ -91,7 +76,27 @@ namespace Magpie {
                 cube.F,
                 cube.G,
                 cube.H }, 
-                direction, out _);            
+                direction, out _);
+        }
+        public static Vector3 CubeSweep(Vector3 direction, Cube cube, Vector3 sweep) {
+            return Math3D.highest_dot(new Vector3[16] {
+                cube.A,
+                cube.B,
+                cube.C,
+                cube.D,
+                cube.E,
+                cube.F,
+                cube.G,
+                cube.H,
+                cube.A + sweep,
+                cube.B + sweep,
+                cube.C + sweep,
+                cube.D + sweep,
+                cube.E + sweep,
+                cube.F + sweep,
+                cube.G + sweep,
+                cube.H + sweep },
+                direction, out _);
         }
     }
 }

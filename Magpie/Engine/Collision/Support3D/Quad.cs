@@ -59,8 +59,8 @@ namespace Magpie.Engine.Collision.Support3D {
         public void create(float scale_x, float scale_y) {
             A = (Vector3.Left * 0.5f * scale_x) + (Vector3.Forward * 0.5f * scale_y);
             B = (Vector3.Right * 0.5f * scale_x) + (Vector3.Forward * 0.5f * scale_y);
-            D = (Vector3.Left * 0.5f * scale_x) + (Vector3.Backward* 0.5f * scale_y);
             C = (Vector3.Right * 0.5f * scale_x) + (Vector3.Backward* 0.5f * scale_y);
+            D = (Vector3.Left * 0.5f * scale_x) + (Vector3.Backward * 0.5f * scale_y);
         }
 
         public void create(Vector3 A, Vector3 B, Vector3 C, Vector3 D) {
@@ -71,38 +71,20 @@ namespace Magpie.Engine.Collision.Support3D {
         }
 
         public void draw(Matrix world) {
-
-            //Draw3D.fill_quad(w, A, B, C, D, Color.White * 0.9f, EngineState.camera.view, EngineState.camera.projection);
-            var wA = Vector3.Transform(A, world);
-            var wB = Vector3.Transform(B, world);
-            var wC = Vector3.Transform(C, world);
-            var wD = Vector3.Transform(D, world);
-
-            Draw3D.xyz_cross(wA, 5f, Color.DeepPink);
-            Draw3D.xyz_cross(wB, 5f, Color.LightPink);
-            Draw3D.xyz_cross(wC, 5f, Color.LightPink);
-            Draw3D.xyz_cross(wD, 5f, Color.DeepPink);
-
-            var n = Vector3.Normalize(Vector3.Cross(wA-wB,wA-wC));
-            var c = ((wA+wB+wC+wD)/4);
-
-            Draw3D.line(c, c + n, Color.Red);
-
-            Draw3D.lines(Color.LightPink,
-                Vector3.Transform(A, world),
-                Vector3.Transform(B, world),
-                Vector3.Transform(C, world),
-                Vector3.Transform(D, world),
-                Vector3.Transform(A, world));
-
             Draw3D.cube(find_bounding_box(world), Color.Magenta);
+
+            Draw3D.fill_quad(world, A, B, C, D, Color.White, "zerocool_sharper");
+            Draw3D.line(Vector3.Transform(A, world), Vector3.Transform(C, world), Color.Pink);
         }
         public Vector3 support(Vector3 direction, Vector3 sweep) {
             if (sweep != Vector3.Zero) {
                 return Supports.Polyhedron(direction, A, B, C, D,
                     A + sweep, B + sweep, C + sweep, D + sweep);
             }
-            return Supports.Quad(direction, A, B, C, D);
+            //return Supports.Quad(direction, A, B, C, D);
+
+            return Supports.Polyhedron(direction, A, B, C, D,
+                A + (Vector3.Down * 0.01f), B + (Vector3.Down * 0.01f), C + (Vector3.Down * 0.01f), D + (Vector3.Down * 0.01f));
         }
     }
 }

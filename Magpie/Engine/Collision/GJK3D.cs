@@ -52,6 +52,9 @@ namespace Magpie.Engine.Collision {
         public Vector3 closest_A = Vector3.Zero;
         public Vector3 closest_B = Vector3.Zero;
 
+        public Vector3 sweep_A = Vector3.Zero;
+        public Vector3 sweep_B = Vector3.Zero;
+
         public simplex_stage stage = simplex_stage.empty;
 
         public Matrix A_transform;
@@ -436,9 +439,208 @@ namespace Magpie.Engine.Collision {
         }
     }
     public class GJK {
-        const int max_iterations = 20;
+        const int max_iterations = 35;
+        public static bool gjk_intersects_bool_only(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b, Vector3 sweep_a, Vector3 sweep_b) {
+            gjk_simplex simplex = new gjk_simplex();
 
-        public static collision_result gjk_intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b) {
+            Vector3 scale_a; Quaternion rot_a;
+            Vector3 scale_b; Quaternion rot_b;
+
+            w_a.Decompose(out scale_a, out rot_a, out _);
+            w_b.Decompose(out scale_b, out rot_b, out _);
+
+            simplex.A_transform = w_a;
+            simplex.B_transform = w_b;
+                        
+            simplex.sweep_A = sweep_a;
+            simplex.sweep_B = sweep_b;
+
+            simplex.A_transform_direction = Matrix.CreateFromQuaternion(rot_a);
+            simplex.B_transform_direction = Matrix.CreateFromQuaternion(rot_b);
+
+            //simplex.direction = w_b.Translation - w_a.Translation;
+            simplex.direction = Vector3.One;
+
+            simplex.add_new_point(
+                Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
+                Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
+
+            simplex.direction = simplex.AO;
+
+            int iteration = 1;
+
+            while (iteration < max_iterations) {
+                simplex.add_new_point(
+                    Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
+                    Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
+
+                simplex.iteration = iteration;
+
+                ///////////////////*** LINE ***////////////////////////////////////////// 
+                if (simplex.stage == simplex_stage.line) { 
+                    if (Vector3.Distance(simplex.A, simplex.B) <= Math3D.big_epsilon) {
+                        simplex.move_to_stage(spoint.B);
+                        return false;
+                    }
+
+                    if (CollisionHelper.line_closest_point(simplex.A, simplex.B, Vector3.Zero).Length() <= Math3D.big_epsilon)
+                        return true;
+                    
+
+                    //origin between A and B
+                    if (simplex.same_dir_as_AO(simplex.AB))
+                        simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+                    else
+                        simplex.direction = simplex.AO; simplex.move_to_stage(spoint.A);
+
+
+                    //////////////*** TRIANGLE ***/////////////////////////////////////////////// 
+                } else if (simplex.stage == simplex_stage.triangle) { 
+
+                    if (Vector3.Distance(simplex.A, simplex.B) <= Math3D.big_epsilon
+                        || Vector3.Distance(simplex.A, simplex.C) <= Math3D.big_epsilon) {
+                        simplex.move_to_stage(spoint.B, spoint.C);
+                        return false;
+                    }
+
+                    //On the ABC x AC plane, so origin could be closest to either AC or A
+                    if (simplex.same_dir_as_AO(Vector3.Cross(simplex.ABC, simplex.AC))) {
+                        if (simplex.same_dir_as_AO(simplex.AC)) {
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AC, simplex.AO), simplex.AC);
+                            simplex.move_to_stage(spoint.A, spoint.C);
+
+                        } else {
+                            if (simplex.same_dir_as_AO(simplex.AB)) {
+                                simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+                                simplex.move_to_stage(spoint.A, spoint.B);
+                            } else {
+                                simplex.direction = simplex.AO;
+                                simplex.move_to_stage(spoint.A);
+                            }
+                        }
+                    } else {
+                        //On the AB x ABC plane, so we're either on AB or A
+                        if (simplex.same_dir_as_AO(Vector3.Cross(simplex.AB, simplex.ABC))) {
+                            if (simplex.same_dir_as_AO(simplex.AB)) {
+                                simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+                                simplex.move_to_stage(spoint.A, spoint.B);
+                            } else {
+                                simplex.direction = simplex.AO;
+                                simplex.move_to_stage(spoint.A);
+                            }
+                        } else { // within plane
+                            if (CollisionHelper.triangle_closest_point(simplex.A, simplex.B, simplex.C, Vector3.Zero).Length() <= Math3D.big_epsilon)
+                                return true;                            
+
+                            if (simplex.same_dir_as_AO(simplex.ABC)) {
+                                simplex.direction = simplex.ABC;
+                            } else {
+                                simplex.direction = -simplex.ABC;
+                                simplex.move_to_stage(spoint.A, spoint.C, spoint.B);
+                            }
+                        }
+                    }
+
+
+                    ///////////////////////////////////////////////////////////
+                } else if (simplex.stage == simplex_stage.tetrahedron) { // *** TETRAHEDRON ***
+                    if (Vector3.Distance(simplex.A, simplex.B) <= Math3D.big_epsilon
+                        || Vector3.Distance(simplex.A, simplex.C) <= Math3D.big_epsilon
+                        || Vector3.Distance(simplex.A, simplex.D) <= Math3D.big_epsilon) {
+                        simplex.move_to_stage(spoint.B, spoint.C, spoint.D);
+                        return false;
+                    }
+
+                    bool ABC = simplex.same_dir_as_AO(simplex.ABC);
+                    bool ACD = simplex.same_dir_as_AO(simplex.ACD);
+                    bool ADB = simplex.same_dir_as_AO(simplex.ADB);
+                    bool BCD = simplex.same_dir_as_AO(simplex.BCD);
+
+                    if (ABC && ADB && ACD) {
+                        simplex.direction = simplex.AO;
+                        simplex.move_to_stage(spoint.A);
+                        //break; // ????????? 
+
+                    } else {
+                        if (ABC && ADB) {
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
+                            simplex.move_to_stage(spoint.A, spoint.B);
+                        } else if (ABC && ACD) {
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AC, simplex.AO), simplex.AC);
+                            simplex.move_to_stage(spoint.A, spoint.C);
+                        } else if (ACD && ADB) {
+                            simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AD, simplex.AO), simplex.AD);
+                            simplex.move_to_stage(spoint.A, spoint.D);
+                        } else { //face
+                            if (ABC) {
+                                simplex.direction = simplex.ABC; simplex.move_to_stage(spoint.A, spoint.B, spoint.C);
+                            } else if (ACD) {
+                                simplex.direction = simplex.ACD; simplex.move_to_stage(spoint.A, spoint.C, spoint.D);
+                            } else if (ADB) {
+                                simplex.direction = simplex.ADB; simplex.move_to_stage(spoint.A, spoint.D, spoint.B);
+                            } else {
+                                if (!ABC && !ACD && !ADB && !BCD) 
+                                    return true;                               
+
+                                return false;
+                            }
+                        }
+                    }
+                }
+                iteration++;
+            }
+
+            return false;
+        }
+
+
+        public static collision_result swept_gjk_intersects_with_halving(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b, Vector3 sweep_a, Vector3 sweep_b) {
+            collision_result result = gjk_intersects(shape_A, shape_B, w_a, w_b, sweep_a, sweep_b);
+            
+            if (!result.intersects || sweep_a == Vector3.Zero) return result;            
+
+
+            var sweep_dir_a = Vector3.Normalize(sweep_a);
+            var sweep_dist_a = sweep_a.Length();
+            var last_a = 0f;
+            var a_diff = Math.Abs(last_a - sweep_dist_a);
+            var iterations = 0;
+
+            var sweep_points = new List<Vector3>();
+            sweep_points.Add(w_a.Translation + sweep_a);
+
+
+            while (iterations < 35) {
+
+
+                if (result.intersects) {
+                    sweep_dist_a -= a_diff / 2f;
+                } else {
+                    sweep_dist_a += a_diff / 2f;
+                }
+
+                a_diff = Math.Abs(last_a - sweep_dist_a);
+                result = gjk_intersects(shape_A, shape_B, w_a, w_b, sweep_dir_a * sweep_dist_a, sweep_b);
+
+                sweep_points.Add(w_a.Translation + (sweep_dir_a * sweep_dist_a));
+
+                if (a_diff <= Math3D.epsilon) { break; }
+
+                last_a = sweep_dist_a;
+
+                iterations++;
+            }
+            //result.penetration += sweep_dist_a;
+            result.intersects = true;
+            result.sweep_points = sweep_points;
+            return result;
+        }
+
+
+        public static collision_result gjk_intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b) =>
+            gjk_intersects(shape_A, shape_B, w_a, w_b, Vector3.Zero, Vector3.Zero);
+        
+        public static collision_result gjk_intersects(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b, Vector3 sweep_a, Vector3 sweep_b) {
             collision_result result = new collision_result();
 
             gjk_simplex simplex = new gjk_simplex();
@@ -452,6 +654,11 @@ namespace Magpie.Engine.Collision {
             simplex.A_transform = w_a;
             simplex.B_transform = w_b;
 
+            if (sweep_a != Vector3.Zero)
+                simplex.sweep_A = sweep_a;
+
+            simplex.sweep_B = sweep_b;
+
             simplex.A_transform_direction = Matrix.CreateFromQuaternion(rot_a);
             simplex.B_transform_direction = Matrix.CreateFromQuaternion(rot_b);
 
@@ -459,8 +666,8 @@ namespace Magpie.Engine.Collision {
             simplex.direction = Vector3.One;
 
             simplex.add_new_point(
-                Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)),  Vector3.Zero), (w_a)),
-                Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), Vector3.Zero), (w_b)));
+                Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
+                Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
 
             simplex.supports[0].barycentric = 1f;
 
@@ -473,12 +680,10 @@ namespace Magpie.Engine.Collision {
 
             while (iteration < max_iterations) {
                 simplex.add_new_point(
-                    Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), Vector3.Zero), (w_a)),
-                    Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), Vector3.Zero), (w_b))
-                    );
+                    Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
+                    Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
 
                 simplex.iteration = iteration;
-
 
                 ///////////////////////////////////////////////////////////
                 if (simplex.stage == simplex_stage.line) { // *** LINE ***
@@ -516,6 +721,7 @@ namespace Magpie.Engine.Collision {
 
                     if (Vector3.Distance(simplex.A, simplex.B) <= Math3D.big_epsilon 
                         || Vector3.Distance(simplex.A, simplex.C) <= Math3D.big_epsilon) {
+                        //result.save_simplex(simplex, "fart");
                         simplex.move_to_stage(spoint.B, spoint.C);
                         gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);
                         break;
@@ -568,6 +774,8 @@ namespace Magpie.Engine.Collision {
                         } else { // within plane
                             if (CollisionHelper.triangle_closest_point(simplex.A, simplex.B, simplex.C, Vector3.Zero).Length() <= Math3D.big_epsilon) {
                                 result.intersects = true;
+                                //simplex.move_to_stage(spoint.B, spoint.C);
+                                result.save_simplex(ref simplex);
                                 gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);                               
                                 break;
                             }
@@ -669,9 +877,39 @@ namespace Magpie.Engine.Collision {
             }
 
             result.end_simplex = simplex;
-            if (result.intersects && simplex.stage == simplex_stage.tetrahedron) {
+            if (result.intersects) {
+                result.distance = 0;
+                if (simplex.stage == simplex_stage.tetrahedron)
+                    result.polytope = EPA3D.expand_polytope(shape_A, shape_B, ref simplex, ref result);
 
-                result.polytope = EPA3D.expand_polytope(shape_A, shape_B, ref simplex, ref result);
+                else if (simplex.stage == simplex_stage.triangle) {
+                    simplex.add_new_point(
+                        Vector3.Transform(shape_A.support(Vector3.Transform(simplex.ABC, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
+                        Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.ABC, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
+                   
+                    result.polytope = EPA3D.expand_polytope(shape_A, shape_B, ref simplex, ref result);
+
+                    if (result.polytope.failed) {
+                        simplex.add_new_point(
+                            Vector3.Transform(shape_A.support(Vector3.Transform(-simplex.ABC, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
+                            Vector3.Transform(shape_B.support(Vector3.Transform(simplex.ABC, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
+
+                        result.polytope = EPA3D.expand_polytope(shape_A, shape_B, ref simplex, ref result);
+
+                    }
+
+                } else if (simplex.stage == simplex_stage.line) {
+                    var dA = Vector3.Distance(Vector3.Zero, simplex.A);
+                    var dB = Vector3.Distance(Vector3.Zero, simplex.B);
+
+                    if (dA < dB ) {
+                        result.penetration_normal = Vector3.Normalize(simplex.A);
+                        result.penetration = dA;
+                    } else {
+                        result.penetration_normal = Vector3.Normalize(simplex.B);
+                        result.penetration = dB;
+                    }
+                }
             }
             return result;
         }

@@ -66,7 +66,7 @@ namespace Magpie.Engine.Collision {
             closest_A = Vector3.Zero;
             closest_B = Vector3.Zero;
         }
-
+        public List<Vector3> sweep_points = new List<Vector3>();
         public void draw(Vector3 world_pos) {
             if (simplex_list == null) return;
             if (simplex_list != null && draw_simplex > -1 && draw_simplex < simplex_list.Count) {
@@ -85,16 +85,15 @@ namespace Magpie.Engine.Collision {
                 //Draw3D.line(world_pos, world_pos + (simplex.direction) * 0.5f, Color.HotPink);
                 //Draw3D.arrow(world_pos + simplex.A, world_pos + simplex.B, 0.1f, Color.HotPink);
 
-                simplex.draw();
+                //simplex.draw();
 
-                Draw3D.xyz_cross(simplex.closest_A, 0.5f, Color.Red);
+                Draw3D.xyz_cross(simplex.closest_A, 0.5f, Color.GreenYellow);
                 Draw3D.xyz_cross(simplex.closest_B, 0.5f, Color.GreenYellow);
 
                 //Draw3D.line(simplex.closest_A, simplex.closest_B, Color.Red);
 
-                Draw3D.line(closest_A, closest_B, Color.Pink);
-                Draw3D.xyz_cross(closest_A, 0.2f, Color.HotPink);
-                Draw3D.xyz_cross(closest_B, 0.2f, Color.HotPink);
+                //if (polytope != null)
+                    //polytope.draw();
             }
             if (draw_all_supports && simplex_list.Count > 1 && draw_simplex <= simplex_list.Count - 1) {
                 int pc = 0;
@@ -127,9 +126,24 @@ namespace Magpie.Engine.Collision {
                 }
             }
 
-            if (polytope != null)
-                polytope.draw();
-            Draw3D.sprite_line(contact, contact + (penetration_normal * penetration), 0.02f, Color.Red);
+
+            Draw3D.line(closest_A, closest_B, Color.Pink);
+
+            Draw3D.xyz_cross(closest_A, 0.2f, Color.Red);
+            //Draw3D.xyz_cross(closest_B, 0.2f, Color.HotPink);
+
+            Draw3D.sprite_line(closest_A, closest_A + (penetration_normal * penetration), 0.02f, Color.Red);
+            Draw3D.sprite_line(closest_B, closest_B + (penetration_normal * penetration), 0.02f, Color.Green);
+            var a = 0;
+            foreach(var v in sweep_points) {
+                if (a == sweep_points.Count -1)
+                    Draw3D.cube(v, Vector3.One, Color.Blue, Matrix.Identity);
+                else Draw3D.cube(v, Vector3.One, Color.Red, Matrix.Identity);
+
+                Draw3D.xyz_cross(v, 5f, Color.GreenYellow);
+                a++;
+            }
+
         }
     }
 }

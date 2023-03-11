@@ -11,8 +11,6 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Magpie.Engine.WorldElements {
     public enum collision_type {
-        none,
-
         hitbox,
         hitbox_collection,
 
@@ -31,20 +29,6 @@ namespace Magpie.Engine.WorldElements {
         public BoundingBox find_bounding_box_swept(Matrix world, Vector3 sweep);
     }
 
-    public class dummy_collision : collision_interface {
-        public collision_type collision_type => collision_type.none;
-
-        public dummy_collision(Shape3D collision) {  }
-
-        public BoundingBox find_bounding_box(Matrix world) {
-            return new BoundingBox(Vector3.Zero, Vector3.Zero);
-        }
-        public BoundingBox find_bounding_box_swept(Matrix world, Vector3 sweep) {
-            return new BoundingBox(Vector3.Zero, Vector3.Zero);
-        }
-
-        public void draw(Matrix world) {}
-    }
 
     public class hitbox_collision : collision_interface {
         public collision_type collision_type => collision_type.hitbox;
@@ -161,24 +145,29 @@ namespace Magpie.Engine.WorldElements {
 
 
     public class collision_info {
-        public collision_interface hitbox = null;
+        //public collision_interface hitbox = null;
 
-        public bool dynamic = true;
+        public Shape3D movebox;
+
+        public bool dynamic = false;
         public bool enabled = true;        
         public bool gravity = true;
 
         public bool resting = false;
-        //public Vector3 
+        public Vector3[] contact_points = new Vector3[4];
 
 
         public collision_info(Shape3D shape) {
-            hitbox = new hitbox_collision(shape);
+            //hitbox = new hitbox_collision(shape);
+            movebox = shape;
         }
+
+        /*
         public collision_info(params Shape3D[] shape) {
-            hitbox = new hitbox_collection_collision(shape);
+            //hitbox = new hitbox_collection_collision(shape);
         }
         public collision_info(VertexBuffer vb, IndexBuffer ib) {
-            hitbox = new mesh_collision(new ModelCollision(vb, ib, -1, -1));
+            //hitbox = new mesh_collision(new ModelCollision(vb, ib, -1, -1));
         }
         public collision_info(string model_name) {
             load_hitbox_from_model(ContentHandler.resources[model_name].value_gfx);
@@ -196,7 +185,7 @@ namespace Magpie.Engine.WorldElements {
                 }                
             }
 
-            hitbox = new mesh_collection_collision(new ModelCollision[c]);
+            //hitbox = new mesh_collection_collision(new ModelCollision[c]);
 
             int m = 0;
             int mp = 0;
@@ -204,19 +193,20 @@ namespace Magpie.Engine.WorldElements {
             foreach (var mesh in model.Meshes) {
                 mp = 0;
                 foreach(var meshpart in mesh.MeshParts) {
+                    
                     ((mesh_collection_collision)hitbox).collision[c] = new ModelCollision(
                         meshpart.VertexBuffer,
                         meshpart.IndexBuffer,
                         m,mp);
-
+                    
                     mp++;
                 }
                 m++;
             }
-        }
-
+        }*/
         public void draw_move_shapes(Matrix world) {
-            hitbox.draw(world);            
+            //hitbox.draw(world);            
+            if (movebox != null) movebox.draw(world);
         }
 
         public void draw_extra_collisions() {

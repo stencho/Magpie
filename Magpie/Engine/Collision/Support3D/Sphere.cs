@@ -42,9 +42,9 @@ namespace Magpie.Engine.Collision.Support3D {
         }
 
         public Vector3 support(Vector3 direction, Vector3 sweep) {
-            //if (sweep != Vector3.Zero) {
-                //return Supports.Line(direction, P, P + sweep);
-            //}
+            if (sweep != Vector3.Zero) {
+                return Supports.Capsule(direction, P, P + sweep, radius);
+            }
             return P + (Vector3.Normalize(direction) * radius);
         }
     }

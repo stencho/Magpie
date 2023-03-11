@@ -1,4 +1,5 @@
-﻿using Magpie.Graphics;
+﻿using Magpie.Engine;
+using Magpie.Graphics;
 using Magpie.Graphics.UI;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Magpie.Engine {
+namespace Magpie {
     public static class Extensions {
         
 

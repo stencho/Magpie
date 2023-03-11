@@ -60,7 +60,7 @@ namespace Magpie.Graphics {
 
             CreateInPlace(gd, W, H, 1);
         }
-        public void change_resolution_super(GraphicsDevice gd, int W, int H, float super_res_scale) {
+        public void change_resolution(GraphicsDevice gd, int W, int H, float super_res_scale) {
             _width = W;
             _height = H;
 
@@ -88,8 +88,6 @@ namespace Magpie.Graphics {
             rt_diffuse = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
             rt_normal = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Vector4, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
             rt_depth = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.PlatformContents);
-            //TODO IMPLEMENT ALPHA TEST PASS
-            //THIS COULD BE USED ALONGSIDE LIGHT SHADERS TO GET FREE SHADOWS EVEN WITH POINT LIGHTS
             //rt_alpha = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Vector4, DepthFormat.Depth24Stencil8);
             rt_lighting = new RenderTarget2D(gd, (int)(width * res_scale), (int)(height * res_scale), false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PlatformContents);
 

@@ -13,13 +13,18 @@ namespace Magpie.Engine.Collision {
 
     public class polytope {       
         public struct epa_vert {
-            Vector3 P;
-            Vector3 support_A, support_B;
+            public Vector3 P;
+            public Vector3 support_A, support_B;
 
             public epa_vert(Vector3 support_A, Vector3 support_B) {                
                 this.support_A = support_A;
                 this.support_B = support_B;
                 P = support_A - support_B;
+            }
+            public epa_vert(Vector3 P, Vector3 support_A, Vector3 support_B) {
+                this.support_A = support_A;
+                this.support_B = support_B;
+                this.P = P; 
             }
         }
         public struct index_tri {
@@ -33,18 +38,18 @@ namespace Magpie.Engine.Collision {
                 C = c;
             }
         }
-        public Vector3 support_point = Vector3.Zero;
-        public Vector3 closest_facet = Vector3.Zero;
 
-        public List<Vector3> points = new List<Vector3>();
+        public List<epa_vert> points = new List<epa_vert>();
         public List<index_tri> triangle_indices = new List<index_tri>();
         public List<(int A, int B)> edge_indices = new List<(int A, int B)>();
 
+        public bool failed = false;
+
         Vector3 tri_normal(index_tri tri) {
-            return Vector3.Cross(points[tri.B] - points[tri.A], points[tri.C] - points[tri.A]);
+            return Vector3.Cross(points[tri.B].P - points[tri.A].P, points[tri.C].P - points[tri.A].P);
         }
         Vector3 tri_center(index_tri tri) {
-            return (points[tri.A] + points[tri.B] + points[tri.C] ) / 3;
+            return (points[tri.A].P + points[tri.B].P + points[tri.C].P) / 3;
         }
 
         public polytope copy() {
@@ -52,7 +57,6 @@ namespace Magpie.Engine.Collision {
             p.points = points;
             p.triangle_indices = triangle_indices;
             p.edge_indices = edge_indices;
-            p.support_point = support_point;
             return p;
         }
 
@@ -63,30 +67,42 @@ namespace Magpie.Engine.Collision {
 
             triangle_indices = new List<index_tri>();
             edge_indices = new List<(int A, int B)>();
-            points = new List<Vector3>();
+            points = new List<epa_vert>();
 
-            add_triangle(simplex.A, simplex.B, simplex.C);
-            add_triangle(simplex.A, simplex.C, simplex.D);
-            add_triangle(simplex.A, simplex.D, simplex.B);
-            add_triangle(simplex.C, simplex.B, simplex.D);
+            add_triangle(
+                new epa_vert(simplex.A, simplex.A_support.A_support, simplex.A_support.B_support) ,
+                new epa_vert(simplex.B, simplex.B_support.A_support, simplex.B_support.B_support) ,
+                new epa_vert(simplex.C, simplex.C_support.A_support, simplex.C_support.B_support));
+            add_triangle(
+                new epa_vert(simplex.A, simplex.A_support.A_support, simplex.A_support.B_support),
+                new epa_vert(simplex.C, simplex.C_support.A_support, simplex.C_support.B_support),
+                new epa_vert(simplex.D, simplex.D_support.A_support, simplex.D_support.B_support));
+            add_triangle(
+                new epa_vert(simplex.A, simplex.A_support.A_support, simplex.A_support.B_support),
+                new epa_vert(simplex.D, simplex.D_support.A_support, simplex.D_support.B_support),
+                new epa_vert(simplex.B, simplex.B_support.A_support, simplex.B_support.B_support));
+            add_triangle(
+                new epa_vert(simplex.C, simplex.C_support.A_support, simplex.C_support.B_support),
+                new epa_vert(simplex.B, simplex.B_support.A_support, simplex.B_support.B_support),
+                new epa_vert(simplex.D, simplex.D_support.A_support, simplex.D_support.B_support));
         }
-
-        int try_add(Vector3 P) {
-            for (int i = 0; i < points.Count; i++) {
-                if (P == points[i]) return i;
-            }
-
-            points.Add(P);
-            return points.Count - 1;
-        }
-
-        void add_triangle(Vector3 A, Vector3 B, Vector3 C) {
+        void add_triangle(epa_vert A, epa_vert B, epa_vert C) {
             var pa = try_add(A);
             var pb = try_add(B);
             var pc = try_add(C);
 
             triangle_indices.Add(new index_tri(pa, pb, pc, false));
         }
+
+        int try_add(epa_vert P) {
+            for (int i = 0; i < points.Count; i++) {
+                if (P.P == points[i].P) return i;
+            }
+
+            points.Add(P);
+            return points.Count - 1;
+        }
+
 
         void add_edge(int A, int B) {
             var c = edge_indices.Count;
@@ -100,9 +116,7 @@ namespace Magpie.Engine.Collision {
             edge_indices.Add((A, B));
         }
 
-        public void expand(Vector3 P, ref gjk_simplex simplex, ref collision_result result) {
-            support_point = P;
-
+        public void expand(epa_vert P, ref gjk_simplex simplex, ref collision_result result) {
 
             for (int i = 0; i < triangle_indices.Count; i++) {
                 var index = i;
@@ -110,7 +124,7 @@ namespace Magpie.Engine.Collision {
                 if (
                     Math3D.same_dir(
                         tri_normal(triangle_indices[index]),
-                        P - tri_center(triangle_indices[index]) )) {
+                        P.P - tri_center(triangle_indices[index]) )) {
                     add_edge(triangle_indices[index].A, triangle_indices[index].C);
                     add_edge(triangle_indices[index].C, triangle_indices[index].B);
                     add_edge(triangle_indices[index].B, triangle_indices[index].A);
@@ -138,24 +152,21 @@ namespace Magpie.Engine.Collision {
                 //Draw3D.fill_tri(Matrix.Identity, points[tri.A], points[tri.B], points[tri.C], Color.Red);
             }
             foreach (var tri in triangle_indices) {                
-                Draw3D.sprite_line(points[tri.A], points[tri.B], 0.02f, Color.Orange);
-                Draw3D.sprite_line(points[tri.A], points[tri.C], 0.02f, Color.Orange);
-                Draw3D.sprite_line(points[tri.C], points[tri.B], 0.02f, Color.Orange);
-                Draw3D.sprite_line(tri_center(tri), tri_center(tri) + tri_normal(tri), 0.02f, 
-                    
-                    Math3D.same_dir(tri_normal(tri), support_point - tri_center(tri)) ? Color.Orange : Color.Green);
+                Draw3D.sprite_line(points[tri.A].P, points[tri.B].P, 0.02f, Color.Orange);
+                Draw3D.sprite_line(points[tri.A].P, points[tri.C].P, 0.02f, Color.Orange);
+                Draw3D.sprite_line(points[tri.C].P, points[tri.B].P, 0.02f, Color.Orange);
+
             }
             foreach (var edge in edge_indices) {
-                Draw3D.sprite_line(points[edge.A], points[edge.B], 0.02f, Color.Red);
+                Draw3D.sprite_line(points[edge.A].P, points[edge.B].P, 0.02f, Color.Red);
             }
 
             foreach (var tri in triangle_indices) {
-                Draw3D.sprite_line(points[tri.A], points[tri.B], 0.02f, Color.Orange);
-                Draw3D.sprite_line(points[tri.A], points[tri.C], 0.02f, Color.Orange);
-                Draw3D.sprite_line(points[tri.C], points[tri.B], 0.02f, Color.Orange);
+                Draw3D.sprite_line(points[tri.A].P, points[tri.B].P, 0.02f, Color.Orange);
+                Draw3D.sprite_line(points[tri.A].P, points[tri.C].P, 0.02f, Color.Orange);
+                Draw3D.sprite_line(points[tri.C].P, points[tri.B].P, 0.02f, Color.Orange);
             }
-            Draw3D.xyz_cross(closest_facet, 2f, Color.Red);
-            Draw3D.xyz_cross(support_point, 2f, Color.MonoGameOrange);
+
 
         }
     }
@@ -189,9 +200,9 @@ namespace Magpie.Engine.Collision {
 
                 for (int i = 0; i < poly.triangle_indices.Count; i++) {
                     var v = CollisionHelper.triangle_closest_point_alternative(
-                        poly.points[poly.triangle_indices[i].A],
-                        poly.points[poly.triangle_indices[i].B],
-                        poly.points[poly.triangle_indices[i].C],
+                        poly.points[poly.triangle_indices[i].A].P,
+                        poly.points[poly.triangle_indices[i].B].P,
+                        poly.points[poly.triangle_indices[i].C].P,
                         Vector3.Zero
                         );
                     var d = v.Length();
@@ -202,20 +213,15 @@ namespace Magpie.Engine.Collision {
                     }
                 }
 
-                poly.closest_facet = closest_facet_point;
-
                 if (iterations > 0) {
                     if (Vector3.Distance(last_closest, closest_facet_point) < Math3D.big_epsilon) {
 
                         result.penetration = Vector3.Distance(closest_facet_point, Vector3.Zero);
-                        result.penetration_normal = Vector3.Normalize(closest_facet_point);
+                        result.penetration_normal = Vector3.Normalize(-closest_facet_point);
 
                         break;
                     }
                 }
-
-                //TODO STORE SUPPORT POINTS ALONGSIDE VERTS THEN USE BARYCENTRIC COORDS
-                //TO EXTRACT LOCAL SPACE CONTACT POINTS
 
                 last_closest = closest_facet_point;
                 var A = Vector3.Transform(
@@ -223,7 +229,7 @@ namespace Magpie.Engine.Collision {
                         Vector3.Transform(
                             closest_facet_point,
                             Matrix.Invert(simplex.A_transform_direction)),
-                        Vector3.Zero),
+                        simplex.sweep_A),
                     simplex.A_transform);
 
                 var B = Vector3.Transform(
@@ -231,20 +237,63 @@ namespace Magpie.Engine.Collision {
                         Vector3.Transform(
                             -closest_facet_point,
                             Matrix.Invert(simplex.B_transform_direction)),
-                        Vector3.Zero),
+                        simplex.sweep_B),
                     simplex.B_transform);
 
-                var support = A - B;
-
-                poly.expand(support, ref simplex, ref result);
+                poly.expand(new polytope.epa_vert(A, B), ref simplex, ref result);
 
                 
                 iterations++;
             }
 
             result.penetration = Vector3.Distance(closest_facet_point, Vector3.Zero);
-            result.penetration_normal = Vector3.Normalize(closest_facet_point);
-            result.contact = closest_facet_point;
+            result.penetration_normal = Vector3.Normalize(-closest_facet_point);
+
+            if (result.penetration_normal.contains_nan()) {
+                result.penetration_normal = Vector3.Zero;
+                result.penetration = 0f;
+            }
+
+
+            closest_facet_index = -1; closest = float.MaxValue;
+
+            for (int i = 0; i < poly.triangle_indices.Count; i++) {
+                var v = CollisionHelper.triangle_closest_point_alternative(
+                        poly.points[poly.triangle_indices[i].A].P,
+                        poly.points[poly.triangle_indices[i].B].P,
+                        poly.points[poly.triangle_indices[i].C].P,
+                        Vector3.Zero
+                        );
+                var d = v.Length();
+                if (d < closest) {
+                    closest = d;
+                    closest_facet_index = i;
+                }
+            }
+            
+            if (poly.triangle_indices.Count == 0 || closest_facet_index == -1) { poly.failed = true; return poly; }
+            
+            var closest_tri = poly.triangle_indices[closest_facet_index];
+
+            var uvw = CollisionHelper.triangle_barycentric(
+                Vector3.Zero,
+                (poly.points[closest_tri.A].P),
+                (poly.points[closest_tri.B].P),
+                (poly.points[closest_tri.C].P));
+
+
+            var contact_A = 
+                ((poly.points[closest_tri.A].support_A) * uvw.u +
+                 (poly.points[closest_tri.B].support_A) * uvw.v + 
+                 (poly.points[closest_tri.C].support_A) * uvw.w);
+
+            var contact_B =
+                ((poly.points[closest_tri.A].support_B) * uvw.u +
+                 (poly.points[closest_tri.B].support_B) * uvw.v +
+                 (poly.points[closest_tri.C].support_B) * uvw.w);
+
+            result.closest_A = contact_A;
+            result.closest_B = contact_B;
             return poly;
         }
     }
