@@ -106,6 +106,7 @@ namespace MagpieBuild.TestActors {
         float velocity = 0f;
         Vector3 saved_pos = Vector3.Zero;
         Vector3 last_mov = Vector3.Zero;
+
         public override void update() {
             Vector3 mv = Vector3.Zero;
 
@@ -129,7 +130,7 @@ namespace MagpieBuild.TestActors {
             }
 
             if (mv != Vector3.Zero)
-                wants_movement += (Vector3.Normalize(mv) * (13f * (binds.pressed("shift") ? 50f : 1f)) * Clock.internal_frame_time_delta);
+                wants_movement += (Vector3.Normalize(mv) * (13f * (binds.pressed("shift") ? 150f : 1f)) * Clock.internal_frame_time_delta);
 
             //wants_movement += Vector3.Down * 9.81f * Clock.internal_frame_time_delta;
 
@@ -172,7 +173,7 @@ namespace MagpieBuild.TestActors {
                     var wb = EngineState.world.current_map.game_objects[gjkid].world;
 
                     sweep_test = GJK.swept_gjk_intersects_with_halving(me, ts, wa, wb,
-                        Vector3.Down * 13f * 135f * Clock.internal_frame_time_delta, Vector3.Zero);
+                       ( Vector3.Down + Vector3.Left + Vector3.Forward) * 13f * 135f * Clock.internal_frame_time_delta, Vector3.Zero);
 
                     if (binds.pressed("shift")) {
                         position = Vector3.Left * 5f + (Vector3.Up * 5f);

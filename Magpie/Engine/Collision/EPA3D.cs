@@ -249,6 +249,12 @@ namespace Magpie.Engine.Collision {
             result.penetration = Vector3.Distance(closest_facet_point, Vector3.Zero);
             result.penetration_normal = Vector3.Normalize(-closest_facet_point);
 
+            var basis_tangents = compute_basis(result.penetration_normal);
+            
+            result.penetration_tangent_A = basis_tangents.A;
+            result.penetration_tangent_B = basis_tangents.B;
+
+
             if (result.penetration_normal.contains_nan()) {
                 result.penetration_normal = Vector3.Zero;
                 result.penetration = 0f;
@@ -294,7 +300,30 @@ namespace Magpie.Engine.Collision {
 
             result.closest_A = contact_A;
             result.closest_B = contact_B;
+
+
+
             return poly;
+        }
+
+        static (Vector3 A, Vector3 B) compute_basis(Vector3 normal) {
+            var x = MathF.Abs(normal.X);
+            var y = MathF.Abs(normal.Y);
+            var z = MathF.Abs(normal.Z);
+
+            var a = Vector3.Zero;
+            var b = Vector3.Zero;
+
+            if (x >= 0.57735f) {
+                a = new Vector3(y,-x,0f);
+            } else {
+                a = new Vector3(0f, z, -y);
+            }
+
+            a.Normalize();
+            b = Vector3.Cross(normal, a);
+
+            return (a, b);
         }
     }
 }

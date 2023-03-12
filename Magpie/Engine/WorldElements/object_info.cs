@@ -84,7 +84,7 @@ namespace Magpie.Engine.WorldElements {
         public BoundingBox bounding_box() {
             if (collision != null) {
                 if (collision.dynamic) {
-                    return collision.movebox.find_bounding_box(world);
+                    return collision.movebox.sweep_bounding_box(world, wants_movement);
                 } else {
                     return collision.movebox.find_bounding_box(world);
                 }

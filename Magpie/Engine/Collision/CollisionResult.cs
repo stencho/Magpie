@@ -24,9 +24,11 @@ namespace Magpie.Engine.Collision {
 
         public float penetration;
         public Vector3 penetration_normal;
+        public Vector3 penetration_tangent_A;
+        public Vector3 penetration_tangent_B;
 
         public bool intersects;
-
+        public bool hit => intersects;
         public gjk_simplex end_simplex;
         public List<gjk_simplex> simplex_list = new List<gjk_simplex>();
 
@@ -66,7 +68,9 @@ namespace Magpie.Engine.Collision {
             closest_A = Vector3.Zero;
             closest_B = Vector3.Zero;
         }
-        public List<Vector3> sweep_points = new List<Vector3>();
+        public volatile List<Vector3> sweep_points = new List<Vector3>();
+        public Vector3 sweep_end = Vector3.Zero;
+
         public void draw(Vector3 world_pos) {
             if (simplex_list == null) return;
             if (simplex_list != null && draw_simplex > -1 && draw_simplex < simplex_list.Count) {
@@ -95,55 +99,44 @@ namespace Magpie.Engine.Collision {
                 //if (polytope != null)
                     //polytope.draw();
             }
-            if (draw_all_supports && simplex_list.Count > 1 && draw_simplex <= simplex_list.Count - 1) {
-                int pc = 0;
-                for (int ci = 0; ci < simplex_list.Count; ci++) {
-                    gjk_simplex s = simplex_list[ci];
-                    switch (s.stage) {
-                        case simplex_stage.line: pc += 2; break;
-                        case simplex_stage.triangle: pc += 3; break;
-                        case simplex_stage.tetrahedron: pc += 3; break;
-                    }
-                }
-                float col_multi = 0f;
-                for (int i = 0; i < draw_simplex; i++) {
-                    gjk_simplex s = simplex_list[i];
-
-                    switch (s.stage) {
-                        case simplex_stage.line:
-                            Draw3D.line(s.supports[s.A_index].A_support, s.supports[s.B_index].A_support, Color.ForestGreen);
-                            Draw3D.line(s.supports[s.A_index].B_support, s.supports[s.B_index].B_support, Color.ForestGreen);
-                            break;
-                        case simplex_stage.triangle:
-                            Draw3D.lines(Color.ForestGreen, s.supports[s.A_index].A_support, s.supports[s.B_index].A_support, s.supports[s.C_index].A_support);
-                            Draw3D.lines(Color.ForestGreen, s.supports[s.A_index].B_support, s.supports[s.B_index].B_support, s.supports[s.C_index].B_support);
-                            break;
-                        case simplex_stage.tetrahedron:
-                            Draw3D.lines(Color.ForestGreen, s.supports[s.A_index].A_support, s.supports[s.B_index].A_support, s.supports[s.C_index].A_support, s.supports[s.D_index].A_support);
-                            Draw3D.lines(Color.ForestGreen, s.supports[s.A_index].B_support, s.supports[s.B_index].B_support, s.supports[s.C_index].B_support, s.supports[s.D_index].B_support);
-                            break;
-                    }
-                }
-            }
 
 
             Draw3D.line(closest_A, closest_B, Color.Pink);
 
-            Draw3D.xyz_cross(closest_A, 0.2f, Color.Red);
-            //Draw3D.xyz_cross(closest_B, 0.2f, Color.HotPink);
+            Draw3D.xyz_cross(closest_A, 10f, Color.Red);
+            Draw3D.xyz_cross(closest_B, 10f, Color.HotPink);
 
             Draw3D.sprite_line(closest_A, closest_A + (penetration_normal * penetration), 0.02f, Color.Red);
             Draw3D.sprite_line(closest_B, closest_B + (penetration_normal * penetration), 0.02f, Color.Green);
-            var a = 0;
-            foreach(var v in sweep_points) {
-                if (a == sweep_points.Count -1)
-                    Draw3D.cube(v, Vector3.One, Color.Blue, Matrix.Identity);
-                else Draw3D.cube(v, Vector3.One, Color.Red, Matrix.Identity);
+            Draw3D.sprite_line(closest_A, closest_A + (penetration_tangent_A*0.5f), 0.04f, Color.Purple);
+            Draw3D.sprite_line(closest_A, closest_A + (penetration_tangent_B * 0.5f), 0.04f, Color.HotPink);
 
-                Draw3D.xyz_cross(v, 5f, Color.GreenYellow);
-                a++;
+
+
+            lock (sweep_points) {
+                var a = 0;
+                foreach (var v in sweep_points) {
+                    Draw3D.cube(v, Vector3.One, Color.Red, Matrix.Identity);
+
+                    Draw3D.xyz_cross(v, 5f, Color.GreenYellow);
+                    a++;
+                }
+                if (sweep_points.Count > 0) {
+                    Draw3D.cube(Vector3.Zero, Vector3.One, Color.Blue, 
+                        end_simplex.A_transform_direction * Matrix.CreateTranslation(sweep_points[0]));
+
+                    Draw3D.sprite_line(sweep_points[0],
+                        sweep_points[sweep_points.Count - 1], 0.04f, Color.Purple);
+                    Draw3D.sprite_line(end_simplex.A_transform.Translation,
+                        sweep_points[0], 0.04f, Color.HotPink);
+
+
+                    Draw3D.cube(Vector3.Zero, Vector3.One, Color.Blue, 
+                        end_simplex.A_transform_direction * Matrix.CreateTranslation(sweep_points[sweep_points.Count - 1]));
+
+
+                }
             }
-
         }
     }
 }

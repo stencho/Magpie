@@ -62,11 +62,21 @@ namespace Magpie.Engine.Stages {
         public void do_broad_phase() {
 
             foreach (var obj in game_objects.Keys) {
-                
+                if (game_objects[obj].collision != null && game_objects[obj].collision.dynamic) {
+
                     game_objects[obj].pre_update();
                     game_objects[obj].update();
-                
+                }
             }
+
+            foreach (var obj in game_objects.Keys) {
+                if (game_objects[obj].collision == null || !game_objects[obj].collision.dynamic) {
+
+                    game_objects[obj].pre_update();
+                    game_objects[obj].update();
+                }
+            }
+
             foreach (var obj in game_objects.Keys) {
                 if (game_objects[obj].collision != null && game_objects[obj].collision.dynamic) {
 
@@ -96,17 +106,17 @@ namespace Magpie.Engine.Stages {
 
                             if (result.intersects) {
                                 var p = result.penetration * Vector3.Normalize(result.penetration_normal);
-                                var dist = result.end_simplex.sweep_A.Length();
+                                var dist = result.sweep_end.Length();
 
 
                                 if (dist < shortest_sweep.Length()) {
-                                    shortest_sweep = Vector3.Normalize(game_objects[obj].wants_movement) * dist;
-                                    game_objects[obj].wants_movement = shortest_sweep;
+                                    shortest_sweep = result.sweep_end;
+                                    game_objects[obj].wants_movement = result.sweep_end;
                                     shortest_hit = result;
                                     shortest_id = obj;
                                 }
                                 if (!p.contains_nan() && p != Vector3.Zero) {
-                                    //game_objects[obj].wants_movement += p;
+                                    game_objects[obj].wants_movement += p;
 
                                 }
                             }
@@ -118,7 +128,7 @@ namespace Magpie.Engine.Stages {
                         if (!p.contains_nan() && p != Vector3.Zero) {
                             //wants_movement -= gjk_targets[shortest_id].end_simplex.sweep_A;
                             //wants_movement += p ;
-                            game_objects[obj].wants_movement = shortest_sweep + p;
+                            game_objects[obj].wants_movement = shortest_hit.sweep_end;
                         }
                     }
 

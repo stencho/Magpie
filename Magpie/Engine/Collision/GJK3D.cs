@@ -462,7 +462,11 @@ namespace Magpie.Engine.Collision {
             simplex.direction = Vector3.One;
 
             simplex.add_new_point(
-                Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
+                Vector3.Transform(
+                    shape_A.support(
+                        Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)),
+                        Vector3.Transform(sweep_a, Matrix.Invert(simplex.A_transform_direction))),
+                    w_a),
                 Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
 
             simplex.direction = simplex.AO;
@@ -471,8 +475,12 @@ namespace Magpie.Engine.Collision {
 
             while (iteration < max_iterations) {
                 simplex.add_new_point(
-                    Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
-                    Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
+                    Vector3.Transform(
+                        shape_A.support(
+                            Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)),
+                            Vector3.Transform(sweep_a, Matrix.Invert(simplex.A_transform_direction))),
+                        w_a),
+                        Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
 
                 simplex.iteration = iteration;
 
@@ -485,13 +493,15 @@ namespace Magpie.Engine.Collision {
 
                     if (CollisionHelper.line_closest_point(simplex.A, simplex.B, Vector3.Zero).Length() <= Math3D.big_epsilon)
                         return true;
-                    
+
 
                     //origin between A and B
                     if (simplex.same_dir_as_AO(simplex.AB))
                         simplex.direction = Vector3.Cross(Vector3.Cross(simplex.AB, simplex.AO), simplex.AB);
-                    else
-                        simplex.direction = simplex.AO; simplex.move_to_stage(spoint.A);
+                    else {
+                        simplex.direction = simplex.AO;
+                        simplex.move_to_stage(spoint.A);
+                    }
 
 
                     //////////////*** TRIANGLE ***/////////////////////////////////////////////// 
@@ -609,29 +619,37 @@ namespace Magpie.Engine.Collision {
             var sweep_points = new List<Vector3>();
             sweep_points.Add(w_a.Translation + sweep_a);
 
+            bool hit = true;
 
-            while (iterations < 35) {
-
-
-                if (result.intersects) {
+            while (iterations < 8 || !hit) {
+                if (hit) {
                     sweep_dist_a -= a_diff / 2f;
                 } else {
                     sweep_dist_a += a_diff / 2f;
                 }
 
                 a_diff = Math.Abs(last_a - sweep_dist_a);
-                result = gjk_intersects(shape_A, shape_B, w_a, w_b, sweep_dir_a * sweep_dist_a, sweep_b);
+                hit = gjk_intersects_bool_only(shape_A, shape_B, w_a, w_b, sweep_dir_a * sweep_dist_a, sweep_b);
 
                 sweep_points.Add(w_a.Translation + (sweep_dir_a * sweep_dist_a));
 
-                if (a_diff <= Math3D.epsilon) { break; }
+                if (a_diff <= Math3D.big_epsilon) { break; }
 
                 last_a = sweep_dist_a;
 
                 iterations++;
             }
             //result.penetration += sweep_dist_a;
-            result.intersects = true;
+
+            result = gjk_intersects(shape_A, shape_B, w_a, w_b, sweep_dir_a * sweep_dist_a, sweep_b);
+            var st = 1-(sweep_dist_a / sweep_a.Length());
+            var pd = CollisionHelper.project_direction_onto_plane(sweep_a, 
+               result.penetration_tangent_A, 
+               result.penetration_tangent_B);
+            var cs = (sweep_a * sweep_dist_a);
+            result.sweep_end = sweep_a - ((pd * st)) + (result.penetration_normal * result.penetration);
+            sweep_points.Add(w_a.Translation + result.sweep_end);
+
             result.sweep_points = sweep_points;
             return result;
         }
@@ -666,7 +684,11 @@ namespace Magpie.Engine.Collision {
             simplex.direction = Vector3.One;
 
             simplex.add_new_point(
-                Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
+                Vector3.Transform(
+                    shape_A.support(
+                        Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), 
+                        Vector3.Transform(sweep_a, Matrix.Invert(simplex.A_transform_direction))), 
+                    w_a),
                 Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
 
             simplex.supports[0].barycentric = 1f;
@@ -680,8 +702,12 @@ namespace Magpie.Engine.Collision {
 
             while (iteration < max_iterations) {
                 simplex.add_new_point(
-                    Vector3.Transform(shape_A.support(Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)), sweep_a), w_a),
-                    Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
+                    Vector3.Transform(
+                        shape_A.support(
+                            Vector3.Transform(simplex.direction, Matrix.Invert(simplex.A_transform_direction)),
+                            Vector3.Transform(sweep_a, Matrix.Invert(simplex.A_transform_direction))),
+                        w_a),
+                        Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
 
                 simplex.iteration = iteration;
 

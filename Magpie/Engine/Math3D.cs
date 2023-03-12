@@ -456,6 +456,13 @@ namespace Magpie.Engine {
             return outp;
         }
 
+
+        public static Vector3 project_direction_onto_plane(Vector3 P, Vector3 AB, Vector3 AC) {
+            var n = Vector3.Cross(Vector3.Normalize(AB),Vector3.Normalize(AC));
+            var d = Vector3.Dot(P,n);
+            return d * n;
+        }
+
         public static Vector3 closest_point_in_list(Vector3 p, params Vector3[] points) {
             float closest = float.MaxValue;
             int closest_index = -1;

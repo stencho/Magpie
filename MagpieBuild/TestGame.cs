@@ -179,7 +179,9 @@ namespace MagpieBuild
             var rcubeid = world.current_map.add_object(new object_info(Vector3.Right * 8, new render_info_model("cube", "zerocool_sharper"), new collision_info(new Cube(1f))));
             world.current_map.game_objects[rcubeid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
 
-            move_id = world.current_map.add_object(new gjkTestActor(Vector3.Left * 5f + (Vector3.Up * 5f), new render_info_model("cube", "zerocool_sharper"), new collision_info(
+            move_id = world.current_map.add_object(new gjkTestActor(Vector3.Left * 5f + (Vector3.Up * 5f), 
+                new render_info_model("cube", "zerocool_sharper"), 
+                new collision_info(
                 new Cube(1f)
                 //new Sphere(1f)
                 //new Capsule(1.85f,1f)
@@ -197,8 +199,8 @@ namespace MagpieBuild
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
-                RNG.rng_v3_neg_one_to_one)
-                */)));
+                RNG.rng_v3_neg_one_to_one)*/
+                )));
 
             //world.current_map.game_objects[moveid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
             //new collision_info(new Triangle(Vector3.Right + Vector3.Forward, Vector3.Up, Vector3.Left + Vector3.Down))));
