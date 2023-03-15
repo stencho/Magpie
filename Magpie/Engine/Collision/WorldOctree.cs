@@ -16,22 +16,24 @@ namespace Magpie.Engine.Collision {
 
 
     public class DynamicOctree {
-        public float base_node_size = 500f;
-        public Dictionary<long, DynamicNode> base_nodes = new Dictionary<long, DynamicNode>();
+        public float base_node_size = 100f;
+        public volatile Dictionary<long, DynamicNode> base_nodes = new Dictionary<long, DynamicNode>();
         public int object_total = 0;
         public void draw() {
-            foreach (long node_id in base_nodes.Keys) {
-                StringBuilder sb = new StringBuilder();
-                foreach(var a in base_nodes[node_id].values.Values) {
-                    if (EngineState.world.current_map.game_objects[a.id].collision != null)
-                    sb.Append($"{a.id.ToString()} {EngineState.world.current_map.game_objects[a.id].collision.movebox.shape.ToString()}\n");
-                }
-                Draw3D.text_3D(EngineState.spritebatch, 
-                    $"ID {node_id.ToString()}\n{base_nodes[node_id].values.Count.ToString()} objects\n{sb.ToString()}" , 
-                    "pf", base_nodes[node_id].bounds.Min + ((base_nodes[node_id].bounds.Max - base_nodes[node_id].bounds.Min) / 2), -EngineState.camera.direction, 15f, Color.Black);
+            lock (base_nodes) {
+                foreach (long node_id in base_nodes.Keys) {
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var a in base_nodes[node_id].values.Values) {
+                        if (EngineState.world.current_map.game_objects[a.id].collision != null)
+                            sb.Append($"{a.id.ToString()} {EngineState.world.current_map.game_objects[a.id].collision.movebox.shape.ToString()}\n");
+                    }
+                    Draw3D.text_3D(EngineState.spritebatch,
+                        $"ID {node_id.ToString()}\n{base_nodes[node_id].values.Count.ToString()} objects\n{sb.ToString()}",
+                        "pf", base_nodes[node_id].bounds.Min + ((base_nodes[node_id].bounds.Max - base_nodes[node_id].bounds.Min) / 2), -EngineState.camera.direction, 15f, Color.Black);
 
-                base_nodes[node_id].draw();
-                Draw3D.cube(base_nodes[node_id].bounds, Color.Red);
+                    base_nodes[node_id].draw();
+                    Draw3D.cube(base_nodes[node_id].bounds, Color.Red);
+                }
             }
         }
 
@@ -196,7 +198,24 @@ namespace Magpie.Engine.Collision {
 
             var node_id = create_node_id(X,Y,Z);
             base_nodes.Add(node_id, new DynamicNode(null, min, max));
+            base_nodes[node_id].subdivide();
+
+            //subdivide_all(base_nodes[node_id].nodes, 1);
+
             return node_id;
+        }
+        public void subdivide_all(DynamicNode[,,] nodes, int depth) {
+            foreach (DynamicNode node in nodes) {
+                if (!node.subdivided) node.subdivide();
+                if (depth > 0) subdivide_all(node.nodes, depth, 1);
+            }
+        }
+
+        internal void subdivide_all(DynamicNode[,,] nodes, int depth, int current_depth = 0) {
+            foreach (DynamicNode node in nodes) {
+                if (!node.subdivided) node.subdivide();
+                if (depth > current_depth) subdivide_all(node.nodes, depth, current_depth + 1);
+            }
         }
 
     }
@@ -235,8 +254,10 @@ namespace Magpie.Engine.Collision {
                     for (byte y = 0; y < 2; y++) {
                         for (byte x = 0; x < 2; x++) {
                             if (nodes[x,y,z].bounds.Contains(pos) != ContainmentType.Disjoint) {
-                                values.Add(object_id, new octree_value() { id = object_id, next_subdiv_x = x, next_subdiv_y = y, next_subdiv_z = z });
-                                nodes[x,y,z].add_value(object_id);
+                                if (!values.ContainsKey(object_id))
+                                    values.Add(object_id, new octree_value() { id = object_id, next_subdiv_x = x, next_subdiv_y = y, next_subdiv_z = z });
+                                if (!nodes[x, y, z].values.ContainsKey(object_id))
+                                    nodes[x,y,z].add_value(object_id);
                                 goto hit;
                             }
                         }
@@ -257,8 +278,10 @@ namespace Magpie.Engine.Collision {
                     for (byte y = 0; y < 2; y++) {
                         for (byte x = 0; x < 2; x++) {
                             if (nodes[x, y, z].bounds.Contains(bb) != ContainmentType.Disjoint) {
-                                values.Add(object_id, new octree_value() { id = object_id, next_subdiv_x = x, next_subdiv_y = y, next_subdiv_z = z });
-                                nodes[x, y, z].add_value(object_id, bb);
+                                if (!values.ContainsKey(object_id))
+                                    values.Add(object_id, new octree_value() { id = object_id, next_subdiv_x = x, next_subdiv_y = y, next_subdiv_z = z });
+                                if (!nodes[x, y, z].values.ContainsKey(object_id))
+                                    nodes[x, y, z].add_value(object_id, bb);
                             }
                         }
                     }

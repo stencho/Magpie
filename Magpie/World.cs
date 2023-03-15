@@ -1,6 +1,7 @@
 ﻿using Magpie.Engine;
 using Magpie.Engine.Brushes;
 using Magpie.Engine.Collision;
+using Magpie.Engine.Collision.Solver;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Engine.Stages;
 using Magpie.Engine.WorldElements;
@@ -91,6 +92,8 @@ namespace Magpie {
 
         public static volatile frame_probe internal_frame_probe = new frame_probe();
 
+        public static CollisionSolver solver = new CollisionSolver();
+
         private void do_world_update() {            
             while (EngineState.running) {
                 internal_frame_probe.start_of_frame();
@@ -109,7 +112,21 @@ namespace Magpie {
 
                 internal_frame_probe.set("update");
                 lock (current_map) {
-                    current_map.do_broad_phase();
+                    foreach (var obj in current_map.game_objects.Keys) {
+                        current_map.game_objects[obj].pre_update();
+                    }
+                        //while (EngineState.drawing) {}
+                    foreach (var obj in current_map.game_objects.Keys) {
+                            current_map.game_objects[obj].update();
+                        
+                    }
+
+                    current_map.do_spawn_queue();
+
+                        solver.solve();
+
+                    //current_map.test_solve();
+
                     /*
                     foreach (int oi in current_map.game_objects.Keys) {
 

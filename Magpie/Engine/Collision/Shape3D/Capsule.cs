@@ -78,7 +78,7 @@ namespace Magpie.Engine.Collision.Support3D {
             //Draw3D.cube(find_bounding_box(), Color.MonoGameOrange, EngineState.camera.view, EngineState.camera.projection);
             BoundingBox bb = find_bounding_box(world);
 
-            Draw3D.cube(bb, Color.Red);
+            //Draw3D.cube(bb, Color.Red);
 
         }
         public Vector3 support(Vector3 direction, Vector3 sweep) {

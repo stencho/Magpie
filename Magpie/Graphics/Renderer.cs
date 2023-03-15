@@ -50,41 +50,42 @@ namespace Magpie.Graphics {
             visible_lights.Clear();
             visible.Clear();
 
-            foreach (var o in map.game_objects) {
-                if (o.Value.in_frustum(camera.frustum)) {
-                    visible.Add(o.Key);
-                }
+            lock (map.game_objects) {
+                foreach (var o in map.game_objects) {
+                    if (o.Value.in_frustum(camera.frustum)) {
+                        visible.Add(o.Key);
+                    }
 
-                if (o.Value.lights != null) {
-                    for (int i = 0; i < o.Value.lights.Length; i++) {
-                        light l = o.Value.lights[i];
-                        switch (l.type) {
-                            case LightType.SPOT:
-                                update_spot_light(ref o.Value.lights[i], camera);
+                    if (o.Value.lights != null) {
+                        for (int i = 0; i < o.Value.lights.Length; i++) {
+                            light l = o.Value.lights[i];
+                            switch (l.type) {
+                                case LightType.SPOT:
+                                    update_spot_light(ref o.Value.lights[i], camera);
 
-                                if (l.spot_info.bounds.Intersects(camera.frustum)) {
-                                    visible_lights.Add(l);
+                                    if (l.spot_info.bounds.Intersects(camera.frustum)) {
+                                        visible_lights.Add(l);
 
-                                    l.spot_info.visible.Clear();
-                                    foreach (int k in map.game_objects.Keys) {
-                                        if (map.game_objects[k].in_frustum(l.spot_info.bounds)) {
-                                            l.spot_info.visible.Add(k);
+                                        l.spot_info.visible.Clear();
+                                        foreach (int k in map.game_objects.Keys) {
+                                            if (map.game_objects[k].in_frustum(l.spot_info.bounds)) {
+                                                l.spot_info.visible.Add(k);
+                                            }
                                         }
                                     }
-                                }
-                                break;
-                            case LightType.POINT:
-                                update_point_light(ref o.Value.lights[i], camera);
+                                    break;
+                                case LightType.POINT:
+                                    update_point_light(ref o.Value.lights[i], camera);
 
-                                if (camera.frustum.Intersects(l.point_info.bounds)) {
-                                    visible_lights.Add(l);
-                                }
-                                break;
+                                    if (camera.frustum.Intersects(l.point_info.bounds)) {
+                                        visible_lights.Add(l);
+                                    }
+                                    break;
+                            }
                         }
                     }
                 }
             }
-
         }
 
 

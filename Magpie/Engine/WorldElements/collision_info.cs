@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Magpie.Engine.Collision;
+using Magpie.Engine.Collision.Solver;
 using Magpie.Engine.Collision.Support3D;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -148,18 +149,17 @@ namespace Magpie.Engine.WorldElements {
         //public collision_interface hitbox = null;
 
         public Shape3D movebox;
-
-        public bool dynamic = false;
-        public bool enabled = true;        
-        public bool gravity = true;
+        public solve_result solve;
 
         public bool resting = false;
-        public Vector3[] contact_points = new Vector3[4];
+
+        public volatile List<contact_point> contact_points = new List<contact_point>();
 
 
         public collision_info(Shape3D shape) {
             //hitbox = new hitbox_collision(shape);
             movebox = shape;
+            solve = new solve_result();            
         }
 
         /*

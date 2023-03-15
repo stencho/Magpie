@@ -606,22 +606,35 @@ namespace Magpie.Engine.Collision {
 
         public static collision_result swept_gjk_intersects_with_halving(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b, Vector3 sweep_a, Vector3 sweep_b) {
             collision_result result = gjk_intersects(shape_A, shape_B, w_a, w_b, sweep_a, sweep_b);
-            
-            if (!result.intersects || sweep_a == Vector3.Zero) return result;            
+            /*
+            result.sweep_end = sweep_a;
+            if (result.hit && result.penetration > Math3D.epsilon) {
+                result.sweep_end += (result.penetration_normal * result.penetration);
+            }
+
+            result.sweep_slide = Vector3.Zero;
 
 
+            if (!result.hit || result.penetration <= Math3D.epsilon) {
+
+                sweep_points.Add(w_a.Translation + sweep_a);
+                sweep_points.Add(w_a.Translation + result.sweep_end);
+                result.sweep_points = sweep_points;
+                return result;
+            }
+            */
+            var sweep_points = new List<Vector3>();
+            sweep_points.Add(w_a.Translation + sweep_a);
             var sweep_dir_a = Vector3.Normalize(sweep_a);
             var sweep_dist_a = sweep_a.Length();
             var last_a = 0f;
             var a_diff = Math.Abs(last_a - sweep_dist_a);
             var iterations = 0;
 
-            var sweep_points = new List<Vector3>();
-            sweep_points.Add(w_a.Translation + sweep_a);
 
             bool hit = true;
 
-            while (iterations < 8 || !hit) {
+            while (iterations < 12 || !hit) {
                 if (hit) {
                     sweep_dist_a -= a_diff / 2f;
                 } else {
@@ -633,7 +646,7 @@ namespace Magpie.Engine.Collision {
 
                 sweep_points.Add(w_a.Translation + (sweep_dir_a * sweep_dist_a));
 
-                if (a_diff <= Math3D.big_epsilon) { break; }
+                if (a_diff / 2f <= Math3D.epsilon) { break; }
 
                 last_a = sweep_dist_a;
 
@@ -642,14 +655,27 @@ namespace Magpie.Engine.Collision {
             //result.penetration += sweep_dist_a;
 
             result = gjk_intersects(shape_A, shape_B, w_a, w_b, sweep_dir_a * sweep_dist_a, sweep_b);
+
             var st = 1-(sweep_dist_a / sweep_a.Length());
             var pd = CollisionHelper.project_direction_onto_plane(sweep_a, 
                result.penetration_tangent_A, 
                result.penetration_tangent_B);
-            var cs = (sweep_a * sweep_dist_a);
-            result.sweep_end = sweep_a - ((pd * st)) + (result.penetration_normal * result.penetration);
-            sweep_points.Add(w_a.Translation + result.sweep_end);
+            var cs = (sweep_dir_a * sweep_dist_a);
 
+            if (result.intersects) {
+                result.sweep_end = cs ;
+                sweep_points.Add(w_a.Translation + result.sweep_end);
+                result.sweep_slide = (w_a.Translation + (sweep_a - (pd * st))) - (w_a.Translation + result.sweep_end);
+                if (result.sweep_slide.contains_nan()) {
+                    result.sweep_slide = Vector3.Zero;
+                }
+                sweep_points.Add(w_a.Translation + result.sweep_end + result.sweep_slide);
+            } else {
+                result.sweep_end = sweep_a;
+                sweep_points.Add(w_a.Translation + result.sweep_end);
+                result.sweep_slide = Vector3.Zero;
+                sweep_points.Add(w_a.Translation + result.sweep_slide);
+            }
             result.sweep_points = sweep_points;
             return result;
         }
@@ -681,7 +707,7 @@ namespace Magpie.Engine.Collision {
             simplex.B_transform_direction = Matrix.CreateFromQuaternion(rot_b);
 
             //simplex.direction = w_b.Translation - w_a.Translation;
-            simplex.direction = Vector3.One;
+            simplex.direction = Vector3.Up + Vector3.Right + Vector3.Forward;
 
             simplex.add_new_point(
                 Vector3.Transform(
@@ -937,6 +963,11 @@ namespace Magpie.Engine.Collision {
                     }
                 }
             }
+
+            if (result.penetration_normal == Vector3.Zero || result.penetration == 0f) { 
+                result.intersects = false;
+            }
+
             return result;
         }
 

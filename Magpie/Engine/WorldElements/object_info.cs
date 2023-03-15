@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Magpie.Engine.Collision;
+using Magpie.Engine.Collision.Solver;
 using Magpie.Engine.Collision.Support3D;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
@@ -42,6 +43,13 @@ namespace Magpie.Engine.WorldElements {
 
         public bool resting = false;
         public bool updated = false;
+
+        public virtual bool dynamic => false;
+        public bool enabled = true;
+
+        public bool gravity = true;
+        public float gravity_current = 0f;
+
 
         public object_info(Vector3 position) {
             this.position = position;
@@ -83,7 +91,7 @@ namespace Magpie.Engine.WorldElements {
 
         public BoundingBox bounding_box() {
             if (collision != null) {
-                if (collision.dynamic) {
+                if (dynamic && wants_movement != Vector3.Zero) {
                     return collision.movebox.sweep_bounding_box(world, wants_movement);
                 } else {
                     return collision.movebox.find_bounding_box(world);
@@ -96,8 +104,8 @@ namespace Magpie.Engine.WorldElements {
         }
 
 
-        public virtual void update() {
 
+        public virtual void update() {
             //if (!resting)
 
             if (render != null)
@@ -116,7 +124,6 @@ namespace Magpie.Engine.WorldElements {
             updated = false;
         }
 
-
         public virtual void draw() {
             if (render != null) { 
                 render.prepass();
@@ -125,9 +132,19 @@ namespace Magpie.Engine.WorldElements {
             }
             if (collision != null) {
                 collision.movebox.draw(world);
-                Draw3D.cube(bounding_box(), Color.Red);
+                //Draw3D.cube(bounding_box(), Color.Red);
+
+                lock (collision.contact_points) {
+                    foreach(var cp in collision.contact_points) {
+                        Draw3D.xyz_cross(cp.contact, 1f, Color.Black);
+                    }
+                }
+
             }
-            Draw3D.text_3D(EngineState.spritebatch, id.ToString(), "pf", bounding_box().Max, -EngineState.camera.direction, 1f, Color.Black);
+            //Draw3D.text_3D(EngineState.spritebatch, id.ToString() + "\n" + collision.solve.info(), "pf", bounding_box().Max, -EngineState.camera.direction, 1f, Color.Black);
+
+
+
             if (draw_action != null) draw_action();
         }
         public void draw_to_light(light light) {

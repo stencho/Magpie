@@ -81,10 +81,10 @@ namespace Magpie.Engine.Collision.Support3D {
                 return Supports.Polyhedron(direction, A, B, C, D,
                     A + sweep, B + sweep, C + sweep, D + sweep);
             }
-            //return Supports.Quad(direction, A, B, C, D);
+            return Supports.Quad(direction, A, B, C, D);
 
             return Supports.Polyhedron(direction, A, B, C, D,
-                A + (Vector3.Down * 0.01f), B + (Vector3.Down * 0.01f), C + (Vector3.Down * 0.01f), D + (Vector3.Down * 0.01f));
+                A + (Vector3.Down * 0.1f), B + (Vector3.Down * 0.1f), C + (Vector3.Down * 0.1f), D + (Vector3.Down * 0.1f));
         }
     }
 }

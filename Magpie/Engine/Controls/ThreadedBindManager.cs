@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
@@ -35,14 +36,22 @@ namespace Magpie.Engine {
 
         public void update() {
             was_pressed = pressed;
-            _was_held = held;
-            pressed = StaticControlBinds.pressed(bind);                        
+            pressed = StaticControlBinds.pressed(bind);
+            _was_held = held;                  
         }
     }
 
     public class ThreadedBindManager {
         Dictionary<string, thread_bind> binds = new Dictionary<string, thread_bind>();  
         
+        public string info() {
+            StringBuilder sb = new StringBuilder();
+            foreach (var k in binds.Keys)
+                sb.AppendLine($"{k}: {binds[k].pressed} {binds[k].just_pressed} {binds[k].pressed_time.ToString()}");
+
+            return sb.ToString();
+        }
+
         public void update() {
             foreach (string key in binds.Keys) {
                 binds[key].update();

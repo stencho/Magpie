@@ -206,9 +206,6 @@ namespace Magpie.Graphics.UI {
                 //size change is basically just mouse delta
                 var size_change = Controls.mouse_delta;
 
-                if (size_change.X > 0) {
-                    Log.log("fuck");
-                }
                 var sizefit = size;
                 if (size.X > EngineState.resolution.X)
                     sizefit = new XYPair(EngineState.resolution.X, sizefit.Y);

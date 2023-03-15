@@ -14,7 +14,9 @@ using Magpie.Graphics;
 using static Magpie.Engine.Collision.Collision2D;
 
 namespace MagpieBuild.TestActors {
-    internal class gjkTestActor : object_info {
+    internal class gjkTestActor : object_info_dynamic {
+        public override bool dynamic => true;
+
         public gjkTestActor(Vector3 position) : base(position) {
             init();
         }
@@ -31,7 +33,6 @@ namespace MagpieBuild.TestActors {
         }
 
         void init() {
-            this.collision.dynamic = true;
         }
 
         int selected_target = 0;
@@ -83,14 +84,16 @@ namespace MagpieBuild.TestActors {
 
                     var c = position + ((spp - position) / 2);
 
-                    gjk_targets[gjkid].draw(c);
+                    lock (gjk_targets)
+                        gjk_targets[gjkid].draw(c);
 
                     //Draw3D.xyz_cross(spp, 1f, Color.Green);               
                 }
             }
 
             //if (sweep_test.intersects) {
-                sweep_test.draw(Vector3.Zero);
+                
+                    //sweep_test.draw(Vector3.Zero);
                 //Draw3D.sprite_line(Vector3.Transform(sweep_test.closest_A, sweep_test.end_simplex.A_transform * Matrix.CreateTranslation(sweep_test.end_simplex.sweep_A)), sweep_test.end_simplex.closest_B, 0.2f, Color.Pink);
 
             //}
@@ -106,7 +109,7 @@ namespace MagpieBuild.TestActors {
         float velocity = 0f;
         Vector3 saved_pos = Vector3.Zero;
         Vector3 last_mov = Vector3.Zero;
-
+        float speed_mult = 1f;
         public override void update() {
             Vector3 mv = Vector3.Zero;
 
@@ -129,19 +132,27 @@ namespace MagpieBuild.TestActors {
                 mv += Vector3.Down;
             }
 
+            if (binds.pressed("speenR")) {
+                speed_mult += 0.5f;
+            } else if (binds.pressed("speenL")) {
+                if (speed_mult > 1f)
+                    speed_mult -= 0.5f;
+            }
+
+
             if (mv != Vector3.Zero)
-                wants_movement += (Vector3.Normalize(mv) * (13f * (binds.pressed("shift") ? 150f : 1f)) * Clock.internal_frame_time_delta);
+                wants_movement += (Vector3.Normalize(mv) * (13f * (binds.pressed("shift") ? 150f : 1f) * speed_mult) * Clock.internal_frame_time_delta);
 
             //wants_movement += Vector3.Down * 9.81f * Clock.internal_frame_time_delta;
 
             //wants_movement = Vector3.Zero;
 
             if (binds.pressed("speenL")) {
-                this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, -1f * Clock.internal_frame_time_delta);
+               // this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, -1f * Clock.internal_frame_time_delta);
 
             }
             if (binds.pressed("speenR")) {
-                this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, 1f * Clock.internal_frame_time_delta);
+               // this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, 1f * Clock.internal_frame_time_delta);
             }
 
 
@@ -163,21 +174,22 @@ namespace MagpieBuild.TestActors {
             Vector3 shortest_sweep = wants_movement;
             int shortest_id = -1;
 
+            if (binds.pressed("t_S") && binds.pressed("shift")) {
+                position = Vector3.Left * 5f + (Vector3.Up * 5f);
+                velocity = 0f;
+
+            }
             int st = 0;
             //lock (gjk_targets) {
             foreach (int gjkid in gjk_targets.Keys) {
-                if (binds.pressed("t_S") && st == 0) {
+                if (st == 1) {
                     var me = collision.movebox;
                     var ts = EngineState.world.current_map.game_objects[gjkid].collision.movebox;
                     var wa = world;
                     var wb = EngineState.world.current_map.game_objects[gjkid].world;
 
                     sweep_test = GJK.swept_gjk_intersects_with_halving(me, ts, wa, wb,
-                       ( Vector3.Down + Vector3.Left + Vector3.Forward) * 13f * 135f * Clock.internal_frame_time_delta, Vector3.Zero);
-
-                    if (binds.pressed("shift")) {
-                        position = Vector3.Left * 5f + (Vector3.Up * 5f);
-                    }
+                       (wb.Translation - position) * 5f, Vector3.Zero);
                 }
                 st++;
                 /*

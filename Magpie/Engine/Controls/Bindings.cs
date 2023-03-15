@@ -119,7 +119,7 @@ namespace Magpie.Engine {
         public static bool released(string bind) => bind_enabled(bind) ? digital_binds.bind_released(bind) : true;
 
         public static bool just_pressed(string bind) => bind_enabled(bind) ? 
-            digital_binds.bind_just_pressed(bind) || (just_enabled && digital_binds.bind_pressed(bind)): false;
+            digital_binds.bind_just_pressed(bind) || (just_enabled && digital_binds.bind_pressed(bind)) : false;
         public static bool just_released(string bind) => bind_enabled(bind) ? 
             digital_binds.bind_just_released(bind) || (just_disabled && digital_binds.bind_pressed(bind)) : false;
 
@@ -691,21 +691,13 @@ namespace Magpie.Engine {
         public KeyboardBind(Keys button, string[] binds) {
             this.binds.AddRange(binds);
             _button = button;
-            this._recent_state = new bool[60];
         }
 
         public void update_state(PlayerIndex player_index) {
-
-            var ks = Controls.keyboard_state;
-            var pks = Controls.keyboard_state_prev;
-            
-            bool just_pressed = (ks.IsKeyDown(button) && !pks.IsKeyDown(button));
-            bool was_pressed = (!ks.IsKeyDown(button) && pks.IsKeyDown(button));
-
-            if (ks.IsKeyDown(button)) {
+            if (Controls.is_pressed(button)) {
                 _bind_state = digital_bind_state.pressed;
 
-                if (just_pressed) {
+                if (!Controls.was_pressed(button)) {
                     _bind_state |= digital_bind_state.just_pressed;
 
                     _pressed_at = DateTime.Now;
@@ -723,7 +715,7 @@ namespace Magpie.Engine {
             } else {
                 _bind_state = digital_bind_state.released;
 
-                if (was_pressed) {
+                if (Controls.was_pressed(button)) {
                     _bind_state |= digital_bind_state.just_released;
                 }
 
@@ -740,11 +732,6 @@ namespace Magpie.Engine {
             }
 
             _bind_state_prev = _bind_state;
-
-            for (int i = 0; i < _recent_state.Length - 1; i++) {
-                _recent_state[i] = _recent_state[i + 1];
-            }
-            _recent_state[_recent_state.Length - 1] = is_pressed;
 
         }
 

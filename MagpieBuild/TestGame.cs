@@ -78,7 +78,7 @@ namespace MagpieBuild
 
             while (EngineState.world == null) { }
 
-            player_id = world.current_map.add_object(new freecam_objinfo(Vector3.Zero));
+            player_id = world.current_map.add_object(new freecam_objinfo(Vector3.Backward * 15f + (Vector3.Up * 2f)));
 
             
             EngineState.camera = ((freecam_objinfo)world.current_map.game_objects[player_id]).cam;
@@ -174,17 +174,22 @@ namespace MagpieBuild
 
             var quad = world.current_map.add_object(new object_info(Vector3.Down * 2, new collision_info(new Quad(250f))));
 
+            var bigcube = world.current_map.add_object(new object_info(Vector3.Forward * 65, new render_info_model("cube", "zerocool_sharper"), new collision_info(new Cube(1f))));
+            world.current_map.game_objects[bigcube].scale = Vector3.One * 10f;
+            world.current_map.game_objects[bigcube].post_solve();
+
             var capsuleid = world.current_map.add_object(new object_info(Vector3.Right * 3, new collision_info(new Capsule(1.85f, 0.8f))));
 
             var rcubeid = world.current_map.add_object(new object_info(Vector3.Right * 8, new render_info_model("cube", "zerocool_sharper"), new collision_info(new Cube(1f))));
             world.current_map.game_objects[rcubeid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
+            world.current_map.game_objects[rcubeid].post_solve();
 
             move_id = world.current_map.add_object(new gjkTestActor(Vector3.Left * 5f + (Vector3.Up * 5f), 
                 new render_info_model("cube", "zerocool_sharper"), 
                 new collision_info(
-                new Cube(1f)
+                //new Cube(1f)
                 //new Sphere(1f)
-                //new Capsule(1.85f,1f)
+                new Capsule(1.85f,1f)
                 /*new Polyhedron(
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
@@ -298,12 +303,13 @@ namespace MagpieBuild
 
 
         protected override void Draw(GameTime gameTime) {
-            while (!init) { }
+            while (!init || World.solver.solving) { }
+            EngineState.drawing = true; 
             Clock.frame_probe.set("draw_world");
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
 
             world.Draw(GraphicsDevice, EngineState.camera);
-            world.current_map.octree.draw();
+            //world.current_map.octree.draw();
             EngineState.window_manager.render_window_internals();
 
             Clock.frame_probe.set("draw_2D");
@@ -341,7 +347,7 @@ namespace MagpieBuild
                         "## gvars ##\n" +
                         gvars.list_all() + "\n\n" +
                         EngineState.window_manager.list_windows() + "\n\n" +
-                        $"{EngineState.world.current_map.octree.object_total.ToString()}"
+                        $"{EngineState.world.current_map.game_objects[player_id].binds.info()}\n"
 
 
 
@@ -379,8 +385,8 @@ namespace MagpieBuild
                 lock (Controls.control_poll_probe)
                     Controls.control_poll_probe.draw(EngineState.resolution.X - 360, th + t + 80, 300, out _, out _);
             }
-
+            EngineState.drawing = false;
         }
-        int th = 0;
+        int th = 0; 
     }
 }

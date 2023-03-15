@@ -11,18 +11,23 @@ using Microsoft.Xna.Framework;
 using static Magpie.Engine.Controls;
 using static Magpie.Engine.ControlBinds;
 using Microsoft.Xna.Framework.Input;
+using Magpie.Engine.Collision.Support3D;
 
 namespace MagpieBuild.TestActors {
-    public class freecam_objinfo : object_info {
+    public class freecam_objinfo : object_info_dynamic {
 
         public volatile Camera cam;
+
+        public override bool dynamic => true;
 
         public freecam_objinfo(Vector3 position) : base(position) {
             init();
         }
 
         void init() {
+            collision = new collision_info(new Capsule(1.85f, 1f));
             cam = new Camera();
+            //gravity = false;
         }
 
         float movement_speed = 12f;
@@ -32,8 +37,11 @@ namespace MagpieBuild.TestActors {
         bool was_aiming = false;
 
         public override void post_solve() {
-            cam.position = position;
+            cam.position = position + ((Capsule)collision.movebox).B;
+
             cam.update();
+
+            base.post_solve();
         }
 
         public override void update() {
@@ -82,15 +90,28 @@ namespace MagpieBuild.TestActors {
             if (binds.pressed("right")) {
                 mv += cam.orientation.Right;
             }
-            if (binds.pressed("up")) {
-                mv += Vector3.Up;
-            }
+            if (binds.just_pressed("up") && has_footing()) {
+                //mv += Vector3.Up;
+                gravity_current = -0.7f;
+            }                
             if (binds.pressed("down")) {
                 mv += Vector3.Down;
             }
 
             if (mv != Vector3.Zero)
                 wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("ctrl") ? 0.3f : (binds.pressed("shift") ? 1f : 4f)) * Clock.internal_frame_time_delta;
+
+
+            if (binds.just_pressed("ui_select")) {
+                var o = EngineState.world.current_map.spawn_object(
+                    new object_info_dynamic(position + (cam.direction * 5f),
+                    new render_info_model("sphere", "trumpmap"),
+                    new collision_info(
+                        //new Sphere(1f)
+                        !binds.pressed("shift") ? new Sphere(1f) : new Cube(1f)
+                        )));
+
+            }
 
             if (wants_movement != Vector3.Zero) {
                 //this.position += wants_movement;

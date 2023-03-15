@@ -26,7 +26,7 @@ namespace Magpie.Engine.Collision {
         public Vector3 penetration_normal;
         public Vector3 penetration_tangent_A;
         public Vector3 penetration_tangent_B;
-
+        public Vector3 penetration_scalar => penetration_normal * (penetration + Math3D.big_epsilon);
         public bool intersects;
         public bool hit => intersects;
         public gjk_simplex end_simplex;
@@ -59,7 +59,6 @@ namespace Magpie.Engine.Collision {
 
             intersects = false;
 
-
             closest_iteration = 0;
 
             id_A = -1;
@@ -70,6 +69,7 @@ namespace Magpie.Engine.Collision {
         }
         public volatile List<Vector3> sweep_points = new List<Vector3>();
         public Vector3 sweep_end = Vector3.Zero;
+        public Vector3 sweep_slide = Vector3.Zero;
 
         public void draw(Vector3 world_pos) {
             if (simplex_list == null) return;
@@ -106,8 +106,8 @@ namespace Magpie.Engine.Collision {
             Draw3D.xyz_cross(closest_A, 10f, Color.Red);
             Draw3D.xyz_cross(closest_B, 10f, Color.HotPink);
 
-            Draw3D.sprite_line(closest_A, closest_A + (penetration_normal * penetration), 0.02f, Color.Red);
-            Draw3D.sprite_line(closest_B, closest_B + (penetration_normal * penetration), 0.02f, Color.Green);
+            Draw3D.sprite_line(closest_A, closest_A + (penetration_normal * penetration) * 5f, 0.02f, Color.Red);
+            Draw3D.sprite_line(closest_B, closest_B + (penetration_normal * penetration) * 5f, 0.02f, Color.Green);
             Draw3D.sprite_line(closest_A, closest_A + (penetration_tangent_A*0.5f), 0.04f, Color.Purple);
             Draw3D.sprite_line(closest_A, closest_A + (penetration_tangent_B * 0.5f), 0.04f, Color.HotPink);
 
@@ -116,13 +116,13 @@ namespace Magpie.Engine.Collision {
             lock (sweep_points) {
                 var a = 0;
                 foreach (var v in sweep_points) {
-                    Draw3D.cube(v, Vector3.One, Color.Red, Matrix.Identity);
+                    //Draw3D.cube(v, Vector3.One, Color.Red, Matrix.Identity);
 
                     Draw3D.xyz_cross(v, 5f, Color.GreenYellow);
                     a++;
                 }
                 if (sweep_points.Count > 0) {
-                    Draw3D.cube(Vector3.Zero, Vector3.One, Color.Blue, 
+                    Draw3D.cube(Vector3.Zero, Vector3.One, Color.MonoGameOrange, 
                         end_simplex.A_transform_direction * Matrix.CreateTranslation(sweep_points[0]));
 
                     Draw3D.sprite_line(sweep_points[0],
@@ -130,6 +130,9 @@ namespace Magpie.Engine.Collision {
                     Draw3D.sprite_line(end_simplex.A_transform.Translation,
                         sweep_points[0], 0.04f, Color.HotPink);
 
+
+                    Draw3D.cube(Vector3.Zero, Vector3.One, Color.Red,
+                        end_simplex.A_transform_direction * Matrix.CreateTranslation(sweep_points[sweep_points.Count - 2]));
 
                     Draw3D.cube(Vector3.Zero, Vector3.One, Color.Blue, 
                         end_simplex.A_transform_direction * Matrix.CreateTranslation(sweep_points[sweep_points.Count - 1]));

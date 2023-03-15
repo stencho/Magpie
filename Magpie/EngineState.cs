@@ -21,6 +21,7 @@ using Keys = Microsoft.Xna.Framework.Input.Keys;
 namespace Magpie {
     public static class EngineState {
         public static volatile bool running = true;
+        public static volatile bool drawing = true;
         public static volatile bool started = false;
 
         public static GBuffer buffer;

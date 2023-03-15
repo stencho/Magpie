@@ -142,6 +142,7 @@ namespace Magpie.Engine {
         }
 
         public static bool is_pressed(MouseButtons mb) {
+            if (!EngineState.is_active) return false;
             switch (mb) {
                 case MouseButtons.Left:
                     return mouse_state.LeftButton == ButtonState.Pressed;
