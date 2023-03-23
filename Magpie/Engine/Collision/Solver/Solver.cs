@@ -19,11 +19,20 @@ namespace Magpie.Engine.Collision.Solver {
         }
     }
 
-    public struct contact_point {
+    public class contact_point {
         public int id;
         public Vector3 contact;
         public Vector3 normal;
-        //public Vector3 tangent;
+        public int frames;
+        public bool dead = false;
+
+        public contact_point(int id, Vector3 contact, Vector3 normal) {
+            this.id = id;
+            this.contact = contact;
+            this.normal = normal;
+            this.frames = 2;
+            
+        }
     }
 
     public class solve_result {
@@ -53,13 +62,13 @@ namespace Magpie.Engine.Collision.Solver {
 
         public void solve() {
             World.internal_frame_probe.set("solve start");
-            while (EngineState.drawing) { }
+            while (EngineState.drawing) { if (!EngineState.running) return; }
             solving = true;
             foreach (var obj in EngineState.world.current_map.game_objects.Keys) {
                 if (EngineState.world.current_map.game_objects[obj].dynamic) {
                     if (EngineState.world.current_map.game_objects[obj].collision != null) {
                         EngineState.world.current_map.game_objects[obj].collision.solve.reset();
-                        EngineState.world.current_map.game_objects[obj].collision.contact_points.Clear();
+                        //EngineState.world.current_map.game_objects[obj].collision.contact_points.Clear();
                         broad.queue.Enqueue(obj);
                     } else {
                         EngineState.world.current_map.game_objects[obj].position += EngineState.world.current_map.game_objects[obj].wants_movement;
@@ -68,7 +77,8 @@ namespace Magpie.Engine.Collision.Solver {
                     }
                 }
             }
-            while (broad.queue.Count > 0 || narrow.queue.Count > 0 || broad.working || narrow.working) { }
+
+            while ((broad.queue.Count > 0 || narrow.queue.Count > 0 || broad.working || narrow.working) && EngineState.running) { }
 
             solving = false;
             World.internal_frame_probe.set("solve end");

@@ -23,18 +23,20 @@ namespace Magpie.Engine.WorldElements {
         public bool has_footing() {
             lock (collision.contact_points) {
                 foreach (var cp in collision.contact_points) {
-                    if (Vector3.Dot(cp.normal, Vector3.Up) >= .2f) {
+                    if (Vector3.Dot(cp.normal, Vector3.Up) >= 0) {
                         return true;
                     }
                 }
-            }
+            }            
             return false;
         }
 
         public override void update() {
             if (gravity) {
-                if (gravity_current < 53f) {
+                if (gravity_current < 53f * (1000.0 / 300.0 / 1000.0)) {
                     gravity_current += 9f * Clock.internal_frame_time_delta;
+                } else {
+                    gravity_current = 53f * (1000.0f / 300.0f / 1000.0f);
                 }
                 if (has_footing() && gravity_current > 0f) gravity_current = 0f;
 

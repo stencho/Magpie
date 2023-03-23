@@ -61,8 +61,8 @@ namespace Magpie.Engine.Collision.Solver {
                         output_solver.working = true;
                     } else {
                         EngineState.world.current_map.game_objects[obj].position += EngineState.world.current_map.game_objects[obj].wants_movement;
-                        EngineState.world.current_map.game_objects[obj].wants_movement = Vector3.Zero;
                         EngineState.world.current_map.game_objects[obj].post_solve();
+                        EngineState.world.current_map.game_objects[obj].wants_movement = Vector3.Zero;
                     }
                 } else if (output_solver == null) {
                     queue.Clear();

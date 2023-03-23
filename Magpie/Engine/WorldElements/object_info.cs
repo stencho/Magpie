@@ -71,6 +71,10 @@ namespace Magpie.Engine.WorldElements {
         void init(render_info render_info, collision_info collision_info) {
             this.render = render_info;
             this.collision = collision_info;
+            
+            if (collision_info != null) {
+                this.collision.parent = this;
+            }
 
             world = Matrix.CreateScale(scale) * orientation * Matrix.CreateTranslation(position);
         }
@@ -110,6 +114,10 @@ namespace Magpie.Engine.WorldElements {
 
             if (render != null)
                 render.world = world;
+            if (collision != null) collision.update();
+
+            //if (collision != null) collision.update();
+
             /*
             if (update_action != null) {
                 update_action();
@@ -137,8 +145,13 @@ namespace Magpie.Engine.WorldElements {
                 lock (collision.contact_points) {
                     foreach(var cp in collision.contact_points) {
                         Draw3D.xyz_cross(cp.contact, 1f, Color.Black);
+                        Draw3D.sprite_line(cp.contact + cp.normal + (EngineState.camera.orientation.Right * 0.2f), cp.contact + cp.normal + (EngineState.camera.orientation.Right * 0.2f) + wants_movement, 0.2f, Color.Orange);
+                        Draw3D.sprite_line(cp.contact, cp.contact + cp.normal, 0.2f, Color.Black);
+                        Draw3D.text_3D(EngineState.spritebatch, cp.frames.ToString() + "\n" + cp.dead.ToString() + "\n", "pf", cp.contact + cp.normal , -EngineState.camera.direction, 1f, Color.Black);
+                        
                     }
                 }
+
 
             }
             //Draw3D.text_3D(EngineState.spritebatch, id.ToString() + "\n" + collision.solve.info(), "pf", bounding_box().Max, -EngineState.camera.direction, 1f, Color.Black);

@@ -337,7 +337,6 @@ namespace Magpie.Graphics {
             e_diffuse.Parameters["FarClip"].SetValue(2000f);
             e_diffuse.Parameters["opacity"].SetValue(-1f);
 
-            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
             EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
             EngineState.graphics_device.SetVertexBuffer(vb);
@@ -351,6 +350,7 @@ namespace Magpie.Graphics {
 
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount));
 
+            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
 
         }
 
@@ -368,7 +368,6 @@ namespace Magpie.Graphics {
             //e_diffuse.Parameters["FarClip"].SetValue(2000f);
             //e_diffuse.Parameters["opacity"].SetValue(-1f);
 
-            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             EngineState.graphics_device.BlendState = BlendState.AlphaBlend;
             EngineState.graphics_device.DepthStencilState = DepthStencilState.Default;
 
@@ -379,6 +378,8 @@ namespace Magpie.Graphics {
 
             EngineState.graphics_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, (vb.VertexCount));
             e_diffuse.Parameters["fullbright"].SetValue(false);
+
+            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
         }
 
 
@@ -478,7 +479,8 @@ namespace Magpie.Graphics {
         }
 
         public static void fill_quad(Matrix world, Vector3 A, Vector3 B, Vector3 C, Vector3 D, Color color, string texture = "OnePXWhite") {
-
+            EngineState.graphics_device.RasterizerState = RasterizerState.CullNone;
+            //EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             if (q_index_buffer == null) {
                 q_index_buffer = new IndexBuffer(EngineState.graphics_device, IndexElementSize.SixteenBits, q_indices.Length, BufferUsage.None);
                 q_index_buffer.SetData<ushort>(q_indices);
@@ -493,7 +495,8 @@ namespace Magpie.Graphics {
             q_vertex_buffer = new VertexBuffer(EngineState.graphics_device, VertexPositionNormalTexture.VertexDeclaration, quad.Length, BufferUsage.None);
             q_vertex_buffer.SetData<VertexPositionNormalTexture>(quad);
 
-            draw_buffers_diffuse_texture(q_vertex_buffer, q_index_buffer, ContentHandler.resources[texture].value_tx, color, world);
+            draw_buffers_diffuse_texture(q_vertex_buffer, q_index_buffer, ContentHandler.resources[texture].value_tx, color, world); 
+            EngineState.graphics_device.RasterizerState = RasterizerState.CullCounterClockwise;
             //draw_buffers(gd, q_vertex_buffer, q_index_buffer, world, color, EngineState.camera.view, EngineState.camera.projection);
         }
 

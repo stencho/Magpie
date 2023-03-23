@@ -26,6 +26,8 @@ namespace MagpieBuild.TestActors {
 
         void init() {
             collision = new collision_info(new Capsule(1.85f, 1f));
+            collision.parent = this;
+
             cam = new Camera();
             //gravity = false;
         }
@@ -92,7 +94,7 @@ namespace MagpieBuild.TestActors {
             }
             if (binds.just_pressed("up") && has_footing()) {
                 //mv += Vector3.Up;
-                gravity_current = -0.7f;
+                gravity_current = -0.8f;
             }                
             if (binds.pressed("down")) {
                 mv += Vector3.Down;

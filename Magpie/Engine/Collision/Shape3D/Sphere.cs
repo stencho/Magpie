@@ -27,7 +27,7 @@ namespace Magpie.Engine.Collision.Support3D {
             }
         }
         public BoundingBox find_bounding_box(Matrix world) {
-            return CollisionHelper.BoundingBox_around_sphere(this, world);
+            return CollisionHelper.BoundingBox_around_sphere(radius + Math3D.big_epsilon, world);
         }
 
         public Sphere(float radius) {
@@ -45,7 +45,7 @@ namespace Magpie.Engine.Collision.Support3D {
             if (sweep != Vector3.Zero) {
                 return Supports.Capsule(direction, P, P + sweep, radius);
             }
-            return P + (Vector3.Normalize(direction) * radius);
+            return P + (Vector3.Normalize(direction) * radius) ;
         }
     }
 

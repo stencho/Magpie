@@ -174,8 +174,18 @@ namespace MagpieBuild
 
             var quad = world.current_map.add_object(new object_info(Vector3.Down * 2, new collision_info(new Quad(250f))));
 
+            var q1 = world.current_map.add_object(new object_info(Vector3.Up + (Vector3.Right * (60 - 12f)), new collision_info(new Quad(25f))));
+            world.current_map.game_objects[q1].orientation = Matrix.CreateFromAxisAngle(Vector3.Forward, 16f);
+            world.current_map.game_objects[q1].post_solve();
+            var q2 = world.current_map.add_object(new object_info(Vector3.Up + (Vector3.Right * (60 + 12f)), new collision_info(new Quad(25f))));
+            world.current_map.game_objects[q2].orientation = Matrix.CreateFromAxisAngle(Vector3.Backward, 16f);
+            world.current_map.game_objects[q2].post_solve();
+            var q3 = world.current_map.add_object(new object_info(Vector3.Down * 2 + (Vector3.Right * 60)+ (Vector3.Forward * 10), new collision_info(new Quad(25f))));
+            world.current_map.game_objects[q3].orientation = Matrix.CreateFromAxisAngle(Vector3.Right, 16f);
+            world.current_map.game_objects[q3].post_solve();
+
             var bigcube = world.current_map.add_object(new object_info(Vector3.Forward * 65, new render_info_model("cube", "zerocool_sharper"), new collision_info(new Cube(1f))));
-            world.current_map.game_objects[bigcube].scale = Vector3.One * 10f;
+            world.current_map.game_objects[bigcube].scale = Vector3.One * 5f;
             world.current_map.game_objects[bigcube].post_solve();
 
             var capsuleid = world.current_map.add_object(new object_info(Vector3.Right * 3, new collision_info(new Capsule(1.85f, 0.8f))));
@@ -184,12 +194,12 @@ namespace MagpieBuild
             world.current_map.game_objects[rcubeid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
             world.current_map.game_objects[rcubeid].post_solve();
 
-            move_id = world.current_map.add_object(new gjkTestActor(Vector3.Left * 5f + (Vector3.Up * 5f), 
-                new render_info_model("cube", "zerocool_sharper"), 
-                new collision_info(
+            //move_id = world.current_map.add_object(new gjkTestActor(Vector3.Left * 5f + (Vector3.Up * 5f), 
+                //new render_info_model("cube", "zerocool_sharper"), 
+               // new collision_info(
                 //new Cube(1f)
                 //new Sphere(1f)
-                new Capsule(1.85f,1f)
+                //new Capsule(1.85f,1f)
                 /*new Polyhedron(
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
@@ -205,19 +215,19 @@ namespace MagpieBuild
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one)*/
-                )));
+               // )));
 
             //world.current_map.game_objects[moveid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
             //new collision_info(new Triangle(Vector3.Right + Vector3.Forward, Vector3.Up, Vector3.Left + Vector3.Down))));
 
-            ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(quad, new collision_result());
+            /*((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(quad, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(cube_id, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(sphereid, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(triid, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(rcubeid, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(weirdone, new collision_result());
             ((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(capsuleid, new collision_result());
-
+            */
 
 
             //world.current_map.add_actor(new MoveTestActor());
@@ -303,7 +313,7 @@ namespace MagpieBuild
 
 
         protected override void Draw(GameTime gameTime) {
-            while (!init || World.solver.solving) { }
+            while ((!init || World.solver.solving)) { if (!EngineState.running) return; }
             EngineState.drawing = true; 
             Clock.frame_probe.set("draw_world");
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);

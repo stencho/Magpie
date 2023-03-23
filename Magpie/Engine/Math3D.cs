@@ -584,9 +584,12 @@ namespace Magpie.Engine {
 
             public static BoundingBox BoundingBox_around_sphere(Sphere sphere, Matrix world) {
                 return new BoundingBox(world.Translation - (Vector3.One * sphere.radius), world.Translation + (Vector3.One * sphere.radius));
-            }
+        }
+        public static BoundingBox BoundingBox_around_sphere(float radius, Matrix world) {
+            return new BoundingBox(world.Translation - (Vector3.One * radius), world.Translation + (Vector3.One * radius));
+        }
 
-            public static BoundingBox BoundingBox_around_OBB(Cube obb, Matrix world) {
+        public static BoundingBox BoundingBox_around_OBB(Cube obb, Matrix world) {
                 float Xmin = float.MaxValue, Ymin = float.MaxValue, Zmin = float.MaxValue;
                 float Xmax = float.MinValue, Ymax = float.MinValue, Zmax = float.MinValue;
 

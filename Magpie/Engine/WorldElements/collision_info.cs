@@ -154,12 +154,64 @@ namespace Magpie.Engine.WorldElements {
         public bool resting = false;
 
         public volatile List<contact_point> contact_points = new List<contact_point>();
+        public object_info parent;
 
+        public void add_contact_point(int id, Vector3 contact, Vector3 normal) {
+            lock (contact_points) {
+                for (int i = 0; i < contact_points.Count; i++) {
+                    if (contact_points[i].id == id) {
+                        contact_points[i].contact = contact;
+                        contact_points[i].normal = normal;
+                        contact_points[i].frames = 5;
+                        contact_points[i].dead = false;
+                        return;
+                    }
+                }
+                contact_points.Add(new contact_point(id, contact, normal));
+            }
+        }
+        public void remove_contact(int id) {
+            for (int i = 0; i < contact_points.Count; i++) {
+                if (contact_points[i].id == id) {
+                    contact_points.RemoveAt(i);
+                    return;
+                }
+
+            }
+        }
+        public void update() {
+            if (parent == null) throw new Exception();
+            lock (contact_points) {
+                for (int i = 0; i < contact_points.Count; i++) {
+                    if (contact_points[i].dead) { contact_points.RemoveAt(i); }
+
+                }
+                for (int i = 0; i < contact_points.Count; i++) {
+                    if (contact_points[i].frames > 0) contact_points[i].frames--;
+                    else if (contact_points[i].frames == 0) contact_points[i].dead = true;                    
+                }
+            }
+        }
+
+
+
+        public bool get_contact(int id, out Vector3 contact) {
+            contact = Vector3.Zero;
+            lock (contact_points) {
+                for (int i = 0; i < contact_points.Count; i++) {
+                    if (contact_points[i].id == id) {
+                        contact = contact_points[i].contact;
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
         public collision_info(Shape3D shape) {
             //hitbox = new hitbox_collision(shape);
             movebox = shape;
-            solve = new solve_result();            
+            solve = new solve_result();          
         }
 
         /*
@@ -213,8 +265,5 @@ namespace Magpie.Engine.WorldElements {
 
         }
 
-        public void internal_update() {
-
-        }
     }
 }
