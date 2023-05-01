@@ -442,23 +442,23 @@ namespace Magpie.Engine.Collision {
         const int max_iterations = 35;
         public static collision_result swept_gjk_intersects_with_halving(Shape3D shape_A, Shape3D shape_B, Matrix w_a, Matrix w_b, Vector3 sweep_a, Vector3 sweep_b) {
             collision_result result = gjk_intersects(shape_A, shape_B, w_a, w_b, sweep_a, sweep_b);
-            /*
+
+
+
+            
             result.sweep_end = sweep_a;
             if (result.hit && result.penetration > Math3D.epsilon) {
                 result.sweep_end += (result.penetration_normal * result.penetration);
             }
 
             result.sweep_slide = Vector3.Zero;
-
+            result.sweep_slide_dir = Vector3.Zero;
 
             if (!result.hit || result.penetration <= Math3D.epsilon) {
 
-                sweep_points.Add(w_a.Translation + sweep_a);
-                sweep_points.Add(w_a.Translation + result.sweep_end);
-                result.sweep_points = sweep_points;
                 return result;
             }
-            */
+            
             var sweep_points = new List<Vector3>();
             sweep_points.Add(w_a.Translation + sweep_a);
             var sweep_dir_a = Vector3.Normalize(sweep_a);
@@ -499,18 +499,17 @@ namespace Magpie.Engine.Collision {
             var cs = (sweep_dir_a * sweep_dist_a);
 
             if (result.intersects) {
-                result.sweep_end = cs ;
-                sweep_points.Add(w_a.Translation + result.sweep_end);
+                result.sweep_end = cs;
                 result.sweep_slide = (w_a.Translation + (sweep_a - (pd * st))) - (w_a.Translation + result.sweep_end);
                 if (result.sweep_slide.contains_nan()) {
                     result.sweep_slide = Vector3.Zero;
                 }
-                sweep_points.Add(w_a.Translation + result.sweep_end + result.sweep_slide);
+                result.sweep_slide_dir = Vector3.Normalize(result.sweep_slide - result.sweep_end);
+
             } else {
                 result.sweep_end = sweep_a;
-                sweep_points.Add(w_a.Translation + result.sweep_end);
                 result.sweep_slide = Vector3.Zero;
-                sweep_points.Add(w_a.Translation + result.sweep_slide);
+                result.sweep_slide_dir = Vector3.Zero;
             }
             result.sweep_points = sweep_points;
             return result;
@@ -544,6 +543,7 @@ namespace Magpie.Engine.Collision {
 
             simplex.direction = w_b.Translation - w_a.Translation;
             //simplex.direction = Vector3.Up + Vector3.Right + Vector3.Forward;
+            //simplex.direction = Vector3.Up;
 
             simplex.add_new_point(
                 Vector3.Transform(
@@ -558,7 +558,6 @@ namespace Magpie.Engine.Collision {
             gjk_closest_point_calc(ref simplex, ref result, w_a, w_b);
 
             simplex.direction = simplex.AO;
-
 
             int iteration = 1;
 
@@ -785,7 +784,7 @@ namespace Magpie.Engine.Collision {
                         result.polytope = EPA3D.expand_polytope(shape_A, shape_B, ref simplex, ref result);
 
                     }
-
+                    
                 } else if (simplex.stage == simplex_stage.line) {
                     var dA = Vector3.Distance(Vector3.Zero, simplex.A);
                     var dB = Vector3.Distance(Vector3.Zero, simplex.B);
@@ -828,8 +827,8 @@ namespace Magpie.Engine.Collision {
             simplex.A_transform_direction = Matrix.CreateFromQuaternion(rot_a);
             simplex.B_transform_direction = Matrix.CreateFromQuaternion(rot_b);
 
-            //simplex.direction = w_b.Translation - w_a.Translation;
-            simplex.direction = Vector3.One;
+            simplex.direction = w_b.Translation - w_a.Translation;
+            //simplex.direction = Vector3.Up;
 
             simplex.add_new_point(
                 Vector3.Transform(
@@ -840,6 +839,9 @@ namespace Magpie.Engine.Collision {
                 Vector3.Transform(shape_B.support(Vector3.Transform(-simplex.direction, Matrix.Invert(simplex.B_transform_direction)), sweep_b), w_b));
 
             simplex.direction = simplex.AO;
+            //simplex.direction = w_b.Translation - w_a.Translation;
+            //simplex.direction = Vector3.Up + Vector3.Right + Vector3.Forward;
+            simplex.direction = Vector3.Up;
 
             int iteration = 1;
 

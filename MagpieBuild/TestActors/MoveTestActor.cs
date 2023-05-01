@@ -28,19 +28,13 @@ namespace MagpieTestbed.TestActors {
         public Shape3D collision { get; set; }
         public Shape3D sweep_collision { get; set; }
 
-        public light[] lights { get; set; } = new light[2] {
+        public light[] lights { get; set; } = new light[1] {
             new light {
                 type = LightType.POINT,
                 color = Color.Blue,
                 point_info = new point_info() {
-                    radius = 2f
+                    radius = 5f
                 }
-            },
-
-            new light {
-                type = LightType.SPOT,
-                color = Color.Red,
-                spot_info = new spot_info()
             }
         };
 

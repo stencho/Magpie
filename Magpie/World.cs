@@ -177,8 +177,8 @@ namespace Magpie {
                     update_frame_rate_avg /= last_ticks.Length;
                 }
 
-                Clock.internal_frame_time_delta_ms = (float)(DateTime.Now - dt).TotalMilliseconds;
-                Clock.internal_frame_time_delta = (float)(Clock.internal_frame_time_delta_ms / 1000.0);
+                //Clock.internal_frame_time_delta_ms = (float)(DateTime.Now - dt).TotalMilliseconds;
+                //Clock.internal_frame_time_delta = (float)(Clock.internal_frame_time_delta_ms / 1000.0);
                 world_running_slow = Clock.frame_time_delta_ms > Clock.internal_frame_time_delta_ms;
                
                 dt = DateTime.Now; 

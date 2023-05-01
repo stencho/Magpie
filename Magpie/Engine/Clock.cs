@@ -375,7 +375,7 @@ namespace Magpie.Engine {
         public static double total_ms_ignore_pause { get; private set; } = 0;
 
         public static float internal_frame_time_delta_ms = 0;
-        public static float internal_frame_time_delta = 0;
+        public static float internal_frame_time_delta => (float)(internal_frame_limit_ms / 1000.0);
 
         public static bool paused { get; set; } = false;
 
@@ -385,7 +385,7 @@ namespace Magpie.Engine {
               EngineState.display_refresh_rate
             : gvars.get_float("frame_limit");
         
-        public static float internal_frame_limit = 300;
+        public static float internal_frame_limit = 60;
 
 
         public static double frame_limit_ms => 1000.0 / Clock.frame_limit;

@@ -8,6 +8,8 @@ using Microsoft.Xna.Framework;
 namespace Magpie.Engine.WorldElements {
     public  class object_info_dynamic : object_info {
         public override bool dynamic => true;
+
+
         public object_info_dynamic(Vector3 position) : base(position) {
         }
 
@@ -34,14 +36,14 @@ namespace Magpie.Engine.WorldElements {
         public override void update() {
             if (gravity) {
                 if (gravity_current < 53f * (1000.0 / 300.0 / 1000.0)) {
-                    gravity_current += 9f * Clock.internal_frame_time_delta;
+                    gravity_current += 9.8f * Clock.internal_frame_time_delta;
                 } else {
                     gravity_current = 53f * (1000.0f / 300.0f / 1000.0f);
                 }
                 if (has_footing() && gravity_current > 0f) gravity_current = 0f;
 
 
-                wants_movement += Vector3.Down * gravity_current;
+                //wants_movement += Vector3.Down * gravity_current;
             }
             base.update();
         }

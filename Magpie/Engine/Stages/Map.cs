@@ -15,8 +15,10 @@ using static Magpie.Engine.Collision.Collision2D;
 namespace Magpie.Engine.Stages {
     public class Map {
         public float update_range = 1500f;
-        
-        public DynamicOctree octree = new DynamicOctree();
+
+        public Octree octree = new Octree(Vector3.One * -500, Vector3.One * 500, 3);
+
+        public SegmentedTerrain terrain;
 
         public struct resource_info {
             public string name;
@@ -37,6 +39,7 @@ namespace Magpie.Engine.Stages {
                 while (spawn_queue.Count > 0) {
                     var q = spawn_queue.Dequeue();
                     if (q.id == 0) return;
+
                     lock(octree)
                         add_object(q.id, q.info);
                 }
@@ -55,9 +58,9 @@ namespace Magpie.Engine.Stages {
                 game_objects.Add(id, object_info);
                 game_objects[id].id = id;
 
-                var nids = octree.add(id, object_info.bounding_box());
+                //var nids = octree.add(id, object_info.bounding_box());
 
-                game_objects[id].octree_base_nodes.AddRange(nids);
+                //game_objects[id].octree_base_nodes.AddRange(nids);
             }
         }
         public int add_object(object_info object_info) {
@@ -66,9 +69,9 @@ namespace Magpie.Engine.Stages {
                 game_objects.Add(id, object_info);
                 game_objects[id].id = id;
 
-                var nids = octree.add(id, object_info.bounding_box());
+                //var nids = octree.add(id, object_info.bounding_box());
 
-                game_objects[id].octree_base_nodes.AddRange(nids);
+                //game_objects[id].octree_base_nodes.AddRange(nids);
             }
             return id;
         }

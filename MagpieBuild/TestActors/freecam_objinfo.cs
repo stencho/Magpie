@@ -12,6 +12,7 @@ using static Magpie.Engine.Controls;
 using static Magpie.Engine.ControlBinds;
 using Microsoft.Xna.Framework.Input;
 using Magpie.Engine.Collision.Support3D;
+using Magpie.Graphics.Lights;
 
 namespace MagpieBuild.TestActors {
     public class freecam_objinfo : object_info_dynamic {
@@ -24,12 +25,29 @@ namespace MagpieBuild.TestActors {
             init();
         }
 
+
         void init() {
             collision = new collision_info(new Capsule(1.85f, 1f));
             collision.parent = this;
 
             cam = new Camera();
             //gravity = false;
+
+            lights = new light[2] {
+            new light {
+                type = LightType.POINT,
+                color = Color.Blue,
+                point_info = new point_info() {
+                    radius = 2f
+                }
+            },
+
+            new light {
+                type = LightType.SPOT,
+                color = Color.Red,
+                spot_info = new spot_info()
+            }
+        };
         }
 
         float movement_speed = 12f;
@@ -40,6 +58,11 @@ namespace MagpieBuild.TestActors {
 
         public override void post_solve() {
             cam.position = position + ((Capsule)collision.movebox).B;
+
+            lights[0].position = position + (cam.orientation.Right * 0.5f) + (cam.orientation.Down * 0.4f) + (cam.orientation.Forward * 0.6f);
+            lights[1].position = position + (cam.orientation.Right * 0.5f) + (cam.orientation.Down * 0.4f) + (cam.orientation.Forward * 0.5f);
+
+            lights[1].spot_info.orientation = cam.orientation * Matrix.CreateFromAxisAngle(cam.orientation.Up, MathHelper.ToRadians(5f));
 
             cam.update();
 
@@ -92,10 +115,10 @@ namespace MagpieBuild.TestActors {
             if (binds.pressed("right")) {
                 mv += cam.orientation.Right;
             }
-            if (binds.just_pressed("up") && has_footing()) {
-                //mv += Vector3.Up;
-                gravity_current = -0.8f;
-            }                
+            if (binds.pressed("up")) {
+                mv += Vector3.Up;
+                //gravity_current = -0.8f;
+            }
             if (binds.pressed("down")) {
                 mv += Vector3.Down;
             }
@@ -104,7 +127,15 @@ namespace MagpieBuild.TestActors {
                 wants_movement = Vector3.Normalize(mv) * movement_speed * (binds.pressed("ctrl") ? 0.3f : (binds.pressed("shift") ? 1f : 4f)) * Clock.internal_frame_time_delta;
 
 
-            if (binds.just_pressed("ui_select")) {
+            if (binds.just_pressed("click")) {
+                var no = new object_info_dynamic(cam.position + cam.direction,
+                    new render_info_model("cube", "trumpmap"),
+                    new collision_info(new Sphere(1f))
+                    );
+                no.wants_movement = cam.direction * 10f;
+
+               // var noid = EngineState.world.current_map.spawn_object(no);
+                /*
                 var o = EngineState.world.current_map.spawn_object(
                     new object_info_dynamic(position + (cam.direction * 5f),
                     new render_info_model("sphere", "trumpmap"),
@@ -112,7 +143,7 @@ namespace MagpieBuild.TestActors {
                         //new Sphere(1f)
                         !binds.pressed("shift") ? new Sphere(1f) : new Cube(1f)
                         )));
-
+                */
             }
 
             if (wants_movement != Vector3.Zero) {

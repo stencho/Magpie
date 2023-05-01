@@ -69,6 +69,7 @@ namespace Magpie.Engine.Collision.Solver {
 
                             if (Vector3.Dot(EngineState.world.current_map.game_objects[nqo.A].wants_movement, result.penetration_scalar) < Math3D.epsilon) {
                                 EngineState.world.current_map.game_objects[nqo.A].wants_movement += result.penetration_scalar;
+
                             } else {
                                 result = GJK.swept_gjk_intersects_with_halving(
                                    shape_a, shape_b,
@@ -80,13 +81,7 @@ namespace Magpie.Engine.Collision.Solver {
                                 EngineState.world.current_map.game_objects[nqo.A].wants_movement = result.sweep_end + result.penetration_scalar + result.sweep_slide;
                             }
 
-                            EngineState.world.current_map.game_objects[nqo.A].collision.add_contact_point(
-                                target,
-                                result.closest_A + result.penetration_scalar,
-                                result.penetration_normal
-                                );
-
-
+                            
                             if (EngineState.world.current_map.game_objects[nqo.A].wants_movement.contains_nan() ||
                                 EngineState.world.current_map.game_objects[nqo.A].wants_movement.Length() < Math3D.epsilon) {
                                 EngineState.world.current_map.game_objects[nqo.A].wants_movement = Vector3.Zero;
@@ -96,6 +91,8 @@ namespace Magpie.Engine.Collision.Solver {
                     }
                     
                     EngineState.world.current_map.game_objects[nqo.A].collision.solve.solver_iterations++;
+
+                    EngineState.world.current_map.game_objects[nqo.A].post_solve();
 
                     if (hit && EngineState.world.current_map.game_objects[nqo.A].collision.solve.solver_iterations < 4)
                         goto iterate;

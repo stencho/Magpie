@@ -22,7 +22,7 @@ namespace Magpie.Engine.WorldElements {
         public Vector3 velocity_normal = Vector3.Zero;
         public float velocity = 0;
 
-        public List<long> octree_base_nodes = new List<long>();
+        public List<ulong> octree_nodes = new List<ulong>();
 
         public Vector3 scale = Vector3.One;
 
@@ -50,6 +50,7 @@ namespace Magpie.Engine.WorldElements {
         public bool gravity = true;
         public float gravity_current = 0f;
 
+        public bool object_outside_map = false;
 
         public object_info(Vector3 position) {
             this.position = position;
@@ -140,7 +141,7 @@ namespace Magpie.Engine.WorldElements {
             }
             if (collision != null) {
                 collision.movebox.draw(world);
-                //Draw3D.cube(bounding_box(), Color.Red);
+                Draw3D.cube(bounding_box(), Color.Red);
 
                 lock (collision.contact_points) {
                     foreach(var cp in collision.contact_points) {

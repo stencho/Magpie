@@ -40,17 +40,20 @@ namespace Magpie.Engine.Collision.Solver {
 
                     if (current_obj.collision == null) continue;
 
-                    var bb = EngineState.world.current_map.game_objects[obj].bounding_box();
+                    var bb = current_obj.bounding_box();
+
                     var octree_hits = EngineState.world.current_map.octree.objects_in_intersecting_nodes(bb);
 
                     narrow_queue_obj nqo;
                     List<int> bb_hits = new List<int>();
 
-                    foreach (var target in octree_hits) {
-                        if (EngineState.world.current_map.game_objects[target].collision == null || target == obj) continue;
 
-                        if (bb.Intersects(EngineState.world.current_map.game_objects[target].bounding_box())) {
-                            bb_hits.Add(target);
+                    foreach (var target in octree_hits) {
+                    //foreach(var target in EngineState.world.current_map.game_objects.Keys) { 
+                        if (EngineState.world.current_map.game_objects[target].collision == null || target == obj) continue;
+                        var tbb =EngineState.world.current_map.game_objects[target].bounding_box();
+                        if (tbb.Intersects(bb)) {
+                             bb_hits.Add(target);
                         }
                     }
                     if (bb_hits.Count > 0) {

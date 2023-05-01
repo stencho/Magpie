@@ -133,10 +133,10 @@ namespace MagpieBuild.TestActors {
             }
 
             if (binds.pressed("speenR")) {
-                speed_mult += 0.5f;
+                //speed_mult += 0.5f;
             } else if (binds.pressed("speenL")) {
-                if (speed_mult > 1f)
-                    speed_mult -= 0.5f;
+                //if (speed_mult > 1f)
+                    //speed_mult -= 0.5f;
             }
 
 
@@ -148,11 +148,11 @@ namespace MagpieBuild.TestActors {
             //wants_movement = Vector3.Zero;
 
             if (binds.pressed("speenL")) {
-               // this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, -1f * Clock.internal_frame_time_delta);
+                this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, -1f * Clock.internal_frame_time_delta);
 
             }
             if (binds.pressed("speenR")) {
-               // this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, 1f * Clock.internal_frame_time_delta);
+                this.orientation *= Matrix.CreateFromAxisAngle(Vector3.Up, 1f * Clock.internal_frame_time_delta);
             }
 
 

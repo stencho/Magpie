@@ -16,6 +16,7 @@ using static Magpie.Engine.Controls;
 
 using static Magpie.Engine.ControlBinds;
 using Magpie.Graphics.Lights;
+using Magpie.Engine.WorldElements;
 
 namespace MagpieTestbed.TestActors {
     [Serializable]
@@ -106,6 +107,7 @@ namespace MagpieTestbed.TestActors {
             } else if (binds.just_released("click_right") || !EngineState.is_active) {
                 aiming = false;
             }
+
 
             if (aiming && !was_aiming) {
                 stored_pos = Controls.mouse_position;

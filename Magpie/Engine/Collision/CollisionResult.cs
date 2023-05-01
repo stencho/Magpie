@@ -70,6 +70,7 @@ namespace Magpie.Engine.Collision {
         public volatile List<Vector3> sweep_points = new List<Vector3>();
         public Vector3 sweep_end = Vector3.Zero;
         public Vector3 sweep_slide = Vector3.Zero;
+        public Vector3 sweep_slide_dir = Vector3.Zero;
 
         public void draw(Vector3 world_pos) {
             if (simplex_list == null) return;

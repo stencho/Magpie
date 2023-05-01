@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Magpie.Engine.Collision.Octrees;
+using Magpie.Engine.WorldElements;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -128,7 +129,7 @@ namespace Magpie.Engine.Collision {
             HashSet<int> objects = new HashSet<int>();
             foreach(DynamicNode n in base_nodes.Values) {
                 if (n.bounds.Intersects(bounds)) {
-                    if (n.subdivided)
+                   if (n.subdivided)
                         add_lowest_objects(ref objects, bounds, n.nodes);
                     else {
                         foreach (octree_value v in n.values.Values) {
@@ -248,12 +249,12 @@ namespace Magpie.Engine.Collision {
 
 
         public void add_value(int object_id) {
-            var pos = EngineState.world.current_map.game_objects[object_id].position;
+            var bb = EngineState.world.current_map.game_objects[object_id].bounding_box();
             if (subdivided) {
                 for (byte z = 0; z < 2; z++) {
                     for (byte y = 0; y < 2; y++) {
                         for (byte x = 0; x < 2; x++) {
-                            if (nodes[x,y,z].bounds.Contains(pos) != ContainmentType.Disjoint) {
+                            if (nodes[x,y,z].bounds.Contains(bb) != ContainmentType.Disjoint) {
                                 if (!values.ContainsKey(object_id))
                                     values.Add(object_id, new octree_value() { id = object_id, next_subdiv_x = x, next_subdiv_y = y, next_subdiv_z = z });
                                 if (!nodes[x, y, z].values.ContainsKey(object_id))
@@ -390,6 +391,83 @@ namespace Magpie.Engine.Collision {
 
 
 
+        }
+    }
+
+
+    public class Octree {
+        Vector3 _min, _max;
+        float _width, _height, _depth;
+
+        float _node_size; public float node_size => _node_size;
+        int _subdivisions; public float subdivisions => _subdivisions;
+
+
+        Dictionary<int, Node> _nodes = new Dictionary<int, Node>();
+
+        public Node get_node(int node_path) => _nodes[node_path];
+
+        void subdivide_all() {
+            for (int z = 0; z < 1; z++) {
+                for (int y = 0; y < 1; y++) {
+                    for (int x = 0; x < 1; x++) {
+                        int tmp_id = 0;
+
+                        if (x > 0) tmp_id |= (1 << 0);
+                        if (y > 0) tmp_id |= (1 << 1);
+                        if (z > 0) tmp_id |= (1 << 2);
+
+                        _nodes.Add(tmp_id, new Node(tmp_id));
+                        subdivide(tmp_id,1);
+                    }
+                }
+            }
+        }
+        internal void subdivide(int id, int current_depth = 0) {
+            for (int z = 0; z < 1; z++) {
+                for (int y = 0; y < 1; y++) {
+                    for (int x = 0; x < 1; x++) {
+                        int tmp_id = id;
+
+                        if (x > 0) tmp_id |= (1 << (4*current_depth)+0);
+                        if (y > 0) tmp_id |= (1 << (4*current_depth)+1);
+                        if (z > 0) tmp_id |= (1 << (4*current_depth)+2);
+
+                        _nodes.Add(tmp_id, new Node(tmp_id));
+                        subdivide(tmp_id, current_depth + 1);
+                    }
+                }
+            }
+        }
+
+
+        uint encode_path(int step, uint id_current, bool X, bool Y, bool Z) {
+
+            return 0;
+        }
+
+        public class Node {
+            int path;
+            public bool subdivided = false;
+
+            public Node(int path) { this.path = path; }
+        }
+
+        public Dictionary<long, Node> nodes = new Dictionary<long, Node>();
+
+        public Octree(Vector3 min, Vector3 max, int subdivisions) {
+            if (subdivisions < 1 || subdivisions > 8) throw new Exception();
+
+            _min = min;
+            _max = max;
+
+            _width = (_max - _min).X;
+            _height = (_max - _min).Y;
+            _depth = (_max - _min).Z;
+
+            _subdivisions = subdivisions;
+
+            subdivide_all();
         }
     }
 
