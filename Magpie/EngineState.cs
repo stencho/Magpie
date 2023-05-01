@@ -53,10 +53,18 @@ namespace Magpie {
         public static ControlBinds player_binds_four;
 
         public static UIWindowManager window_manager;
+        public static UIWindow debug_info_window;
 
         public static World world;
 
         public static StringBuilder startup_log;
+
+        public static void debug_info_window_draw() {
+        }
+        public static void debug_info_window_draw_internal() {
+            world.current_map.octree.draw_info_2D();
+
+        }
 
         public static void initialize(XYPair game_resolution, GameWindow game_window,
             GraphicsDevice gd, GraphicsDeviceManager gdm, Game game) {
@@ -171,6 +179,11 @@ namespace Magpie {
 
                 startup_log.AppendLine("initializing window manager");
                 window_manager = new UIWindowManager();
+
+                debug_info_window = new UIWindow(XYPair.One * 400, XYPair.One * 260);
+                debug_info_window.draw_action = debug_info_window_draw;
+                debug_info_window.internal_draw_action = debug_info_window_draw_internal;
+                window_manager.add_window(debug_info_window);
 
                 startup_log.AppendLine("setting up gvar actions");
                 //add actions to all the gvars that need them, this comes late so that they don't get triggered during setup

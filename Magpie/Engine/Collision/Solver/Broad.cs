@@ -41,21 +41,22 @@ namespace Magpie.Engine.Collision.Solver {
                     if (current_obj.collision == null) continue;
 
                     var bb = current_obj.bounding_box();
-
-                    var octree_hits = EngineState.world.current_map.octree.objects_in_intersecting_nodes(bb);
+                    return;
+                    //var octree_hits = EngineState.world.current_map.octree.objects_in_intersecting_nodes(bb);
 
                     narrow_queue_obj nqo;
                     List<int> bb_hits = new List<int>();
 
 
-                    foreach (var target in octree_hits) {
+                    //foreach (var target in octree_hits) {
                     //foreach(var target in EngineState.world.current_map.game_objects.Keys) { 
-                        if (EngineState.world.current_map.game_objects[target].collision == null || target == obj) continue;
-                        var tbb =EngineState.world.current_map.game_objects[target].bounding_box();
-                        if (tbb.Intersects(bb)) {
-                             bb_hits.Add(target);
-                        }
-                    }
+                        //if (EngineState.world.current_map.game_objects[target].collision == null || target == obj) continue;
+                        //var tbb =EngineState.world.current_map.game_objects[target].bounding_box();
+                        //if (tbb.Intersects(bb)) {
+                             //bb_hits.Add(target);
+                        //}
+                    //}
+                    /*
                     if (bb_hits.Count > 0) {
                         World.internal_frame_probe.set("solving bb " + obj.ToString());
                         nqo = new narrow_queue_obj(obj, bb_hits);
@@ -67,6 +68,7 @@ namespace Magpie.Engine.Collision.Solver {
                         EngineState.world.current_map.game_objects[obj].post_solve();
                         EngineState.world.current_map.game_objects[obj].wants_movement = Vector3.Zero;
                     }
+                    */
                 } else if (output_solver == null) {
                     queue.Clear();
                 }

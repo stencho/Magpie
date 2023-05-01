@@ -22,8 +22,6 @@ namespace Magpie.Engine.WorldElements {
         public Vector3 velocity_normal = Vector3.Zero;
         public float velocity = 0;
 
-        public List<ulong> octree_nodes = new List<ulong>();
-
         public Vector3 scale = Vector3.One;
 
         public Matrix orientation = Matrix.Identity;
@@ -50,6 +48,7 @@ namespace Magpie.Engine.WorldElements {
         public bool gravity = true;
         public float gravity_current = 0f;
 
+        public HashSet<int> octree_leaves = new HashSet<int>();
         public bool object_outside_map = false;
 
         public object_info(Vector3 position) {

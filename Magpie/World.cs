@@ -123,11 +123,11 @@ namespace Magpie {
 
                     current_map.do_spawn_queue();
 
-                        solver.solve();
+                        //solver.solve();
 
                     //current_map.test_solve();
 
-                    /*
+                    
                     foreach (int oi in current_map.game_objects.Keys) {
 
                         current_map.game_objects[oi].pre_update();
@@ -143,8 +143,8 @@ namespace Magpie {
 
                         current_map.game_objects[oi].post_solve();
                     }
-                    */
-                    current_map.octree.update_tree_structure();
+                    
+                    //current_map.octree.update_tree_structure();
                 }
 
 

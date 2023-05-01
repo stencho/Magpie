@@ -10,13 +10,13 @@ using Microsoft.Xna.Framework;
 
 namespace Magpie.Engine.Collision.Octrees
 {
-    public class Octree
+    public class MCOctree
     {
         public Node[,,] nodes;
 
         public BoundingBox bounds;
 
-        public Octree(Vector3 min, Vector3 max)
+        public MCOctree(Vector3 min, Vector3 max)
         {
             bounds = new BoundingBox(min, max);
 

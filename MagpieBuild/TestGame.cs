@@ -63,9 +63,12 @@ namespace MagpieBuild
 
             gvars.write_gvars_to_disk();
         }
+
         int player_id = 0;
         int move_id = 0;
         int cube_id = 0;
+
+
         protected override void Initialize() {
             base.Initialize();
 

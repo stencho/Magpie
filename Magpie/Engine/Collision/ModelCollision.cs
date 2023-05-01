@@ -22,7 +22,7 @@ namespace Magpie.Engine.Collision
 
         BoundingBox bounds;
 
-        public Octree octree;
+        public MCOctree octree;
 
         public BoundingBox get_bounds (Matrix world) {
             return CollisionHelper.BoundingBox_around_transformed_points(world, points);
@@ -120,7 +120,7 @@ namespace Magpie.Engine.Collision
                 }
 
                 bounds = get_bounds(Matrix.Identity);
-                octree = new Octree(bounds.Min, bounds.Max);
+                octree = new MCOctree(bounds.Min, bounds.Max);
                 //octree.subdivide_all(2);
             }
 
