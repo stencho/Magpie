@@ -82,22 +82,29 @@ namespace Magpie.Graphics.UI {
 
         int resize_handle_thickness = 10;
 
-        IUIForm _parent_form;
-        bool is_child => _parent_form != null;
+        public IUIForm parent_form { get; set; }
+
+        bool is_child => parent_form != null;
 
         public string list_subforms() {
             return UIStandard.list_subforms(subforms);
         }
 
+        public void add_subform(IUIForm subform) {
+            subform.parent_form = this;
+            
+            subforms.Add(subform);
+        }
+
         public UIWindow(IUIForm parent_form = null) {
-            _parent_form = parent_form;
+            parent_form = parent_form;
             setup();
         }
 
         public UIWindow(XYPair position, XYPair size, IUIForm parent_form = null) {
             this.position = position;
             this.size = size;
-            _parent_form = parent_form;
+            parent_form = parent_form;
 
             setup();
         }
@@ -128,25 +135,25 @@ namespace Magpie.Graphics.UI {
 
 
         static Shape2D _mouse_coll_obj_child;
-        XYPair parent_pos => _parent_form.position;
+        XYPair parent_pos => parent_form.position;
 
         public virtual void update() {
             test_mouse();
 
             if (is_child) {
-                ((BoundingBox2D)_collision["form"]).position = (position + _parent_form.client_top_left).ToVector2();
+                ((BoundingBox2D)_collision["form"]).position = (position + parent_form.client_top_left).ToVector2();
                 ((BoundingBox2D)_collision["form"]).SetSize(size.ToVector2());
 
-                ((BoundingBox2D)_collision["top_bar"]).position = (position + _parent_form.client_top_left).ToVector2();
+                ((BoundingBox2D)_collision["top_bar"]).position = (position + parent_form.client_top_left).ToVector2();
                 ((BoundingBox2D)_collision["top_bar"]).SetSize((Vector2.UnitX * size.X) + (Vector2.UnitY * top_bar_height));
 
                 ((BoundingBox2D)_collision["resize_handle_R"]).set(
-                    ((position + _parent_form.client_top_left) + (size - (XYPair.UnitX * resize_handle_thickness)) - (XYPair.UnitY * size.Y) + (XYPair.UnitX * (resize_handle_thickness / 2))),
-                    bottom_right + _parent_form.client_top_left + (XYPair.One * (resize_handle_thickness / 2)).ToVector2());
+                    ((position + parent_form.client_top_left) + (size - (XYPair.UnitX * resize_handle_thickness)) - (XYPair.UnitY * size.Y) + (XYPair.UnitX * (resize_handle_thickness / 2))),
+                    bottom_right + parent_form.client_top_left + (XYPair.One * (resize_handle_thickness / 2)).ToVector2());
 
                 ((BoundingBox2D)_collision["resize_handle_B"]).set(
-                    ((position + _parent_form.client_top_left) + (size - (XYPair.UnitY * resize_handle_thickness)) - (XYPair.UnitX * size.X) + (XYPair.UnitY * (resize_handle_thickness / 2))),
-                    bottom_right + _parent_form.client_top_left + (XYPair.One * (resize_handle_thickness / 2)).ToVector2());
+                    ((position + parent_form.client_top_left) + (size - (XYPair.UnitY * resize_handle_thickness)) - (XYPair.UnitX * size.X) + (XYPair.UnitY * (resize_handle_thickness / 2))),
+                    bottom_right + parent_form.client_top_left + (XYPair.One * (resize_handle_thickness / 2)).ToVector2());
 
 
                 mdown = Controls.is_pressed(MouseButtons.Left) && EngineState.is_active && Controls.mouse_in_bounds;

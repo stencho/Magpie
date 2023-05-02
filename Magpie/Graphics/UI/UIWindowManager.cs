@@ -156,7 +156,7 @@ namespace Magpie.Graphics.UI {
 
             if (!EngineState.is_active) return;
 
-            for (int i = windows.Count - 1; i >= 0; i--) {
+            for (int i = windows.Count-1; i >= 0; --i) {
                 windows[i].update();
 
 

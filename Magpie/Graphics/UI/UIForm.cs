@@ -39,6 +39,8 @@ namespace Magpie.Graphics.UI {
         List<IUIForm> subforms { get; set; }
         Dictionary<string, Shape2D> collision { get; }
 
+        IUIForm parent_form { get; set; }
+
         List<string> mouse_interactions { get; }
 
         bool test_mouse();
@@ -108,7 +110,7 @@ namespace Magpie.Graphics.UI {
 
         float molerp = 0;
         
-        IUIForm parent_form;
+        public IUIForm parent_form { get; set; }
 
         public UIButton(int X, int Y, int width, int height, string text) {
             position = new XYPair(X, Y);
@@ -165,7 +167,7 @@ namespace Magpie.Graphics.UI {
             var mo = test_mouse();
 
             mdown = Controls.is_pressed(MouseButtons.Left);
-                       
+           // mo = Math2D.AABB_test(mouse_position.X, mouse_position.Y, parent_top_left.X + X, parent_top_left.Y + Y, width, height);
             if (mo && (top_of_mouse_stack && is_child)) {
                 current_flags = button_mouse_status.mouse_over;
 

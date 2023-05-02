@@ -47,7 +47,27 @@ namespace Magpie {
         public static bool is_active;
         public static bool was_active;
 
-        public static ControlBinds player_binds_one;
+        public static int player_id_from_index(PlayerIndex index) {
+            switch (index) {
+                case PlayerIndex.One:
+                    return player_id;                    
+                case PlayerIndex.Two:
+                    return player_id_two;
+                case PlayerIndex.Three:
+                    return player_id_three;
+                case PlayerIndex.Four:
+                    return player_id_four;
+            }
+
+            return player_id;
+        }
+
+        public static int player_id;
+        public static int player_id_two;
+        public static int player_id_three;
+        public static int player_id_four;
+
+        public static ControlBinds player_binds;
         public static ControlBinds player_binds_two;
         public static ControlBinds player_binds_three;
         public static ControlBinds player_binds_four;
@@ -183,6 +203,11 @@ namespace Magpie {
                 debug_info_window = new UIWindow(XYPair.One * 400, XYPair.One * 260);
                 debug_info_window.draw_action = debug_info_window_draw;
                 debug_info_window.internal_draw_action = debug_info_window_draw_internal;
+
+                debug_info_window.add_subform(new UIButton(3, 40, 200, 30, "go to selected octree node"));
+
+                ((UIButton)debug_info_window.subforms[0]).set_action(goto_node_clicked);
+                
                 window_manager.add_window(debug_info_window);
 
                 startup_log.AppendLine("setting up gvar actions");
@@ -215,6 +240,11 @@ namespace Magpie {
 
             started = true;
         }
+
+        private static void goto_node_clicked() {
+
+        }
+
         static bool was_fullscreen = false;
         static void fullscreen() {
             if (gvars.get_bool("fullscreen") == was_fullscreen) return;
@@ -325,8 +355,8 @@ namespace Magpie {
             if (StaticControlBinds.just_pressed("screenshot")) Scene.screenshot();
 
             window_manager.update();
-                        
-            if (player_binds_one != null && player_binds_one.player_index != PlayerIndex.One) {player_binds_one.change_player_index(PlayerIndex.One);}
+                                    
+            if (player_binds != null && player_binds.player_index != PlayerIndex.One) {player_binds.change_player_index(PlayerIndex.One);}
             if (player_binds_two != null && player_binds_two.player_index != PlayerIndex.Two) {player_binds_two.change_player_index(PlayerIndex.Two);}
             if (player_binds_three != null && player_binds_three.player_index != PlayerIndex.Three) {player_binds_three.change_player_index(PlayerIndex.Three);}
             if (player_binds_four != null && player_binds_four.player_index != PlayerIndex.Four) {player_binds_four.change_player_index(PlayerIndex.Four);}

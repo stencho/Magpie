@@ -81,7 +81,7 @@ namespace Magpie.Graphics.UI {
 
         public int bottom_scroll_pos = 25;
 
-        IUIForm parent_form;
+        public IUIForm parent_form { get; set; }
 
         ConsoleInputHandler cih;
 
