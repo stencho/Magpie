@@ -30,7 +30,7 @@ namespace Magpie.Graphics {
         public Matrix frustum_projection { get; set; }
 
         public float near_clip { get; set; } = 0.1f;
-        public float far_clip { get; set; } = 1500f;
+        public float far_clip { get; set; } = 1000f;
 
         public float FOV { get; set; } = 90f;
         public float FOV_default { get; set; } = 90f;

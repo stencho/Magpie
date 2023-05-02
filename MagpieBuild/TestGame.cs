@@ -54,7 +54,7 @@ namespace MagpieBuild
             this.graphics.HardwareModeSwitch = false;
             this.graphics.IsFullScreen = false;
             this.graphics.PreferHalfPixelOffset = false;
-            IsFixedTimeStep = true;
+            IsFixedTimeStep = false;
             
         }
 
@@ -64,7 +64,7 @@ namespace MagpieBuild
             gvars.write_gvars_to_disk();
         }
 
-        int player_id = 0;
+
         int move_id = 0;
         int cube_id = 0;
 
@@ -81,10 +81,10 @@ namespace MagpieBuild
 
             while (EngineState.world == null) { }
 
-            player_id = world.current_map.add_object(new freecam_objinfo(Vector3.Backward * 15f + (Vector3.Up * 2f)));
+            EngineState.player_id = world.current_map.add_object(new freecam_objinfo(Vector3.Backward * 15f + (Vector3.Up * 2f)));
 
             
-            EngineState.camera = ((freecam_objinfo)world.current_map.game_objects[player_id]).cam;
+            EngineState.camera = ((freecam_objinfo)world.current_map.game_objects[EngineState.player_id]).cam;
 
 
             add_bindings(
@@ -100,6 +100,9 @@ namespace MagpieBuild
 
                 (bind_type.digital, controller_type.keyboard, Keys.PageUp, "t_up"),
                 (bind_type.digital, controller_type.keyboard, Keys.PageDown, "t_down"),
+
+                (bind_type.digital, controller_type.keyboard, Keys.Home, "t_upper"),
+                (bind_type.digital, controller_type.keyboard, Keys.End, "t_downer"),
 
                 (bind_type.digital, controller_type.keyboard, Keys.Space, "up"),
                 (bind_type.digital, controller_type.keyboard, Keys.C, "down"),
@@ -135,7 +138,7 @@ namespace MagpieBuild
             force_enable("toggle_console");
             force_enable("screenshot");
 
-            /*
+            
             cube_id = world.current_map.add_object(new object_info(Vector3.Left * 6 + (Vector3.Up * 3f), new render_info_model("cube", "zerocool_sharper"), new collision_info(new Cube(1f))));
 
             
@@ -154,7 +157,7 @@ namespace MagpieBuild
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one))));
-            */
+            
             /*
             Vector3.Up,
             Vector3.Forward,
@@ -171,7 +174,7 @@ namespace MagpieBuild
                     );
             }
             */
-            /*
+            
             var sphereid = world.current_map.add_object(new object_info(Vector3.Left * 1, new render_info_model("sphere", "trumpmap"), new collision_info(new Sphere(1f))));
 
             var triid = world.current_map.add_object(new object_info(Vector3.Right * 16, new collision_info(
@@ -186,12 +189,12 @@ namespace MagpieBuild
             var q2 = world.current_map.add_object(new object_info(Vector3.Up + (Vector3.Right * (60 + 12f)), new collision_info(new Quad(25f))));
             world.current_map.game_objects[q2].orientation = Matrix.CreateFromAxisAngle(Vector3.Backward, 16f);
             world.current_map.game_objects[q2].post_solve();
-             */
+             
             var q3 = world.current_map.add_object(new object_info(Vector3.Down * 2 + (Vector3.Right * 0)+ (Vector3.Forward * 0), new collision_info(new Quad(25f))));
             world.current_map.game_objects[q3].orientation = Matrix.CreateFromAxisAngle(Vector3.Right, 16f);
             world.current_map.game_objects[q3].post_solve();
 
-            /*
+            
             var bigcube = world.current_map.add_object(new object_info(Vector3.Forward * 65, new render_info_model("cube", "zerocool_sharper"), new collision_info(new Cube(1f))));
             world.current_map.game_objects[bigcube].scale = Vector3.One * 5f;
             world.current_map.game_objects[bigcube].post_solve();
@@ -201,10 +204,10 @@ namespace MagpieBuild
             var rcubeid = world.current_map.add_object(new object_info(Vector3.Right * 8, new render_info_model("cube", "zerocool_sharper"), new collision_info(new Cube(1f))));
             world.current_map.game_objects[rcubeid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
             world.current_map.game_objects[rcubeid].post_solve();
-            */
-
-            move_id = world.current_map.add_object(new gjkTestActor(Vector3.Left * 5f + (Vector3.Up * 5f), 
-                new render_info_model("cube", "zerocool_sharper"), 
+            
+            /*
+            move_id = world.current_map.add_object(new gjkTestActor((Vector3.UnitX + Vector3.UnitZ) * 500, 
+                new render_info_model("skull", "OnePXWhite"), 
                 new collision_info(
                 new Cube(1f)
                 //new Sphere(1f)
@@ -224,9 +227,11 @@ namespace MagpieBuild
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one,
                 RNG.rng_v3_neg_one_to_one)*/
-                )));
+                //)));
 
-            //world.current_map.game_objects[moveid].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, 16f);
+            //world.current_map.game_objects[move_id].scale = Vector3.One * 800;
+            //world.current_map.game_objects[move_id].orientation = Matrix.CreateFromAxisAngle(Vector3.Up, -60);
+            
             //new collision_info(new Triangle(Vector3.Right + Vector3.Forward, Vector3.Up, Vector3.Left + Vector3.Down))));
 
             /*((gjkTestActor)world.current_map.game_objects[move_id]).gjk_targets.Add(quad, new collision_result());
@@ -291,7 +296,7 @@ namespace MagpieBuild
 
             if (tapped("test")) {
                 world.current_map.add_object(
-                    new object_info(world.current_map.game_objects[player_id].position + (RNG.rng_v3_neg_one_to_one * 25), new render_info_model("sphere", "trumpmap"),
+                    new object_info(world.current_map.game_objects[EngineState.player_id].position + (RNG.rng_v3_neg_one_to_one * 25), new render_info_model("sphere", "trumpmap"),
                     new collision_info(new Sphere(1f)))
                     );
             }
@@ -328,7 +333,9 @@ namespace MagpieBuild
             GraphicsDevice.SetRenderTargets(EngineState.buffer.buffer_targets);
 
             world.Draw(GraphicsDevice, EngineState.camera);
-            //world.current_map.octree.draw();
+            world.current_map.octree.draw_nodes();
+
+
             EngineState.window_manager.render_window_internals();
 
             Clock.frame_probe.set("draw_2D");
@@ -366,7 +373,7 @@ namespace MagpieBuild
                         "## gvars ##\n" +
                         gvars.list_all() + "\n\n" +
                         EngineState.window_manager.list_windows() + "\n\n" +
-                        $"{EngineState.world.current_map.game_objects[player_id].binds.info()}\n"
+                        $"{EngineState.world.current_map.game_objects[EngineState.player_id].binds.info()}\n"
 
 
 

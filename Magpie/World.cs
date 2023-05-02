@@ -118,8 +118,9 @@ namespace Magpie {
                         //while (EngineState.drawing) {}
                     foreach (var obj in current_map.game_objects.Keys) {
                             current_map.game_objects[obj].update();
-                        
+
                     }
+
 
                     current_map.do_spawn_queue();
 
@@ -134,8 +135,11 @@ namespace Magpie {
                         current_map.game_objects[oi].update();
 
                         if (current_map.game_objects[oi].wants_movement != Vector3.Zero) {
+
+                            current_map.game_objects[oi].previous_position = current_map.game_objects[oi].position;
                             current_map.game_objects[oi].position += current_map.game_objects[oi].wants_movement;
                             current_map.game_objects[oi].wants_movement = Vector3.Zero;
+
                             current_map.game_objects[oi].resting = false;
                         } else {
                             current_map.game_objects[oi].resting = true;
@@ -143,7 +147,10 @@ namespace Magpie {
 
                         current_map.game_objects[oi].post_solve();
                     }
-                    
+
+                    current_map.octree.update_leaves_within_radius(current_map.update_range, EngineState.camera.position);
+
+
                     //current_map.octree.update_tree_structure();
                 }
 

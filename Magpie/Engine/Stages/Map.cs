@@ -14,9 +14,9 @@ using static Magpie.Engine.Collision.Collision2D;
 
 namespace Magpie.Engine.Stages {
     public class Map {
-        public float update_range = 1500f;
+        public float update_range = 200f;
 
-        public Octree octree = new Octree(Vector3.One * -500, Vector3.One * 500, 3);
+        public Octree octree = new Octree(Vector3.Zero, ((Vector3.Right + Vector3.Forward) * 1000) + (Vector3.Up * 750),6);
 
         public SegmentedTerrain terrain;
 

@@ -16,6 +16,8 @@ namespace Magpie.Engine.WorldElements {
         public int id = -1;
 
         public Vector3 position = Vector3.Zero;
+        public Vector3 previous_position = Vector3.Zero;
+
         public Vector3 wants_movement = Vector3.Zero;
 
 

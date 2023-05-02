@@ -73,7 +73,7 @@ namespace Magpie {
         public static ControlBinds player_binds_four;
 
         public static UIWindowManager window_manager;
-        public static UIWindow debug_info_window;
+        public static UIWindow octree_info_window;
 
         public static World world;
 
@@ -200,15 +200,17 @@ namespace Magpie {
                 startup_log.AppendLine("initializing window manager");
                 window_manager = new UIWindowManager();
 
-                debug_info_window = new UIWindow(XYPair.One * 400, XYPair.One * 260);
-                debug_info_window.draw_action = debug_info_window_draw;
-                debug_info_window.internal_draw_action = debug_info_window_draw_internal;
+                //OCTREE DEBUG INFO
+                octree_info_window = new UIWindow(XYPair.One * 400, XYPair.One * 260);
+                octree_info_window.draw_action = debug_info_window_draw;
+                octree_info_window.internal_draw_action = debug_info_window_draw_internal;
+                octree_info_window.change_text("world octree info");
 
-                debug_info_window.add_subform(new UIButton(3, 40, 200, 30, "go to selected octree node"));
+                octree_info_window.add_subform(new UIButton(3, 70, 200, 30, "go to selected octree node"));
 
-                ((UIButton)debug_info_window.subforms[0]).set_action(goto_node_clicked);
+                ((UIButton)octree_info_window.subforms[0]).set_action(goto_node_clicked);
                 
-                window_manager.add_window(debug_info_window);
+                window_manager.add_window(octree_info_window);
 
                 startup_log.AppendLine("setting up gvar actions");
                 //add actions to all the gvars that need them, this comes late so that they don't get triggered during setup
@@ -242,7 +244,8 @@ namespace Magpie {
         }
 
         private static void goto_node_clicked() {
-
+            world.current_map.game_objects[player_id].position =
+                world.current_map.octree.get_node(world.current_map.octree.walk_test_node).center;
         }
 
         static bool was_fullscreen = false;
