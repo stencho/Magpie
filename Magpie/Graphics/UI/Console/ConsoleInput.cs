@@ -327,26 +327,30 @@ namespace ConsoleInput
 
             // seek from the cursor to the end of the input,
             // find the next "end of word" char, then move to where it is
-            for (int i = cursor_position + 1; i < current_input.Length; i++) {
+            for (int i = cursor_position; i < current_input.Length; i++) {
                 if (current_input[i] == ' '
-                || current_input[i] == '('
-                || current_input[i] == ')'
-                || current_input[i] == '{'
-                || current_input[i] == '}'
-                || current_input[i] == '['
-                || current_input[i] == ']'
-                || current_input[i] == '.'
-                || current_input[i] == ','
-                || current_input[i] == ':'
-                || current_input[i] == ';'
-                || current_input[i] == '\''
-                || current_input[i] == '"'
-                || current_input[i] == '-'
-                || current_input[i] == '+'
-                || current_input[i] == '='
-                || current_input[i] == '?'
+                 || current_input[i] == '('
+                 || current_input[i] == ')'
+                 || current_input[i] == '{'
+                 || current_input[i] == '}'
+                 || current_input[i] == '['
+                 || current_input[i] == ']'
+                 || current_input[i] == '.'
+                 || current_input[i] == ','
+                 || current_input[i] == ':'
+                 || current_input[i] == ';'
+                 || current_input[i] == '\''
+                 || current_input[i] == '"'
+                 || current_input[i] == '-'
+                 || current_input[i] == '+'
+                 || current_input[i] == '='
+                 || current_input[i] == '?'
                 ) {
-                    move_cursor_right(ignore_shift, i - cursor_position + 1);
+                    if ((i - cursor_position) == 0)
+                        move_cursor_right(ignore_shift);
+                    else
+                        move_cursor_right(ignore_shift, (i - cursor_position));
+
                     return;
                 }
             }
@@ -361,30 +365,29 @@ namespace ConsoleInput
         public void move_cursor_left_one_word(bool ignore_shift) {
             if (!shift) deselect();
 
-            for (int i = cursor_position - 2; i > 0; i--) {
-                if (current_input[i] == ' '
-                || current_input[i] == '('
-                || current_input[i] == ')'
-                || current_input[i] == '{'
-                || current_input[i] == '}'
-                || current_input[i] == '['
-                || current_input[i] == ']'
-                || current_input[i] == '.'
-                || current_input[i] == ','
-                || current_input[i] == ':'
-                || current_input[i] == ';'
-                || current_input[i] == '\''
-                || current_input[i] == '"'
-                || current_input[i] == '-'
-                || current_input[i] == '+'
-                || current_input[i] == '='
-                || current_input[i] == '?'
+            for (int i = cursor_position; i > 0; i--) {
+                if (current_input[i-1] == ' '
+                 || current_input[i-1] == '('
+                 || current_input[i-1] == ')'
+                 || current_input[i-1] == '{'
+                 || current_input[i-1] == '}'
+                 || current_input[i-1] == '['
+                 || current_input[i-1] == ']'
+                 || current_input[i-1] == '.'
+                 || current_input[i-1] == ','
+                 || current_input[i-1] == ':'
+                 || current_input[i-1] == ';'
+                 || current_input[i-1] == '\''
+                 || current_input[i-1] == '"'
+                 || current_input[i-1] == '-'
+                 || current_input[i-1] == '+'
+                 || current_input[i-1] == '='
+                 || current_input[i-1] == '?'
                 ) {
-                    if (i != cursor_position - 1) {
-                        move_cursor_left(ignore_shift, Math.Abs(cursor_position - i));
-                    } else {
+                    if ((i - cursor_position) == 0)
                         move_cursor_left(ignore_shift);
-                    }
+                    else
+                        move_cursor_left(ignore_shift, Math.Abs(i - cursor_position));
                     return;
                 }
             }
