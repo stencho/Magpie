@@ -5,10 +5,11 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using static System.Windows.Forms.AxHost;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace Magpie.Engine {
-    class thread_bind {
+    class local_bind {
         //add playerindex system at some point, have static binds in enginestate
         //and whichever playerindex is selected here is also checked (alongside static control binds)
         PlayerIndex player_index = PlayerIndex.One;
@@ -21,29 +22,66 @@ namespace Magpie.Engine {
         public bool just_pressed => pressed && !was_pressed;
         public bool just_released => !pressed && was_pressed;
 
-        public bool held => StaticControlBinds.held(bind);
+        public bool held => StaticControlBinds.held(bind) || (parent.using_custom_binds && parent.custom_control_binds.held(bind));
         public bool was_held => _was_held; bool _was_held = false;
 
         public bool just_held => held && !was_held;
 
-        public double held_time => StaticControlBinds.held_time(bind);
-        public double pressed_time => StaticControlBinds.pressed_time(bind);
+        double cht,scht;
+        public double held_time {
+            get {
+                cht = 0; scht = 0;
+                if (parent.using_custom_binds) cht = parent.custom_control_binds.held_time(bind);
+                scht = StaticControlBinds.held_time(bind);
+                if (scht >= cht) return scht;
+                else return cht;
+            }
+        }
 
-        public thread_bind(string bind) { this.bind = bind; }
+        double cpt, scpt;
+        public double pressed_time {
+            get {
+                cpt = 0; scpt = 0;
+                if (parent.using_custom_binds) cpt = parent.custom_control_binds.pressed_time(bind);
+                scpt = StaticControlBinds.pressed_time(bind);
+                if (scpt >= cpt) return scpt;
+                else return cpt;
+            }
+        }
 
-        public thread_bind() { }
-        public thread_bind(PlayerIndex player_index) { this.player_index = player_index; }
+        ThreadsafeBindManager parent;
+        bool static_control_bind = false;
+        public local_bind(string bind, ThreadsafeBindManager parent, bool staticCB) { 
+            this.bind = bind; this.parent = parent; this.static_control_bind = staticCB;
+        }
+
+        public local_bind() { }
+        public local_bind(PlayerIndex player_index) { this.player_index = player_index; }
 
         public void update() {
-            was_pressed = pressed;
-            pressed = StaticControlBinds.pressed(bind);
+            was_pressed = pressed; pressed = false;
+            if (static_control_bind)
+                pressed = pressed | StaticControlBinds.pressed(bind);
+            else 
+                pressed = pressed | parent.custom_control_binds.pressed(bind); 
             _was_held = held;                  
         }
     }
 
-    public class ThreadedBindManager {
-        Dictionary<string, thread_bind> binds = new Dictionary<string, thread_bind>();  
-        
+    public class ThreadsafeBindManager {
+        Dictionary<string, local_bind> binds = new Dictionary<string, local_bind>();
+        internal ControlBinds custom_control_binds = null;
+
+        internal bool using_custom_binds = false;
+
+        public ThreadsafeBindManager() { }
+        public ThreadsafeBindManager(ControlBinds custom_control_binds) {
+
+            this.custom_control_binds = custom_control_binds;
+            using_custom_binds = true;
+
+        }
+
         public string info() {
             StringBuilder sb = new StringBuilder();
             foreach (var k in binds.Keys)
@@ -53,15 +91,18 @@ namespace Magpie.Engine {
         }
 
         public void update() {
+            if (using_custom_binds) custom_control_binds.update();
             foreach (string key in binds.Keys) {
                 binds[key].update();
             }
         }
         void maybe_new_bind(string bind) {
             if (!binds.ContainsKey(bind)) {
-                if (StaticControlBinds.bind_exists(bind)) {
-                    binds.Add(bind, new thread_bind(bind));
-                }
+                if (StaticControlBinds.bind_exists(bind)) 
+                    binds.Add(bind, new local_bind(bind, this, true));                
+                else if (using_custom_binds && custom_control_binds.bind_exists(bind)) 
+                    binds.Add(bind, new local_bind(bind, this, false));
+                
             }
         }
         public double pressed_time(string bind) {

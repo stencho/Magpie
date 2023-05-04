@@ -303,8 +303,12 @@ namespace Magpie.Engine {
                 ? digital_binds.bind_just_released(bind)
                 : ((global_enable != global_enable_prev && digital_binds.bind_pressed_ignore_enable(bind)) ? true : false));
 
+        public double pressed_time(string bind) => digital_binds.bind_pressed_time(bind);
+
         public bool held(string bind) => digital_binds.bind_held(bind);
         public bool just_held(string bind) => digital_binds.bind_just_held(bind);
+
+        public double held_time(string bind) => digital_binds.bind_held_time(bind);
 
         public bool tapped(string bind) => digital_binds.bind_tapped(bind);
 
@@ -314,6 +318,8 @@ namespace Magpie.Engine {
         public void add_bind_digital(MouseButtons button, params string[] binds) => digital_binds.add_bind(button, binds);
         public void add_bind_digital(XInputButtons button, params string[] binds) => digital_binds.add_bind(button, binds);
         #endregion
+
+        public bool bind_exists(string bind) => digital_binds.bind_exists(bind);
 
         public void change_player_index(PlayerIndex index) { _player_index = index; }
 
