@@ -65,7 +65,7 @@ namespace MagpieTestbed.TestActors {
 
         bool aiming = false;
         bool was_aiming = false;
-        ThreadedBindManager binds = new ThreadedBindManager();
+        ThreadBindManager binds = new ThreadBindManager();
         public void Update() {
             binds.update();
             /*

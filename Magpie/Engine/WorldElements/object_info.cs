@@ -39,7 +39,7 @@ namespace Magpie.Engine.WorldElements {
         public Action update_action;
         public Action draw_action;
 
-        public ThreadedBindManager binds = new ThreadedBindManager();
+        public ThreadBindManager binds = new ThreadBindManager();
 
         public bool resting = false;
         public bool updated = false;

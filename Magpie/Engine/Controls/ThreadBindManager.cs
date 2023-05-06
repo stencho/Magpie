@@ -5,8 +5,6 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
-using static System.Windows.Forms.AxHost;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace Magpie.Engine {
     class local_bind {
@@ -49,9 +47,9 @@ namespace Magpie.Engine {
             }
         }
 
-        ThreadsafeBindManager parent;
+        ThreadBindManager parent;
         bool static_control_bind = false;
-        public local_bind(string bind, ThreadsafeBindManager parent, bool staticCB) { 
+        public local_bind(string bind, ThreadBindManager parent, bool staticCB) { 
             this.bind = bind; this.parent = parent; this.static_control_bind = staticCB;
         }
 
@@ -68,14 +66,14 @@ namespace Magpie.Engine {
         }
     }
 
-    public class ThreadsafeBindManager {
+    public class ThreadBindManager {
         Dictionary<string, local_bind> binds = new Dictionary<string, local_bind>();
         internal ControlBinds custom_control_binds = null;
 
         internal bool using_custom_binds = false;
 
-        public ThreadsafeBindManager() { }
-        public ThreadsafeBindManager(ControlBinds custom_control_binds) {
+        public ThreadBindManager() { }
+        public ThreadBindManager(ControlBinds custom_control_binds) {
 
             this.custom_control_binds = custom_control_binds;
             using_custom_binds = true;
