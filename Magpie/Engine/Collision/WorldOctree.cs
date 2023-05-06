@@ -64,6 +64,9 @@ namespace Magpie.Engine.Collision {
 
         public Node get_node(int node_path) => nodes[node_path];
 
+        public ControlBinds extra_binds = new ControlBinds();
+        public ThreadBindManager binds;
+
         public Octree(Vector3 min, Vector3 max, int subdivisions) {
             if (subdivisions < 1 || subdivisions > 7) throw new Exception();
 
@@ -81,45 +84,48 @@ namespace Magpie.Engine.Collision {
             _subdivisions = subdivisions;
 
             subdivide_all();
+
+            extra_binds.add_bind_digital(Microsoft.Xna.Framework.Input.Keys.Up, "test_fart");
+            binds = new ThreadBindManager(extra_binds);
         }
 
-        public ThreadedBindManager binds = new ThreadedBindManager();
+
         public void update_leaves_within_radius(float radius, Vector3 center) {
             List<int> leaf_ids;
 
             binds.update();
 
-            if (binds.just_released("t_forward")) {
+            if (binds.just_pressed("test_fart")) {
                 walk_test_node = step_forward(walk_test_node);
             }
-            if (binds.just_released("t_backward")) {
+            if (binds.just_pressed("t_backward")) {
                 walk_test_node = step_backward(walk_test_node);
             }
 
-            if (binds.just_released("t_left")) {
+            if (binds.just_pressed("t_left")) {
                 walk_test_node = step_left(walk_test_node);
             }
-            if (binds.just_released("t_right")) {
+            if (binds.just_pressed("t_right")) {
                 walk_test_node = step_right(walk_test_node);
             }
 
-            if (binds.just_released("t_up")) {
+            if (binds.just_pressed("t_up")) {
                 walk_test_node = step_up(walk_test_node);
             }
-            if (binds.just_released("t_down")) {
+            if (binds.just_pressed("t_down")) {
                 walk_test_node = step_down(walk_test_node);
             }
 
-            if (binds.just_released("t_upper")) {
+            if (binds.just_pressed("t_upper")) {
                 move_up_one_level(ref walk_test_node);
             }
 
-            if (binds.just_released("t_downer")) {
+            if (binds.just_pressed("t_downer")) {
 
 
             }
 
-            if (binds.just_released("test")) {
+            if (binds.just_pressed("test")) {
                 walk_test_node = walk_test_node_corner;
             }
         }
@@ -150,7 +156,7 @@ namespace Magpie.Engine.Collision {
             return l;
         }
 
-        public List<int> raycast_node_intersections(Ray ray) {
+        public List<int> leaf_nodes_in_ray(Ray ray) {
             var l = get_all_nodes_at_path(0 | (1 << 0));
             List<int> hits = new List<int>();
 
@@ -169,8 +175,7 @@ namespace Magpie.Engine.Collision {
 
             return hits;
         }
-
-        public void raycast_recurse(ref List<int> hits, Ray ray, int path) {
+        void raycast_recurse(ref List<int> hits, Ray ray, int path) {
             var l = get_all_nodes_at_path(path);
 
             foreach (var node in l) {
@@ -187,6 +192,116 @@ namespace Magpie.Engine.Collision {
         }
 
 
+        public List<int> leaf_nodes_in_boundingbox(BoundingBox bb) {
+            var l = get_all_nodes_at_path(0 | (1 << 0));
+            List<int> hits = new List<int>();
+
+            foreach(var node in l) {
+                if (node.subdivided) {
+                    if (node.bounds.Intersects(bb)) {
+                        bb_recurse(ref hits, bb, node.path);
+                    }
+                } else {
+                    if (node.bounds.Intersects(bb)) {
+                        hits.Add(node.path);
+                    }
+                }
+            }
+
+            return hits;
+        }
+        void bb_recurse(ref List<int> hits, BoundingBox bb, int path) {
+            var l = get_all_nodes_at_path(path);
+
+            foreach (var node in l) {
+                if (node.subdivided) {
+                    if (node.bounds.Intersects(bb)) {
+                        bb_recurse(ref hits, bb, node.path);
+                    }
+                } else {
+                    if (node.bounds.Intersects(bb)) {
+                        hits.Add(node.path);
+                    }
+                }
+            }
+        }
+
+        //TODO REPLACE THIS WITH DIVISION ONCE LEAF_NODE_SIZE EXISTS
+        public int leaf_node_at_point(Vector3 point) {
+            int start_node = 0b1000000000000000;
+            int hit_node = 0;
+            for (int z = 0; z < 2; z++) {
+                for (int y = 0; y < 2; y++) {
+                    for (int x = 0; x < 2; x++) {
+                        int current_path = start_node;
+                        if (x > 0) enable_bit(ref current_path, 1);
+                        if (y > 0) enable_bit(ref current_path, 2);
+                        if (z > 0) enable_bit(ref current_path, 3);
+                        if (nodes[current_path].bounds.Contains(point) != ContainmentType.Disjoint) {
+                            lnap_recurse(ref hit_node, 1, current_path, point);
+                        }
+                        if (hit_node != 0) return hit_node;
+                    }
+                }
+            }
+            return 0;
+        }
+        void lnap_recurse(ref int hit, int depth, int path, Vector3 point) {
+
+            if (path == 0) return;
+            if (!nodes[path].subdivided) {
+                if (nodes[path].bounds.Contains(point) != ContainmentType.Disjoint) {
+                    hit = path;
+                }
+                return;
+            }
+
+            for (int z = 0; z < 2; z++) {
+                for (int y = 0; y < 2; y++) {
+                    for (int x = 0; x < 2; x++) {
+                        int current_path = path | (1 << (4 * (depth)));
+                        if (x > 0) enable_bit(ref current_path, (4 * (depth)) + 1);
+                        if (y > 0) enable_bit(ref current_path, (4 * (depth)) + 2);
+                        if (z > 0) enable_bit(ref current_path, (4 * (depth)) + 3);
+
+                        if (nodes[path].bounds.Contains(point) != ContainmentType.Disjoint) {
+                            lnap_recurse(ref hit, depth + 1, current_path, point);
+                        }
+                    }
+                }
+            }
+        }
+
+        public List<int> leaf_nodes_in_boundingbox_bitwise_walk(BoundingBox bb) {
+            int leaf_min = leaf_node_at_point(bb.Min);
+            int leaf_max = leaf_node_at_point(bb.Max);
+
+            int walk_id = leaf_min;
+            //Debug.WriteLine($"{leaf_min} -> {leaf_max}");
+
+            List<int> leaves = new List<int>();
+
+            // HOW TO MAKE THIS TOMORROW OR WHATEVER
+
+            // need to walk the ID from leaf_min to leaf_max,
+            // basically the same way as the for x/y/z stuff above, 
+            // but instead of 0-1, add X/Y/Z values to the Node class,
+            // representing the X/Y/Z position in terms of nodes/axis
+            // at a depth of 2 it would be 8 * 8 nodes, 4 nodes per axis,
+            // so 32,32,32 would be just after the center point 
+
+            // knowing this, we can walk the tree on each axis from min to max
+            // and stop once we hit the difference between node[leaf_min].node_xyz and node[leaf_max].node_xyz 
+            
+            //lnibbbw_recurse();
+            
+            
+            //return leaves;
+
+        }
+        void lnibbbw_recurse() {
+
+        }
 
         internal void draw_all_layers(int path) {
             int working_path = path;
@@ -203,11 +318,11 @@ namespace Magpie.Engine.Collision {
         public void draw_nodes() {
             //Draw3D.cube(Vector3.Zero, Vector3.One, Color.Red, Matrix.Identity);
 
-            var ray_nodes = raycast_node_intersections(new Ray(EngineState.camera.position, EngineState.camera.direction * EngineState.camera.far_clip));
+            var ray_nodes = leaf_nodes_in_ray(new Ray(EngineState.camera.position, EngineState.camera.direction * EngineState.camera.far_clip));
 
             //Draw3D.cube(nodes[ray_nodes[0]].bounds, Color.Red);
             foreach(int n in ray_nodes) {
-                draw_all_layers(n);
+                //draw_all_layers(n);
                 Draw3D.cube(nodes[n].bounds, Color.MonoGameOrange);
             }
 
@@ -253,6 +368,12 @@ $"{node_count_total} : {node_count_smallest}\n" +
                 $"{binary_string(step_left(walk_test_node))}<-{binary_string(walk_test_node)}->{binary_string(step_right(walk_test_node))}\n" +
                 $"{sb.ToString()}",
                 Vector2.One * 7, Color.HotPink);
+
+            /*
+            Draw2D.text("pf",
+                $"{}",
+                Vector2.One * 7, Color.HotPink);
+            */
         }
 
 
