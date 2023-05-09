@@ -363,16 +363,25 @@ namespace Magpie.Engine {
                     if (control_poll_probe.since_frame_start() >= control_thread_ms) break;
                 }
                 mouse_lock_p = mouse_lock;
+
+
+
+                update(EngineState.window, EngineState.game.IsActive, EngineState.resolution);
+                StaticControlBinds.update();
+
                 control_poll_probe.end_of_frame();
             }
         }
-        public static void update(GameWindow window, bool is_active, XYPair res) {
-            
+
+        public static void spawn_thread_if_null() {
             if (control_thread == null) {
                 control_thread = new Thread(control_thread_update);
                 control_thread.Start();
             }
+        }
 
+        public static void update(GameWindow window, bool is_active, XYPair res) {
+            //spawn_thread_if_null();
             scroll_wheel_changed();
 
             ksp = ks;
