@@ -98,6 +98,7 @@ namespace Magpie {
             while (EngineState.running) {
                 internal_frame_probe.start_of_frame();
 
+
                 Controls.pull_accumulated_md_internal();
 
                 update_frame_rate_avg = 0;
@@ -112,6 +113,7 @@ namespace Magpie {
 
                 internal_frame_probe.set("update");
                 lock (current_map) {
+                    /*
                     foreach (var obj in current_map.game_objects.Keys) {
                         current_map.game_objects[obj].pre_update();
                     }
@@ -119,7 +121,7 @@ namespace Magpie {
                     foreach (var obj in current_map.game_objects.Keys) {
                             current_map.game_objects[obj].update();
 
-                    }
+                    }*/
 
 
                     current_map.do_spawn_queue();
