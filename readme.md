@@ -3,7 +3,20 @@
 this is a several-years-long single-idiot attempt to write a 3D game engine. it's going alright<br>
 it's called magpie because I like magpies and naming projects after birds<br>
 
-have a look around MagpieBuild/scr for some idea of what this mess can do and the troubles I've experienced<br>
+here are some images of the nonsense it's capable of<br>
+I have no way to explain the use of tump programmer art. tumpl<br>
+
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133235758403855399.png width=400></img>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133114626191656635.png width=400></img><br>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133044561005967787.jpg width=400></img>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr132966595510168487.jpg width=400></img><br>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133091138553824388.png width=400></img>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133215412581394526.png width=400></img><br>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133086050450791444.png width=400></img>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133085982162092423.png width=400></img><br>
+
+<p>tirmp</p>
+
 
 ### random stuff it currently supports in one way or another
 - 2D GJK collision detection
@@ -40,17 +53,3 @@ have a look around MagpieBuild/scr for some idea of what this mess can do and th
 - Partial transparencies, with dynamic lighting support. probably approached via rendering everything but transparencies, followed by transparent objects front to back, using forward rendering instead of deferred for their lighting
 - An automatic render-to-texture setup implemented in the Camera class (this is one I had actually working in a much older version of this renderer)
 - Planar reflections based on the above
-
-here are some images of the nonsense it's capable of
-I have no way to explain the use of tump programmer art. tumpl<br>
-
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133235758403855399.png width=400></img>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133114626191656635.png width=400></img><br>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133044561005967787.jpg width=400></img>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr132966595510168487.jpg width=400></img><br>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133091138553824388.png width=400></img>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133215412581394526.png width=400></img><br>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133086050450791444.png width=400></img>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133085982162092423.png width=400></img><br>
-
-<p>tirmp</p>
