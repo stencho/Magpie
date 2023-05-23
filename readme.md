@@ -36,4 +36,5 @@
 - An automatic render-to-texture setup implemented in the Camera class (this is one I had actually working in a much older version of this renderer)
 - Planar reflections based on the above
 
-<video src="https://github.com/Astronat/Magpie/raw/master/idiotic_demo.mp4" controls="controls" muted="muted">
+<video src="https://cdn.discordapp.com/attachments/521011204685037598/1023693205243429095/wearetheuniverse.mp4" controls="controls" muted="muted" height=400></video>
+<video src="https://cdn.discordapp.com/attachments/521011204685037598/1035661537089687572/finally_lighting2.mp4" controls="controls" muted="muted" height=400></video>
