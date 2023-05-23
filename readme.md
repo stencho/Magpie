@@ -18,7 +18,7 @@
 - Point clouds and particles
 - 2D SDFs
 - An entire window manager, as well as a WinForms-esque UI Forms system, this is not a bit
-- the console is a fully featured C# REPL (it has full keyboard support, arrows/del/home/end, all those with ctrl, clipboard, etc)
+- the console is a fully featured C# REPL (it has full keyboard and mouse support, arrows/del/home/end, all those with ctrl, clipboard, etc)
 - A massive library of 2D/3D drawing and math utility code outside of all of this
 - there's so many projects in here, each written in a single manic sitting
 
