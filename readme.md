@@ -4,16 +4,17 @@
 <p>it's called magpie because I like magpies</p>
 
 ## random stuff it currently supports in one way or another
-- Deferred dynamic lighting, currently supporting spot lights with shadows and point lights without
 - 2D GJK collision detection
 - 3D GJK swept collision detection with EPA
-- Octree-based space partitioning
+- Octree-based world space and mesh collision test partitioning
+- Deferred dynamic lighting, currently supporting spot lights with shadows and point lights without
+- An ambient lighting system that takes arbitrary gradients to determine how the lighting will change over time (basically a day/night cycle with arbitrary colours)
 - Update loop in separate thread from drawing, with a fixed tick rate (and, in the future, interpolation in the rendering thread)
 - Automatic rendering of object_info objects added to world map
 - Easily useable global handling of loaded content through ContentHandler 
 - Similar system for controls and control bindings
 - Persistent game variable system, (currently) saving settings to a file simply called "gvars" in the same folder as the executable, these are easily set through, for example, gvars.set("vsync", true);
-- 3D heightmaps with chunks built in
+- 3D heightmaps with octree-based chunks built in
 - Point clouds and particles
 - 2D SDFs
 - An entire window manager, as well as a WinForms-esque UI Forms system, this is not a bit
@@ -34,3 +35,5 @@
 - CSMs based on the above
 - An automatic render-to-texture setup implemented in the Camera class (this is one I had actually working in a much older version of this renderer)
 - Planar reflections based on the above
+
+<video src="https://github.com/Astronat/Magpie/raw/master/idiotic_demo.mp4" controls="controls" muted="muted">
