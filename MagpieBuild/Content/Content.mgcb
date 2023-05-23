@@ -79,6 +79,12 @@
 /processorParam:DebugMode=Auto
 /build:../../Magpie/Shaders/terrain.fx;sha/terrain.fx
 
+#begin ../../Magpie/Shaders/particle.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../../Magpie/Shaders/particle.fx;sha/particle.fx
+
 #begin fnt/pf.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
@@ -239,12 +245,6 @@
 /processorParam:SwapWindingOrder=False
 /processorParam:TextureFormat=Compressed
 /build:gfx/sphere.FBX
-
-#begin sha/particle.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:sha/particle.fx
 
 #begin snd/hchv.wav
 /importer:WavImporter

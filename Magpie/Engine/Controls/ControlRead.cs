@@ -288,8 +288,11 @@ namespace Magpie.Engine {
 
         static XYPair window_center = XYPair.Zero;
 
-        static volatile bool mouse_lock = false;
-        static volatile bool mouse_lock_p = false;
+        static volatile bool mouse_locked = false;
+        static volatile bool mouse_locked_p = false;
+        public static bool enable_mouse_lock { get; set; } = false;
+
+        public static bool enable_mouse_cursor { get; set; } = true;
 
         public static Vector2 mouse_delta;
         static Vector2 mouse_delta_int;
@@ -302,12 +305,12 @@ namespace Magpie.Engine {
             md_accumulator_internal = Vector2.Zero;
         }
 
-        static Keys[] pressed_keys;
-        static Keys[] pressed_keys_previous;
+        //static Keys[] pressed_keys;
+        //static Keys[] pressed_keys_previous;
         
         public static Thread control_thread;
 
-        public static volatile int control_thread_poll_hz = 400;
+        public static volatile int control_thread_poll_hz = 1000;
         public static volatile float mouse_multi = 15f;
         public static double control_thread_ms => (1000.0 / control_thread_poll_hz);
         public static volatile frame_probe control_poll_probe = new frame_probe();
@@ -319,8 +322,6 @@ namespace Magpie.Engine {
         //this gives both update threads access to extremely accurate,
         //framerate agnostic mouse delta information
 
-        public static bool enable_mouse_lock { get; set; } = false;
-        public static bool enable_mouse_cursor { get; set; } = true;
         public static void control_thread_update() {
             while (EngineState.running) {
                 control_poll_probe.start_of_frame();
@@ -330,6 +331,8 @@ namespace Magpie.Engine {
                 mdsp = mds;
                 mds = Mouse.GetState();
 
+                ks = Keyboard.GetState();
+
                 EngineState.game.IsMouseVisible = enable_mouse_cursor;
 
                 window_center.X = (EngineState.window.ClientBounds.Width / 2);
@@ -337,19 +340,19 @@ namespace Magpie.Engine {
 
                 mouse_delta_int = Vector2.Zero;
                 
-                mouse_lock_p = mouse_lock;
-                mouse_lock = enable_mouse_lock;
+                mouse_locked_p = mouse_locked;
+                mouse_locked = enable_mouse_lock;
                 
-                if (mouse_lock && !mouse_lock_p) {                    
+                if (mouse_locked && !mouse_locked_p) {                    
                     Mouse.SetPosition(window_center.X, window_center.Y);
 
-                } else if (mouse_lock) {    
+                } else if (mouse_locked) {    
                     mouse_delta_int = (window_center.ToVector2())
                                     - (Vector2.UnitX * mds.X)
                                     - (Vector2.UnitY * mds.Y);
 
                     Mouse.SetPosition(window_center.X, window_center.Y);
-                } else if (!mouse_lock) {
+                } else if (!mouse_locked) {
                     mouse_delta_int = ((Vector2.UnitX * -(mdsp.X - mds.X)) + (Vector2.UnitY * -(mdsp.Y - mds.Y)));
                 }
 
@@ -362,12 +365,7 @@ namespace Magpie.Engine {
                 while (EngineState.running) {
                     if (control_poll_probe.since_frame_start() >= control_thread_ms) break;
                 }
-                mouse_lock_p = mouse_lock;
-
-
-
-                update(EngineState.window, EngineState.game.IsActive, EngineState.resolution);
-                StaticControlBinds.update();
+                mouse_locked_p = mouse_locked;
 
                 control_poll_probe.end_of_frame();
             }
@@ -381,21 +379,16 @@ namespace Magpie.Engine {
         }
 
         public static void update(GameWindow window, bool is_active, XYPair res) {
-            //spawn_thread_if_null();
             scroll_wheel_changed();
+
+            //pressed_keys_previous = pressed_keys;
+            //pressed_keys = ks.GetPressedKeys();
 
             ksp = ks;
             xsp = xs;
             msp = ms;
 
             ms = Mouse.GetState();
-            ks = Keyboard.GetState();
-
-            pressed_keys_previous = pressed_keys;
-            pressed_keys = ks.GetPressedKeys();
-
-            mouse_delta = md_accumulator;
-            md_accumulator = Vector2.Zero;
 
             xsp[0] = xs[0];
             xsp[1] = xs[1];
@@ -406,6 +399,11 @@ namespace Magpie.Engine {
             xs[1] = GamePad.GetState(PlayerIndex.Two);
             xs[2] = GamePad.GetState(PlayerIndex.Three);
             xs[3] = GamePad.GetState(PlayerIndex.Four);
+
+
+            mouse_delta = md_accumulator;
+            md_accumulator = Vector2.Zero;
+
 
 
             //picker_raycasts.update();

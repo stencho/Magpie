@@ -347,9 +347,9 @@ namespace Magpie {
             updating_controls = true;
 
             //MOVE THIS TO A SEPARATE THREAD PROBABLY
-            //Controls.update(EngineState.window, EngineState.game.IsActive, EngineState.resolution);
             Controls.spawn_thread_if_null();
-            //StaticControlBinds.update();
+            Controls.update(EngineState.window, EngineState.game.IsActive, EngineState.resolution);
+            StaticControlBinds.update();
             updating_controls = false;
 
             if (StaticControlBinds.just_released("switch_buffer")) {

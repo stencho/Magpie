@@ -873,7 +873,7 @@ namespace Magpie.Graphics {
         /// <param name="points">each of the points to draw lines between</param>
         public static void poly(float lineWidth, Color col, bool complete, params Vector2[] points) {
             //If there's less than 2 points then just return
-            if (points.Length <= 1) return;
+            if (points.Length < 2) return;
 
             //else continue and draw lines between each of the points
             for (var i = 0; i < points.Length - 1; i++) {

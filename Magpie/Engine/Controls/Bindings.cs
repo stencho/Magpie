@@ -42,7 +42,6 @@ namespace Magpie.Engine {
         tapped = 1 << 6,
         released_hold = 1 << 7
     };
-
     public static class StaticControlBinds {
         public static AnalogBinds analog_binds = new AnalogBinds();
         public static DigitalBinds digital_binds = new DigitalBinds();
@@ -663,8 +662,8 @@ namespace Magpie.Engine {
         digital_bind_state _bind_state_prev;
         public digital_bind_state bind_state => _bind_state;
 
-        public bool is_pressed => bind_state.HasFlag(digital_bind_state.pressed);
-        public bool is_released => bind_state.HasFlag(digital_bind_state.released);
+        public bool is_pressed => Controls.is_pressed(button);// bind_state.HasFlag(digital_bind_state.pressed);
+        public bool is_released => !is_pressed;
 
         public bool held => bind_state.HasFlag(digital_bind_state.held);
         public bool just_held => bind_state.HasFlag(digital_bind_state.just_held);
@@ -694,6 +693,8 @@ namespace Magpie.Engine {
 
         double _hold_time = 300;
 
+        bool _was_pressed = false;
+
         public KeyboardBind(Keys button, string[] binds) {
             this.binds.AddRange(binds);
             _button = button;
@@ -703,7 +704,7 @@ namespace Magpie.Engine {
             if (Controls.is_pressed(button)) {
                 _bind_state = digital_bind_state.pressed;
 
-                if (!Controls.was_pressed(button)) {
+                if (!_was_pressed) {
                     _bind_state |= digital_bind_state.just_pressed;
 
                     _pressed_at = DateTime.Now;
@@ -721,7 +722,7 @@ namespace Magpie.Engine {
             } else {
                 _bind_state = digital_bind_state.released;
 
-                if (Controls.was_pressed(button)) {
+                if (_was_pressed) {
                     _bind_state |= digital_bind_state.just_released;
                 }
 
@@ -738,6 +739,7 @@ namespace Magpie.Engine {
             }
 
             _bind_state_prev = _bind_state;
+            _was_pressed = Controls.is_pressed(button);
 
         }
 
@@ -842,8 +844,8 @@ namespace Magpie.Engine {
         digital_bind_state _bind_state_prev;
         public digital_bind_state bind_state => _bind_state;
 
-        public bool is_pressed => bind_state.HasFlag(digital_bind_state.pressed);
-        public bool is_released => bind_state.HasFlag(digital_bind_state.released);
+        public bool is_pressed => Controls.is_pressed(button);
+        public bool is_released => !is_pressed;
 
         public bool held => bind_state.HasFlag(digital_bind_state.held);
         public bool just_held => bind_state.HasFlag(digital_bind_state.just_held);
@@ -882,12 +884,12 @@ namespace Magpie.Engine {
         public void force_state(digital_bind_state state) {
             _bind_state |= state;
         }
-
+        bool _was_pressed = false;
         public void update_state(PlayerIndex player_index) {
             if (Controls.is_pressed(button)) {
                 _bind_state = digital_bind_state.pressed;
 
-                if (!Controls.was_pressed(button)) {
+                if (!_was_pressed) {
                     _bind_state |= digital_bind_state.just_pressed;
 
                     _pressed_at = DateTime.Now;
@@ -905,7 +907,7 @@ namespace Magpie.Engine {
             } else {
                 _bind_state = digital_bind_state.released;
 
-                if (Controls.was_pressed(button)) {
+                if (_was_pressed) {
                     _bind_state |= digital_bind_state.just_released;
                 }
 
@@ -927,6 +929,7 @@ namespace Magpie.Engine {
                 _recent_state[i] = _recent_state[i + 1];
             }
             _recent_state[_recent_state.Length - 1] = is_pressed;
+            _was_pressed = Controls.is_pressed(button);
         }
 
     }

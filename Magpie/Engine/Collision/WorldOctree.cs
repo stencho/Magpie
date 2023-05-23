@@ -14,14 +14,13 @@ using Magpie.Engine.WorldElements;
 using Magpie.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Magpie.Engine.Collision {
 
     public class Octree {
         public class Node {
             BoundingBox _bounds;
-
+            
             Vector3 _size;
             Vector3 _center_pos;
 
@@ -296,7 +295,7 @@ namespace Magpie.Engine.Collision {
             //lnibbbw_recurse();
             
             
-            //return leaves;
+            return leaves;
 
         }
         void lnibbbw_recurse() {
@@ -317,16 +316,19 @@ namespace Magpie.Engine.Collision {
 
         public void draw_nodes() {
             //Draw3D.cube(Vector3.Zero, Vector3.One, Color.Red, Matrix.Identity);
+            Draw3D.cube(_bounds, Color.MonoGameOrange);
+            return;
 
             var ray_nodes = leaf_nodes_in_ray(new Ray(EngineState.camera.position, EngineState.camera.direction * EngineState.camera.far_clip));
 
+
             //Draw3D.cube(nodes[ray_nodes[0]].bounds, Color.Red);
-            foreach(int n in ray_nodes) {
+            foreach (int n in ray_nodes) {
                 //draw_all_layers(n);
                 Draw3D.cube(nodes[n].bounds, Color.MonoGameOrange);
             }
 
-            Draw3D.cube(_bounds, Color.MonoGameOrange);
+
 
             var nn = get_all_nodes_at_path(walk_test_node);
 
