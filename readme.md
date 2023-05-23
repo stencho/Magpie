@@ -6,6 +6,7 @@ I have no way to explain the use of tump test images. tumpl<br>
 
 <p>tirmp</p>
 
+
 ### random stuff it currently supports in one way or another
 - 2D GJK collision detection
 - 3D GJK swept collision detection with EPA
@@ -14,20 +15,22 @@ I have no way to explain the use of tump test images. tumpl<br>
 - An ambient lighting system that takes arbitrary gradients to determine how the lighting will change over time (basically a day/night cycle with arbitrary colours)
 - Update loop in separate thread from drawing, with a fixed tick rate (and, in the future, interpolation in the rendering thread)
 - Automatic rendering of object_info objects added to world map
-- Easily useable global handling of loaded content through ContentHandler 
+- Easily useable global handling of shared content through ContentHandler ('ContentHandler.resources["OnePXWhite"].value_tx' will get the texture "OnePXWhite", which is a 1x1 white square created by the ContentHandler on load)
 - Similar system for controls and control bindings, also threaded (to be supplemented with a RawInput-based setup (and rewritten to utilize it to the fullest) in the near future)
 - Persistent game variable system, (currently) saving settings to a file simply called "gvars" in the same folder as the executable, these are easily set through, for example, gvars.set("vsync", true);
+- Automatic, clean handling of things like changing graphics modes through the gvar system (running 'gvars.set("resolution", new XYPair(720,1280))' will immediately switch to 720x1280, a portrait resolution, without issue) 
+- Internal resolution scaling (super- and sub-sampling, for anti-aliasing and increasing performance, respectively), also handled through gvars
 - 3D heightmaps with octree-based chunks built in
 - Point clouds/particles, though with only binary transparency
 - 2D SDFs
-- An entire window manager, as well as a WinForms-esque UI Forms system, this is not a bit
+- An entire window manager, as well as a WinForms-esque UI Forms system. *this is not a bit*
 - the console is a fully featured C# REPL (it has full keyboard and mouse support, arrows/del/home/end, all those with ctrl, clipboard, etc)
 - A massive library of 2D/3D drawing and math utility code outside of all of this
-- there's so many projects in here, each written in a single manic sitting
+- there's so many projects in here, many written in a single manic sitting
 
-##### The engine has a lot of goals to be met, including but not limited to:
+##### The engine has a lot of goals yet to be met, including:
 - A walk system
-- Reimplementation and improvement of the collision resolution system that currently lies dormant (I'm in the middle of upgrading my world octree code as I write this)
+- Reimplementation and improvement of the collision solver which currently lies dormant (I'm in the middle of upgrading the world octree code)
 - Animations (!!)
 - Inverse kinematics
 - Room-based space partitioning and indoor/outdoor switching
