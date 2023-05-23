@@ -80,8 +80,8 @@ namespace MagpieBuild.TestActors {
 
             if (aiming && !was_aiming) {
                 stored_pos = Controls.mouse_position;
-                enable_mouse_cursor = false;
-                enable_mouse_lock = true;
+                mouse_cursor = false;
+                mouse_lock = true;
             } else if (aiming) {
                 cam.orientation *= Matrix.CreateRotationY(mouse_delta_internal.X / (EngineState.resolution.X));
 
@@ -94,8 +94,8 @@ namespace MagpieBuild.TestActors {
                 //if (was_locked == true)
                 Mouse.SetPosition(stored_pos.X, stored_pos.Y);
 
-                enable_mouse_lock = false;
-                enable_mouse_cursor = true;
+                mouse_lock = false;
+                mouse_cursor = true;
                 //was_locked = false;
             }
 

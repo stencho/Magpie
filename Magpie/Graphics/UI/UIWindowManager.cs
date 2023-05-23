@@ -154,7 +154,7 @@ namespace Magpie.Graphics.UI {
                 }
             }
 
-            if (!EngineState.is_active || enable_mouse_lock) return;
+            if (!EngineState.is_active || mouse_lock) return;
 
             for (int i = windows.Count-1; i >= 0; --i) {
                 windows[i].update();

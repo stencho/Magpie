@@ -363,6 +363,7 @@ namespace MagpieBuild
                     Draw2D.text_shadow("pf",
                         $"render {Clock.frame_rate.ToString()}/{Clock.frame_limit} FPS {(gvars.get_bool("vsync") ? "[vsync]" : "")}\n" +
                         $"update {Clock.internal_frame_rate_immediate.ToString()}/{Clock.internal_frame_limit} FPS\n" +
+                        $"control thread poll rate [{Controls.control_thread_poll_hz}hz]" +
                         "\n" +
                         string.Format("[ delta s  [int {0:F3}] [ext {1:F3}] ]\n", Clock.internal_frame_time_delta, Clock.frame_time_delta) +
                         string.Format("[ delta ms [int {0:F3}] [ext {1:F3}] ]\n", Clock.internal_frame_time_delta_ms, Clock.frame_time_delta_ms) + "\n" +
@@ -386,7 +387,7 @@ namespace MagpieBuild
 
             GraphicsDevice.SetRenderTarget(EngineState.buffer.rt_2D);
 
-            if (enable_mouse_lock) {
+            if (mouse_lock) {
                 crosshair_sdf.position = EngineState.resolution * 0.5f;
             } else {
                 crosshair_sdf.position = Controls.mouse_position.ToVector2();

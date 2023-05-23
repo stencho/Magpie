@@ -126,7 +126,7 @@ namespace Magpie {
                 gvars.add_gvar("vsync", gvar_data_type.BOOL, true, true);
                 gvars.add_gvar("frame_limit", gvar_data_type.FLOAT, 60.0f, true);
                 gvars.add_gvar("light_spot_resolution", gvar_data_type.INT, 1024, true);
-
+                
                 gvars.add_gvar("window_position", gvar_data_type.XYPAIR, game_window.Position.ToXYPair(), false);
                 gvars.add_gvar("window_size", gvar_data_type.XYPAIR, game_window.ClientBounds.Size.ToXYPair(), false);
 
@@ -345,10 +345,8 @@ namespace Magpie {
             Log.update();
 
             updating_controls = true;
-
-            //MOVE THIS TO A SEPARATE THREAD PROBABLY
-            Controls.spawn_thread_if_null();
             Controls.update(EngineState.window, EngineState.game.IsActive, EngineState.resolution);
+
             StaticControlBinds.update();
             updating_controls = false;
 
