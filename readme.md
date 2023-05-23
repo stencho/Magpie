@@ -41,8 +41,16 @@ have a look around MagpieBuild/scr for some idea of what this mess can do and th
 - An automatic render-to-texture setup implemented in the Camera class (this is one I had actually working in a much older version of this renderer)
 - Planar reflections based on the above
 
-I have no way to explain the use of tump test images. tumpl<br>
+here are some images of the nonsense it's capable of
+I have no way to explain the use of tump programmer art. tumpl<br>
+
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133235758403855399.png width=400></img>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133114626191656635.png width=400></img><br>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133044561005967787.jpg width=400></img>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr132966595510168487.jpg width=400></img><br>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133091138553824388.png width=400></img>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133215412581394526.png width=400></img><br>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133086050450791444.png width=400></img>
+<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133085982162092423.png width=400></img><br>
 
 <p>tirmp</p>
-
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133235758403855399.png height=400></img>
