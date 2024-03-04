@@ -6,14 +6,14 @@ it's called magpie because I like magpies and naming projects after birds<br>
 here are some images of the nonsense it's capable of<br>
 I have no way to explain the use of tump programmer art. tumpl<br>
 
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133235758403855399.png width=400></img>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133114626191656635.png width=400></img><br>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133044561005967787.jpg width=400></img>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr132966595510168487.jpg width=400></img><br>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133091138553824388.png width=400></img>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133215412581394526.png width=400></img><br>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133086050450791444.png width=400></img>
-<img src=https://raw.githubusercontent.com/Astronat/Magpie/master/img/scr133085982162092423.png width=400></img><br>
+<img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr133235758403855399.png width=400></img>
+<img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr133114626191656635.png width=400></img><br>
+<img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr133044561005967787.jpg width=400></img>
+<img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr132966595510168487.jpg width=400></img><br>
+<img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr133091138553824388.png width=400></img>
+<img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr133215412581394526.png width=400></img><br>
+<img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr133086050450791444.png width=400></img>
+<img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr133085982162092423.png width=400></img><br>
 
 <p>tirmp</p>
 
