@@ -15,6 +15,9 @@ I have no way to explain the use of tump programmer art. tumpl<br>
 <img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr133086050450791444.png width=400></img>
 <img src=https://raw.githubusercontent.com/stencho/Magpie/master/img/scr133085982162092423.png width=400></img><br>
 
+
+![](img/scr133085982162092423.png)
+
 <p>tirmp</p>
 
 
