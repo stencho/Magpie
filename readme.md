@@ -17,7 +17,7 @@ this is mostly a dead project, untouched in months with enormous gaping holes to
 
 the 3D GJK needs to be torn out, have a lot of debug code re-added to it, and to be tested thoroughly<br>
 it then needs to be put back, re-integrated with the collision resolution threads, which also probably need to be redone or at least reactivated<br>
-it probably needs a new object system, like a proper EPA implementation, instead of the mess it is now<br>
+it probably needs a new object system, like a proper ECS implementation, instead of the mess it is now<br>
 it definitely needs the very nice octree system to be actually implemented in any way
 
 at this point, it's basically just sitting around for me to pull pieces from for my other projects<br>
