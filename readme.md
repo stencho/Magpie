@@ -13,8 +13,18 @@ I have no way to explain the use of tump programmer art. tumpl<br>
 
 <p>tirmp</p>
 
+this is mostly a dead project, untouched in months with enormous gaping holes torn in it from my last few attempts to solve issues with it<br>
 
-### random stuff it currently supports in one way or another
+the 3D GJK needs to be torn out, have a lot of debug code re-added to it, and to be tested thoroughly<br>
+it then needs to be put back, re-integrated with the collision resolution threads, which also probably need to be redone or at least reactivated<br>
+it probably needs a new object system, like a proper EPA implementation, instead of the mess it is now<br>
+it definitely needs the very nice octree system to be actually implemented in any way
+
+at this point, it's basically just sitting around for me to pull pieces from for my other projects<br>
+
+however<br>
+
+### the pieces
 - 2D GJK collision detection
 - 3D GJK swept collision detection (broken) with EPA (working)
 - Octree-based world space and mesh collision test partitioning
@@ -34,20 +44,5 @@ I have no way to explain the use of tump programmer art. tumpl<br>
 - A massive library of 2D/3D drawing and math utility code outside of all of this
 - there's so many projects in here, many written in a single manic sitting
 
-this is mostly a dead project, however:
 
-##### The engine has a lot of goals yet to be met, including:
-- A walk system
-- Reimplementation and improvement of the collision solver which currently lies dormant (I'm "in the middle" of upgrading the world octree code)
-- Animations (!!)
-- Inverse kinematics
-- Room-based space partitioning and indoor/outdoor switching
-- A lot of stuff to be actually finished lmao
-
-##### The renderer is pretty close to done
-- Cube-mesh-based deferred directional lighting
-- CSMs based on the above
-- Partial transparencies, with dynamic lighting support. probably approached via rendering everything but transparencies, followed by transparent objects front to back, using forward rendering instead of deferred for their lighting
-- An automatic render-to-texture setup implemented in the Camera class (this is one I had actually working in a much older version of this renderer)
-- Planar reflections based on the above
-
+I have attempted to write several game engines before this one, and I will probably write several game engines in the future<br>
